@@ -1,0 +1,1 @@
+Either Visual Studio or the Arduino IDE may be used to compile the code.  Only Teensy 3.2 is supported.
