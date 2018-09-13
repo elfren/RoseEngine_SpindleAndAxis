@@ -1,1 +1,3 @@
 Either Visual Studio or the Arduino IDE may be used to compile the code.  Only Teensy 3.2 is supported.
+
+The compiled code file, TwoRose_V001.hex, can be directly loaded into a Teensy 3.2.
