@@ -1,1 +1,2 @@
 Gerbers for two axes board.
+This board uses Teensy 3.2, one 74HCT245 level shifter, and optionally an R-78C5.0-1.0 down converter.
