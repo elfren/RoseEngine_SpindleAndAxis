@@ -1,1 +1,2 @@
-Gerbers for four axes board
+Gerbers for four axes board.
+This board uses Teensy 3.5, two 74HCT245 level shifters, and optionally an R-78C5.0-1.0 down converter.
