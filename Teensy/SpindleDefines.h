@@ -5,8 +5,8 @@
 //==================================================================
 // Pin assignments
 //==================================================================
-#define TEENSY_35
-//#define TWO_AXES_V2
+//#define TEENSY_35
+#define TWO_AXES_V2
 //#define MICRO_SD
 //#define DEBUG
 

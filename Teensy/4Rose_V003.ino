@@ -941,7 +941,7 @@ void loop()
 			{
 #ifdef TEENSY_35
 				stepper_Axis_X.enableOutputs();
-				digitalWrite(PIN_AXIS_Z_ENABLE, LOW);  // Enable
+				digitalWrite(PIN_AXIS_X_ENABLE, LOW);  // Enable
 #endif //TEENSY_35
 				break;
 
@@ -949,8 +949,8 @@ void loop()
 			case 3:
 			{
 #ifdef TEENSY_35
-				stepper_Axis_Z.enableOutputs();
-				digitalWrite(PIN_AXIS_Z_ENABLE, LOW);  // Enable
+				stepper_Axis_B.enableOutputs();
+				digitalWrite(PIN_AXIS_B_ENABLE, LOW);  // Enable
 #endif //TEENSY_35
 				break;
 			}
@@ -972,7 +972,7 @@ void loop()
 			{
 #ifdef TEENSY_35
 				stepper_Axis_X.disableOutputs();
-				digitalWrite(PIN_AXIS_Z_ENABLE, HIGH);  // Enable
+				digitalWrite(PIN_AXIS_X_ENABLE, HIGH);  // Enable
 #endif //TEENSY_35
 				break;
 
@@ -980,8 +980,8 @@ void loop()
 			case 3:
 			{
 #ifdef TEENSY_35
-				stepper_Axis_Z.disableOutputs();
-				digitalWrite(PIN_AXIS_Z_ENABLE, HIGH);  // Enable
+				stepper_Axis_B.disableOutputs();
+				digitalWrite(PIN_AXIS_B_ENABLE, HIGH);  // Enable
 #endif //TEENSY_35
 				break;
 			}
