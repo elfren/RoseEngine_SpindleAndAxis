@@ -5,38 +5,38 @@
 //==================================================================
 // Pin assignments
 //==================================================================
-//#define TEENSY_35
-#define TWO_AXES_V2
+#define TEENSY_35
+//#define TWO_AXES_V2
 //#define MICRO_SD
 //#define DEBUG
 
 #ifdef TEENSY_35
 // Spindle
 #define ID_SPINDLE 3
-#define PIN_SPINDLE_DIR 2//3//2  //Stepper direction
-#define PIN_SPINDLE_STEP 3//2//3  //Stepper step
-#define PIN_SPINDLE_ENABLE 4//6//4 //Enable
+#define PIN_SPINDLE_DIR 2  //Stepper direction
+#define PIN_SPINDLE_STEP 3  //Stepper step
+#define PIN_SPINDLE_ENABLE 4 //Enable
 #define PIN_SPINDLE_MS0 24
 #define PIN_SPINDLE_MS1 25 
 #define PIN_SPINDLE_MS2 26
 
 // Axes
-#define PIN_LIMIT_MIN 18//16//18 // Limit switch: Moving towards headstock
-#define PIN_LIMIT_MAX 19//17//19  // Limit switch: Moving away from headstock
+#define PIN_LIMIT_MIN 18 // Limit switch: Moving towards headstock
+#define PIN_LIMIT_MAX 19 // Limit switch: Moving away from headstock
 
 // Z axis
 #define ID_Z_AXIS 0
-#define PIN_AXIS_Z_DIR 5//4//5  //Stepper direction
-#define PIN_AXIS_Z_STEP 6//5//6  //Stepper step
-#define PIN_AXIS_Z_ENABLE 14//20//14 // Enable 
+#define PIN_AXIS_Z_DIR 5 // Stepper direction
+#define PIN_AXIS_Z_STEP 6 // Stepper step
+#define PIN_AXIS_Z_ENABLE 14 // Enable 
 #define PIN_AXIS_Z_MS0 27
 #define PIN_AXIS_Z_MS1 28 
 #define PIN_AXIS_Z_MS2 29
 
 // X axis
 #define ID_AXIS_X 1
-#define PIN_AXIS_X_DIR 20  //Stepper direction
-#define PIN_AXIS_X_STEP 21  //Stepper step
+#define PIN_AXIS_X_DIR 20  // Stepper direction
+#define PIN_AXIS_X_STEP 21  // Stepper step
 #define PIN_AXIS_X_ENABLE 22 // Enable 
 #define PIN_AXIS_X_MS0 30
 #define PIN_AXIS_X_MS1 31 
@@ -44,8 +44,8 @@
 
 // B axis
 #define ID_AXIS_B 2
-#define PIN_AXIS_B_DIR 23  //Stepper direction
-#define PIN_AXIS_B_STEP 16  //Stepper step
+#define PIN_AXIS_B_DIR 23  // Stepper direction
+#define PIN_AXIS_B_STEP 16  // Stepper step
 #define PIN_AXIS_B_ENABLE 17 // Enable 
 #define PIN_AXIS_B_MS0 27
 #define PIN_AXIS_B_MS1 28 
@@ -53,35 +53,35 @@
 #elif defined(TWO_AXES_V2)
 // Spindle
 #define ID_SPINDLE 3
-#define PIN_SPINDLE_DIR 2 //Stepper direction
-#define PIN_SPINDLE_STEP 3  //Stepper step
-#define PIN_SPINDLE_ENABLE 4 //Enable
+#define PIN_SPINDLE_DIR 2 // Stepper direction
+#define PIN_SPINDLE_STEP 3  // Stepper step
+#define PIN_SPINDLE_ENABLE 4 // Enable
 
 // Axes
-#define PIN_LIMIT_MIN 16// Limit switch: Moving towards headstock
+#define PIN_LIMIT_MIN 16 // Limit switch: Moving towards headstock
 #define PIN_LIMIT_MAX 17 // Limit switch: Moving away from headstock
 
 // Z axis
 #define ID_Z_AXIS 0
-#define PIN_AXIS_Z_DIR 5  //Stepper direction
-#define PIN_AXIS_Z_STEP 6  //Stepper step
+#define PIN_AXIS_Z_DIR 5  // Stepper direction
+#define PIN_AXIS_Z_STEP 6  // Stepper step
 #define PIN_AXIS_Z_ENABLE 14 // Enable 
 
 #else // Three axes board
 // Spindle
 #define ID_SPINDLE 3
-#define PIN_SPINDLE_DIR 3 //Stepper direction
-#define PIN_SPINDLE_STEP 2  //Stepper step
-#define PIN_SPINDLE_ENABLE 6 //Enable
+#define PIN_SPINDLE_DIR 3 // Stepper direction
+#define PIN_SPINDLE_STEP 2  // Stepper step
+#define PIN_SPINDLE_ENABLE 6 // Enable
 
 // Axes
-#define PIN_LIMIT_MIN 16// Limit switch: Moving towards headstock
+#define PIN_LIMIT_MIN 16 // Limit switch: Moving towards headstock
 #define PIN_LIMIT_MAX 17 // Limit switch: Moving away from headstock
 
 // Z axis
 #define ID_Z_AXIS 0
-#define PIN_AXIS_Z_DIR 4  //Stepper direction
-#define PIN_AXIS_Z_STEP 5  //Stepper step
+#define PIN_AXIS_Z_DIR 4  // Stepper direction
+#define PIN_AXIS_Z_STEP 5  // Stepper step
 #define PIN_AXIS_Z_ENABLE 20 // Enable 
 
 
@@ -192,6 +192,10 @@ struct stepperConfig
 	float distanceSyncX;
 	float revolutionsSyncZ_Spindle;
 	float revolutionsSyncX_Spindle;
+	bool enable_Spindle;
+	bool enable_Axis_Z;
+	bool enable_Axis_X;
+	bool enable_Axis_B;
 };
 
 //==================================================================
@@ -207,32 +211,8 @@ String filename_Index1;
 int filenameLength = 0;
 String filename_Index2;
 
+double returnSteps_Recip1_Z = 0;
+double returnSteps_Recip1_SpZ = 0;
 // End Global Variables
 //==================================================================
 
-// TeensyStep variables
-//int t1, t2, t3;
-//constexpr int targetPositions[]{ 2500, 0, 2500, 0 };
-//int targetPositions[4];
-//constexpr int nrOfPositions = sizeof(targetPositions) / sizeof(targetPositions[0]);
-int targetPositions[30];
-int nrOfPositions = 0;
-
-elapsedMillis stopwatch = 0;
-int cycleWidth;
-int direction;
-int cycleCounter;
-//int numberOfCycles;
-//int maxSpeed;
-
-double returnSteps_Recip1_Z = 0;
-double returnSteps_Recip1_SpZ = 0;
-enum class state
-{
-	waiting,
-	starting,
-	startingCycle,
-	runningCycle,
-	stoppingCycle,
-	stopping,
-} currentstate;

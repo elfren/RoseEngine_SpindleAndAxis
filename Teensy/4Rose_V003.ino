@@ -29,6 +29,7 @@ Stepper motor_Axis_Z(PIN_AXIS_Z_STEP, PIN_AXIS_Z_DIR);
 AccelStepper stepper_Axis_X(AccelStepper::DRIVER, PIN_AXIS_X_STEP, PIN_AXIS_X_DIR);
 AccelStepper stepper_Axis_B(AccelStepper::DRIVER, PIN_AXIS_B_STEP, PIN_AXIS_B_DIR);
 
+
 Stepper motor_Axis_X(PIN_AXIS_X_STEP, PIN_AXIS_X_DIR);
 Stepper motor_Axis_B(PIN_AXIS_B_STEP, PIN_AXIS_B_DIR);
 #endif // TEENSY_35
@@ -91,18 +92,14 @@ void setup()
 	SetMicrosteppingMode(configSteppers.microsteps_Axis_B, PIN_AXIS_B_MS0, PIN_AXIS_B_MS1, PIN_AXIS_B_MS2);
 #endif //TEENSY_35
 
-	// Enable spindle stepper
-	pinMode(PIN_SPINDLE_ENABLE, OUTPUT);   
-	digitalWrite(PIN_SPINDLE_ENABLE, HIGH);  
-
 	// Set the enable pin for the stepper motor
 	stepper_Spindle.setEnablePin(PIN_SPINDLE_ENABLE);
 
 	// Set pins "inverted", HIGH == off
-	stepper_Spindle.setPinsInverted(false, true, true);
+	stepper_Spindle.setPinsInverted(false, false, configSteppers.enable_Spindle);
 
 	// Enable the spindle stepper motor
-	stepper_Spindle.enableOutputs();
+	stepper_Spindle.disableOutputs();
 
 	// Main page opens by default, so set initial Sp1 microstepping, speed, and acceleration
 	stepper_Spindle.setMaxSpeed(configSteppers.maxSpeedSpindle_SpZ);
@@ -110,12 +107,9 @@ void setup()
 
 	//-------------------------------
 	// Z Axis stepper motor initialization
-	pinMode(PIN_AXIS_Z_ENABLE, OUTPUT);
-	digitalWrite(PIN_AXIS_Z_ENABLE, HIGH);  // Disable
-
 	// Configure Enable Z Axis stepper
 	stepper_Axis_Z.setEnablePin(PIN_AXIS_Z_ENABLE);
-	stepper_Axis_Z.setPinsInverted(false, true, true);
+	stepper_Axis_Z.setPinsInverted(false, false, configSteppers.enable_Axis_Z);
 
 	// Disable the Z Axis stepper motor (enable in run method)
 	stepper_Axis_Z.disableOutputs();
@@ -129,12 +123,9 @@ void setup()
 
 	//-------------------------------
 	// X Axis stepper motor initialization
-	pinMode(PIN_AXIS_X_ENABLE, OUTPUT);   // Enable
-	digitalWrite(PIN_AXIS_X_ENABLE, HIGH);  // Enable
-
 	// Configure Enable X Axis stepper
 	stepper_Axis_X.setEnablePin(PIN_AXIS_X_ENABLE);
-	stepper_Axis_X.setPinsInverted(false, true, true);
+	stepper_Axis_X.setPinsInverted(false, false, configSteppers.enable_Axis_X);
 
 	// Disable the X Axis stepper motor (enable in run method)
 	stepper_Axis_X.disableOutputs();
@@ -146,12 +137,9 @@ void setup()
 
 	//-------------------------------
 	// B Axis stepper motor initialization
-	pinMode(PIN_AXIS_B_ENABLE, OUTPUT);   // Enable
-	digitalWrite(PIN_AXIS_B_ENABLE, HIGH);  // Enable
-
 	// Configure Enable B Axis stepper
 	stepper_Axis_B.setEnablePin(PIN_AXIS_B_ENABLE);
-	stepper_Axis_B.setPinsInverted(false, true, true);
+	stepper_Axis_B.setPinsInverted(false, false, configSteppers.enable_Axis_B);
 
 	// Disable the B Axis stepper motor (enable in run method)
 	stepper_Axis_B.disableOutputs();
@@ -934,14 +922,14 @@ void loop()
 			case 1:
 			{
 				stepper_Axis_Z.enableOutputs();
-				digitalWrite(PIN_AXIS_Z_ENABLE, LOW);  // Enable
+				//digitalWrite(PIN_AXIS_Z_ENABLE, LOW);  // Enable
 				break;
 			}
 			case 2:
 			{
 #ifdef TEENSY_35
 				stepper_Axis_X.enableOutputs();
-				digitalWrite(PIN_AXIS_X_ENABLE, LOW);  // Enable
+				//digitalWrite(PIN_AXIS_X_ENABLE, LOW);  // Enable
 #endif //TEENSY_35
 				break;
 
@@ -950,7 +938,7 @@ void loop()
 			{
 #ifdef TEENSY_35
 				stepper_Axis_B.enableOutputs();
-				digitalWrite(PIN_AXIS_B_ENABLE, LOW);  // Enable
+				//digitalWrite(PIN_AXIS_B_ENABLE, LOW);  // Enable
 #endif //TEENSY_35
 				break;
 			}
@@ -965,14 +953,14 @@ void loop()
 			case 1:
 			{
 				stepper_Axis_Z.disableOutputs();
-				digitalWrite(PIN_AXIS_Z_ENABLE, HIGH);  // Enable
+				//digitalWrite(PIN_AXIS_Z_ENABLE, HIGH);  // Enable
 				break;
 			}
 			case 2:
 			{
 #ifdef TEENSY_35
 				stepper_Axis_X.disableOutputs();
-				digitalWrite(PIN_AXIS_X_ENABLE, HIGH);  // Enable
+				//digitalWrite(PIN_AXIS_X_ENABLE, HIGH);  // Enable
 #endif //TEENSY_35
 				break;
 
@@ -981,7 +969,7 @@ void loop()
 			{
 #ifdef TEENSY_35
 				stepper_Axis_B.disableOutputs();
-				digitalWrite(PIN_AXIS_B_ENABLE, HIGH);  // Enable
+				//digitalWrite(PIN_AXIS_B_ENABLE, HIGH);  // Enable
 #endif //TEENSY_35
 				break;
 			}
@@ -1689,46 +1677,95 @@ void loop()
 			EEPROM.put(eePromAddress, configSteppers);
 			break;
 		}
-		case 209: // È - Recip1_SpZ Axis Acceleration
+		case 209: // Ñ - Recip1_SpZ Axis Acceleration
 		{
 			configSteppers.acceleration_Recip1_SpZ_Axis = GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress, configSteppers);
 			break;
 		}
-		case 210: // É - Recip1_SpZ Spindle MaxSpeed 
+		case 210: // Ò - Recip1_SpZ Spindle MaxSpeed 
 		{
 			configSteppers.maxSpeed_Recip1_SpZ_Spindle = GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress, configSteppers);
 			break;
 		}
-		case 211: // Ê - Recip1_SpZ Axis MaxSpeed 
+		case 211: // Ó - Recip1_SpZ Axis MaxSpeed 
 		{
 			configSteppers.maxSpeed_Recip1_SpZ_Axis = GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress, configSteppers);
 			break;
 		}
-		case 212: // Ì - Recip1_SpZ Repeats (Count)
+		case 212: // Ô - Recip1_SpZ Repeats (Count)
 		{
 			configSteppers.repeats_Recip1_SpZ = GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress, configSteppers);
 			break;
 		}
-		case 213: // Ë - Recip1_SpZ Distance
+		case 213: // Õ - Recip1_SpZ Distance
 		{
 			configSteppers.degrees_Recip1_SpZ = GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress, configSteppers);
 			break;
 		}
 
-		case 214: // Í - Recip1_SpZ Amplitude
+		case 214: // Ö - Recip1_SpZ Amplitude
 		{
 			configSteppers.amplitude_Recip1_SpZ = GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress, configSteppers);
 			break;
 		}
-		case 215: // Î - Recip1_SpZ Return
+		case 215: // × - Recip1_SpZ Return
 		{
 			Return_Recip1_SpZ();
+			break;
+		}
+
+
+		case 216: // Ø - Enable Spindle (High or Low)
+		{
+			int enableSpindle = GetSerialInteger();
+			enableSpindle >= 1 ? (configSteppers.enable_Spindle = true) : (configSteppers.enable_Spindle = false);
+			EEPROM.put(eePromAddress, configSteppers);
+			break;
+		}
+		case 217: // Ù - Enable Z (High or Low)
+		{
+			int enableZ = GetSerialInteger();
+			enableZ >= 1 ? (configSteppers.enable_Axis_Z = true) : (configSteppers.enable_Axis_Z = false);
+			EEPROM.put(eePromAddress, configSteppers);
+			break;
+		}
+		case 218: // Ú - Enable X (High or Low)
+		{
+			int enableX = GetSerialInteger();
+			enableX >= 1 ? (configSteppers.enable_Axis_X = true) : (configSteppers.enable_Axis_X = false);
+			EEPROM.put(eePromAddress, configSteppers);
+			break;
+		}
+		case 219: // Û - Enable B (High or Low)
+		{
+			int enableB = GetSerialInteger();
+
+			//Serial1.print("pageSetup.t19.txt=");
+			//Serial1.write(0x22);
+			//Serial1.print("Z Axis-Enable:");
+			//Serial1.print(enableB);
+			//Serial1.write(0x22);
+			//Serial1.write(0xff);
+			//Serial1.write(0xff);
+			//Serial1.write(0xff);
+			//delay(2000);
+			//Serial1.print("pageSetup.t19.txt=");
+			//Serial1.write(0x22);
+			//Serial1.print("Z Axis-Enable:");
+			//Serial1.print(enableB);
+			//Serial1.write(0x22);
+			//Serial1.write(0xff);
+			//Serial1.write(0xff);
+			//Serial1.write(0xff);
+			//delay(2000);
+			enableB >= 1 ? (configSteppers.enable_Axis_B = true) : (configSteppers.enable_Axis_B = false);
+			EEPROM.put(eePromAddress, configSteppers);
 			break;
 		}
 		default:

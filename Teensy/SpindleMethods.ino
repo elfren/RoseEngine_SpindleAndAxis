@@ -1421,9 +1421,9 @@ void Sync_SpindleZ(int directionSpindle, int directionAxis)
 		.setAcceleration(configSteppers.acceleration_Axis_Z) 
 		.setTargetRel((configSteppers.distanceSyncZ / configSteppers.distancePerRev_AxisZ) * configSteppers.microsteps_Axis_Z * configSteppers.steps360_Axis_Z * directionAxis);
 
-	digitalWrite(PIN_SPINDLE_ENABLE, LOW);
-	digitalWrite(PIN_AXIS_Z_ENABLE, LOW);  // Disable
-
+	digitalWrite(PIN_SPINDLE_ENABLE, LOW); // Enable (Uses TeensyStep library)
+	digitalWrite(PIN_AXIS_Z_ENABLE, LOW);  // Enable (Uses TeensyStep library)
+	
 	controller_Spindle.moveAsync(motor_Spindle, motor_Axis_Z);
 
 	while (controller_Spindle.isRunning())
@@ -1505,8 +1505,8 @@ void Sync_SpindleX(int directionSpindle, int directionAxis)
 		.setAcceleration(configSteppers.acceleration_Axis_X)
 		.setTargetRel((configSteppers.distanceSyncX / configSteppers.distancePerRev_AxisX) * configSteppers.microsteps_Axis_X * configSteppers.steps360_Axis_X * directionAxis);
 
-	digitalWrite(PIN_SPINDLE_ENABLE, LOW);
-	digitalWrite(PIN_AXIS_X_ENABLE, LOW);  // Disable
+	digitalWrite(PIN_SPINDLE_ENABLE, LOW); // Enable (Uses TeensyStep library)
+	digitalWrite(PIN_AXIS_X_ENABLE, LOW);  // Enable (Uses TeensyStep library)
 
 	controller_Spindle.moveAsync(motor_Spindle, motor_Axis_X);
 
@@ -1696,78 +1696,13 @@ int RunTwoSteppersSyncX(
 	return 0;
 }
 #endif // TEENSY_35
-/*
-void aaDoWaveZ(int wavDir)
-{
-	int t1 = 3000;
-	int t2 = 0;
-	int t3 = 3000;
-	targetPositions[0] = t1;
-	targetPositions[1] = t2;
-	targetPositions[2] = t3;
-	targetPositions[3] = t2;
-	nrOfPositions = 4;
 
-	motor_Axis_Z.setAcceleration(configSteppers.acceleration_Recip1_Z_Axis);
-	motor_Axis_Z.setMaxSpeed(configSteppers.maxSpeed_Recip1_Z_Axis);
-	controller_Axis.rotateAsync(motor_Axis_Z);
-
-	motor_Spindle.setAcceleration(configSteppers.acceleration_Recip1_Z_Spindle);
-	motor_Spindle.setMaxSpeed(configSteppers.maxSpeed_Recip1_Z_Spindle);
-
-	//xxxxcontroller_Spindle.setCallback(newMotorTarget);
-	//xxxxnewMotorTarget();  // start the movment sequence
-}
-void xxxnewMotorTarget()
-{
-	static int posNr = 0;
-
-	motor_Spindle.setTargetAbs(targetPositions[posNr]);
-	controller_Spindle.moveAsync(motor_Spindle);
-
-	posNr = (posNr + 1);// % nrOfPositions;
-	if (posNr == nrOfPositions + 1)
-	{
-		controller_Axis.stop();
-	}
-}
-void xxxxnewMotorTarget()
-{
-	static int posNr = -1;
-
-	// Run through targetPositions once
-	posNr = (posNr + 1);
-
-	// If targetPositions completed, stop Axis motor
-	if (posNr == nrOfPositions + 1)
-	{
-		controller_Axis.stop();
-		//return;
-	}
-	else
-	{
-		// Move spindle motor
-		motor_Spindle.setTargetAbs(targetPositions[posNr]);
-		controller_Spindle.moveAsync(motor_Spindle);
-	}
-
-	Serial1.print("pageRecip1_Z.t9.txt=");
-	Serial1.write(0x22);
-	Serial1.print(posNr);
-	Serial1.write(0x22);
-	Serial1.write(0xff);
-	Serial1.write(0xff);
-	Serial1.write(0xff);
-	Serial1.print("pageRecip1_Z.t9.txt=");
-	Serial1.write(0x22);
-	Serial1.print(posNr);
-	Serial1.write(0x22);
-	Serial1.write(0xff);
-	Serial1.write(0xff);
-	Serial1.write(0xff);
-	return;
-}
-*/
+/// <summary>
+/// Return Z axis to start of Recip1_SpZ
+/// </summary>
+/// <comment>
+/// </comment>
+/// <returns></returns>
 void Return_Recip1_SpZ()
 {
 	double returnTarget = returnSteps_Recip1_SpZ * (-1);
@@ -1815,6 +1750,13 @@ void Return_Recip1_SpZ()
 	Serial1.write(0xff);
 }
 
+/// <summary>
+/// DoRecip1_SpZ
+/// </summary>
+/// <comment>
+/// </comment>
+/// <param name="wavDir">Counterclockwise: -1, Clockwise: 1</param>
+/// <returns></returns>
 void DoRecip1_SpZ(int wavDir)
 {
 	////int32_t startPosition_Z = motor_Axis_Z.getPosition();
@@ -1837,8 +1779,8 @@ void DoRecip1_SpZ(int wavDir)
 		.setMaxSpeed(configSteppers.maxSpeed_Recip1_SpZ_Axis)
 		.setAcceleration(configSteppers.acceleration_Recip1_SpZ_Axis);
 
-	digitalWrite(PIN_SPINDLE_ENABLE, LOW);
-	digitalWrite(PIN_AXIS_Z_ENABLE, LOW);  // Enable
+	digitalWrite(PIN_SPINDLE_ENABLE, LOW); // Enable (Uses TeensyStep library)
+	digitalWrite(PIN_AXIS_Z_ENABLE, LOW);  // Enable (Uses TeensyStep library)
 	for (int i = 0; i < (configSteppers.repeats_Recip1_SpZ * 2); i++)
 	{
 		axisSteps *= -1;
@@ -1969,6 +1911,12 @@ void DoRecip1_SpZ(int wavDir)
 	Serial1.write(0xff);
 }
 
+/// <summary>
+/// Return Spindle to start of Recip1_Z
+/// </summary>
+/// <comment>
+/// </comment>
+/// <returns></returns>
 void Return_Recip1_Z()
 {
 	double returnTarget = returnSteps_Recip1_Z * (-1);
@@ -2016,6 +1964,13 @@ void Return_Recip1_Z()
 	Serial1.write(0xff);
 }
 
+/// <summary>
+/// DoRecip1_Z
+/// </summary>
+/// <comment>
+/// </comment>
+/// <param name="wavDir">In: -1, Out: 1</param>
+/// <returns></returns>
 void DoRecip1_Z(int wavDir)
 {
 	//int32_t startPosition_Z = motor_Axis_Z.getPosition();
@@ -2032,8 +1987,8 @@ void DoRecip1_Z(int wavDir)
 		.setMaxSpeed(configSteppers.maxSpeed_Recip1_Z_Axis)
 		.setAcceleration(configSteppers.acceleration_Recip1_Z_Axis);
 
-	digitalWrite(PIN_SPINDLE_ENABLE, LOW);
-	digitalWrite(PIN_AXIS_Z_ENABLE, LOW);  // Enable
+	digitalWrite(PIN_SPINDLE_ENABLE, LOW); // Enable (Uses TeensyStep library)
+	digitalWrite(PIN_AXIS_Z_ENABLE, LOW);  // Enable (Uses TeensyStep library)
 	for (int i = 0; i < (configSteppers.repeats_Recip1_Z * 2); i++)
 	{
 		spindleSteps *= -1;
@@ -2155,225 +2110,6 @@ void DoRecip1_Z(int wavDir)
 	Serial1.write(0xff);
 	Serial1.write(0xff);
 }
-/*
-void ggoodDoWaveZ(int wavDir)
-{
-	int32_t startPosition_Z = motor_Axis_Z.getPosition();
-	int32_t startPosition_Sp = motor_Spindle.getPosition();
-
-	targetPositions[0] = configSteppers.amplitude_Recip1_Z;
-	targetPositions[1] = 0;
-	targetPositions[2] = configSteppers.amplitude_Recip1_Z;
-	targetPositions[3] = 0;
-	targetPositions[4] = configSteppers.amplitude_Recip1_Z * 2;
-	targetPositions[5] = 0;
-	targetPositions[6] = configSteppers.amplitude_Recip1_Z;
-	targetPositions[7] = 0;
-	nrOfPositions = configSteppers.repeats_Recip1_Z;
-
-	motor_Axis_Z.setAcceleration(configSteppers.acceleration_Recip1_Z_Axis);
-	int axisSpeed = configSteppers.maxSpeed_Recip1_Z_Axis * wavDir;
-	motor_Axis_Z.setMaxSpeed(axisSpeed);
-	controller_Axis.rotateAsync(motor_Axis_Z);
-
-	motor_Spindle.setAcceleration(configSteppers.acceleration_Recip1_Z_Spindle);
-	motor_Spindle.setMaxSpeed(configSteppers.maxSpeed_Recip1_Z_Spindle);
-
-	for (int i = 0; i < nrOfPositions + 2; i++)
-	{
-		if (i == nrOfPositions + 1)
-		{
-			controller_Axis.stop();
-		}
-		else
-		{
-			motor_Spindle.setTargetAbs(targetPositions[i]);
-			controller_Spindle.move(motor_Spindle);
-		}
-
-		startPosition_Z = motor_Axis_Z.getPosition();
-		startPosition_Sp = motor_Spindle.getPosition();
-		Serial1.print("pageWaveZ.t9.txt=");
-		Serial1.write(0x22);
-		Serial1.print(i);
-		Serial1.write(0x22);
-		Serial1.write(0xff);
-		Serial1.write(0xff);
-		Serial1.write(0xff);
-		Serial1.print("pageWaveZ.t9.txt=");
-		Serial1.write(0x22);
-		Serial1.print(i);
-		Serial1.write(0x22);
-		Serial1.write(0xff);
-		Serial1.write(0xff);
-		Serial1.write(0xff);
-		Serial1.print("pageWaveZ.t12.txt=");
-		Serial1.write(0x22);
-		Serial1.print(startPosition_Z);
-		Serial1.write(0x22);
-		Serial1.write(0xff);
-		Serial1.write(0xff);
-		Serial1.write(0xff);
-		Serial1.print("pageWaveZ.t10.txt=");
-		Serial1.write(0x22);
-		Serial1.print(startPosition_Sp);
-		Serial1.write(0x22);
-		Serial1.write(0xff);
-		Serial1.write(0xff);
-		Serial1.write(0xff);
-	}
-
-
-	Serial1.print("pageWaveZ.t9.txt=");
-	Serial1.write(0x22);
-	Serial1.print("fin");
-	Serial1.write(0x22);
-	Serial1.write(0xff);
-	Serial1.write(0xff);
-	Serial1.write(0xff);
-	Serial1.print("pageWaveZ.t9.txt=");
-	Serial1.write(0x22);
-	Serial1.print("fin");
-	Serial1.write(0x22);
-	Serial1.write(0xff);
-	Serial1.write(0xff);
-	Serial1.write(0xff);
-
-	motor_Axis_Z.setPosition(0);
-	motor_Spindle.setPosition(0);
-
-}
-
-
-void xDoWaveZ(int wavDir)
-{
-
-	motor_Axis_X.setPosition(0);
-	motor_Spindle.setPosition(0);
-	delay(10);
-	int32_t startPosition_Z = motor_Axis_Z.getPosition();
-	cycleCounter = 1;
-	motor_Spindle.setAcceleration(configSteppers.acceleration_Recip1_Z_Spindle);
-	motor_Axis_Z.setAcceleration(configSteppers.acceleration_Recip1_Z_Axis);
-
-	cycleWidth = 20000; // steps
-						//cycleWidth = (configSteppers.distance_Recip1_Z / configSteppers.distancePerRev_AxisZ) * configSteppers.microsteps_Axis_Z * configSteppers.steps360_Axis_Z;
-						//maxSpeed = 30000;
-						//numberOfCycles = 3;
-
-	currentstate = state::starting;
-
-
-	//for (int i = 0; i <= numberOfCycles; i++)
-	while (cycleCounter <= configSteppers.repeats_Recip1_Z)
-	{
-		if (stopwatch > 300)
-		{
-			stopwatch = 0;
-			digitalWriteFast(LED_BUILTIN, !digitalReadFast(LED_BUILTIN));
-
-		}
-		tick();
-	}
-	int32_t endPosition_Z = motor_Axis_Z.getPosition();
-
-	Serial1.print("pageWaveZ.t9.txt=");
-	Serial1.write(0x22);
-	Serial1.print(startPosition_Z);
-	Serial1.write(0x22);
-	Serial1.write(0xff);
-	Serial1.write(0xff);
-	Serial1.write(0xff);
-	Serial1.print("pageWaveZ.t9.txt=");
-	Serial1.write(0x22);
-	Serial1.print(startPosition_Z);
-	Serial1.write(0x22);
-	Serial1.write(0xff);
-	Serial1.write(0xff);
-	Serial1.write(0xff);
-	Serial1.print("pageWaveZ.t12.txt=");
-	Serial1.write(0x22);
-	Serial1.print(endPosition_Z);
-	Serial1.write(0x22);
-	Serial1.write(0xff);
-	Serial1.write(0xff);
-	Serial1.write(0xff);
-
-
-}
-
-void tick()
-{
-	int position = motor_Spindle.getPosition();
-
-	switch (currentstate)
-	{
-	case state::waiting:
-		break;
-
-	case state::starting:
-		direction = 1;
-		motor_Axis_Z.setMaxSpeed(configSteppers.maxSpeed_Recip1_Z_Axis);
-		controller_Axis.rotateAsync(motor_Axis_Z);
-		// fallthrough intended
-
-	case state::startingCycle:
-		direction *= -1;
-		motor_Spindle.setMaxSpeed(direction * configSteppers.maxSpeed_Recip1_Z_Spindle);
-		controller_Spindle.rotateAsync(motor_Spindle); // start spindle motor, as long as maxSpeed and acceleration of both motors are the same the will run in sync
-		currentstate = state::runningCycle;
-		break;
-
-	case state::runningCycle:
-		if (direction * position >= cycleWidth) // did the spindle motor reach the cycleWidth
-		{
-			Serial1.print("pageWaveZ.t10.txt=");
-			Serial1.write(0x22);
-			Serial1.print(position);
-			Serial1.write(0x22);
-			Serial1.write(0xff);
-			Serial1.write(0xff);
-			Serial1.write(0xff);
-			Serial1.print("pageWaveZ.t10.txt=");
-			Serial1.write(0x22);
-			Serial1.print(position);
-			Serial1.write(0x22);
-			Serial1.write(0xff);
-			Serial1.write(0xff);
-			Serial1.write(0xff);
-			if (cycleCounter < configSteppers.repeats_Recip1_Z) // cycles left? -> initiate new cycle
-			{
-				cycleCounter++;
-				controller_Spindle.stopAsync();
-				currentstate = state::stoppingCycle;
-			}
-			else // all cycles done, stopping both motors
-			{
-				controller_Spindle.stop();
-				controller_Axis.stop();
-
-				currentstate = state::stopping;
-				cycleCounter = configSteppers.repeats_Recip1_Z + 2;
-			}
-		}
-		break;
-
-	case state::stoppingCycle:
-		if (!controller_Spindle.isRunning())
-			currentstate = state::startingCycle;
-		break;
-
-	case state::stopping:
-		if (!controller_Spindle.isRunning() && !controller_Axis.isRunning())
-		{
-			currentstate = state::waiting;
-			Serial.println("done");
-		}
-		break;
-	}
-}
-*/
-
 
 /// <summary>
 /// Serial Print
@@ -2758,7 +2494,15 @@ void TestEEPROMSetup()
 	Serial1.write(0xff);
 	Serial1.write(0xff);
 	delay(2000);
-
+	Serial1.print("pageSetup.t19.txt=");
+	Serial1.write(0x22);
+	Serial1.print("Spindle-Enable:");
+	Serial1.print(eePromConfig.enable_Spindle? "Low":"High");
+	Serial1.write(0x22);
+	Serial1.write(0xff);
+	Serial1.write(0xff);
+	Serial1.write(0xff);
+	delay(2000);
 
 	Serial1.print("pageSetup.t19.txt=");
 	Serial1.write(0x22);
@@ -2782,6 +2526,15 @@ void TestEEPROMSetup()
 	Serial1.write(0x22);
 	Serial1.print("Z Axis-Dist/360:");
 	Serial1.print(eePromConfig.distancePerRev_AxisZ);
+	Serial1.write(0x22);
+	Serial1.write(0xff);
+	Serial1.write(0xff);
+	Serial1.write(0xff);
+	delay(2000);
+	Serial1.print("pageSetup.t19.txt=");
+	Serial1.write(0x22);
+	Serial1.print("Z Axis-Enable:");
+	Serial1.print(eePromConfig.enable_Axis_Z ? "Low" : "High");
 	Serial1.write(0x22);
 	Serial1.write(0xff);
 	Serial1.write(0xff);
@@ -2816,6 +2569,15 @@ void TestEEPROMSetup()
 	Serial1.write(0xff);
 	Serial1.write(0xff);
 	delay(2000);
+	Serial1.print("pageSetup.t19.txt=");
+	Serial1.write(0x22);
+	Serial1.print("X Axis-Enable:");
+	Serial1.print(eePromConfig.enable_Axis_X ? "Low" : "High");
+	Serial1.write(0x22);
+	Serial1.write(0xff);
+	Serial1.write(0xff);
+	Serial1.write(0xff);
+	delay(2000);
 
 	Serial1.print("pageSetup.t19.txt=");
 	Serial1.write(0x22);
@@ -2840,6 +2602,15 @@ void TestEEPROMSetup()
 	Serial1.write(0x22);
 	Serial1.print("B Axis-Gear Ratio:");
 	Serial1.print(eePromConfig.gearRatio_AxisB);
+	Serial1.write(0x22);
+	Serial1.write(0xff);
+	Serial1.write(0xff);
+	Serial1.write(0xff);
+	delay(2000);
+	Serial1.print("pageSetup.t19.txt=");
+	Serial1.write(0x22);
+	Serial1.print("B Axis-Enable:");
+	Serial1.print(eePromConfig.enable_Axis_B ? "Low" : "High");
 	Serial1.write(0x22);
 	Serial1.write(0xff);
 	Serial1.write(0xff);
