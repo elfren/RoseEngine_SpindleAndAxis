@@ -23,16 +23,16 @@ AccelStepper stepper_Axis_Z(AccelStepper::DRIVER, PIN_AXIS_Z_STEP, PIN_AXIS_Z_DI
 Stepper motor_Spindle(PIN_SPINDLE_STEP, PIN_SPINDLE_DIR);
 Stepper motor_Axis_Z(PIN_AXIS_Z_STEP, PIN_AXIS_Z_DIR);
 
-#ifdef TEENSY_35
 
-
-AccelStepper stepper_Axis_X(AccelStepper::DRIVER, PIN_AXIS_X_STEP, PIN_AXIS_X_DIR);
-AccelStepper stepper_Axis_B(AccelStepper::DRIVER, PIN_AXIS_B_STEP, PIN_AXIS_B_DIR);
-
-
+#ifndef TWO_AXES_V2
 Stepper motor_Axis_X(PIN_AXIS_X_STEP, PIN_AXIS_X_DIR);
+AccelStepper stepper_Axis_X(AccelStepper::DRIVER, PIN_AXIS_X_STEP, PIN_AXIS_X_DIR);
+#endif // TWO_AXES_V2
+
+#ifdef FOUR_AXES
+AccelStepper stepper_Axis_B(AccelStepper::DRIVER, PIN_AXIS_B_STEP, PIN_AXIS_B_DIR);
 Stepper motor_Axis_B(PIN_AXIS_B_STEP, PIN_AXIS_B_DIR);
-#endif // TEENSY_35
+#endif // B_AXIS_ENABLED
 
 stepperConfig configSteppers;
 StepControl<> controller_Spindle;
@@ -84,13 +84,15 @@ void setup()
 	}
 
 
-#ifdef TEENSY_35
+#ifdef FOUR_AXES
 	// Set Microstepping mode
-	SetMicrosteppingMode(configSteppers.microsteps_Spindle, PIN_SPINDLE_MS0, PIN_SPINDLE_MS1, PIN_SPINDLE_MS2);
-	SetMicrosteppingMode(configSteppers.microsteps_Axis_X, PIN_AXIS_X_MS0, PIN_AXIS_X_MS1, PIN_AXIS_X_MS2);
-	SetMicrosteppingMode(configSteppers.microsteps_Axis_Z, PIN_AXIS_Z_MS0, PIN_AXIS_Z_MS1, PIN_AXIS_Z_MS2);
-	SetMicrosteppingMode(configSteppers.microsteps_Axis_B, PIN_AXIS_B_MS0, PIN_AXIS_B_MS1, PIN_AXIS_B_MS2);
-#endif //TEENSY_35
+	//SetMicrosteppingMode(configSteppers.microsteps_Spindle, PIN_SPINDLE_MS0, PIN_SPINDLE_MS1, PIN_SPINDLE_MS2);
+	//SetMicrosteppingMode(configSteppers.microsteps_Axis_Z, PIN_AXIS_Z_MS0, PIN_AXIS_Z_MS1, PIN_AXIS_Z_MS2);
+	//SetMicrosteppingMode(configSteppers.microsteps_Axis_B, PIN_AXIS_B_MS0, PIN_AXIS_B_MS1, PIN_AXIS_B_MS2);
+#endif //FOUR_AXES
+#ifndef TWO_AXES_V2
+	//SetMicrosteppingMode(configSteppers.microsteps_Axis_X, PIN_AXIS_X_MS0, PIN_AXIS_X_MS1, PIN_AXIS_X_MS2);
+#endif // TWO_AXES_V2
 
 	// Set the enable pin for the stepper motor
 	stepper_Spindle.setEnablePin(PIN_SPINDLE_ENABLE);
@@ -118,24 +120,7 @@ void setup()
 	stepper_Axis_Z.setMaxSpeed(configSteppers.maxSpeed_Axis_Z);
 	stepper_Axis_Z.setAcceleration(configSteppers.acceleration_Axis_Z);
 	//-------------------------------
-#ifdef TEENSY_35
-
-
-	//-------------------------------
-	// X Axis stepper motor initialization
-	// Configure Enable X Axis stepper
-	stepper_Axis_X.setEnablePin(PIN_AXIS_X_ENABLE);
-	stepper_Axis_X.setPinsInverted(false, false, configSteppers.enable_Axis_X);
-
-	// Disable the X Axis stepper motor (enable in run method)
-	stepper_Axis_X.disableOutputs();
-
-	// Set X Axis MaxSpeed and Acceleration
-	stepper_Axis_X.setMaxSpeed(configSteppers.maxSpeed_Axis_Z);
-	stepper_Axis_X.setAcceleration(configSteppers.acceleration_Axis_Z);
-	//------------------------------
-
-	//-------------------------------
+#ifdef FOUR_AXES
 	// B Axis stepper motor initialization
 	// Configure Enable B Axis stepper
 	stepper_Axis_B.setEnablePin(PIN_AXIS_B_ENABLE);
@@ -148,18 +133,30 @@ void setup()
 	stepper_Axis_B.setMaxSpeed(configSteppers.maxSpeed_Axis_Z);
 	stepper_Axis_B.setAcceleration(configSteppers.acceleration_Axis_Z);
 	//------------------------------
+	motor_Axis_B
+		.setMaxSpeed(configSteppers.maxSpeed_Axis_B)       // steps/s
+		.setAcceleration(configSteppers.acceleration_Axis_B) // steps/s^2 
+		.setStepPinPolarity(LOW); // driver expects active low pulses
+#endif // FOUR_AXES
+#ifndef TWO_AXES_V2
+	// X Axis stepper motor initialization
+	// Configure Enable X Axis stepper
+	stepper_Axis_X.setEnablePin(PIN_AXIS_X_ENABLE);
+	stepper_Axis_X.setPinsInverted(false, false, configSteppers.enable_Axis_X);
+
+	// Disable the X Axis stepper motor (enable in run method)
+	stepper_Axis_X.disableOutputs();
+
+	// Set X Axis MaxSpeed and Acceleration
+	stepper_Axis_X.setMaxSpeed(configSteppers.maxSpeed_Axis_Z);
+	stepper_Axis_X.setAcceleration(configSteppers.acceleration_Axis_Z);
+	//------------------------------
 	// Configure TeensyStep motors
 	motor_Axis_X
 		.setMaxSpeed(configSteppers.maxSpeed_Axis_X)       // steps/s
 		.setAcceleration(configSteppers.acceleration_Axis_X) // steps/s^2    
 		.setStepPinPolarity(LOW); // driver expects active low pulses
-	motor_Axis_B
-		.setMaxSpeed(configSteppers.maxSpeed_Axis_B)       // steps/s
-		.setAcceleration(configSteppers.acceleration_Axis_B) // steps/s^2 
-	    .setStepPinPolarity(LOW); // driver expects active low pulses
-
-
-#endif // TEENSY_35
+#endif // TWO_AXES_V2
 	
 	// Configure TeensyStep motors
 
@@ -183,17 +180,20 @@ void setup()
 	digitalWrite(PIN_LIMIT_MAX, HIGH);  // Enable
 	delayMicroseconds(10);
 
-#ifdef MICRO_SD
+#ifdef FOUR_AXES
 	// Enable microSD card
-	////if (!(SD.begin(BUILTIN_SDCARD)))
-	////{
-	////	while (1) 
-	////	{
-	////		Serial.println("Unable to access the SD card"); // ToDo: Send to Nextion
-	////		delay(200);
-	////	}
-	////}
-#endif // MICRO_SD
+	if (!(SD.begin(BUILTIN_SDCARD)))
+	{
+			Serial.println("Unable to access the SD card"); // ToDo: Send to Nextion
+			delay(200);
+	}
+#else
+	if (!(SD.begin(PIN_SPI_CS)))
+	{
+		Serial.println("Unable to access the SD card"); // ToDo: Send to Nextion
+		delay(200);
+	}
+#endif // FOUR_AXES
 
 }
 
@@ -334,78 +334,77 @@ void loop()
 		}
 		case 70: // F - Index2 counter clockwise
 		{
-#ifdef TEENSY_35
-			////Serial1.print("pageIndexF2.t10.txt="); // Nextion may not get the first packet
-			////Serial1.write(0x22);
-			////Serial1.print(configSteppers.source_Index2);
-			////Serial1.write(0x22);
-			////Serial1.write(0xff);
-			////Serial1.write(0xff);
-			////Serial1.write(0xff);
-			////delay(100);
-			////Serial1.print("pageIndexF2.t10.txt=");
-			////Serial1.write(0x22);
-			////Serial1.print(configSteppers.source_Index2);
-			////Serial1.write(0x22);
-			////Serial1.write(0xff);
-			////Serial1.write(0xff);
-			////Serial1.write(0xff);
-			////delay(100);
-			////Serial1.print("pageIndexF2.t3.txt=");
-			////Serial1.write(0x22);
-			////Serial1.print(configSteppers.size_Index2);
-			////Serial1.write(0x22);
-			////Serial1.write(0xff);
-			////Serial1.write(0xff);
-			////Serial1.write(0xff);
-			////Serial1.print("pageIndexF2.t3.txt=");
-			////Serial1.write(0x22);
-			////Serial1.print(configSteppers.size_Index2);
-			////Serial1.write(0x22);
-			////Serial1.write(0xff);
-			////Serial1.write(0xff);
-			////Serial1.write(0xff);
-			////if (configSteppers.source_Index2 == FILE_SD)
-			////{
-			////	//for (int i = 0; i < 3; i++) // Verify Teensy is operational
-			////	//{
-			////	//	digitalWrite(PIN_LED, HIGH);
-			////	//	delay(500);
-			////	//	digitalWrite(PIN_LED, LOW);
-			////	//	delay(500);
-			////	//}
-			////	int lineNumber = GetSerialInteger();
-			////	if (lineNumber == 255)
-			////	{
-			////		lineNumber = 0;
-			////	}
-			////	double newIndexSize = GetDataFromSD(lineNumber);
-			////	configSteppers.size_Index2 = (configSteppers.microsteps_Spindle * configSteppers.steps360_Spindle * configSteppers.gearRatio_Spindle) * (newIndexSize / 360);
-			////	Serial1.print("pageIndexF2.t7.txt="); // Nextion may not get the first packet
-			////	Serial1.write(0x22);
-			////	Serial1.print(newIndexSize);
-			////	Serial1.write(0x22);
-			////	Serial1.write(0xff);
-			////	Serial1.write(0xff);
-			////	Serial1.write(0xff);
-			////	delay(100);
-			////	Serial1.print("pageIndexF2.t7.txt=");
-			////	Serial1.write(0x22);
-			////	Serial1.print(newIndexSize);
-			////	Serial1.write(0x22);
-			////	Serial1.write(0xff);
-			////	Serial1.write(0xff);
-			////	Serial1.write(0xff);
-			////	delay(100);
-			////}
-			////else
-			////{
-			////	digitalWrite(PIN_LED, HIGH);
-			////	delay(500);
-			////	digitalWrite(PIN_LED, LOW);
-			////	delay(500);
-			////}
-#endif // TEENSY_35
+
+			Serial1.print("pageIndexF2.t10.txt="); // Nextion may not get the first packet
+			Serial1.write(0x22);
+			Serial1.print(configSteppers.source_Index2);
+			Serial1.write(0x22);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			delay(100);
+			Serial1.print("pageIndexF2.t10.txt=");
+			Serial1.write(0x22);
+			Serial1.print(configSteppers.source_Index2);
+			Serial1.write(0x22);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			delay(100);
+			Serial1.print("pageIndexF2.t3.txt=");
+			Serial1.write(0x22);
+			Serial1.print(configSteppers.size_Index2);
+			Serial1.write(0x22);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.print("pageIndexF2.t3.txt=");
+			Serial1.write(0x22);
+			Serial1.print(configSteppers.size_Index2);
+			Serial1.write(0x22);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			if (configSteppers.source_Index2 == FILE_SD)
+			{
+				//for (int i = 0; i < 3; i++) // Verify Teensy is operational
+				//{
+				//	digitalWrite(PIN_LED, HIGH);
+				//	delay(500);
+				//	digitalWrite(PIN_LED, LOW);
+				//	delay(500);
+				//}
+				int lineNumber = GetSerialInteger();
+				if (lineNumber == 255)
+				{
+					lineNumber = 0;
+				}
+				double newIndexSize = GetDataFromSD(lineNumber);
+				configSteppers.size_Index2 = (configSteppers.microsteps_Spindle * configSteppers.steps360_Spindle * configSteppers.gearRatio_Spindle) * (newIndexSize / 360);
+				Serial1.print("pageIndexF2.t7.txt="); // Nextion may not get the first packet
+				Serial1.write(0x22);
+				Serial1.print(newIndexSize);
+				Serial1.write(0x22);
+				Serial1.write(0xff);
+				Serial1.write(0xff);
+				Serial1.write(0xff);
+				delay(100);
+				Serial1.print("pageIndexF2.t7.txt=");
+				Serial1.write(0x22);
+				Serial1.print(newIndexSize);
+				Serial1.write(0x22);
+				Serial1.write(0xff);
+				Serial1.write(0xff);
+				Serial1.write(0xff);
+				delay(100);
+			}
+			else
+			{
+				digitalWrite(PIN_LED, HIGH);
+				delay(500);
+				digitalWrite(PIN_LED, LOW);
+				delay(500);
+			}
 
 			// Check for 0 size.  GetDataFromSD function will return 0 when it reaches end of file.
 			if (configSteppers.size_Index2 > 0)
@@ -418,71 +417,70 @@ void loop()
 		}
 		case 71: // G - Index2 Clockwise
 		{
-#ifdef TEENSY_35
-			////Serial1.print("pageIndexF2.t10.txt="); // Nextion may not get the first packet
-			////Serial1.write(0x22);
-			////Serial1.print(configSteppers.source_Index2);
-			////Serial1.write(0x22);
-			////Serial1.write(0xff);
-			////Serial1.write(0xff);
-			////Serial1.write(0xff);
-			////delay(100);
-			////Serial1.print("pageIndexF2.t10.txt=");
-			////Serial1.write(0x22);
-			////Serial1.print(configSteppers.source_Index2);
-			////Serial1.write(0x22);
-			////Serial1.write(0xff);
-			////Serial1.write(0xff);
-			////Serial1.write(0xff);
-			////delay(100);
-			////Serial1.print("pageIndexF2.t3.txt=");
-			////Serial1.write(0x22);
-			////Serial1.print(configSteppers.size_Index2);
-			////Serial1.write(0x22);
-			////Serial1.write(0xff);
-			////Serial1.write(0xff);
-			////Serial1.write(0xff);
-			////Serial1.print("pageIndexF2.t3.txt=");
-			////Serial1.write(0x22);
-			////Serial1.print(configSteppers.size_Index2);
-			////Serial1.write(0x22);
-			////Serial1.write(0xff);
-			////Serial1.write(0xff);
-			////Serial1.write(0xff);
+			Serial1.print("pageIndexF2.t10.txt="); // Nextion may not get the first packet
+			Serial1.write(0x22);
+			Serial1.print(configSteppers.source_Index2);
+			Serial1.write(0x22);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			delay(100);
+			Serial1.print("pageIndexF2.t10.txt=");
+			Serial1.write(0x22);
+			Serial1.print(configSteppers.source_Index2);
+			Serial1.write(0x22);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			delay(100);
+			Serial1.print("pageIndexF2.t3.txt=");
+			Serial1.write(0x22);
+			Serial1.print(configSteppers.size_Index2);
+			Serial1.write(0x22);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.print("pageIndexF2.t3.txt=");
+			Serial1.write(0x22);
+			Serial1.print(configSteppers.size_Index2);
+			Serial1.write(0x22);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
 
-			////if (configSteppers.source_Index2 == FILE_SD)
-			////{
-			////	int lineNumber = GetSerialInteger();
-			////	if (lineNumber == 255)
-			////	{
-			////		lineNumber = 0;
-			////	}
+			if (configSteppers.source_Index2 == FILE_SD)
+			{
+				int lineNumber = GetSerialInteger();
+				if (lineNumber == 255)
+				{
+					lineNumber = 0;
+				}
 
-			////	// Get size from file
-			////	digitalWrite(PIN_LED, HIGH);
-			////	delay(500);
-			////	digitalWrite(PIN_LED, LOW);
-			////	delay(500);
-			////	double newIndexSize = GetDataFromSD(lineNumber);
-			////	configSteppers.size_Index2 = (configSteppers.microsteps_Spindle * configSteppers.steps360_Spindle * configSteppers.gearRatio_Spindle) * (newIndexSize / 360);
-			////	Serial1.print("pageIndexF2.t7.txt=");
-			////	Serial1.write(0x22);
-			////	Serial1.print(newIndexSize);
-			////	Serial1.write(0x22);
-			////	Serial1.write(0xff);
-			////	Serial1.write(0xff);
-			////	Serial1.write(0xff);
-			////	delay(300);
-			////	Serial1.print("pageIndexF2.t7.txt=");
-			////	Serial1.write(0x22);
-			////	Serial1.print(newIndexSize);
-			////	Serial1.write(0x22);
-			////	Serial1.write(0xff);
-			////	Serial1.write(0xff);
-			////	Serial1.write(0xff);
-			////	delay(100);
-			////}
-#endif // TEENSY_35
+				// Get size from file
+				digitalWrite(PIN_LED, HIGH);
+				delay(500);
+				digitalWrite(PIN_LED, LOW);
+				delay(500);
+				double newIndexSize = GetDataFromSD(lineNumber);
+				configSteppers.size_Index2 = (configSteppers.microsteps_Spindle * configSteppers.steps360_Spindle * configSteppers.gearRatio_Spindle) * (newIndexSize / 360);
+				Serial1.print("pageIndexF2.t7.txt=");
+				Serial1.write(0x22);
+				Serial1.print(newIndexSize);
+				Serial1.write(0x22);
+				Serial1.write(0xff);
+				Serial1.write(0xff);
+				Serial1.write(0xff);
+				delay(300);
+				Serial1.print("pageIndexF2.t7.txt=");
+				Serial1.write(0x22);
+				Serial1.print(newIndexSize);
+				Serial1.write(0x22);
+				Serial1.write(0xff);
+				Serial1.write(0xff);
+				Serial1.write(0xff);
+				delay(100);
+			}
+
 			// Check for 0 size. GetDataFromSD function will return 0 when it reaches end of file.
 			if (configSteppers.size_Index2 > 0)
 			{
@@ -668,30 +666,30 @@ void loop()
 		}
 		case 81: // Q - Index1 counter clockwise
 		{
-			////Serial1.print("pageIndex1.t5.txt="); // Nextion may not get the first packet
-			////Serial1.write(0x22);
-			////Serial1.print(configSteppers.source_Index1);
-			////Serial1.write(0x22);
-			////Serial1.write(0xff);
-			////Serial1.write(0xff);
-			////Serial1.write(0xff);
-			////delay(100);
-			////Serial1.print("pageIndex1.t5.txt="); // Nextion may not get the first packet
-			////Serial1.write(0x22);
-			////Serial1.print(configSteppers.source_Index1);
-			////Serial1.write(0x22);
-			////Serial1.write(0xff);
-			////Serial1.write(0xff);
-			////Serial1.write(0xff);
-			////delay(100);
-			////Serial1.print("pageIndex1.t10.txt=");
-			////Serial1.write(0x22);
-			////Serial1.print(configSteppers.size_Index1);
-			////Serial1.write(0x22);
-			////Serial1.write(0xff);
-			////Serial1.write(0xff);
-			////Serial1.write(0xff);
-			////delay(100);
+			Serial1.print("pageIndex1.t5.txt="); // Nextion may not get the first packet
+			Serial1.write(0x22);
+			Serial1.print(configSteppers.source_Index1);
+			Serial1.write(0x22);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			delay(100);
+			Serial1.print("pageIndex1.t5.txt="); // Nextion may not get the first packet
+			Serial1.write(0x22);
+			Serial1.print(configSteppers.source_Index1);
+			Serial1.write(0x22);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			delay(100);
+			Serial1.print("pageIndex1.t10.txt=");
+			Serial1.write(0x22);
+			Serial1.print(configSteppers.size_Index1);
+			Serial1.write(0x22);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			delay(100);
 
 			// Check for 0 size
 			if (configSteppers.size_Index1 > 0)
@@ -719,22 +717,22 @@ void loop()
 		}
 		case 82: // R - Index1 Clockwise
 		{
-			////Serial1.print("pageIndex1.t5.txt="); // Nextion may not get the first packet
-			////Serial1.write(0x22);
-			////Serial1.print(configSteppers.source_Index1);
-			////Serial1.write(0x22);
-			////Serial1.write(0xff);
-			////Serial1.write(0xff);
-			////Serial1.write(0xff);
-			////delay(100);
-			////Serial1.print("pageIndex1.t5.txt="); // Nextion may not get the first packet
-			////Serial1.write(0x22);
-			////Serial1.print(configSteppers.source_Index1);
-			////Serial1.write(0x22);
-			////Serial1.write(0xff);
-			////Serial1.write(0xff);
-			////Serial1.write(0xff);
-			////delay(100);
+			Serial1.print("pageIndex1.t5.txt="); // Nextion may not get the first packet
+			Serial1.write(0x22);
+			Serial1.print(configSteppers.source_Index1);
+			Serial1.write(0x22);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			delay(100);
+			Serial1.print("pageIndex1.t5.txt="); // Nextion may not get the first packet
+			Serial1.write(0x22);
+			Serial1.print(configSteppers.source_Index1);
+			Serial1.write(0x22);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			delay(100);
 
 
 			// Check for 0 size
@@ -927,19 +925,17 @@ void loop()
 			}
 			case 2:
 			{
-#ifdef TEENSY_35
+#ifndef TWO_AXES_V2
 				stepper_Axis_X.enableOutputs();
-				//digitalWrite(PIN_AXIS_X_ENABLE, LOW);  // Enable
-#endif //TEENSY_35
+#endif // TWO_AXES_V2
 				break;
-
 			}
 			case 3:
 			{
-#ifdef TEENSY_35
+#ifdef FOUR_AXES
 				stepper_Axis_B.enableOutputs();
 				//digitalWrite(PIN_AXIS_B_ENABLE, LOW);  // Enable
-#endif //TEENSY_35
+#endif // FOUR_AXES
 				break;
 			}
 			break;
@@ -958,19 +954,18 @@ void loop()
 			}
 			case 2:
 			{
-#ifdef TEENSY_35
+#ifndef TWO_AXES_V2
 				stepper_Axis_X.disableOutputs();
-				//digitalWrite(PIN_AXIS_X_ENABLE, HIGH);  // Enable
-#endif //TEENSY_35
+#endif // TWO_AXES_V2
 				break;
 
 			}
 			case 3:
 			{
-#ifdef TEENSY_35
+#ifdef FOUR_AXES
 				stepper_Axis_B.disableOutputs();
 				//digitalWrite(PIN_AXIS_B_ENABLE, HIGH);  // Enable
-#endif //TEENSY_35
+#endif // FOUR_AXES
 				break;
 			}
 			break;
@@ -1090,10 +1085,12 @@ void loop()
 			EEPROM.put(eePromAddress, configSteppers);
 			break;
 		}
-		case 111: // o - Z/Sync Spindle MaxSpeed
+		case 111: // o - SpZ/SpX/SpB/Sync Spindle MaxSpeed
 		{
 			configSteppers.maxSpeedSpindle_SpZ = GetSerialFloat(serialId);
 			configSteppers.maxSpeedSpindle_SyncZ = configSteppers.maxSpeedSpindle_SpZ;
+			configSteppers.maxSpeedSpindle_SpX = configSteppers.maxSpeedSpindle_SpZ;
+			configSteppers.maxSpeedSpindle_SpB = configSteppers.maxSpeedSpindle_SpZ;
 			EEPROM.put(eePromAddress, configSteppers);
 			break;
 		}
@@ -1125,7 +1122,7 @@ void loop()
 			EEPROM.put(eePromAddress, configSteppers);
 			break;
 		}
-#ifdef TEENSY_35
+#ifdef FOUR_AXES
 		case 116: // t - B axis Acceleration
 		{
 			configSteppers.acceleration_Axis_B = GetSerialFloat(serialId);
@@ -1142,7 +1139,7 @@ void loop()
 		{
 			configSteppers.microsteps_Axis_B = GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress, configSteppers);
-			SetMicrosteppingMode(configSteppers.microsteps_Axis_B, PIN_AXIS_B_MS0, PIN_AXIS_B_MS1, PIN_AXIS_B_MS2);
+			//SetMicrosteppingMode(configSteppers.microsteps_Axis_B, PIN_AXIS_B_MS0, PIN_AXIS_B_MS1, PIN_AXIS_B_MS2);
 			break;
 		}
 		case 119: // w - B axis Steps/360 
@@ -1157,7 +1154,7 @@ void loop()
 			EEPROM.put(eePromAddress, configSteppers);
 			break;
 		}
-#endif // TEENSY_35
+#endif // FOUR_AXES
 		case 121: // y - Z Axis Microsteps
 		{
 			configSteppers.microsteps_Axis_Z = GetSerialFloat(serialId);
@@ -1195,7 +1192,7 @@ void loop()
 			TestEEPROMConfig();
 			break;
 		}
-#ifdef TEENSY_35
+#ifndef TWO_AXES_V2
 		case 161: // ¡ - Sp-X spindle speed
 		{
 			configSteppers.speedPercentageSpindle_SpX = GetSerialInteger();
@@ -1264,6 +1261,9 @@ void loop()
 				0);
 			break;
 		}
+#endif //TWO_AXES_V2
+#ifdef FOUR_AXES
+
 		case 167: // § - Sp-B spindle speed
 		{
 			configSteppers.speedPercentageSpindle_SpB = GetSerialInteger();
@@ -1335,6 +1335,8 @@ void loop()
 
 		//	break;
 		//}
+#endif // FOUR_AXES
+#ifndef TWO_AXES_V2
 		case 174: // ® - SyncX axis speed
 		{
 			configSteppers.speedPercentageAxis_SyncX = GetSerialInteger();
@@ -1470,7 +1472,7 @@ void loop()
 		{
 			configSteppers.microsteps_Axis_X = GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress, configSteppers);
-			SetMicrosteppingMode(configSteppers.microsteps_Axis_X, PIN_AXIS_X_MS0, PIN_AXIS_X_MS1, PIN_AXIS_X_MS2);
+			//SetMicrosteppingMode(configSteppers.microsteps_Axis_X, PIN_AXIS_X_MS0, PIN_AXIS_X_MS1, PIN_AXIS_X_MS2);
 			break;
 		}
 		case 188: // ¼ - X Full Steps
@@ -1485,7 +1487,7 @@ void loop()
 			EEPROM.put(eePromAddress, configSteppers);
 			break;
 		}
-#endif // TEENSY_35
+#endif // TWO_AXES_V2
 		case 190: // ¾ - Index1 Source:Fixed
 		{
 			//double newIndexSize = GetSerialFloat(serialId);

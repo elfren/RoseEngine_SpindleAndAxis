@@ -89,7 +89,8 @@ double GetSerial1Float()
 		}
 	}
 
-	// Uncomment for debugging (add new t5 control to Nextion).
+#ifdef DEBUG
+	// Add new t5 control to Nextion).
 	////Serial1.print("pageSlow.t5.txt="); //Nextion global object
 	////Serial1.write(0x22);
 	////Serial1.print(in[0]); 
@@ -100,6 +101,7 @@ double GetSerial1Float()
 	////Serial1.write(0xff);
 	////Serial1.write(0xff);
 	////Serial1.write(0xff);
+#endif // DEBUG
 	return GetFloatFromCharArray(in, decimalFound,endFound);
 }
 
@@ -122,23 +124,6 @@ int GetSerialInteger()
 		// Discard remaining serial chars
 		Serial1.read();
 	}
-
-	// Uncomment for debugging (add new t3 and t2 control to Nextion).
-	//Serial1.print("pageSlow.t3.txt="); 
-	//Serial1.write(0x22);
-	//Serial1.print(inputHex); 
-	//Serial1.write(0x22);
-	//Serial1.write(0xff);
-	//Serial1.write(0xff);
-	//Serial1.write(0xff);
-	//Serial1.print("pageSlow.t2.txt="); 
-	//Serial1.write(0x22);
-	//Serial1.print(newSpeed); 
-	//Serial1.write(0x22);
-	//Serial1.write(0xff);
-	//Serial1.write(0xff);
-	//Serial1.write(0xff);
-
 	return newInteger;
 }
 
@@ -177,8 +162,9 @@ double GetFloatFromCharArray(char in[], int decimalFound, int endFound)
 			inputNumber = (inputNumber / 10);
 		}
 	}
+#ifdef DEBUG
 
-	// // Uncomment for debugging (add new t11 control to Nextion).
+	//  (add new t11 control to Nextion).
 	////Serial1.print("pageIndex.t11.txt="); 
 	////Serial1.write(0x22);
 	////Serial1.print(inputNumber); 
@@ -186,6 +172,7 @@ double GetFloatFromCharArray(char in[], int decimalFound, int endFound)
 	////Serial1.write(0xff);
 	////Serial1.write(0xff);
 	////Serial1.write(0xff);
+#endif // DEBUG
 	return inputNumber;
 }
 
@@ -292,7 +279,7 @@ int MoveAxisZ(int direction)
 	return 0;
 }
 
-#ifdef TEENSY_35
+#ifndef TWO_AXES_V2
 /// <summary>
 /// Move AxisX
 /// </summary>
@@ -380,7 +367,7 @@ int MoveAxisX(int direction)
 	Serial1.write(0xff);
 	return 0;
 }
-#endif // TEENSY_35
+#endif // TWO_AXES_V2
 
 /// <summary>
 /// Run stepper at preset speed in Sp2 mode
@@ -617,13 +604,15 @@ int RunTwoSteppers_SpZ(
 
 		if (stepper_Spindle_Go)
 		{
-			////for (int i = 0; i < 3; i++) // Verify Teensy is operational
-			////{
-			////	digitalWrite(PIN_LED, HIGH);
-			////	delay(500);
-			////	digitalWrite(PIN_LED, LOW);
-			////	delay(500);
-			////}
+#ifdef DEBUG
+			for (int i = 0; i < 3; i++) // Verify Teensy is operational
+			{
+				digitalWrite(PIN_LED, HIGH);
+				delay(500);
+				digitalWrite(PIN_LED, LOW);
+				delay(500);
+			}
+#endif // DEBUG
 			stepper_Spindle.run();
 		}
 
@@ -690,7 +679,7 @@ int RunTwoSteppers_SpZ(
 	return 0;
 }
 
-#ifdef TEENSY_35
+#ifndef TWO_AXES_V2
 /// <summary>
 /// Run steppers X axis
 /// </summary>
@@ -931,7 +920,8 @@ int RunTwoSteppers_SpX(
 
 	return 0;
 }
-
+#endif //TWO_AXES_V2
+#ifdef FOUR_AXES
 /// <summary>
 /// Run steppers B axis (Spherical apparatus)
 /// </summary>
@@ -1169,7 +1159,7 @@ int RunTwoSteppers_SpB(
 
 	return 0;
 }
-#endif // TEENSY_35
+#endif // FOUR_AXES
 
 /// <summary>
 /// Run steppers
@@ -1483,7 +1473,7 @@ void Sync_SpindleZ(int directionSpindle, int directionAxis)
 	Serial1.write(0xff);
 }
 
-#ifdef TEENSY_35
+#ifndef TWO_AXES_V2
 /// <summary>
 /// Sync spindle and X axis with TeensyStep
 /// </summary>
@@ -1695,7 +1685,7 @@ int RunTwoSteppersSyncX(
 
 	return 0;
 }
-#endif // TEENSY_35
+#endif // TWO_AXES_V2
 
 /// <summary>
 /// Return Z axis to start of Recip1_SpZ
@@ -1759,8 +1749,10 @@ void Return_Recip1_SpZ()
 /// <returns></returns>
 void DoRecip1_SpZ(int wavDir)
 {
-	////int32_t startPosition_Z = motor_Axis_Z.getPosition();
-	////int32_t startPosition_Sp = motor_Spindle.getPosition();
+#ifdef DEBUG
+	int32_t startPosition_Z = motor_Axis_Z.getPosition();
+	int32_t startPosition_Sp = motor_Spindle.getPosition();
+#endif // DEBUG
 	// Set speed and acceleration
 	motor_Spindle
 		.setMaxSpeed(configSteppers.maxSpeed_Recip1_SpZ_Spindle)
@@ -1837,14 +1829,16 @@ void DoRecip1_SpZ(int wavDir)
 	Serial1.write(0xff);
 	Serial1.print("pageRecip1_Sp.t10.txt=");
 	Serial1.write(0x22);
-	Serial1.print(round(returnSteps_Recip1_SpZ));
+	Serial1.print(round(spindleDegrees));
+	//Serial1.print(configSteppers.maxSpeed_Recip1_SpZ_Spindle);
 	Serial1.write(0x22);
 	Serial1.write(0xff);
 	Serial1.write(0xff);
 	Serial1.write(0xff);
-	////int32_t endPosition_Z = motor_Axis_Z.getPosition();
-	////int32_t endPosition_Sp = motor_Spindle.getPosition();
-/*
+#ifdef DEBUG
+	int32_t endPosition_Z = motor_Axis_Z.getPosition();
+	int32_t endPosition_Sp = motor_Spindle.getPosition();
+
 	Serial1.print("pageRecip1_Sp.t0.txt=");
 	Serial1.write(0x22);
 	Serial1.print(startPosition_Sp);
@@ -1887,7 +1881,7 @@ void DoRecip1_SpZ(int wavDir)
 	Serial1.write(0xff);
 	Serial1.write(0xff);
 	Serial1.write(0xff);
-	*/
+#endif // DEBUG
 	// Update Nextion
 	Serial1.print("pageRecip1_Sp.bt3.pco=0");
 	Serial1.write(0xff);
@@ -1973,8 +1967,10 @@ void Return_Recip1_Z()
 /// <returns></returns>
 void DoRecip1_Z(int wavDir)
 {
+#ifdef DEBUG
 	//int32_t startPosition_Z = motor_Axis_Z.getPosition();
 	//int32_t startPosition_Sp = motor_Spindle.getPosition();
+#endif // DEBUG
 	// Set speed and acceleration
 	motor_Spindle
 		.setMaxSpeed(configSteppers.maxSpeed_Recip1_Z_Spindle)
@@ -2042,8 +2038,8 @@ void DoRecip1_Z(int wavDir)
 		////	delay(10);
 		////}
 	}
-	////int32_t endPosition_Z = motor_Axis_Z.getPosition();
-	////int32_t endPosition_Sp = motor_Spindle.getPosition();
+
+
 
 	Serial1.print("pageRecip1_Z.t9.txt=");
 	Serial1.write(0x22);
@@ -2066,7 +2062,10 @@ void DoRecip1_Z(int wavDir)
 	Serial1.write(0xff);
 	Serial1.write(0xff);
 	Serial1.write(0xff);
-/*	Serial1.print("pageRecip1_Z.t10.txt=");
+#ifdef DEBUG
+	int32_t endPosition_Z = motor_Axis_Z.getPosition();
+	//int32_t endPosition_Sp = motor_Spindle.getPosition();
+	Serial1.print("pageRecip1_Z.t10.txt=");
 	Serial1.write(0x22);
 	Serial1.print(round(returnSteps_Recip1_Z));
 	Serial1.write(0x22);
@@ -2087,7 +2086,8 @@ void DoRecip1_Z(int wavDir)
 	Serial1.write(0xff);
 	Serial1.write(0xff);
 	Serial1.write(0xff);
-	*/
+#endif // DEBUG
+
 	// Update Nextion
 	Serial1.print("pageRecip1_Z.bt3.pco=59391");
 	Serial1.write(0xff);
@@ -2399,7 +2399,7 @@ void TestEEPROMConfig()
 	Serial1.write(0xff);
 	delay(2000);
 
-#ifdef TEENSY_35
+#ifndef TWO_AXES_V2
 
 
 	Serial1.print("pageConfig.t19.txt=");
@@ -2420,6 +2420,8 @@ void TestEEPROMConfig()
 	Serial1.write(0xff);
 	Serial1.write(0xff);
 	delay(2000);
+#endif // TWO_AXES_V2
+#ifdef FOUR_AXES
 
 	Serial1.print("pageConfig.t19.txt=");
 	Serial1.write(0x22);
@@ -2439,7 +2441,7 @@ void TestEEPROMConfig()
 	Serial1.write(0xff);
 	Serial1.write(0xff);
 	delay(2000);
-#endif // TEENSY_35
+#endif // FOUR_AXES
 }
 
 /// <summary>
@@ -2541,7 +2543,7 @@ void TestEEPROMSetup()
 	Serial1.write(0xff);
 	delay(2000);
 
-#ifdef TEENSY_35
+#ifndef TWO_AXES_V2
 	Serial1.print("pageSetup.t19.txt=");
 	Serial1.write(0x22);
 	Serial1.print("X Axis-Microsteps:");
@@ -2578,7 +2580,8 @@ void TestEEPROMSetup()
 	Serial1.write(0xff);
 	Serial1.write(0xff);
 	delay(2000);
-
+#endif // TWO_AXES_V2
+#ifdef FOUR_AXES
 	Serial1.print("pageSetup.t19.txt=");
 	Serial1.write(0x22);
 	Serial1.print("B Axis-Microsteps:");
@@ -2616,7 +2619,7 @@ void TestEEPROMSetup()
 	Serial1.write(0xff);
 	Serial1.write(0xff);
 	delay(2000);
-#endif // TEENSY_35
+#endif // FOUR_AXES
 }
 
 /// <summary>
@@ -2631,6 +2634,7 @@ void TestEEPROMSetup()
 /// <returns></returns>
 void SetMicrosteppingMode(int microsteps, int pinMs0, int pinMs1, int pinMs2)
 {
+	// Settings for DRV8825 and MKS-LV8729
 	switch (microsteps)
 	{
 		case 1:

@@ -5,20 +5,22 @@
 //==================================================================
 // Pin assignments
 //==================================================================
-#define TEENSY_35
-//#define TWO_AXES_V2
-//#define MICRO_SD
+//#define FOUR_AXES  // Teensy 3.5
+//#define THREE_AXES // Teensy 3.2
+#define TWO_AXES_V2 // Teensy 3.2
 //#define DEBUG
 
-#ifdef TEENSY_35
+#ifdef FOUR_AXES
 // Spindle
 #define ID_SPINDLE 3
 #define PIN_SPINDLE_DIR 2  //Stepper direction
 #define PIN_SPINDLE_STEP 3  //Stepper step
 #define PIN_SPINDLE_ENABLE 4 //Enable
-#define PIN_SPINDLE_MS0 24
-#define PIN_SPINDLE_MS1 25 
-#define PIN_SPINDLE_MS2 26
+//  User runtime settable microstepping: Uncomment all microstepping #defines. 
+//  Uncomment calls to SetMicrosteppingMode().
+//#define PIN_SPINDLE_MS0 24
+//#define PIN_SPINDLE_MS1 25 
+//#define PIN_SPINDLE_MS2 26
 
 // Axes
 #define PIN_LIMIT_MIN 18 // Limit switch: Moving towards headstock
@@ -29,33 +31,38 @@
 #define PIN_AXIS_Z_DIR 5 // Stepper direction
 #define PIN_AXIS_Z_STEP 6 // Stepper step
 #define PIN_AXIS_Z_ENABLE 14 // Enable 
-#define PIN_AXIS_Z_MS0 27
-#define PIN_AXIS_Z_MS1 28 
-#define PIN_AXIS_Z_MS2 29
+//#define PIN_AXIS_Z_MS0 27
+//#define PIN_AXIS_Z_MS1 28 
+//#define PIN_AXIS_Z_MS2 29
 
 // X axis
 #define ID_AXIS_X 1
 #define PIN_AXIS_X_DIR 20  // Stepper direction
 #define PIN_AXIS_X_STEP 21  // Stepper step
 #define PIN_AXIS_X_ENABLE 22 // Enable 
-#define PIN_AXIS_X_MS0 30
-#define PIN_AXIS_X_MS1 31 
-#define PIN_AXIS_X_MS2 32
+//#define PIN_AXIS_X_MS0 30
+//#define PIN_AXIS_X_MS1 31 
+//#define PIN_AXIS_X_MS2 32
 
 // B axis
 #define ID_AXIS_B 2
 #define PIN_AXIS_B_DIR 23  // Stepper direction
 #define PIN_AXIS_B_STEP 16  // Stepper step
 #define PIN_AXIS_B_ENABLE 17 // Enable 
-#define PIN_AXIS_B_MS0 27
-#define PIN_AXIS_B_MS1 28 
-#define PIN_AXIS_B_MS2 29
+//#define PIN_AXIS_B_MS0 27
+//#define PIN_AXIS_B_MS1 28 
+//#define PIN_AXIS_B_MS2 29
+
 #elif defined(TWO_AXES_V2)
 // Spindle
 #define ID_SPINDLE 3
 #define PIN_SPINDLE_DIR 2 // Stepper direction
 #define PIN_SPINDLE_STEP 3  // Stepper step
 #define PIN_SPINDLE_ENABLE 4 // Enable
+// User runtime settable microstepping requires inner pins on Teensy 3.2
+//#define PIN_SPINDLE_MS0 24
+//#define PIN_SPINDLE_MS1 25 
+//#define PIN_SPINDLE_MS2 26
 
 // Axes
 #define PIN_LIMIT_MIN 16 // Limit switch: Moving towards headstock
@@ -66,15 +73,23 @@
 #define PIN_AXIS_Z_DIR 5  // Stepper direction
 #define PIN_AXIS_Z_STEP 6  // Stepper step
 #define PIN_AXIS_Z_ENABLE 14 // Enable 
+// User runtime settable microstepping requires inner pins on Teensy 3.2
+//#define PIN_AXIS_Z_MS0 27
+//#define PIN_AXIS_Z_MS1 28 
+//#define PIN_AXIS_Z_MS2 29
 
-#else // Three axes board
+#elif defined(THREE_AXES) // Three axes board
 // Spindle
 #define ID_SPINDLE 3
 #define PIN_SPINDLE_DIR 3 // Stepper direction
 #define PIN_SPINDLE_STEP 2  // Stepper step
 #define PIN_SPINDLE_ENABLE 6 // Enable
+// User runtime settable microstepping requires inner pins on Teensy 3.2
+//#define PIN_SPINDLE_MS0 24
+//#define PIN_SPINDLE_MS1 25 
+//#define PIN_SPINDLE_MS2 26
 
-// Axes
+// Limit Switches
 #define PIN_LIMIT_MIN 16 // Limit switch: Moving towards headstock
 #define PIN_LIMIT_MAX 17 // Limit switch: Moving away from headstock
 
@@ -82,11 +97,25 @@
 #define ID_Z_AXIS 0
 #define PIN_AXIS_Z_DIR 4  // Stepper direction
 #define PIN_AXIS_Z_STEP 5  // Stepper step
-#define PIN_AXIS_Z_ENABLE 20 // Enable 
+#define PIN_AXIS_Z_ENABLE 20 //PCB jumper:33>>20 // Enable  
+
+// User runtime settable microstepping requires inner pins on Teensy 3.2
+//#define PIN_AXIS_Z_MS0 27
+//#define PIN_AXIS_Z_MS1 28 
+//#define PIN_AXIS_Z_MS2 29
+
+// X axis
+#define ID_AXIS_X 1
+#define PIN_AXIS_X_DIR 23  //PCB jumper:24>>23 // Stepper direction
+#define PIN_AXIS_X_STEP 22  //PCB jumper:30>>22// Stepper step
+#define PIN_AXIS_X_ENABLE 21 //PCB jumper:29>>21 // Enable 
+// User runtime settable microstepping requires inner pins on Teensy 3.2
+//#define PIN_AXIS_X_MS0 30
+//#define PIN_AXIS_X_MS1 31 
+//#define PIN_AXIS_X_MS2 32
 
 
-
-#endif //TEENSY_35/Two Axes/3 Axes
+#endif //FOUR_AXES/Two Axes/3 Axes
 
 // SPI
 #define PIN_SPI_CS 10
