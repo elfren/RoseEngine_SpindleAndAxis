@@ -224,6 +224,154 @@ double GetFloatFromCharArray(char in[], int decimalFound, int endFound)
 }
 
 /// <summary>
+/// Index spindle with TeensyStep
+/// </summary>
+/// <comment>
+/// </comment>
+/// <param name="directionSpindle">Counterclockwise: -1, Clockwise: 1</param>
+/// <returns></returns>
+void MoveAxis(int axisId, int directionAxis)
+{
+	double stepsToMove = 0;
+	float nextSpeed = 0;
+	long moveTo = 0;
+
+	switch (axisId)
+	{
+		case ID_AXIS_Z:
+		{
+			teensyStep_Axis_Z.setPosition(0);
+			stepsToMove = (configMain.distance_MoveZ / (configMain.distancePerRev_AxisZ) * (configMain.steps360_Axis_Z * configMain.microsteps_Axis_Z));
+
+			// Set speed and acceleration
+			nextSpeed = configMain.speedPercent_MoveZ * configMoveZ.maxSpd_Axis_Z * .01;
+			teensyStep_Axis_Z
+				.setMaxSpeed(nextSpeed)
+				.setAcceleration(configMoveZ.accel_Axis_Z)
+				.setTargetRel(stepsToMove * directionAxis);
+			digitalWrite(PIN_AXIS_Z_ENABLE, LOW);
+			stepControllerI.moveAsync(teensyStep_Axis_Z);
+			break;
+		}
+		case ID_AXIS_X:
+		{
+			teensyStep_Axis_X.setPosition(0);
+			stepsToMove = (configMain.distance_MoveX / (configMain.distancePerRev_AxisX) * (configMain.steps360_Axis_X * configMain.microsteps_Axis_X));
+
+			// Set speed and acceleration
+			nextSpeed = configMain.speedPercent_MoveX * configMoveX.maxSpd_Axis_X * .01;
+			teensyStep_Axis_X
+				.setMaxSpeed(nextSpeed)
+				.setAcceleration(configMoveX.accel_Axis_X)
+				.setTargetRel(stepsToMove * directionAxis);
+			digitalWrite(PIN_AXIS_X_ENABLE, LOW);
+			stepControllerI.moveAsync(teensyStep_Axis_X);
+			break;
+		}
+	}
+
+	
+	
+
+	while (stepControllerI.isRunning())
+	{
+		// Check for Cancel code  
+		if (SerialAvailable() >= 0)
+		{
+			incomingByte = SerialRead(serialId);
+			switch (incomingByte)
+			{
+				case 93: // - ] 
+				case 99: // - c
+				case 109: // - m
+				{
+					stepControllerI.stopAsync();
+					break;
+				}
+			}
+
+		}
+		delay(10);
+	}
+
+	switch (axisId)
+	{
+		case ID_AXIS_Z:
+		{
+			// Update Index flag on Nextion. 
+			Serial1.print("pageMoveZ.bt2.pco=59391");// The first one may be ignored by Nextion
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.print("pageMoveZ.va0.val=0");
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.print("pageMoveZ.bt1.val=0");
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.print("pageMoveZ.bt2.val=0");
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.print("pageMoveZ.bt3.val=0");
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.print("pageMoveZ.t6.txt=");
+			Serial1.write(0x22);
+			Serial1.print(distanceTotal_MoveZ);
+			Serial1.write(0x22);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+
+			endPosition_Axis = teensyStep_Axis_Z.getPosition();
+			endPosition_Spindle = 0;
+			break;
+		}
+		case ID_AXIS_X:
+		{
+			// Update Index flag on Nextion. 
+			Serial1.print("pageMoveX.bt2.pco=59391");// The first one may be ignored by Nextion
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.print("pageMoveX.va0.val=0");
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.print("pageMoveX.bt1.val=0");
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.print("pageMoveX.bt2.val=0");
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.print("pageMoveX.bt3.val=0");
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.print("pageMoveX.t6.txt=");
+			Serial1.write(0x22);
+			Serial1.print(distanceTotal_MoveZ);
+			Serial1.write(0x22);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+
+			endPosition_Axis = teensyStep_Axis_X.getPosition();
+			endPosition_Spindle = 0;
+			break;
+		}
+	}
+
+
+}
+
+/// <summary>
 /// Move AxisZ
 /// </summary>
 /// <comment>
@@ -254,17 +402,19 @@ int MoveAxisZ(int direction)
 			incomingByte = SerialRead(serialId);
 			switch (incomingByte)
 			{
-			case 99: // - c
-			{
-				accelStep_Axis_Z.stop();
-			}
-			case 62: // > - Set Main Axis Speed
-			{
-				configMain.speedPercent_MoveZ = GetSerialInteger();
-				float newSpeed = configMain.speedPercent_MoveZ * configMoveZ.maxSpd_Axis_Z * .01;
-				accelStep_Axis_Z.setMaxSpeed(newSpeed);
-				EEPROM.put(eePromAddress_Setup, configMain);
-			}
+				case 93: // - ] 
+				case 99: // - c
+				case 109: // - m
+				{
+					accelStep_Axis_Z.stop();
+				}
+				case 62: // > - Set Main Axis Speed
+				{
+					configMain.speedPercent_MoveZ = GetSerialInteger();
+					float newSpeed = configMain.speedPercent_MoveZ * configMoveZ.maxSpd_Axis_Z * .01;
+					accelStep_Axis_Z.setMaxSpeed(newSpeed);
+					EEPROM.put(eePromAddress_Setup, configMain);
+				}
 			}
 		}
 
@@ -279,6 +429,9 @@ int MoveAxisZ(int direction)
 	{
 		distanceTotal_MoveZ = distanceTotal_MoveZ - configMain.distance_MoveZ;
 	}
+
+	endPosition_Axis = accelStep_Axis_Z.currentPosition();
+	endPosition_Spindle = 0;
 
 	// Update Index flag on Nextion. 
 	Serial1.print("pageMoveZ.bt2.pco=59391");// The first one may be ignored by Nextion
@@ -343,17 +496,19 @@ int MoveAxisX(int direction)
 			incomingByte = SerialRead(serialId);
 			switch (incomingByte)
 			{
-			case 99: // - c
-			{
-				accelStep_Axis_X.stop();
-			}
-			case 179: // ³ - MvX Speed 
-			{
-				configMain.speedPercent_MoveX = GetSerialInteger();
-				float newSpeed = configMain.speedPercent_MoveX * configMoveX.maxSpd_Axis_X * .01;
-				accelStep_Axis_X.setMaxSpeed(newSpeed);
-				EEPROM.put(eePromAddress_Setup, configMain);
-			}
+				case 93: // - ] 
+				case 99: // - c
+				case 109: // - m
+				{
+					accelStep_Axis_X.stop();
+				}
+				case 179: // ³ - MvX Speed 
+				{
+					configMain.speedPercent_MoveX = GetSerialInteger();
+					float newSpeed = configMain.speedPercent_MoveX * configMoveX.maxSpd_Axis_X * .01;
+					accelStep_Axis_X.setMaxSpeed(newSpeed);
+					EEPROM.put(eePromAddress_Setup, configMain);
+				}
 			}
 		}
 
@@ -368,6 +523,9 @@ int MoveAxisX(int direction)
 	{
 		distanceTotal_MoveX = distanceTotal_MoveX - configMain.distance_MoveX;
 	}
+
+	endPosition_Axis = accelStep_Axis_X.currentPosition();
+	endPosition_Spindle = 0;
 
 	// Update Index flag on Nextion. 
 	Serial1.print("pageMoveX.bt2.pco=59391");// The first one may be ignored by Nextion
@@ -1178,7 +1336,7 @@ int RunTwoSteppers_SpB(
 void IndexSpindle(int indexId, int directionSpindle)
 {
 	double stepsToMove = configMain.size_Index1;
-	//StepControl stepController;
+	teensyStep_Spindle.setPosition(0);
 
 	switch (indexId)
 	{
@@ -1205,26 +1363,52 @@ void IndexSpindle(int indexId, int directionSpindle)
 	}
 
 	digitalWrite(PIN_SPINDLE_ENABLE, LOW);
-	stepController.moveAsync(teensyStep_Spindle);
+	stepControllerI.moveAsync(teensyStep_Spindle);
 
-	if (!stepController.isRunning())
-	{ 
+	while (stepControllerI.isRunning())
+	{
+		// Check for Cancel code  
+		if (SerialAvailable() >= 0)
+		{
+			incomingByte = SerialRead(serialId);
+			switch (incomingByte)
+			{
+				case 93: // - ] 
+				case 99: // - c
+				case 109: // - m
+				{
+					stepControllerI.stopAsync();
+					break;
+				}
+			}
+
+		}
+		delay(10);
+	}
+
+	//if (!stepControllerI.isRunning())
+	//{ 
 		if (indexId == 2)
 		{
 			// Update Index flag on Nextion. 
-			Serial1.print("pageIndexF2.b6.pco=59391");
+	// Update Nextion
+			Serial1.print("pageIndex2.bt3.pco=0");// The first one may be ignored by Nextion, so resend.
 			Serial1.write(0xff);
 			Serial1.write(0xff);
 			Serial1.write(0xff);
-			Serial1.print("pageIndexF2.va0.val=0");
+			Serial1.print("pageIndex2.va0.val=0");
 			Serial1.write(0xff);
 			Serial1.write(0xff);
 			Serial1.write(0xff);
-			Serial1.print("pageIndexF2.b6.pco=59391");// The first one may be ignored by Nextion, so resend.
+			Serial1.print("pageIndex2.bt3.val=0");
 			Serial1.write(0xff);
 			Serial1.write(0xff);
 			Serial1.write(0xff);
-			Serial1.print("pageIndexF2.b7.pco=59391");
+			Serial1.print("pageIndex2.bt2.val=0");
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.print("pageIndex2.bt1.val=0");
 			Serial1.write(0xff);
 			Serial1.write(0xff);
 			Serial1.write(0xff);
@@ -1233,7 +1417,7 @@ void IndexSpindle(int indexId, int directionSpindle)
 		{ 
 		
 			// Update Index flag on Nextion. 
-			Serial1.print("pageIndex1.b6.pco=59391");
+			Serial1.print("pageIndex1.bt3.pco=0");// The first one may be ignored by Nextion, so resend.
 			Serial1.write(0xff);
 			Serial1.write(0xff);
 			Serial1.write(0xff);
@@ -1241,11 +1425,15 @@ void IndexSpindle(int indexId, int directionSpindle)
 			Serial1.write(0xff);
 			Serial1.write(0xff);
 			Serial1.write(0xff);
-			Serial1.print("pageIndex1.b6.pco=59391");
+			Serial1.print("pageIndex1.bt3.val=0");
 			Serial1.write(0xff);
 			Serial1.write(0xff);
 			Serial1.write(0xff);
-			Serial1.print("pageIndex1.b7.pco=59391");
+			Serial1.print("pageIndex1.bt2.val=0");
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.print("pageIndex1.bt1.val=0");
 			Serial1.write(0xff);
 			Serial1.write(0xff);
 			Serial1.write(0xff);
@@ -1266,7 +1454,14 @@ void IndexSpindle(int indexId, int directionSpindle)
 			Serial1.write(0xff);
 			Serial1.write(0xff);
 		}
-	}
+
+		
+	//}
+
+
+
+	endPosition_Axis = 0;
+	endPosition_Spindle = teensyStep_Spindle.getPosition();
 }
 
 /// <summary>
@@ -1279,17 +1474,19 @@ void IndexSpindle(int indexId, int directionSpindle)
 /// <returns></returns>
 void Sync_SpindleZ(int directionSpindle, int directionAxis)
 {
-	//StepControl stepController;
+	StepControl stepController;
 	// Set speed and acceleration
 	teensyStep_Spindle
 		.setMaxSpeed(configSyncZ.maxSpd_Spindle * configMain.speedPercentSpindle_SyncZ * .01)
 		.setAcceleration(configSyncZ.accel_Spindle)
 		.setTargetRel(configMain.revolutionsSyncZ_Spindle * configMain.gearRatio_Spindle * configMain.microsteps_Spindle * configMain.steps360_Spindle * directionSpindle);
+	teensyStep_Spindle.setPosition(0);
 
 	teensyStep_Axis_Z
 		.setMaxSpeed(configSyncZ.maxSpd_Axis_Z * configMain.speedPercentAxis_SyncZ * .01)
 		.setAcceleration(configSyncZ.accel_Axis_Z)
 		.setTargetRel((configMain.distanceSyncZ / configMain.distancePerRev_AxisZ) * configMain.microsteps_Axis_Z * configMain.steps360_Axis_Z * directionAxis);
+	teensyStep_Axis_Z.setPosition(0);
 
 	digitalWrite(PIN_SPINDLE_ENABLE, LOW); // Enable (Uses TeensyStep library)
 	digitalWrite(PIN_AXIS_Z_ENABLE, LOW);  // Enable (Uses TeensyStep library)
@@ -1304,7 +1501,9 @@ void Sync_SpindleZ(int directionSpindle, int directionAxis)
 			incomingByte = SerialRead(serialId);
 			switch (incomingByte)
 			{
-				case 93: // ] - Stop Sync
+				case 93: // - ] 
+				case 99: // - c
+				case 109: // - m
 				{
 					stepController.stopAsync();
 					break;
@@ -1314,6 +1513,9 @@ void Sync_SpindleZ(int directionSpindle, int directionAxis)
 
 		delay(10);
 	}
+
+	endPosition_Axis = teensyStep_Axis_Z.getPosition();
+	endPosition_Spindle = teensyStep_Spindle.getPosition();
 
 	// Update Nextion
 	Serial1.print("pageSync.bt6.pco=0");
@@ -1349,17 +1551,19 @@ void Sync_SpindleZ(int directionSpindle, int directionAxis)
 /// <returns></returns>
 void Sync_SpindleX(int directionSpindle, int directionAxis)
 {
-	//StepControl stepController;
+	StepControl stepController;
 	// Set speed and acceleration
 	teensyStep_Spindle
 		.setMaxSpeed(configSyncX.maxSpd_Spindle * configMain.speedPercentSpindle_SyncX * .01)
 		.setAcceleration(configSyncX.accel_Spindle)
 		.setTargetRel(configMain.revolutionsSyncX_Spindle * configMain.gearRatio_Spindle * configMain.microsteps_Spindle * configMain.steps360_Spindle * directionSpindle);
+	teensyStep_Spindle.setPosition(0);
 
 	teensyStep_Axis_X
 		.setMaxSpeed(configSyncX.maxSpd_Axis_X * configMain.speedPercentAxis_SyncX * .01)
 		.setAcceleration(configSyncX.accel_Axis_X)
 		.setTargetRel((configMain.distanceSyncX / configMain.distancePerRev_AxisX) * configMain.microsteps_Axis_X * configMain.steps360_Axis_X * directionAxis);
+	teensyStep_Axis_X.setPosition(0);
 
 	digitalWrite(PIN_SPINDLE_ENABLE, LOW); // Enable (Uses TeensyStep library)
 	digitalWrite(PIN_AXIS_X_ENABLE, LOW);  // Enable (Uses TeensyStep library)
@@ -1374,16 +1578,21 @@ void Sync_SpindleX(int directionSpindle, int directionAxis)
 			incomingByte = SerialRead(serialId);
 			switch (incomingByte)
 			{
-			case 93: // ] - Stop Sync
-			{
-				stepController.stopAsync();
-				break;
-			}
+				case 93: // - ] 
+				case 99: // - c
+				case 109: // - m
+				{
+					stepController.stopAsync();
+					break;
+				}
 			}
 		}
 
 		delay(10);
 	}
+
+	endPosition_Axis = teensyStep_Axis_X.getPosition();
+	endPosition_Spindle = teensyStep_Spindle.getPosition();
 
 	// Update Nextion
 	Serial1.print("pageSyncX.bt6.pco=0");
@@ -1410,61 +1619,6 @@ void Sync_SpindleX(int directionSpindle, int directionAxis)
 
 //#endif // TWO_AXES_V2
 
-/// <summary>
-/// Return Spindle to start of Rec1_Spindle
-/// </summary>
-/// <comment>
-/// </comment>
-/// <returns></returns>
-void Return_Rec1_Spindle()
-{
-	//StepControl stepController;
-	double returnTarget = returnSteps_Rec1_S * (-1);
-
-	// Use Index1 settings
-	teensyStep_Spindle
-		.setMaxSpeed(configIndex1.maxSpd_Spindle * configMain.speedPercent_Index1 * .01)
-		.setAcceleration(configIndex1.accel_Spindle)
-		.setTargetRel(returnTarget);
-
-	stepController.moveAsync(teensyStep_Spindle);
-
-	while (stepController.isRunning())
-	{
-		// Check for Cancel code  
-		if (SerialAvailable() >= 0)
-		{
-			incomingByte = SerialRead(serialId);
-			switch (incomingByte)
-			{
-			case 93: // ] - Stop Sync
-			{
-				stepController.stop();
-				break;
-			}
-			}
-		}
-
-		delay(10);
-	}
-	// Update Nextion
-	Serial1.print("pageRec1_Sp.bt0.pco=0");
-	Serial1.write(0xff);
-	Serial1.write(0xff);
-	Serial1.write(0xff);
-	Serial1.print("pageRec1_Sp.va0.val=0");
-	Serial1.write(0xff);
-	Serial1.write(0xff);
-	Serial1.write(0xff);
-	Serial1.print("pageRec1_Sp.bt0.val=0");// The first one may be ignored by Nextion, so resend.
-	Serial1.write(0xff);
-	Serial1.write(0xff);
-	Serial1.write(0xff);
-	Serial1.print("pageRec1_Sp.bt1.val=0");
-	Serial1.write(0xff);
-	Serial1.write(0xff);
-	Serial1.write(0xff);
-}
 
 /// <summary>
 /// DoRec1_Spindle
@@ -1475,12 +1629,13 @@ void Return_Rec1_Spindle()
 /// <returns></returns>
 void DoRec1_Spindle(int wavDir)
 {
-	//StepControl stepController;
+	StepControl stepController;
 
 	// Set speed and acceleration
 	teensyStep_Spindle
 		.setMaxSpeed(configRec1_S.maxSpd_Spindle * configMain.speedPercentSpindle_Rec1S * .01)
 		.setAcceleration(configRec1_S.accel_Spindle);
+	teensyStep_Spindle.setPosition(0);
 
 	float spindleDegrees = configMain.degrees_Rec1_S / (configMain.waves_Rec1_S * 2);
 	int spindleSteps = round((configMain.microsteps_Spindle * configMain.steps360_Spindle * configMain.gearRatio_Spindle) * (spindleDegrees / 360) * wavDir);
@@ -1489,7 +1644,7 @@ void DoRec1_Spindle(int wavDir)
 	teensyStep_Axis_Z
 		.setMaxSpeed(configRec1_S.maxSpd_Axis_Z * configMain.speedPercentAxis_Rec1S * .01)
 		.setAcceleration(configRec1_S.accel_Axis_Z);
-
+	teensyStep_Axis_Z.setPosition(0);
 	float axisDistance = configMain.amplitude_Rec1_S;
 	int axisSteps = round((axisDistance / configMain.distancePerRev_AxisZ) * configMain.microsteps_Axis_Z * configMain.steps360_Axis_Z * wavDir);
 
@@ -1512,7 +1667,9 @@ void DoRec1_Spindle(int wavDir)
 				incomingByte = SerialRead(serialId);
 				switch (incomingByte)
 				{
-					case 93: // ] - Stop Sync
+					case 93: // - ] 
+					case 99: // - c
+					case 109: // - m
 					{
 						stepController.stop();
 						return;
@@ -1529,6 +1686,8 @@ void DoRec1_Spindle(int wavDir)
 		}
 	}
 
+	endPosition_Axis = teensyStep_Axis_Z.getPosition();
+	endPosition_Spindle = teensyStep_Spindle.getPosition();
 
 	// Update Nextion
 	Serial1.print("pageRec1_Sp.bt3.pco=0");// The first one may be ignored by Nextion, so resend.
@@ -1554,63 +1713,6 @@ void DoRec1_Spindle(int wavDir)
 }
 
 /// <summary>
-/// Return Spindle to start of Rec1_Z
-/// </summary>
-/// <comment>
-/// </comment>
-/// <returns></returns>
-void Return_Rec1_Z()
-{
-	StepControl controller_Axis;
-	double returnTarget = returnSteps_Rec1_Z * (-1);
-
-	// Use MoveZ settings
-	teensyStep_Axis_Z
-		.setMaxSpeed(configMoveZ.maxSpd_Axis_Z * configMain.speedPercent_MoveZ * .01)
-		.setAcceleration(configMoveZ.accel_Axis_Z)
-		.setTargetRel(returnTarget);
-
-
-	controller_Axis.moveAsync(teensyStep_Axis_Z);
-
-	while (controller_Axis.isRunning())
-	{
-		// Check for Cancel code  
-		if (SerialAvailable() >= 0)
-		{
-			incomingByte = SerialRead(serialId);
-			switch (incomingByte)
-			{
-			case 93: // ] - Stop Sync
-			{
-				controller_Axis.stop();
-				break;
-			}
-			}
-		}
-
-		delay(10);
-	}
-	// Update Nextion
-	Serial1.print("pageRec1_Z.bt0.pco=0");
-	Serial1.write(0xff);
-	Serial1.write(0xff);
-	Serial1.write(0xff);
-	Serial1.print("pageRec1_Z.va0.val=0");
-	Serial1.write(0xff);
-	Serial1.write(0xff);
-	Serial1.write(0xff);
-	Serial1.print("pageRec1_Z.bt0.val=0");// The first one may be ignored by Nextion, so resend.
-	Serial1.write(0xff);
-	Serial1.write(0xff);
-	Serial1.write(0xff);
-	Serial1.print("pageRec1_Z.bt1.val=0");
-	Serial1.write(0xff);
-	Serial1.write(0xff);
-	Serial1.write(0xff);
-}
-
-/// <summary>
 /// DoRec1_Z
 /// </summary>
 /// <comment>
@@ -1619,12 +1721,13 @@ void Return_Rec1_Z()
 /// <returns></returns>
 void DoRec1_Z(int wavDir)
 {
-	//StepControl stepController;
+	StepControl stepController;
 
 	// Set speed and acceleration
 	teensyStep_Spindle
 		.setMaxSpeed(configRec1_Z.maxSpd_Spindle * configMain.speedPercentSpindle_Rec1Z * .01)
 		.setAcceleration(configRec1_Z.accel_Spindle);
+	teensyStep_Spindle.setPosition(0);
 
 	int spindleSteps = round((configMain.microsteps_Spindle * configMain.steps360_Spindle * configMain.gearRatio_Spindle) * (configMain.amplitude_Rec1_Z / 360) * wavDir);
 	long axisSteps = round((((configMain.distance_Rec1_Z / (configMain.distancePerRev_AxisZ)) * (configMain.steps360_Axis_Z * configMain.microsteps_Axis_Z))/(configMain.waves_Rec1_Z * 2)) * wavDir);
@@ -1633,6 +1736,7 @@ void DoRec1_Z(int wavDir)
 	teensyStep_Axis_Z
 		.setMaxSpeed(configRec1_Z.maxSpd_Axis_Z * configMain.speedPercentAxis_Rec1Z * .01)
 		.setAcceleration(configRec1_Z.accel_Axis_Z);
+	teensyStep_Axis_Z.setPosition(0);
 
 	digitalWrite(PIN_SPINDLE_ENABLE, LOW); // Enable (Uses TeensyStep library)
 	digitalWrite(PIN_AXIS_Z_ENABLE, LOW);  // Enable (Uses TeensyStep library)
@@ -1655,7 +1759,9 @@ void DoRec1_Z(int wavDir)
 				incomingByte = SerialRead(serialId);
 				switch (incomingByte)
 				{
-					case 93: // ] - Stop Sync
+					case 93: // - ] 
+					case 99: // - c
+					case 109: // - m
 					{
 						stepController.stop();
 						return;
@@ -1672,31 +1778,8 @@ void DoRec1_Z(int wavDir)
 		}
 	}
 
-#ifdef DEBUG
-	int32_t endPosition_Z = motor_Axis_Z.getPosition();
-	//int32_t endPosition_Sp = teensyStep_Spindle.getPosition();
-	Serial1.print("pageRec1_Z.t10.txt=");
-	Serial1.write(0x22);
-	Serial1.print(round(returnSteps_Rec1_Z));
-	Serial1.write(0x22);
-	Serial1.write(0xff);
-	Serial1.write(0xff);
-	Serial1.write(0xff);
-	Serial1.print("pageRec1_Z.t8.txt=");
-	Serial1.write(0x22);
-	Serial1.print(endPosition_Z);
-	Serial1.write(0x22);
-	Serial1.write(0xff);
-	Serial1.write(0xff);
-	Serial1.write(0xff);
-	Serial1.print("pageRec1_Z.t9.txt=");
-	Serial1.write(0x22);
-	Serial1.print(returnSteps_Rec1_Z);
-	Serial1.write(0x22);
-	Serial1.write(0xff);
-	Serial1.write(0xff);
-	Serial1.write(0xff);
-#endif // DEBUG
+	endPosition_Axis = teensyStep_Axis_Z.getPosition();
+	endPosition_Spindle = teensyStep_Spindle.getPosition();
 
 	// Update Nextion
 	Serial1.print("pageRec1_Z.bt3.pco=59391");
@@ -1929,139 +2012,19 @@ double GetDataFromSD(int lineNumber)
 	return atof(newSizeChar);
 }
 
+
+
 // ================================================================================= 
-// RosePattern Methods
+// RosePatternSpindle Methods
 // ================================================================================= 
-float slideFunc_Axis_Z(float spindleAngle)
+
+
+
+float slideFunc_Spindle_Z(float spindleAngleZ)
 {
-	float phi = fmodf(spindleAngle * kRatio, TWO_PI);
-	float retVal = round(stepDistance_RoseAxis * cosf(phi));
-	
+	float phi = fmodf(spindleAngleZ * kRatio, TWO_PI);
+	float retVal = spindleStepsAmplitude * cosf(phi);
 	return retVal;
-}
-
-//------------------------------------------------------------------------------------ 
-// tick() 
-// 
-// This function is called periodically with period recalcPeriod.  
-// It calculates  
-//  1) a new target value for the slide depending on the spindle angle 
-//  2) the new speed for the spindle so that it will reach the target until it is called again 
-void tick()
-{
-	spindleStepsPerRev = configMain.gearRatio_Spindle * configMain.microsteps_Spindle * configMain.steps360_Spindle;
-	float spindleAngle = teensyStep_Spindle.getPosition() * (TWO_PI / spindleStepsPerRev); //convert steps to angle
-	float slidePosition = teensyStep_Axis_Z.getPosition();
-	float slideTarget = slideFunc_Axis_Z(spindleAngle);
-
-	float newSpeed = (slideTarget - slidePosition) / dt; // speed to reach target in given delta t (neglecting acceleration) 
-	float speedFac = newSpeed / (configRose.maxSpd_Axis_Z * configRose.speedPercent_Axis * .01);              // transform in relative factor (-1.0 .. 1.0) 
-
-	//digitalWriteFast(LED_BUILTIN, !digitalReadFast(LED_BUILTIN));
-	controllerRose_Axis.overrideSpeed(speedFac);             // set new speed 
-}
-
-void DoRosePattern_Z()
-{
-	iCounterX = 5;
-	bool runPattern = true;
-	IntervalTimer tickTimer;
-	kRatio = (float)(configRose.n / configRose.d);
-	stepDistance_RoseAxis = (configRose.amplitude_Axis_Z / (configMain.distancePerRev_AxisZ)) * (configMain.steps360_Axis_Z * configMain.microsteps_Axis_Z);
-
-	spindleStepsPerRev = configMain.gearRatio_Spindle * configMain.microsteps_Spindle * configMain.steps360_Spindle;
-	newMaxSpd_RoseSpindle = configRose.maxSpd_Spindle * configRose.speedPercent_Spindle * .01;
-
-	teensyStep_Spindle
-		.setMaxSpeed(newMaxSpd_RoseSpindle)
-		.setAcceleration(configRose.accel_Spindle)
-		.setPosition(0);
-
-	newMaxSpd_RoseAxis = configRose.maxSpd_Axis_Z * configRose.speedPercent_Axis * .01;
-
-	teensyStep_Axis_Z
-		.setMaxSpeed(newMaxSpd_RoseAxis)
-		.setAcceleration(configRose.accel_Axis_Z)
-		.setPosition(0);
-		//.setPosition(slideFunc(0)); // set start position of counter 
-
-	// Enable steppers
-	accelStep_Spindle.enableOutputs();
-	accelStep_Axis_Z.enableOutputs();
-
-	controllerRose_Axis.rotateAsync(teensyStep_Axis_Z);
-	controllerRose_Spindle.rotateAsync(teensyStep_Spindle); // let the spindle run with constant speed 
-
-	controllerRose_Axis.overrideSpeed(0); // start with stopped slide 
-	tick();
-
-	// use a timer to periodically calculate new targets for the slide 
-	tickTimer.priority(255);// 255); // lowest priority, potentially long caclulations need to be interruptable by TeensyStep 
-	tickTimer.begin(tick, recalcPeriod);
-	//int iCounter = 0;
-	while (runPattern)
-	{
-		
-		digitalWriteFast(LED_BUILTIN, !digitalReadFast(LED_BUILTIN));
-
-		// print current values of spindle angle [rad] and slide position [steps] 
-		float phi = teensyStep_Spindle.getPosition() * (TWO_PI / spindleStepsPerRev);
-		int32_t r = teensyStep_Axis_Z.getPosition();
-
-		//Serial.printf("%f\t%d\n", phi, r);
-		Serial1.print("pageRose.t4.txt=");
-		Serial1.write(0x22);
-		Serial1.print(phi);
-		Serial1.write(0x22);
-		Serial1.write(0xff);
-		Serial1.write(0xff);
-		Serial1.write(0xff);
-		delay(5);
-		Serial1.print("pageRose.t4.txt=");
-		Serial1.write(0x22);
-		Serial1.print(phi);
-		Serial1.write(0x22);
-		Serial1.write(0xff);
-		Serial1.write(0xff);
-		Serial1.write(0xff);
-		delay(5);
-		Serial1.print("pageRose.t6.txt=");
-		Serial1.write(0x22);
-		Serial1.print(r);
-		Serial1.write(0x22);
-		Serial1.write(0xff);
-		Serial1.write(0xff);
-		Serial1.write(0xff);
-		delay(5);
-
-		// Check for Cancel code  
-		if (SerialAvailable() >= 0)
-		{
-			incomingByte = SerialRead(serialId);
-			switch (incomingByte)
-			{
-				case 109:
-				{
-					runPattern = false;
-					controllerRose_Axis.stopAsync();
-					controllerRose_Spindle.stopAsync();
-					break;
-				}
-			}
-		}
-	}
-}
-
-// ================================================================================= 
-// RosePatternX Methods
-// ================================================================================= 
-
-float slideFuncX(float spindleAngleX)
-{
-	float phi = fmodf(spindleAngleX * kX, TWO_PI);
-
-
-	return slideAmplitudeX * cosf(phi);
 }
 
 //------------------------------------------------------------------------------------
@@ -2071,82 +2034,660 @@ float slideFuncX(float spindleAngleX)
 // It calculates 
 //  1) a new target value for the slide depending on the spindle angle
 //  2) the new speed for the spindle so that it will reach the target until it is called again
+void tickSpindleZ()
+{
+	float spindleAngleZ = teensyStep_Axis_Z.getPosition();// *(TWO_PI / spindleStepsPerRev); //convert steps to angle
+	float slidePositionZ = teensyStep_Spindle.getPosition();
+	float slideTargetZ = slideFunc_Spindle_Z(spindleAngleZ);
 
+	float newSpeedZ = (slideTargetZ - slidePositionZ) / dtRose; // speed to reach target in given delta t (neglecting acceleration)
+	float speedFacZ = newSpeedZ / newMaxSpd_RoseSpindle;              // transform in relative factor (-1.0 .. 1.0)
+
+	controllerRose_Axis.overrideSpeed(speedFacZ);             // set new speed
+}
+
+void DoRosePattern_SpindleZ()
+{
+	IntervalTimer tickTimerZ;
+	RotateControl controllerRose;
+	bool runPattern = true;
+
+	kRatio = (float)configRose.n / configRose.d;
+	spindleStepsPerRev = configMain.gearRatio_Spindle * configMain.microsteps_Spindle * configMain.steps360_Spindle;
+
+	slideStepsAmplitude = ((configRose.amplitude_Axis_Z / (configMain.distancePerRev_AxisZ)) * (configMain.steps360_Axis_Z * configMain.microsteps_Axis_Z));
+
+	spindleStepsAmplitude = (configRose.amplitude_Spindle / 360) * spindleStepsPerRev;
+
+	newMaxSpd_RoseSpindle = configRose.maxSpd_Spindle * configRose.speedPercent_Spindle * .01;
+	teensyStep_Spindle
+		.setMaxSpeed(newMaxSpd_RoseSpindle)
+		.setAcceleration(configRose.accel_Spindle)
+		.setPosition(0);
+
+	newMaxSpd_RoseAxis = configRose.maxSpd_Axis_Z * configRose.speedPercent_Axis * .01;
+	teensyStep_Axis_Z
+		.setMaxSpeed(newMaxSpd_RoseAxis)
+		.setAcceleration(configRose.accel_Axis_Z)
+		.setPosition(0);
+		//.setPosition(slideFunc_Axis_Z(0)); // set start position of counter
+
+		// Enable steppers
+	digitalWrite(PIN_SPINDLE_ENABLE, LOW);
+	digitalWrite(PIN_AXIS_Z_ENABLE, LOW);
+
+	controllerRose_Axis.rotateAsync(teensyStep_Axis_Z);
+	//controllerRose_Axis.overrideSpeed(0); // start with stopped slide
+	controllerRose.rotateAsync(teensyStep_Spindle); // let the spindle run with constant speed
+
+	tickZ();
+
+	// use a timer to periodically calculate new targets for the slide
+	tickTimerZ.priority(128); // lowest priority, potentially long caclulations need to be interruptable by TeensyStep
+	tickTimerZ.begin(tickZ, recalcPeriod);
+
+	while (runPattern)
+	{
+		digitalWriteFast(LED_BUILTIN, !digitalReadFast(LED_BUILTIN));
+
+		endPosition_Axis = teensyStep_Axis_Z.getPosition();
+		endPosition_Spindle = teensyStep_Spindle.getPosition();
+
+		// print current values of spindle angle [rad] and slide position [steps]
+		float phiZ = endPosition_Spindle * (TWO_PI / spindleStepsPerRev);
+		//int32_t rZ = teensyStep_Axis_Z.getPosition();
+
+		Serial.printf("%f\t%d\n", phiZ, endPosition_Axis);
+
+		Serial1.print("pageRose.t12.txt=");
+		Serial1.write(0x22);
+		Serial1.print(endPosition_Spindle);
+		Serial1.write(0x22);
+		Serial1.write(0xff);
+		Serial1.write(0xff);
+		Serial1.write(0xff);
+		delay(50);
+		Serial1.print("pageRose.t12.txt=");
+		Serial1.write(0x22);
+		Serial1.print(endPosition_Spindle);
+		Serial1.write(0x22);
+		Serial1.write(0xff);
+		Serial1.write(0xff);
+		Serial1.write(0xff);
+		delay(50);
+		Serial1.print("pageRose.t13.txt=");
+		Serial1.write(0x22);
+		Serial1.print(endPosition_Axis);
+		Serial1.write(0x22);
+		Serial1.write(0xff);
+		Serial1.write(0xff);
+		Serial1.write(0xff);
+		delay(50);
+
+		//delay(5);
+		// Check for Cancel code  
+		if (SerialAvailable() >= 0)
+		{
+			incomingByte = SerialRead(serialId);
+			switch (incomingByte)
+			{
+			case 109:
+			{
+				runPattern = false;
+				controllerRose.stopAsync();
+				controllerRose_Axis.stopAsync();
+				break;
+			}
+			}
+		}
+	}
+
+	endPosition_Spindle = teensyStep_Spindle.getPosition();
+}
+
+// ================================================================================= 
+// RosePatternZ Methods
+// ================================================================================= 
+
+/// <summary>
+/// Return Spindle and/or axes to start position
+/// </summary>
+/// <comment>
+/// </comment>
+/// <returns></returns>
+void ReturnToStartPosition(int selection)
+{
+	int32_t target_Spindle = endPosition_Spindle % spindleStepsPerRev * (-1);
+	StepControl stepController;
+	
+	teensyStep_Spindle
+		.setMaxSpeed(configMain.maxSpd_Return_Spindle)
+		.setAcceleration(configMain.accel_Return_Spindle)
+		.setTargetRel(target_Spindle);
+	teensyStep_Axis_Z
+		.setMaxSpeed(configMain.maxSpd_Return_Axis)
+		.setAcceleration(configMain.accel_Return_Axis)
+		.setTargetAbs(0);
+	teensyStep_Axis_X
+		.setMaxSpeed(configMain.maxSpd_Return_Axis)
+		.setAcceleration(configMain.accel_Return_Axis)
+		.setTargetAbs(0);
+
+	stepControllerI.moveAsync(teensyStep_Spindle);
+	switch (selection)
+	{
+		case 0:
+		case 2:
+		{
+			stepController.moveAsync(teensyStep_Axis_Z);
+			break;
+		}
+		case 1:
+		case 3:
+		{
+			stepController.moveAsync(teensyStep_Axis_X);
+			break;
+		}
+	}
+
+	while ((stepController.isRunning()) || (stepControllerI.isRunning()))
+	{
+		// Check for Cancel code  
+		if (SerialAvailable() >= 0)
+		{
+			incomingByte = SerialRead(serialId);
+			switch (incomingByte)
+			{
+				case 93: // - ] 
+				case 99: // - c
+				case 109: // - m
+				{
+					stepController.stop();
+					stepControllerI.stop();
+					break;
+				}
+			}
+		}
+
+		delay(10);
+	}
+
+	endPosition_Spindle = teensyStep_Spindle.getPosition();
+	switch (selection)
+	{
+		case 0:
+		case 2:
+		{
+			endPosition_Axis = teensyStep_Axis_Z.getPosition();
+			break;
+		}
+		case 1:
+		case 3:
+		{
+			endPosition_Axis = teensyStep_Axis_X.getPosition();
+			break;
+		}
+	}
+
+	switch (pageCallerId)
+	{
+		case PAGE_SYNCZ:
+		{
+			Serial1.print("pageSync.bt1.val=0");
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.print("pageSync.bt1.val=0");
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.print("pageSync.va0.val=0");
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.print("pageSync.bt0.val=0");
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			break;
+		}
+		case PAGE_SYNCX:
+		{
+			Serial1.print("pageSyncX.bt1.val=0");
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.print("pageSyncX.bt1.val=0");
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.print("pageSyncX.va0.val=0");
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.print("pageSyncX.bt0.val=0");
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			break;
+		}
+		case PAGE_REC1_Z:
+		{
+			Serial1.print("pageRec1_Z.bt1.val=0");
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.print("pageRec1_Z.bt1.val=0");
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.print("pageRec1_Z.va0.val=0");
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.print("pageRec1_Z.bt0.val=0");
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			break;
+		}
+		case PAGE_REC1_S:
+		{
+			Serial1.print("pageRec1_Sp.bt1.val=0");
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.print("pageRec1_Sp.bt1.val=0");
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.print("pageRec1_Sp.va0.val=0");
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.print("pageRec1_Sp.bt0.val=0");
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			break;
+		}
+		case PAGE_INDEX1:
+		{
+			Serial1.print("pageIndex1.bt1.val=0");
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.print("pageIndex1.bt1.val=0");
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.print("pageIndex1.va0.val=0");
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.print("pageIndex1.bt0.val=0");
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			break;
+		}
+		case PAGE_INDEX2:
+		{
+			Serial1.print("pageIndex2.bt1.val=0");
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.print("pageIndex2.bt1.val=0");
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.print("pageIndex2.va0.val=0");
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.print("pageIndex2.bt0.val=0");
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			break;
+		}
+		case PAGE_MOVEZ:
+		{
+			Serial1.print("pageMoveZ.bt1.val=0");
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.print("pageMoveZ.bt1.val=0");
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.print("pageMoveZ.va0.val=0");
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.print("pageMoveZ.bt0.val=0");
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			break;
+		}
+		case PAGE_MOVEX:
+		{
+			Serial1.print("pageMoveX.bt1.val=0");
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.print("pageMoveX.bt1.val=0");
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.print("pageMoveX.va0.val=0");
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.print("pageMoveX.bt0.val=0");
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			break;
+		}
+		case PAGE_ROSE:
+		{
+			Serial1.print("pageRose.bt1.val=0");
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			delay(50);
+			Serial1.print("pageRose.bt1.val=0");
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			delay(50);
+			Serial1.print("pageRose.va0.val=0");
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			delay(50);
+			//Serial1.print("pageRose.bt0.val=0");
+			//Serial1.write(0xff);
+			//Serial1.write(0xff);
+			//Serial1.write(0xff);
+			//delay(50);
+			//Serial1.print("pageRose.t12.txt=");
+			//Serial1.write(0x22);
+			//Serial1.print(endPosition_Spindle);
+			//Serial1.write(0x22);
+			//Serial1.write(0xff);
+			//Serial1.write(0xff);
+			//Serial1.write(0xff);
+			//delay(50);
+			Serial1.print("pageRose.t12.txt=");
+			Serial1.write(0x22);
+			Serial1.print(endPosition_Spindle);
+			Serial1.write(0x22);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			delay(50);
+			Serial1.print("pageRose.t13.txt=");
+			Serial1.write(0x22);
+			Serial1.print(endPosition_Axis);
+			Serial1.write(0x22);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			Serial1.write(0xff);
+			delay(50);
+			break;
+		}
+
+		}
+
+}
+
+
+float slideFunc_Axis_Z(float spindleAngleZ)
+{
+	float phi = fmodf(spindleAngleZ * kRatio, TWO_PI);
+	float retVal = slideStepsAmplitude * cosf(phi);
+	return retVal;
+}
+
+//------------------------------------------------------------------------------------
+// tick()
+//
+// This function is called periodically with period recalcPeriod. 
+// It calculates 
+//  1) a new target value for the slide depending on the spindle angle
+//  2) the new speed for the spindle so that it will reach the target until it is called again
+void tickZ()
+{
+	float spindleAngleZ = teensyStep_Spindle.getPosition() * (TWO_PI / spindleStepsPerRev); //convert steps to angle
+	float slidePositionZ = teensyStep_Axis_Z.getPosition();
+
+	float phi = fmodf(spindleAngleZ * kRatio, TWO_PI);
+	float slideTargetZ = slideStepsAmplitude * cosf(phi);
+
+
+	//float slideTargetZ = slideFunc_Axis_Z(spindleAngleZ);
+
+
+
+	float newSpeedZ = (slideTargetZ - slidePositionZ) / dtRose; // speed to reach target in given delta t (neglecting acceleration)
+	float speedFacZ = newSpeedZ / newMaxSpd_RoseAxis;              // transform in relative factor (-1.0 .. 1.0)
+
+	controllerRose_Axis.overrideSpeed(speedFacZ);             // set new speed
+}
+
+void DoRosePattern_Z()
+{
+	IntervalTimer tickTimerZ;
+	RotateControl controllerRose;
+	bool runPattern = true;
+
+	kRatio = (float)configRose.n / configRose.d;
+	spindleStepsPerRev = configMain.gearRatio_Spindle * configMain.microsteps_Spindle * configMain.steps360_Spindle;
+	slideStepsAmplitude = ((configRose.amplitude_Axis_Z / (configMain.distancePerRev_AxisZ)) * configMain.steps360_Axis_Z * configMain.microsteps_Axis_Z)/2;  // Amplitude is normally measured from the middle to the top
+
+	newMaxSpd_RoseSpindle = configRose.maxSpd_Spindle * configRose.speedPercent_Spindle * .01;
+	teensyStep_Spindle
+		.setMaxSpeed(newMaxSpd_RoseSpindle)
+		.setAcceleration(configRose.accel_Spindle)
+		.setPosition(0);
+
+	initialPosition_Axis = slideFunc_Axis_Z(0);
+	newMaxSpd_RoseAxis = configRose.maxSpd_Axis_Z * configRose.speedPercent_Axis * .01;
+	teensyStep_Axis_Z
+		.setMaxSpeed(newMaxSpd_RoseAxis)
+		.setAcceleration(configRose.accel_Axis_Z)
+		.setPosition(initialPosition_Axis); // set start position of counter
+
+	Serial1.print("pageRose.t5.txt=");
+	Serial1.write(0x22);
+	Serial1.print(initialPosition_Axis);
+	Serial1.write(0x22);
+	Serial1.write(0xff);
+	Serial1.write(0xff);
+	Serial1.write(0xff);
+	delay(10);
+	Serial1.print("pageRose.t5.txt=");
+	Serial1.write(0x22);
+	Serial1.print(initialPosition_Axis);
+	Serial1.write(0x22);
+	Serial1.write(0xff);
+	Serial1.write(0xff);
+	Serial1.write(0xff);
+
+		// Enable steppers
+	digitalWrite(PIN_SPINDLE_ENABLE, LOW);
+	digitalWrite(PIN_AXIS_Z_ENABLE, LOW);
+
+	controllerRose_Axis.rotateAsync(teensyStep_Axis_Z);
+	//controllerRose_Axis.overrideSpeed(0); // start with stopped slide
+	controllerRose.rotateAsync(teensyStep_Spindle); // let the spindle run with constant speed
+
+	tickZ();
+
+	// use a timer to periodically calculate new targets for the slide
+	tickTimerZ.priority(128); // lowest priority, potentially long caclulations need to be interruptable by TeensyStep
+	tickTimerZ.begin(tickZ, recalcPeriod);
+
+	while (runPattern)
+	{
+		digitalWriteFast(LED_BUILTIN, !digitalReadFast(LED_BUILTIN));
+
+		endPosition_Axis = teensyStep_Axis_Z.getPosition();
+		endPosition_Spindle = teensyStep_Spindle.getPosition();
+
+		// print current values of spindle angle [rad] and slide position [steps]
+		//float phiZ = endPosition_Spindle * (TWO_PI / spindleStepsPerRev);
+		//Serial.printf("%f\t%d\n", phiZ, endPosition_Axis);
+
+		Serial1.print("pageRose.t12.txt=");
+		Serial1.write(0x22);
+		Serial1.print(endPosition_Spindle);
+		Serial1.write(0x22);
+		Serial1.write(0xff);
+		Serial1.write(0xff);
+		Serial1.write(0xff);
+		delay(10);
+		Serial1.print("pageRose.t12.txt=");
+		Serial1.write(0x22);
+		Serial1.print(endPosition_Spindle);
+		Serial1.write(0x22);
+		Serial1.write(0xff);
+		Serial1.write(0xff);
+		Serial1.write(0xff);
+		delay(10);
+		Serial1.print("pageRose.t13.txt=");
+		Serial1.write(0x22);
+		Serial1.print(endPosition_Axis);
+		Serial1.write(0x22);
+		Serial1.write(0xff);
+		Serial1.write(0xff);
+		Serial1.write(0xff);
+
+
+		//delay(5);
+		// Check for Cancel code  
+		if (SerialAvailable() >= 0)
+		{
+			incomingByte = SerialRead(serialId);
+			switch (incomingByte)
+			{
+			case 109:
+			{
+				runPattern = false;
+				controllerRose.stopAsync();
+				controllerRose_Axis.stopAsync();
+				break;
+			}
+			}
+		}
+	}
+	endPosition_Spindle = teensyStep_Spindle.getPosition();
+}
+
+// ================================================================================= 
+// RosePatternX Methods
+// ================================================================================= 
+
+float slideFunc_Axis_X(float spindleAngleX)
+{
+	float phi = fmodf(spindleAngleX * kRatio, TWO_PI);
+	float retVal = slideStepsAmplitude * cosf(phi);
+	return retVal;
+}
+
+////------------------------------------------------------------------------------------
+//// tick()
+////
+//// This function is called periodically with period recalcPeriod. 
+//// It calculates 
+////  1) a new target value for the slide depending on the spindle angle
+////  2) the new speed for the spindle so that it will reach the target until it is called again
+//
 void tickX()
 {
-	float spindleAngleX = teensyStep_Spindle.getPosition() * (TWO_PI / spindleSPRX); //convert steps to angle
-	float slidePositionX = teensyStep_Axis_Z.getPosition();
-	float slideTargetX = slideFuncX(spindleAngleX);
+	float spindleAngleX = teensyStep_Spindle.getPosition() * (TWO_PI / spindleStepsPerRev); //convert steps to angle
+	float slidePositionX = teensyStep_Axis_X.getPosition();
+	float slideTargetX = slideFunc_Axis_X(spindleAngleX);
 
-	float newSpeedX = (slideTargetX - slidePositionX) / dtX; // speed to reach target in given delta t (neglecting acceleration)
-	float speedFacX = newSpeedX / slideSpeedX;              // transform in relative factor (-1.0 .. 1.0)
+	float newSpeedX = (slideTargetX - slidePositionX) / dtRose; // speed to reach target in given delta t (neglecting acceleration)
+	float speedFacX = newSpeedX / newMaxSpd_RoseAxis;              // transform in relative factor (-1.0 .. 1.0)
 
 	controllerRose_Axis.overrideSpeed(speedFacX);             // set new speed
 }
-
 void DoRosePattern_X()
 {
 	IntervalTimer tickTimerX;
+	RotateControl controllerRose_Spindle;
 	bool runPatternX = true;
+
+	kRatio = (float)configRose.n / configRose.d;
+	spindleStepsPerRev = configMain.gearRatio_Spindle * configMain.microsteps_Spindle * configMain.steps360_Spindle;
+	slideStepsAmplitude = ((configRose.amplitude_Axis_X / (configMain.distancePerRev_AxisX)) * configMain.steps360_Axis_X * configMain.microsteps_Axis_X)/2;
+
+	newMaxSpd_RoseSpindle = configRose.maxSpd_Spindle * configRose.speedPercent_Spindle * .01;
 	teensyStep_Spindle
-		.setMaxSpeed(spindleSpeedX)
-		.setAcceleration(50000);
+		.setMaxSpeed(newMaxSpd_RoseSpindle)
+		.setAcceleration(configRose.accel_Spindle)
+		.setPosition(0);
 
-	teensyStep_Axis_Z
-		.setMaxSpeed(slideSpeedX)
-		.setAcceleration(50000)
-		.setPosition(slideFuncX(0)); // set start position of counter
+	newMaxSpd_RoseAxis = configRose.maxSpd_Axis_X * configRose.speedPercent_Axis * .01;
+	teensyStep_Axis_X
+		.setMaxSpeed(newMaxSpd_RoseAxis)
+		.setAcceleration(configRose.accel_Axis_X)
+		.setPosition(slideFunc_Axis_X(0)); // set start position of counter
 
-	accelStep_Spindle.enableOutputs();
-	accelStep_Axis_Z.enableOutputs();
+		// Enable steppers
+	digitalWrite(PIN_SPINDLE_ENABLE, LOW);
+	digitalWrite(PIN_AXIS_X_ENABLE, LOW);
 
-
-
+	controllerRose_Axis.rotateAsync(teensyStep_Axis_X);
+	//controllerRose_Axis.overrideSpeed(0); // start with stopped slide
 	controllerRose_Spindle.rotateAsync(teensyStep_Spindle); // let the spindle run with constant speed
 
-	Serial1.print("pageRose.t4.txt=");
-	Serial1.write(0x22);
-	Serial1.print("here");
-	Serial1.write(0x22);
-	Serial1.write(0xff);
-	Serial1.write(0xff);
-	Serial1.write(0xff);
-	delay(5);
-	Serial1.print("pageRose.t4.txt=");
-	Serial1.write(0x22);
-	Serial1.print("here");
-	Serial1.write(0x22);
-	Serial1.write(0xff);
-	Serial1.write(0xff);
-	Serial1.write(0xff);
-	delay(5);
-	Serial1.print("pageRose.t6.txt=");
-	Serial1.write(0x22);
-	Serial1.print("Tick Next");
-	Serial1.write(0x22);
-	Serial1.write(0xff);
-	Serial1.write(0xff);
-	Serial1.write(0xff);
-	delay(5);
-	controllerRose_Axis.rotateAsync(teensyStep_Axis_Z);
-	controllerRose_Axis.overrideSpeed(0); // start with stopped slide
 	tickX();
 
 	// use a timer to periodically calculate new targets for the slide
-	tickTimerX.priority(255); // lowest priority, potentially long caclulations need to be interruptable by TeensyStep
-	tickTimerX.begin(tickX, recalcPeriodX);
+	tickTimerX.priority(128); // lowest priority, potentially long caclulations need to be interruptable by TeensyStep
+	tickTimerX.begin(tickX, recalcPeriod);
 
 	while (runPatternX)
 	{
 		digitalWriteFast(LED_BUILTIN, !digitalReadFast(LED_BUILTIN));
 
+		endPosition_Axis = teensyStep_Axis_X.getPosition();
+		endPosition_Spindle = teensyStep_Spindle.getPosition();
+
 		// print current values of spindle angle [rad] and slide position [steps]
-		float phiX = teensyStep_Spindle.getPosition() * (TWO_PI / spindleSPRX);
-		int32_t rX = teensyStep_Axis_Z.getPosition();
+		//float phiZ = endPosition_Spindle * (TWO_PI / spindleStepsPerRev);
+		//Serial.printf("%f\t%d\n", phiZ, endPosition_Axis);
 
-		Serial.printf("%f\t%d\n", phiX, rX);
-
-		delay(20);
+		Serial1.print("pageRose.t12.txt=");
+		Serial1.write(0x22);
+		Serial1.print(endPosition_Spindle);
+		Serial1.write(0x22);
+		Serial1.write(0xff);
+		Serial1.write(0xff);
+		Serial1.write(0xff);
+		delay(50);
+		Serial1.print("pageRose.t12.txt=");
+		Serial1.write(0x22);
+		Serial1.print(endPosition_Spindle);
+		Serial1.write(0x22);
+		Serial1.write(0xff);
+		Serial1.write(0xff);
+		Serial1.write(0xff);
+		delay(50);
+		Serial1.print("pageRose.t13.txt=");
+		Serial1.write(0x22);
+		Serial1.print(endPosition_Axis);
+		Serial1.write(0x22);
+		Serial1.write(0xff);
+		Serial1.write(0xff);
+		Serial1.write(0xff);
+		delay(50);
 		// Check for Cancel code  
 		if (SerialAvailable() >= 0)
 		{
@@ -2163,11 +2704,13 @@ void DoRosePattern_X()
 			}
 		}
 	}
-
+	endPosition_Spindle = teensyStep_Spindle.getPosition();
 }
+
+
 // ========================================================
-// Test EEPROM
-// ========================================================
+ //Test EEPROM
+ //========================================================
 /// <summary>
 /// Write current Config screen eeprom values to Nextion
 /// </summary>

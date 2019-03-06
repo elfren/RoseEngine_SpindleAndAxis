@@ -20,31 +20,31 @@
 #define PIN_SPINDLE_ENABLE 4 //Enable
 //  User runtime settable microstepping: Uncomment all microstepping #defines. 
 //  Uncomment calls to SetMicrosteppingMode().
-//#define PIN_SPINDLE_MS0 24
-//#define PIN_SPINDLE_MS1 25 
-//#define PIN_SPINDLE_MS2 26
+#define PIN_SPINDLE_MS0 24
+#define PIN_SPINDLE_MS1 25 
+#define PIN_SPINDLE_MS2 26
 
 // Axes
 //#define PIN_LIMIT_MIN 18 // Limit switch: Moving towards headstock
 //#define PIN_LIMIT_MAX 19 // Limit switch: Moving away from headstock
 
 // Z axis
-#define ID_Z_AXIS 0
+#define ID_AXIS_Z 0
 #define PIN_AXIS_Z_DIR 5 // Stepper direction
 #define PIN_AXIS_Z_STEP 6 // Stepper step
 #define PIN_AXIS_Z_ENABLE 14 // Enable 
-//#define PIN_AXIS_Z_MS0 27
-//#define PIN_AXIS_Z_MS1 28 
-//#define PIN_AXIS_Z_MS2 29
+#define PIN_AXIS_Z_MS0 27
+#define PIN_AXIS_Z_MS1 28 
+#define PIN_AXIS_Z_MS2 29
 
 // X axis
 #define ID_AXIS_X 1
 #define PIN_AXIS_X_DIR 20  // Stepper direction
 #define PIN_AXIS_X_STEP 21  // Stepper step
 #define PIN_AXIS_X_ENABLE 22 // Enable 
-//#define PIN_AXIS_X_MS0 30
-//#define PIN_AXIS_X_MS1 31 
-//#define PIN_AXIS_X_MS2 32
+#define PIN_AXIS_X_MS0 30
+#define PIN_AXIS_X_MS1 31 
+#define PIN_AXIS_X_MS2 32
 
 // B axis
 #define ID_AXIS_B 2
@@ -236,6 +236,10 @@ struct configs
 	int limit_Max_X;
 	int limit_Min_B;
 	int limit_Max_B;
+	int maxSpd_Return_Spindle;
+	int accel_Return_Spindle;
+	int maxSpd_Return_Axis;
+	int accel_Return_Axis;
 };
 
 // Config Structs
@@ -328,8 +332,10 @@ struct configPageRose // page 12
 	int speedPercent_Spindle;
 	int n;
 	int d;
-	int amplitude_Axis_Z;
 	int speedPercent_Axis;
+	float amplitude_Axis_Z;
+	float amplitude_Axis_X;
+	float amplitude_Spindle;
 };
 
 //==================================================================
@@ -392,57 +398,24 @@ char * filename_Index2;
 double returnSteps_Rec1_Z = 0;
 double returnSteps_Rec1_S = 0;
 
-// Rose Functions variables
-//float spindleSpeed_Rose = 1000;
-volatile int32_t newMaxSpd_RoseSpindle;
-volatile int32_t newMaxSpd_RoseAxis;
-volatile int spindleStepsPerRev;// = 6400;
-volatile float kRatio;
-volatile float stepDistance_RoseAxis;
-// TeensyStep 
-//RotateControl slideController;
-//RotateControl spindleController;
-//Stepper teensyStep_Spindle(PIN_SPINDLE_STEP, PIN_SPINDLE_DIR);
-//Stepper teensyStep_Axis_Z(PIN_AXIS_Z_STEP, PIN_AXIS_Z_DIR);
-
-//accuracy 
-//IntervalTimer tickTimer;
-constexpr unsigned recalcPeriod = 25'000; //?s  period for calculation of new target points. Straight lines between those points. 
-//constexpr float dt = recalcPeriod / 1E6;  // seconds 
-constexpr float dt = .075;  // seconds 
-volatile int iCounterX = 0;
-
+/////////////////////////////////////////////////////////////////////////
+// Rose settings
 /////////////////////////////////////////////////////////////////////////
 
+volatile int32_t newMaxSpd_RoseSpindle;
+volatile int32_t newMaxSpd_RoseAxis;
+volatile int32_t spindleStepsPerRev;
+volatile float slideStepsAmplitude;
+volatile float spindleStepsAmplitude;
+volatile float kRatio;
 
+float initialPosition_Axis = 0;
+int32_t endPosition_Spindle = 0;
+int32_t endPosition_Axis = 0;
 
-//spindle settings 
-constexpr unsigned rpmX = 10;
-constexpr unsigned spindleSPRX = 6400;                    // stp per rev 
-constexpr unsigned spindleSpeedX = rpmX * spindleSPRX / 60; // stp/sec 
-////constexpr unsigned spindleStepPinX = 3;
-////constexpr unsigned spindleDirPinX = 2;
-
-
-//slide settings 
-constexpr unsigned slideAmplitudeX = 10000; // stp 
-constexpr unsigned slideSpeedX = 15000;     //stp/sec 
-//constexpr unsigned slideStepPinX = 6;
-//constexpr unsigned slideDirPinX = 5;
-
-//accuracy 
-//IntervalTimer tickTimerX;
-constexpr unsigned recalcPeriodX = 25'000; //?s  period for calculation of new target points. Straight lines between those points. 
-constexpr float dtX = recalcPeriodX / 1E6;  // seconds 
-
-
-// rose fuction 
-constexpr int nX = 5;
-constexpr int dX = 8;
-constexpr float kX = (float)nX / dX;
-
-
-
+// Accuracy interval 
+constexpr unsigned recalcPeriod = 25'000; //?s  period for calculation of new target points. Straight lines between those points. 
+constexpr float dtRose = recalcPeriod / 1E6;  // seconds 
 
 /////////////////////////////////////////////////////////////////////////////
 // Page defines

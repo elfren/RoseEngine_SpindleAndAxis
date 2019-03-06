@@ -10,7 +10,6 @@
 #include "AccelStepper.h"
 #include "SD.h"
 #include "SPI.h"
-//#include "StepControl.h"
 #include "TeensyStep.h"
 
 //==================================================================
@@ -29,12 +28,8 @@ Stepper teensyStep_Axis_Z(PIN_AXIS_Z_STEP, PIN_AXIS_Z_DIR);
 Stepper teensyStep_Axis_X(PIN_AXIS_X_STEP, PIN_AXIS_X_DIR);
 
 // TeensyStep controllers
-StepControl stepController;
-RotateControl controllerRose_Spindle;
+StepControl stepControllerI;
 RotateControl controllerRose_Axis;
-
-//IntervalTimer tickTimer;
-//IntervalTimer tickTimerX;
 
 /// <summary>
 /// Setup
@@ -48,8 +43,8 @@ void setup()
 	digitalWrite(1, HIGH);
 	pinMode(LED_BUILTIN, OUTPUT);
 	// Initialize Serial0 (USB port)
-	//Serial.begin(115200);
-	Serial.begin(9600);
+	Serial.begin(115200);
+	//Serial.begin(9600);
 	// Initialize Nextion LCD for 115200 baud
 	// Note: Nextion requires 3 0xFF bytes to signal end of transmission
 	// First run for Nextion must run at 9600.  Once the Nextion has been programmed for 115200, uncomment 115200 line and comment 9600 line.
@@ -120,13 +115,22 @@ void setup()
 	//}
 
 #ifdef FOUR_AXES
+	pinMode(PIN_SPINDLE_MS0, OUTPUT);
+	pinMode(PIN_SPINDLE_MS1, OUTPUT);
+	pinMode(PIN_SPINDLE_MS2, OUTPUT);
+	pinMode(PIN_AXIS_Z_MS0, OUTPUT);
+	pinMode(PIN_AXIS_Z_MS1, OUTPUT);
+	pinMode(PIN_AXIS_Z_MS2, OUTPUT);
+	pinMode(PIN_AXIS_X_MS0, OUTPUT);
+	pinMode(PIN_AXIS_X_MS1, OUTPUT);
+	pinMode(PIN_AXIS_X_MS2, OUTPUT);
 	// Set Microstepping mode
-	//SetMicrosteppingMode(configMain.microsteps_Spindle, PIN_SPINDLE_MS0, PIN_SPINDLE_MS1, PIN_SPINDLE_MS2);
-	//SetMicrosteppingMode(configMain.microsteps_Axis_Z, PIN_AXIS_Z_MS0, PIN_AXIS_Z_MS1, PIN_AXIS_Z_MS2);
+	SetMicrosteppingMode(configMain.microsteps_Spindle, PIN_SPINDLE_MS0, PIN_SPINDLE_MS1, PIN_SPINDLE_MS2);
+	SetMicrosteppingMode(configMain.microsteps_Axis_Z, PIN_AXIS_Z_MS0, PIN_AXIS_Z_MS1, PIN_AXIS_Z_MS2);
 	//SetMicrosteppingMode(configMain.microsteps_Axis_B, PIN_AXIS_B_MS0, PIN_AXIS_B_MS1, PIN_AXIS_B_MS2);
 #endif //FOUR_AXES
 #ifndef TWO_AXES_V2
-	//SetMicrosteppingMode(configMain.microsteps_Axis_X, PIN_AXIS_X_MS0, PIN_AXIS_X_MS1, PIN_AXIS_X_MS2);
+	SetMicrosteppingMode(configMain.microsteps_Axis_X, PIN_AXIS_X_MS0, PIN_AXIS_X_MS1, PIN_AXIS_X_MS2);
 #endif // TWO_AXES_V2
 
 	// Set the enable pin for the stepper motor
@@ -221,24 +225,24 @@ void setup()
 
 	if (sdValid)
 	{
-	////	SerialPrint("pageIndexF2.vaDisplayFile.val=1"); // Nextion may not get the first packet
+	////	SerialPrint("pageIndex2.vaDisplayFile.val=1"); // Nextion may not get the first packet
 	////	Serial1.write(0xff);
 	////	Serial1.write(0xff);
 	////	Serial1.write(0xff);
 	////	delay(50);
-	////	Serial1.print("pageIndexF2.vaDisplayFile.val=1");
+	////	Serial1.print("pageIndex2.vaDisplayFile.val=1");
 	////	Serial1.write(0xff);
 	////	Serial1.write(0xff);
 	////	Serial1.write(0xff);
 	}
 	else
 	{
-	////	SerialPrint("pageIndexF2.vaDisplayFile.val=0"); // Nextion may not get the first packet
+	////	SerialPrint("pageIndex2.vaDisplayFile.val=0"); // Nextion may not get the first packet
 	////	Serial1.write(0xff);
 	////	Serial1.write(0xff);
 	////	Serial1.write(0xff);
 	////	delay(50);
-	////	Serial1.print("pageIndexF2.vaDisplayFile.val=0");
+	////	Serial1.print("pageIndex2.vaDisplayFile.val=0");
 	////	Serial1.write(0xff);
 	////	Serial1.write(0xff);
 	////	Serial1.write(0xff);
@@ -467,7 +471,7 @@ void loop()
 			EEPROM.put(eePromAddress_Rose, configRose);
 			break;
 		}
-		case 61: // = 
+		case 61: // = Start microSD (Currently not used)
 		{
 #ifdef FOUR_AXES
 			bool sdStarted = SD.begin(BUILTIN_SDCARD);
@@ -543,7 +547,7 @@ void loop()
 				}
 				double newIndexSize = GetDataFromSD(lineNumber);
 				configMain.size_Index2 = (configMain.microsteps_Spindle * configMain.steps360_Spindle * configMain.gearRatio_Spindle) * (newIndexSize / 360);
-				Serial1.print("pageIndexF2.t7.txt="); // Nextion may not get the first packet
+				Serial1.print("pageIndex2.t7.txt="); // Nextion may not get the first packet
 				Serial1.write(0x22);
 				Serial1.print(newIndexSize);
 				Serial1.write(0x22);
@@ -551,7 +555,7 @@ void loop()
 				Serial1.write(0xff);
 				Serial1.write(0xff);
 				delay(100);
-				Serial1.print("pageIndexF2.t7.txt=");
+				Serial1.print("pageIndex2.t7.txt=");
 				Serial1.write(0x22);
 				Serial1.print(newIndexSize);
 				Serial1.write(0x22);
@@ -581,7 +585,7 @@ void loop()
 				// Get size from file
 				double newIndexSize = GetDataFromSD(lineNumber);
 				configMain.size_Index2 = (configMain.microsteps_Spindle * configMain.steps360_Spindle * configMain.gearRatio_Spindle) * (newIndexSize / 360);
-				Serial1.print("pageIndexF2.t7.txt=");
+				Serial1.print("pageIndex2.t7.txt=");
 				Serial1.write(0x22);
 				Serial1.print(newIndexSize);
 				Serial1.write(0x22);
@@ -589,7 +593,7 @@ void loop()
 				Serial1.write(0xff);
 				Serial1.write(0xff);
 				delay(100);
-				Serial1.print("pageIndexF2.t7.txt=");
+				Serial1.print("pageIndex2.t7.txt=");
 				Serial1.write(0x22);
 				Serial1.print(newIndexSize);
 				Serial1.write(0x22);
@@ -976,8 +980,36 @@ void loop()
 		}
 		case 105: // i - 
 		{
-			DoRosePattern_Z();
-			//DoRosePattern_X();
+			int selection = GetSerialInteger();
+
+			switch (selection)
+			{
+				case 0:
+				case 30:
+				{
+					DoRosePattern_Z();
+					break;
+				}
+				case 1:
+				case 31:
+				{
+					DoRosePattern_X();
+					break;
+				}
+				case 2:
+				case 32:
+				{
+					DoRosePattern_SpindleZ();
+					break;
+				}
+				case 3:
+				case 33:
+				{
+					//DoRosePattern_SpindleX();
+					break;
+				}
+			}
+
 			break;
 		}
 		case 106: // j - Move Z counter clockwise
@@ -986,7 +1018,7 @@ void loop()
 			EEPROM.put(eePromAddress_Setup, configMain);
 
 			// Run
-			MoveAxisZ(DIR_CCW);
+			MoveAxis(ID_AXIS_Z, DIR_CCW);
 			break;
 		}
 		case 107: // k - Z Spindle Clockwise
@@ -1035,7 +1067,7 @@ void loop()
 		{
 			configMain.microsteps_Spindle = GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Setup, configMain);
-			//SetMicrosteppingMode(configMain.microsteps_Spindle, PIN_SPINDLE_MS0, PIN_SPINDLE_MS1, PIN_SPINDLE_MS2);
+			SetMicrosteppingMode(configMain.microsteps_Spindle, PIN_SPINDLE_MS0, PIN_SPINDLE_MS1, PIN_SPINDLE_MS2);
 			break;
 		}
 		case 113: // q - Move Z clockwise
@@ -1044,7 +1076,8 @@ void loop()
 			EEPROM.put(eePromAddress_Setup, configMain);
 
 			// Run
-			MoveAxisZ(DIR_CW);
+			MoveAxis(ID_AXIS_Z,DIR_CW);
+
 			break;
 		}
 		case 114: // r - Main/Sync/Sp2 Spindle FullSteps
@@ -1112,7 +1145,7 @@ void loop()
 		{
 			configMain.microsteps_Axis_Z = GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Setup, configMain);
-			//SetMicrosteppingMode(configMain.microsteps_Axis_Z, PIN_AXIS_Z_MS0, PIN_AXIS_Z_MS1, PIN_AXIS_Z_MS2);
+			SetMicrosteppingMode(configMain.microsteps_Axis_Z, PIN_AXIS_Z_MS0, PIN_AXIS_Z_MS1, PIN_AXIS_Z_MS2);
 			break;
 		}
 		case 122: // z - Z Axis FullSteps
@@ -1556,7 +1589,8 @@ void loop()
 			EEPROM.put(eePromAddress_Setup, configMain);
 
 			// Run
-			MoveAxisX(DIR_CCW);
+			//MoveAxisX(DIR_CCW);
+			MoveAxis(ID_AXIS_X, DIR_CCW);
 			break;
 		}
 		case 184: // ¸ - MvX CW
@@ -1565,7 +1599,8 @@ void loop()
 			EEPROM.put(eePromAddress_Setup, configMain);
 
 			// Run
-			MoveAxisX(DIR_CW);
+			//MoveAxisX(DIR_CW);
+			MoveAxis(ID_AXIS_X, DIR_CW);
 			break;
 		}
 		case 185: // ¹ - X Max speed
@@ -1624,7 +1659,7 @@ void loop()
 		{
 			configMain.microsteps_Axis_X = GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Setup, configMain);
-			//SetMicrosteppingMode(configMain.microsteps_Axis_X, PIN_AXIS_X_MS0, PIN_AXIS_X_MS1, PIN_AXIS_X_MS2);
+			SetMicrosteppingMode(configMain.microsteps_Axis_X, PIN_AXIS_X_MS0, PIN_AXIS_X_MS1, PIN_AXIS_X_MS2);
 			break;
 		}
 		case 188: // ¼ - X Full Steps
@@ -1637,6 +1672,26 @@ void loop()
 		{
 			configMain.distancePerRev_AxisX = GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Setup, configMain);
+
+			//configs dpr;
+			//EEPROM.get(eePromAddress_Setup, dpr);
+			////t7
+			//Serial1.print("pageSetup.t7.txt=");
+			//Serial1.write(0x22);
+			//Serial1.print(dpr.distancePerRev_AxisX);
+			//Serial1.write(0x22);
+			//Serial1.write(0xff);
+			//Serial1.write(0xff);
+			//Serial1.write(0xff);
+			//delay(50);
+			//Serial1.print("pageSetup.t7.txt=");
+			//Serial1.write(0x22);
+			//Serial1.print(dpr.distancePerRev_AxisX);
+			//Serial1.write(0x22);
+			//Serial1.write(0xff);
+			//Serial1.write(0xff);
+			//Serial1.write(0xff);
+			//delay(50);
 			break;
 		}
 //#endif // TWO_AXES_V2
@@ -1715,7 +1770,7 @@ void loop()
 		}
 		case 199: // Ç - Rose: Spindle Axis Amplitude
 		{
-			configRose.amplitude_Axis_Z = (int)GetSerialFloat(serialId);
+			configRose.amplitude_Axis_Z = GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Rose, configRose);
 			break;
 		}
@@ -1787,9 +1842,11 @@ void loop()
 			EEPROM.put(eePromAddress_Setup, configMain);
 			break;
 		}
-		case 206: // Î - Rec1_Z Return
+		case 206: // Î -  Return
 		{
-			Return_Rec1_Z();
+			// Spindle and Z axis
+			pageCallerId = GetSerialInteger();
+			ReturnToStartPosition(0);
 			break;
 		}
 		case 207: // Ï - Do Rec1_S
@@ -1846,9 +1903,11 @@ void loop()
 			EEPROM.put(eePromAddress_Setup, configMain);
 			break;
 		}
-		case 215: // × - Rec1_S Return
+		case 215: // × - Return
 		{
-			Return_Rec1_Spindle();
+			// Spindle and X axis
+			pageCallerId = GetSerialInteger();
+			ReturnToStartPosition(1);
 			break;
 		}
 		case 216: // Ø - Enable Spindle (High or Low)
@@ -1934,6 +1993,62 @@ void loop()
 			configRose.accel_Axis_X = (int)GetSerial1Float();
 			EEPROM.put(eePromAddress_Rose, configRose);
 			break;
+		}
+		case 228: // ä - Rose: X Axis Amplitude
+		{
+			configRose.amplitude_Axis_X = GetSerial1Float();
+			EEPROM.put(eePromAddress_Rose, configRose);
+			break;
+		}
+		case 229: // å - Rose: Spindle Amplitude
+		{
+			configRose.amplitude_Spindle = GetSerial1Float();
+			EEPROM.put(eePromAddress_Rose, configRose);
+			break;
+		}
+		case 230: // å - Rose: DoRoseSpindle
+		{
+			DoRosePattern_SpindleZ();
+			break;
+		}
+		case 231: // ç - Rose: Return Z and Spindle
+		{
+			int selection = GetSerialInteger();
+			pageCallerId = PAGE_ROSE;
+			ReturnToStartPosition(selection);
+			break;
+		}
+		case 232: // è - Return Spindle MaxSpd
+		{
+			configMain.maxSpd_Return_Spindle = GetSerial1Float();
+			EEPROM.put(eePromAddress_Setup, configMain);
+			break;
+		}
+		case 233: // é - Return Spindle Accel
+		{
+			configMain.accel_Return_Spindle = GetSerial1Float();
+			EEPROM.put(eePromAddress_Setup, configMain);
+			break;
+		}
+		case 234: // ê - Return Spindle Accel
+		{
+			configMain.maxSpd_Return_Axis = GetSerial1Float();
+			EEPROM.put(eePromAddress_Setup, configMain);
+			break;
+		}
+		case 235: // ë - Return Spindle Accel
+		{
+			configMain.accel_Return_Axis = GetSerial1Float();
+			EEPROM.put(eePromAddress_Setup, configMain);
+			break;
+		}
+		case 236:
+		{
+			endPosition_Axis = 0;
+			endPosition_Spindle = 0;
+			teensyStep_Spindle.setPosition(0);
+			teensyStep_Axis_Z.setPosition(0);
+			teensyStep_Axis_X.setPosition(0);
 		}
 		default:
 			SerialPrint("Input:");
