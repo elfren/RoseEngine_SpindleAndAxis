@@ -68,24 +68,6 @@ void setup()
 	Serial1.write(0xFF);
 	delay(50);
 
-	SerialPrint("pageSpZ.t0.txt=");
-	SerialWrite(0x22);
-	SerialPrint("Good");
-	SerialWrite(0x22);
-	SerialWrite(0xff);
-	SerialWrite(0xff);
-	SerialWrite(0xff);
-	delay(50);
-	SerialPrint("pageSpZ.t0.txt=");
-	SerialWrite(0x22);
-	SerialPrint("Good");
-	SerialWrite(0x22);
-	SerialWrite(0xff);
-	SerialWrite(0xff);
-	SerialWrite(0xff);
-	delay(50);
-
-
 	// Update with values from EEProm
 	EEPROM.get(eePromAddress_Setup, configMain);
 
@@ -106,13 +88,13 @@ void setup()
 	// Config as well as all other EEProm settings must be run from Nextion whenever Teensy is updated.  
 	// EEProm may contain invalid settings otherwise.
 
-	//for (int i = 0; i < 3; i++) // Verify Teensy is operational
-	//{
-	//	digitalWrite(LED_BUILTIN, HIGH);
-	//	delay(50);
-	//	digitalWrite(LED_BUILTIN, LOW);
-	//	delay(300);
-	//}
+	for (int i = 0; i < 3; i++) // Verify Teensy is operational
+	{
+		digitalWrite(LED_BUILTIN, HIGH);
+		delay(50);
+		digitalWrite(LED_BUILTIN, LOW);
+		delay(300);
+	}
 
 #ifdef FOUR_AXES
 	pinMode(PIN_SPINDLE_MS0, OUTPUT);
@@ -123,7 +105,7 @@ void setup()
 	pinMode(PIN_AXIS_Z_MS2, OUTPUT);
 	pinMode(PIN_AXIS_X_MS0, OUTPUT);
 	pinMode(PIN_AXIS_X_MS1, OUTPUT);
-	pinMode(PIN_AXIS_X_MS2, OUTPUT);
+	pinMode(LED_BUILTIN, OUTPUT);
 	// Set Microstepping mode
 	SetMicrosteppingMode(configMain.microsteps_Spindle, PIN_SPINDLE_MS0, PIN_SPINDLE_MS1, PIN_SPINDLE_MS2);
 	SetMicrosteppingMode(configMain.microsteps_Axis_Z, PIN_AXIS_Z_MS0, PIN_AXIS_Z_MS1, PIN_AXIS_Z_MS2);
@@ -264,49 +246,13 @@ void loop()
 		// USB connected 
 		serialId = 0;
 	}
-	////else if (Serialxx1.available() > 0)
-	////{
-	////	//Nextion connected
-	////	serialId = 1;
-	////}
 	else if (Serial1.available() > 0)
 	{
 		//Nextion connected
 		serialId = 1;
 	}
 	serialId = 3;
-#ifdef DEBUG
 
-	Serial1.print("pageSpZ.t0.txt="); // Nextion may not get the first packet
-	Serial1.write(0x22);
-	Serial1.print("Id:");
-	Serial1.print(serialId);
-	Serial1.write(0x22);
-	Serial1.write(0xff);
-	Serial1.write(0xff);
-	Serial1.write(0xff);
-	delay(100);
-	Serial1.print("pageSpZ.t0.txt=");
-	Serial1.write(0x22);
-	Serial1.print("Id:");
-	Serial1.print(serialId);
-	Serial1.write(0x22);
-	Serial1.write(0xff);
-	Serial1.write(0xff);
-	Serial1.write(0xff);
-	delay(100);
-
-
-
-#endif // DEBUG
-
-	//for (int i = 0; i < 3; i++) // Verify Teensy is operational
-	//{
-	//	digitalWrite(LED_BUILTIN, HIGH);
-	//	delay(50);
-	//	digitalWrite(LED_BUILTIN, LOW);
-	//	delay(300);
-	//}
 	// All Nextion incoming data packets are terminated with one 0xFF byte
 	if (serialId <9) // If serial data is available, parse the data
 	{
@@ -1016,9 +962,10 @@ void loop()
 		{
 			configMain.speedPercent_MoveZ = GetSerialInteger();
 			EEPROM.put(eePromAddress_Setup, configMain);
-
+#ifdef FOUR_AXES
 			// Run
 			MoveAxis(ID_AXIS_Z, DIR_CCW);
+#endif // FOUR_AXES
 			break;
 		}
 		case 107: // k - Z Spindle Clockwise
@@ -1074,10 +1021,10 @@ void loop()
 		{
 			configMain.speedPercent_MoveZ = GetSerialInteger();
 			EEPROM.put(eePromAddress_Setup, configMain);
-
+#ifdef FOUR_AXES
 			// Run
 			MoveAxis(ID_AXIS_Z,DIR_CW);
-
+#endif
 			break;
 		}
 		case 114: // r - Main/Sync/Sp2 Spindle FullSteps
@@ -1443,9 +1390,9 @@ void loop()
 		{
 			// Set Speed
 			configMain.speedPercentSpindle_SpB = GetSerialInteger();
-			accelStep_Spindle.setCurrentPosition(0);
+			//accelStep_Spindle.setCurrentPosition(0);
 			EEPROM.put(eePromAddress_Setup, configMain);
-
+			accelStep_Axis_B.enableOutputs();
 			RunTwoSteppers_SpB(
 				DIR_CW,
 				DIR_CW,
@@ -1659,7 +1606,9 @@ void loop()
 		{
 			configMain.microsteps_Axis_X = GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifndef TWO_AXES_V2
 			SetMicrosteppingMode(configMain.microsteps_Axis_X, PIN_AXIS_X_MS0, PIN_AXIS_X_MS1, PIN_AXIS_X_MS2);
+#endif // !TWO_AXES_V2
 			break;
 		}
 		case 188: // ¼ - X Full Steps
@@ -1672,26 +1621,6 @@ void loop()
 		{
 			configMain.distancePerRev_AxisX = GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Setup, configMain);
-
-			//configs dpr;
-			//EEPROM.get(eePromAddress_Setup, dpr);
-			////t7
-			//Serial1.print("pageSetup.t7.txt=");
-			//Serial1.write(0x22);
-			//Serial1.print(dpr.distancePerRev_AxisX);
-			//Serial1.write(0x22);
-			//Serial1.write(0xff);
-			//Serial1.write(0xff);
-			//Serial1.write(0xff);
-			//delay(50);
-			//Serial1.print("pageSetup.t7.txt=");
-			//Serial1.write(0x22);
-			//Serial1.print(dpr.distancePerRev_AxisX);
-			//Serial1.write(0x22);
-			//Serial1.write(0xff);
-			//Serial1.write(0xff);
-			//Serial1.write(0xff);
-			//delay(50);
 			break;
 		}
 //#endif // TWO_AXES_V2

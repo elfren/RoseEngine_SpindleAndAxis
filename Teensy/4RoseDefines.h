@@ -51,9 +51,9 @@
 #define PIN_AXIS_B_DIR 23  // Stepper direction
 #define PIN_AXIS_B_STEP 16  // Stepper step
 #define PIN_AXIS_B_ENABLE 17 // Enable 
-//#define PIN_AXIS_B_MS0 27
-//#define PIN_AXIS_B_MS1 28 
-//#define PIN_AXIS_B_MS2 29
+#define PIN_AXIS_B_MS0 33
+#define PIN_AXIS_B_MS1 34
+#define PIN_AXIS_B_MS2 35
 
 #elif defined(TWO_AXES_V2)
 // Spindle
@@ -62,9 +62,9 @@
 #define PIN_SPINDLE_STEP 3  // Stepper step
 #define PIN_SPINDLE_ENABLE 4 // Enable
 // User runtime settable microstepping requires inner pins on Teensy 3.2
-//#define PIN_SPINDLE_MS0 24
-//#define PIN_SPINDLE_MS1 25 
-//#define PIN_SPINDLE_MS2 26
+#define PIN_SPINDLE_MS0 18
+#define PIN_SPINDLE_MS1 19 
+#define PIN_SPINDLE_MS2 20
 
 // Axes
 #define PIN_LIMIT_MIN 16 // Limit switch: Moving towards headstock
@@ -76,9 +76,9 @@
 #define PIN_AXIS_Z_STEP 6  // Stepper step
 #define PIN_AXIS_Z_ENABLE 14 // Enable 
 // User runtime settable microstepping requires inner pins on Teensy 3.2
-//#define PIN_AXIS_Z_MS0 27
-//#define PIN_AXIS_Z_MS1 28 
-//#define PIN_AXIS_Z_MS2 29
+#define PIN_AXIS_Z_MS0 21
+#define PIN_AXIS_Z_MS1 22
+#define PIN_AXIS_Z_MS2 23
 
 // X axis
 #define ID_AXIS_X 1
@@ -105,9 +105,9 @@
 #define PIN_SPINDLE_STEP 2  // Stepper step
 #define PIN_SPINDLE_ENABLE 6 // Enable
 // User runtime settable microstepping requires inner pins on Teensy 3.2
-//#define PIN_SPINDLE_MS0 24
-//#define PIN_SPINDLE_MS1 25 
-//#define PIN_SPINDLE_MS2 26
+#define PIN_SPINDLE_MS0 24
+#define PIN_SPINDLE_MS1 25 
+#define PIN_SPINDLE_MS2 26
 
 // Limit Switches
 //#define PIN_LIMIT_MIN_Z 16 // Limit switch: Moving towards headstock
@@ -122,9 +122,9 @@
 #define PIN_AXIS_Z_ENABLE 20 //PCB jumper:33>>20 // Enable  
 
 // User runtime settable microstepping requires inner pins on Teensy 3.2
-//#define PIN_AXIS_Z_MS0 27
-//#define PIN_AXIS_Z_MS1 28 
-//#define PIN_AXIS_Z_MS2 29
+#define PIN_AXIS_Z_MS0 27
+#define PIN_AXIS_Z_MS1 28 
+#define PIN_AXIS_Z_MS2 29
 
 // X axis
 #define ID_AXIS_X 1
@@ -132,9 +132,9 @@
 #define PIN_AXIS_X_STEP 22  //PCB jumper:30>>22// Stepper step
 #define PIN_AXIS_X_ENABLE 21 //PCB jumper:29>>21 // Enable 
 // User runtime settable microstepping requires inner pins on Teensy 3.2
-//#define PIN_AXIS_X_MS0 30
-//#define PIN_AXIS_X_MS1 31 
-//#define PIN_AXIS_X_MS2 32
+#define PIN_AXIS_X_MS0 30
+#define PIN_AXIS_X_MS1 31 
+#define PIN_AXIS_X_MS2 32
 
 // B axis
 #define ID_AXIS_B 2
