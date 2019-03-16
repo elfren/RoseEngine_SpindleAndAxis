@@ -6,6 +6,7 @@
 #define FOUR_AXES  // Teensy 3.5
 //#define THREE_AXES // Teensy 3.2
 //#define TWO_AXES_V2 // Teensy 3.2
+//#define SHOW_POSITION
 //#define DEBUG
 
 //==================================================================
@@ -71,7 +72,7 @@
 #define PIN_LIMIT_MAX 17 // Limit switch: Moving away from headstock
 
 // Z axis
-#define ID_Z_AXIS 0
+#define ID_AXIS_Z 0
 #define PIN_AXIS_Z_DIR 5  // Stepper direction
 #define PIN_AXIS_Z_STEP 6  // Stepper step
 #define PIN_AXIS_Z_ENABLE 14 // Enable 
@@ -116,7 +117,7 @@
 //#define PIN_LIMIT_MAX_X 17 // Limit switch: Moving away from center. Change to 19 if separate limit switches.
 
 // Z axis
-#define ID_Z_AXIS 0
+#define ID_AXIS_Z 0
 #define PIN_AXIS_Z_DIR 4  // Stepper direction
 #define PIN_AXIS_Z_STEP 5  // Stepper step
 #define PIN_AXIS_Z_ENABLE 20 //PCB jumper:33>>20 // Enable  
@@ -176,12 +177,8 @@ struct configs
 	int speedPercentSpindle_SpB;
 	int speedPercentSpindle_SyncZ;
 	int speedPercentSpindle_SyncX;
-	int speedPercentSpindle_Rec1S;
-	int speedPercentSpindle_Rec1Z;
 	int speedPercentAxis_SyncZ;
 	int speedPercentAxis_SyncX;
-	int speedPercentAxis_Rec1S;
-	int speedPercentAxis_Rec1Z;
 	int speedPercent_Index1;
 	int speedPercent_Index2;
 	int speedPercent_Sp2;
@@ -208,16 +205,10 @@ struct configs
 	int type_Index2;
 	int source_Index1;
 	int source_Index2;
-	int waves_Rec1_Z;
-	int waves_Rec1_S;
 	double size_Index1;
 	double size_Index2;
 	float distance_MoveZ;
 	float distance_MoveX;
-	float distance_Rec1_Z;
-	float amplitude_Rec1_Z;
-	float amplitude_Rec1_S;
-	float degrees_Rec1_S;
 	float gearRatio_Spindle;
 	float gearRatio_AxisB;
 	float distancePerRev_AxisZ;
@@ -240,87 +231,51 @@ struct configs
 	int accel_Return_Spindle;
 	int maxSpd_Return_Axis;
 	int accel_Return_Axis;
+	int trackPositions;
 };
 
 // Config Structs
-struct configPageSpZ // page 0
+struct configSteppers // 
+{
+	int maxSpd_Spindle;
+	int accel_Spindle;
+	int maxSpd_Axis;
+	int accel_Axis;
+};
+
+struct configStepper //
+{
+	int maxSpd;
+	int accel;
+};
+
+struct configPageReci // page 5,6,13,14
 {
 	int maxSpd_Spindle;
 	int accel_Spindle;
 	int maxSpd_Axis_Z;
-	int accel_Axis_Z;
-};
-struct configPageSpX // page 1
-{
-	int maxSpd_Spindle;
-	int accel_Spindle;
 	int maxSpd_Axis_X;
+	int speedPercent_Spindle;
+	int speedPercent_Axis_Z;
+	int speedPercent_Axis_X;
+	int accel_Axis_Z;
 	int accel_Axis_X;
-};
-struct configPageSpB // page 2
-{
-	int maxSpd_Spindle;
-	int accel_Spindle;
-	int maxSpd_Axis_B;
-	int accel_Axis_B;
-};
-struct configPageSyncZ // page 3
-{
-	int maxSpd_Spindle;
-	int accel_Spindle;
-	int maxSpd_Axis_Z;
-	int accel_Axis_Z;
-};
-struct configPageSyncX // page 4
-{
-	int maxSpd_Spindle;
-	int accel_Spindle;
-	int maxSpd_Axis_X;
-	int accel_Axis_X;
+	int waves_AxialZ;
+	int waves_AxialX;
+	int waves_RadialZ;
+	int waves_RadialX;
+
+	float distance_AxialZ;
+	float distance_AxialX;
+	float amplitude_AxialZ;
+	float amplitude_AxialX;
+	float amplitude_RadialZ;
+	float amplitude_RadialX;
+	float degrees_RadialZ;
+	float degrees_RadialX;
 };
 
-struct configPageRec1_ZAxis // page 5
-{
-	int maxSpd_Spindle;
-	int accel_Spindle;
-	int maxSpd_Axis_Z;
-	int accel_Axis_Z;
-};
-struct configPageRec1_Spindle // page 6
-{
-	int maxSpd_Spindle;
-	int accel_Spindle;
-	int maxSpd_Axis_Z;
-	int accel_Axis_Z;
-};
 
-struct configPageSp // page 7
-{
-	int maxSpd_Spindle;
-	int accel_Spindle;
-};
-
-struct configPageIndex1 // page 8
-{
-	int maxSpd_Spindle;
-	int accel_Spindle;
-};
-struct configPageIndex2 // page 9
-{
-	int maxSpd_Spindle;
-	int accel_Spindle;
-};
-
-struct configPageMoveZ // page 10
-{
-	int maxSpd_Axis_Z;
-	int accel_Axis_Z;
-};
-struct configPageMoveX // page 11
-{
-	int maxSpd_Axis_X;
-	int accel_Axis_X;
-};
 struct configPageRose // page 12
 {
 	int maxSpd_Spindle;
@@ -367,25 +322,27 @@ struct configPageRose // page 12
 //RotateControl controllerRose_Spindle;
 //RotateControl controllerRose_Axis;
 
-int serialId = 9; // Initialize with unused serial id.  Serial-0, Serial1-1
+int serialId = 9; // Initialize with unused serial id.  Serial-0, Serial3-1
 byte incomingByte = 0;	// store incoming Serial data
 unsigned int eePromAddress_Setup = 0;  // EEProm address for spindleConfig values
 unsigned int eePromAddress_Filename = 900; // EEProm address for Index2 filename
 unsigned int eePromAddress_Filename_Length = 996; // EEProm address for length of Index2 filename
 
-unsigned int eePromAddress_SpZ = 1000;  // EEProm address for SpZ 200-207
-unsigned int eePromAddress_SpX = 1016;  // EEProm address for SpX  208-215
-unsigned int eePromAddress_SpB = 1032;  // EEProm address for SpB 216-223
-unsigned int eePromAddress_SyncZ = 1048;  // EEProm address for SyncZ 224-231
-unsigned int eePromAddress_SyncX = 1064;  // EEProm address for SyncX 232-239
-unsigned int eePromAddress_Rec1_Z = 1080;  // EEProm address for Rec1_ZAxis 240-247
-unsigned int eePromAddress_Rec1_S = 1096;  // EEProm address for Rec1_Spindle 248-255
-unsigned int eePromAddress_Sp = 1112;  // EEProm address for Sp 256-259
-unsigned int eePromAddress_Index1 = 1128;  // EEProm address for Index1 260-263
-unsigned int eePromAddress_Index2 = 1144;  // EEProm address for Index2 264-267
-unsigned int eePromAddress_MoveZ = 1160;  // EEProm address for MoveZ 268-271
-unsigned int eePromAddress_MoveX = 1176;  // EEProm address for MoveX 272-275
+unsigned int eePromAddress_SpZ = 1000;  // EEProm address for SpZ
+unsigned int eePromAddress_SpX = 1016;  // EEProm address for SpX  
+unsigned int eePromAddress_SpB = 1032;  // EEProm address for SpB 
+unsigned int eePromAddress_SyncZ = 1048;  // EEProm address for SyncZ 
+unsigned int eePromAddress_SyncX = 1064;  // EEProm address for SyncX 
+//unsigned int eePromAddress_Rec1_Z = 1080;  // EEProm address for Rec1_ZAxis 
+//unsigned int eePromAddress_Rec1_S = 1096;  // EEProm address for Rec1_Spindle 
+unsigned int eePromAddress_Sp = 1112;  // EEProm address for Sp 
+unsigned int eePromAddress_Index1 = 1128;  // EEProm address for Index1 
+unsigned int eePromAddress_Index2 = 1144;  // EEProm address for Index2 
+unsigned int eePromAddress_MoveZ = 1160;  // EEProm address for MoveZ 
+unsigned int eePromAddress_MoveX = 1176;  // EEProm address for MoveX 
 unsigned int eePromAddress_Rose = 1200; // EEProm address for Rose
+
+unsigned int eePromAddress_Reci = 1300;
 
 float distanceTotal_MoveZ = 0;
 float distanceTotal_MoveX = 0;
@@ -412,6 +369,8 @@ volatile float kRatio;
 float initialPosition_Axis = 0;
 int32_t endPosition_Spindle = 0;
 int32_t endPosition_Axis = 0;
+float degrees_Spindle = 0;
+float distance_Axis = 0;
 
 // Accuracy interval 
 constexpr unsigned recalcPeriod = 25'000; //?s  period for calculation of new target points. Straight lines between those points. 
@@ -425,29 +384,39 @@ int pageCallerId = 20;
 #define PAGE_SPB 2
 #define PAGE_SYNCZ 3
 #define PAGE_SYNCX 4
-#define PAGE_REC1_Z 5
-#define PAGE_REC1_S 6
+#define PAGE_RECI_AXIAL_Z 5
+#define PAGE_RECI_RADIAL_Z 6
 #define PAGE_SP 7
 #define PAGE_INDEX1 8
 #define PAGE_INDEX2 9
 #define PAGE_MOVEZ 10
 #define PAGE_MOVEX 11
 #define PAGE_ROSE 12
+#define PAGE_RECI_AXIAL_X 13
+#define PAGE_RECI_RADIAL_X 14
 
 // Config and Setup variables
 configs configMain;
-configPageSpZ configSpZ;
-configPageSpX configSpX;
-configPageSpB configSpB;
-configPageSyncZ configSyncZ;
-configPageSyncX configSyncX;
-configPageRec1_ZAxis configRec1_Z;
-configPageRec1_Spindle configRec1_S;
-configPageSp configSp;
-configPageIndex1 configIndex1;
-configPageIndex2 configIndex2;
-configPageMoveZ configMoveZ;
-configPageMoveX configMoveX;
+configSteppers configSpZ;
+configSteppers configSpX;
+configSteppers configSpB;
+configSteppers configSyncZ;
+configSteppers configSyncX;
+//configPageRec1 configRec1;
+//configPageRecZ configRecZ_Axis;
+//configSteppers configRecZ_Spindle;
+
+//configPageRec1b configAxialZ;
+//configPageRec1b configAxialX;
+//configPageRec1b configRadialZ;
+//configPageRec1b configRadialX;
+configPageReci configReci;
+
+configStepper configSp;
+configStepper configIndex1;
+configStepper configIndex2;
+configStepper configMoveZ;
+configStepper configMoveX;
 configPageRose configRose;
 
 // End Global Variables

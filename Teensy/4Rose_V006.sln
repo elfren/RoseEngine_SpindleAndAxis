@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.421
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RoseEngineSpindle", "4Rose_V006.vcxproj", "{27C7556F-D37E-494D-98C1-FA038C70FC79}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "4Rose_V006", "4Rose_V006.vcxproj", "{27C7556F-D37E-494D-98C1-FA038C70FC79}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,5 +24,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A7F96A5B-1C19-4F71-8396-C8BA22ABFBFF}
 	EndGlobalSection
 EndGlobal

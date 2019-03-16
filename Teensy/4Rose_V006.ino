@@ -48,25 +48,27 @@ void setup()
 	// Initialize Nextion LCD for 115200 baud
 	// Note: Nextion requires 3 0xFF bytes to signal end of transmission
 	// First run for Nextion must run at 9600.  Once the Nextion has been programmed for 115200, uncomment 115200 line and comment 9600 line.
-	// Nextion may use Serial1 or Serial1.
+	// Nextion may use Serial3 or Serial3.
 	////Serialxx1.begin(115200);
-	//Serial1.begin(9600);  
-	Serial1.begin(115200); //Nextion Serial baud rate set in Nextion pageSpB Preinitialize Event tab
-	Serial1.print("bauds=115200");
-	Serial1.write(0xFF);
-	Serial1.write(0xFF);
-	Serial1.write(0xFF);
+	//Serial3.begin(9600);  
+	Serial3.begin(115200); //Nextion Serial baud rate set in Nextion pageSpB Preinitialize Event tab
+	Serial3.print("bauds=115200");
+	Serial3.write(0xFF);
+	Serial3.write(0xFF);
+	Serial3.write(0xFF);
 	delay(50);
-	Serial1.print("bauds=115200");
-	Serial1.write(0xFF);
-	Serial1.write(0xFF);
-	Serial1.write(0xFF);
+	Serial3.print("bauds=115200");
+	Serial3.write(0xFF);
+	Serial3.write(0xFF);
+	Serial3.write(0xFF);
 	delay(50);
-	Serial1.print("bkcmd=0");  // Set Nextion to return NO replies to each command
-	Serial1.write(0xFF);
-	Serial1.write(0xFF);
-	Serial1.write(0xFF);
+	Serial3.print("bkcmd=0");  // Set Nextion to return NO replies to each command
+	Serial3.write(0xFF);
+	Serial3.write(0xFF);
+	Serial3.write(0xFF);
 	delay(50);
+
+	//Serial3.begin(115200);
 
 	// Update with values from EEProm
 	EEPROM.get(eePromAddress_Setup, configMain);
@@ -76,25 +78,19 @@ void setup()
 	EEPROM.get(eePromAddress_SpB, configSpB);
 	EEPROM.get(eePromAddress_SyncZ, configSyncZ);
 	EEPROM.get(eePromAddress_SyncX, configSyncX);
-	EEPROM.get(eePromAddress_Rec1_Z, configRec1_Z);
-	EEPROM.get(eePromAddress_Rec1_S, configRec1_S);
 	EEPROM.get(eePromAddress_Sp, configSp);
 	EEPROM.get(eePromAddress_Index1, configIndex1);
 	EEPROM.get(eePromAddress_Index2, configIndex2);
 	EEPROM.get(eePromAddress_MoveZ, configMoveZ);
 	EEPROM.get(eePromAddress_MoveX, configMoveX);
 	EEPROM.get(eePromAddress_Rose, configRose);
+	EEPROM.get(eePromAddress_Reci, configReci);
+	
+	
 
 	// Config as well as all other EEProm settings must be run from Nextion whenever Teensy is updated.  
 	// EEProm may contain invalid settings otherwise.
 
-	for (int i = 0; i < 3; i++) // Verify Teensy is operational
-	{
-		digitalWrite(LED_BUILTIN, HIGH);
-		delay(50);
-		digitalWrite(LED_BUILTIN, LOW);
-		delay(300);
-	}
 
 #ifdef FOUR_AXES
 	pinMode(PIN_SPINDLE_MS0, OUTPUT);
@@ -158,8 +154,8 @@ void setup()
 	//------------------------------
 	// Configure TeensyStep motors
 	teensyStep_Axis_X
-		.setMaxSpeed(configSpX.maxSpd_Axis_X)       // steps/s
-		.setAcceleration(configSpX.accel_Axis_X) // steps/s^2    
+		.setMaxSpeed(configSpX.maxSpd_Axis)       // steps/s
+		.setAcceleration(configSpX.accel_Axis) // steps/s^2    
 		.setStepPinPolarity(configMain.polarity_Axis_X ? (LOW) : (HIGH)); // driver expects active low pulses
 #endif // TWO_AXES_V2
 
@@ -171,8 +167,8 @@ void setup()
 		.setStepPinPolarity(configMain.enable_Spindle ? (LOW) : (HIGH)); // DRV8825 driver expects active low pulses
 
 	teensyStep_Axis_Z
-		.setMaxSpeed(configSyncZ.maxSpd_Axis_Z)       // steps/s
-		.setAcceleration(configSyncZ.accel_Axis_Z) // steps/s^2 
+		.setMaxSpeed(configSyncZ.maxSpd_Axis)       // steps/s
+		.setAcceleration(configSyncZ.accel_Axis) // steps/s^2 
 		.setStepPinPolarity(configMain.polarity_Axis_Z ? (LOW) : (HIGH)); // driver expects active low pulses
 
 	// Initialize Limit switches
@@ -205,30 +201,14 @@ void setup()
 	sdValid = SD.begin(PIN_SPI_CS);
 #endif // FOUR_AXES
 
-	if (sdValid)
+	for (int i = 0; i < 3; i++) // Verify Teensy is operational
 	{
-	////	SerialPrint("pageIndex2.vaDisplayFile.val=1"); // Nextion may not get the first packet
-	////	Serial1.write(0xff);
-	////	Serial1.write(0xff);
-	////	Serial1.write(0xff);
-	////	delay(50);
-	////	Serial1.print("pageIndex2.vaDisplayFile.val=1");
-	////	Serial1.write(0xff);
-	////	Serial1.write(0xff);
-	////	Serial1.write(0xff);
+		digitalWrite(LED_BUILTIN, HIGH);
+		delay(50);
+		digitalWrite(LED_BUILTIN, LOW);
+		delay(300);
 	}
-	else
-	{
-	////	SerialPrint("pageIndex2.vaDisplayFile.val=0"); // Nextion may not get the first packet
-	////	Serial1.write(0xff);
-	////	Serial1.write(0xff);
-	////	Serial1.write(0xff);
-	////	delay(50);
-	////	Serial1.print("pageIndex2.vaDisplayFile.val=0");
-	////	Serial1.write(0xff);
-	////	Serial1.write(0xff);
-	////	Serial1.write(0xff);
-	}
+
 }
 
 /// <summary>
@@ -240,18 +220,20 @@ void setup()
 /// <returns></returns>
 void loop()
 {
-	// Select serial port: Serial = USB connected, Serial1 = Nextion LCD connected
+	// Select serial port: Serial = USB connected, Serial3 = Nextion LCD connected
 	if (Serial.available() > 0)
 	{
 		// USB connected 
 		serialId = 0;
 	}
-	else if (Serial1.available() > 0)
+	else if (Serial3.available() > 0)
 	{
 		//Nextion connected
 		serialId = 1;
+
+
 	}
-	serialId = 3;
+	serialId = 1;
 
 	// All Nextion incoming data packets are terminated with one 0xFF byte
 	if (serialId <9) // If serial data is available, parse the data
@@ -283,60 +265,93 @@ void loop()
 				{
 					configSpZ.maxSpd_Spindle = GetSerialFloat(serialId);
 					EEPROM.put(eePromAddress_SpZ, configSpZ);
+#ifdef DEBUG
+					Serial.print("maxSpd:");
+					Serial.println(configSpZ.maxSpd_Spindle);
+#endif // DEBUG
 					break;
 				}
 				case PAGE_SPX:
 				{
 					configSpX.maxSpd_Spindle = GetSerialFloat(serialId);
 					EEPROM.put(eePromAddress_SpX, configSpX);
+#ifdef DEBUG
+					Serial.print("maxSpd:");
+					Serial.println(configSpX.maxSpd_Spindle);
+#endif // DEBUG
 					break;
 				}
 				case PAGE_SPB:
 				{
 					configSpB.maxSpd_Spindle = GetSerialFloat(serialId);
 					EEPROM.put(eePromAddress_SpB, configSpB);
+#ifdef DEBUG
+					Serial.print("maxSpd:");
+					Serial.println(configSpB.maxSpd_Spindle);
+#endif // DEBUG
 					break;
 				}
 				case PAGE_SYNCZ:
 				{
 					configSyncZ.maxSpd_Spindle = GetSerialFloat(serialId);
 					EEPROM.put(eePromAddress_SyncZ, configSyncZ);
+#ifdef DEBUG
+					Serial.print("maxSpd:");
+					Serial.println(configSyncZ.maxSpd_Spindle);
+#endif // DEBUG
 					break;
 				}
 				case PAGE_SYNCX:
 				{
 					configSyncX.maxSpd_Spindle = GetSerialFloat(serialId);
 					EEPROM.put(eePromAddress_SyncX, configSyncX);
+#ifdef DEBUG
+					Serial.print("maxSpd:");
+					Serial.println(configSyncX.maxSpd_Spindle);
+#endif // DEBUG
 					break;
 				}
-				case PAGE_REC1_Z:
+				case PAGE_RECI_AXIAL_Z:
+				case PAGE_RECI_RADIAL_Z:
+				case PAGE_RECI_AXIAL_X:
+				case PAGE_RECI_RADIAL_X:
 				{
-					configRec1_Z.maxSpd_Spindle = GetSerialFloat(serialId);
-					EEPROM.put(eePromAddress_Rec1_Z, configRec1_Z);
-					break;
-				}
-				case PAGE_REC1_S:
-				{
-					configRec1_S.maxSpd_Spindle = GetSerialFloat(serialId);
-					EEPROM.put(eePromAddress_Rec1_S, configRec1_S);
+					configReci.maxSpd_Spindle = GetSerialFloat(serialId);
+					EEPROM.put(eePromAddress_Reci, configReci);
+#ifdef DEBUG
+					Serial.print("maxSpd:");
+					Serial.println(configReci.maxSpd_Spindle);
+#endif // DEBUG
 					break;
 				}
 				case PAGE_SP:
 				{
-					configSp.maxSpd_Spindle = GetSerialFloat(serialId);
+					configSp.maxSpd = GetSerialFloat(serialId);
 					EEPROM.put(eePromAddress_Sp, configSp);
+#ifdef DEBUG
+					Serial.print("maxSpd:");
+					Serial.println(configSp.maxSpd);
+#endif // DEBUG
 					break;
 				}
 				case PAGE_INDEX1:
 				{
-					configIndex1.maxSpd_Spindle = GetSerialFloat(serialId);
+					configIndex1.maxSpd = GetSerialFloat(serialId);
 					EEPROM.put(eePromAddress_Index1, configIndex1);
+#ifdef DEBUG
+					Serial.print("maxSpd:");
+					Serial.println(configIndex1.maxSpd);
+#endif // DEBUG
 					break;
 				}
 				case PAGE_INDEX2:
 				{
-					configIndex2.maxSpd_Spindle = GetSerialFloat(serialId);
+					configIndex2.maxSpd = GetSerialFloat(serialId);
 					EEPROM.put(eePromAddress_Index2, configIndex2);
+#ifdef DEBUG
+					Serial.print("maxSpd:");
+					Serial.println(configIndex2.maxSpd);
+#endif // DEBUG
 					break;
 				}
 			}
@@ -351,60 +366,94 @@ void loop()
 				{
 					configSpZ.accel_Spindle = GetSerialFloat(serialId);
 					EEPROM.put(eePromAddress_SpZ, configSpZ);
+#ifdef DEBUG
+					Serial.print("accel_Spindle:");
+					Serial.println(configSpZ.accel_Spindle);
+#endif // DEBUG
 					break;
 				}
 				case PAGE_SPX:
 				{
 					configSpX.accel_Spindle = GetSerialFloat(serialId);
 					EEPROM.put(eePromAddress_SpX, configSpX);
+#ifdef DEBUG
+					Serial.print("accel_Spindle:");
+					Serial.println(configSpX.accel_Spindle);
+#endif // DEBUG
 					break;
 				}
 				case PAGE_SPB:
 				{
 					configSpB.accel_Spindle = GetSerialFloat(serialId);
 					EEPROM.put(eePromAddress_SpB, configSpB);
+#ifdef DEBUG
+					Serial.print("accel_Spindle:");
+					Serial.println(configSpB.accel_Spindle);
+#endif // DEBUG
 					break;
 				}
 				case PAGE_SYNCZ:
 				{
 					configSyncZ.accel_Spindle = GetSerialFloat(serialId);
 					EEPROM.put(eePromAddress_SyncZ, configSyncZ);
+#ifdef DEBUG
+					Serial.print("accel_Spindle:");
+					Serial.println(configSyncZ.accel_Spindle);
+#endif // DEBUG
 					break;
 				}
 				case PAGE_SYNCX:
 				{
 					configSyncX.accel_Spindle = GetSerialFloat(serialId);
 					EEPROM.put(eePromAddress_SyncX, configSyncX);
+#ifdef DEBUG
+					Serial.print("accel_Spindle:");
+					Serial.println(configSyncX.accel_Spindle);
+#endif // DEBUG
 					break;
 				}
-				case PAGE_REC1_Z:
+				case PAGE_RECI_AXIAL_Z:
+				case PAGE_RECI_RADIAL_Z:
+				case PAGE_RECI_AXIAL_X:
+				case PAGE_RECI_RADIAL_X:
 				{
-					configRec1_Z.accel_Spindle = GetSerialFloat(serialId);
-					EEPROM.put(eePromAddress_Rec1_Z, configRec1_Z);
-					break;
-				}
-				case PAGE_REC1_S:
-				{
-					configRec1_S.accel_Spindle = GetSerialFloat(serialId);
-					EEPROM.put(eePromAddress_Rec1_S, configRec1_S);
+					configReci.accel_Spindle = GetSerialFloat(serialId);
+					Serial.println(configReci.accel_Spindle);
+					EEPROM.put(eePromAddress_Reci, configReci);
+#ifdef DEBUG
+					Serial.print("accel_Spindle:");
+					Serial.println(configReci.accel_Spindle);
+#endif // DEBUG
 					break;
 				}
 				case PAGE_SP:
 				{
-					configSp.accel_Spindle = GetSerialFloat(serialId);
+					configSp.accel = GetSerialFloat(serialId);
 					EEPROM.put(eePromAddress_Sp, configSp);
+#ifdef DEBUG
+					Serial.print("accel:");
+					Serial.println(configSp.accel);
+#endif // DEBUG
 					break;
 				}
 				case PAGE_INDEX1:
 				{
-					configIndex1.accel_Spindle = GetSerialFloat(serialId);
+					configIndex1.accel = GetSerialFloat(serialId);
 					EEPROM.put(eePromAddress_Index1, configIndex1);
+#ifdef DEBUG
+					Serial.print("accel:");
+					Serial.println(configIndex1.accel);
+#endif // DEBUG
 					break;
 				}
 				case PAGE_INDEX2:
 				{
-					configIndex2.accel_Spindle = GetSerialFloat(serialId);
+					configIndex2.accel = GetSerialFloat(serialId);
 					EEPROM.put(eePromAddress_Index2, configIndex2);
+#ifdef DEBUG
+					Serial.print("accel:");
+					Serial.println(configIndex2.accel);
+#endif // DEBUG
 					break;
 				}
 			}
@@ -415,6 +464,10 @@ void loop()
 		{
 			configRose.maxSpd_Axis_Z = (int)GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Rose, configRose);
+#ifdef DEBUG
+			Serial.print("maxSpd_Axis_Z:");
+			Serial.println(configRose.maxSpd_Axis_Z);
+#endif // DEBUG
 			break;
 		}
 		case 61: // = Start microSD (Currently not used)
@@ -433,8 +486,12 @@ void loop()
 		}
 		case 62: // > Greater than - Set moveZ_ speed
 		{
-			configMain.speedPercent_MoveZ = GetSerialInteger();
+			configMain.speedPercent_MoveZ = (int)GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("speedPercent_MoveZ:");
+			Serial.println(configMain.speedPercent_MoveZ);
+#endif // DEBUG
 			break;
 		}
 		case 63: // ? Question mark - moveZ_Distance (Text)
@@ -443,12 +500,20 @@ void loop()
 			float newDistance = GetSerialFloat(serialId);
 			configMain.distance_MoveZ = newDistance;
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("distance_MoveZ:");
+			Serial.println(configMain.distance_MoveZ);
+#endif // DEBUG
 			break;
 		}
 		case 64: // @ - Rose: Spindle RPM
 		{
-			configRose.speedPercent_Spindle = GetSerialInteger();
+			configRose.speedPercent_Spindle = (int)GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Rose, configRose);
+#ifdef DEBUG
+			Serial.print("speedPercent_Spindle:");
+			Serial.println(configRose.speedPercent_Spindle);
+#endif // DEBUG
 			break;
 		}
 		case 65: // A - Enable spindle stepper
@@ -469,8 +534,12 @@ void loop()
 		}
 		case 68: // D - SyncZ Spindle Speed
 		{
-			configMain.speedPercentSpindle_SyncZ = GetSerialInteger();
+			configMain.speedPercentSpindle_SyncZ = (int)GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("speedPercentSpindle_SyncZ:");
+			Serial.println(configMain.speedPercentSpindle_SyncZ);
+#endif // DEBUG
 			break;
 		}
 		case 69: //E - Index2 by divisions
@@ -493,21 +562,21 @@ void loop()
 				}
 				double newIndexSize = GetDataFromSD(lineNumber);
 				configMain.size_Index2 = (configMain.microsteps_Spindle * configMain.steps360_Spindle * configMain.gearRatio_Spindle) * (newIndexSize / 360);
-				Serial1.print("pageIndex2.t7.txt="); // Nextion may not get the first packet
-				Serial1.write(0x22);
-				Serial1.print(newIndexSize);
-				Serial1.write(0x22);
-				Serial1.write(0xff);
-				Serial1.write(0xff);
-				Serial1.write(0xff);
+				Serial3.print("pageIndex2.t7.txt="); // Nextion may not get the first packet
+				Serial3.write(0x22);
+				Serial3.print(newIndexSize);
+				Serial3.write(0x22);
+				Serial3.write(0xff);
+				Serial3.write(0xff);
+				Serial3.write(0xff);
 				delay(100);
-				Serial1.print("pageIndex2.t7.txt=");
-				Serial1.write(0x22);
-				Serial1.print(newIndexSize);
-				Serial1.write(0x22);
-				Serial1.write(0xff);
-				Serial1.write(0xff);
-				Serial1.write(0xff);
+				Serial3.print("pageIndex2.t7.txt=");
+				Serial3.write(0x22);
+				Serial3.print(newIndexSize);
+				Serial3.write(0x22);
+				Serial3.write(0xff);
+				Serial3.write(0xff);
+				Serial3.write(0xff);
 				delay(100);
 			}
 
@@ -531,21 +600,21 @@ void loop()
 				// Get size from file
 				double newIndexSize = GetDataFromSD(lineNumber);
 				configMain.size_Index2 = (configMain.microsteps_Spindle * configMain.steps360_Spindle * configMain.gearRatio_Spindle) * (newIndexSize / 360);
-				Serial1.print("pageIndex2.t7.txt=");
-				Serial1.write(0x22);
-				Serial1.print(newIndexSize);
-				Serial1.write(0x22);
-				Serial1.write(0xff);
-				Serial1.write(0xff);
-				Serial1.write(0xff);
+				Serial3.print("pageIndex2.t7.txt=");
+				Serial3.write(0x22);
+				Serial3.print(newIndexSize);
+				Serial3.write(0x22);
+				Serial3.write(0xff);
+				Serial3.write(0xff);
+				Serial3.write(0xff);
 				delay(100);
-				Serial1.print("pageIndex2.t7.txt=");
-				Serial1.write(0x22);
-				Serial1.print(newIndexSize);
-				Serial1.write(0x22);
-				Serial1.write(0xff);
-				Serial1.write(0xff);
-				Serial1.write(0xff);
+				Serial3.print("pageIndex2.t7.txt=");
+				Serial3.write(0x22);
+				Serial3.print(newIndexSize);
+				Serial3.write(0x22);
+				Serial3.write(0xff);
+				Serial3.write(0xff);
+				Serial3.write(0xff);
 				delay(100);
 			}
 
@@ -558,14 +627,22 @@ void loop()
 		}
 		case 72: // H - Set Index2 speed
 		{
-			configMain.speedPercent_Index2 = GetSerialInteger();
+			configMain.speedPercent_Index2 = (int)GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("speedPercent_Index2:");
+			Serial.println(configMain.speedPercent_Index2);
+#endif // DEBUG
 			break;
 		}
 		case 73: // I-SyncZ Helix Type
 		{
 			configMain.helixType_SyncZ = GetSerialInteger();
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("helixType_SyncZ:");
+			Serial.println(configMain.helixType_SyncZ);
+#endif // DEBUG
 			break;
 		}
 		case 74: // J - SyncZ In
@@ -645,6 +722,10 @@ void loop()
 			}
 
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("size_Index2:");
+			Serial.println(configMain.size_Index2);
+#endif // DEBUG
 			break;
 		}
 		case 78: // N - Sync Spindle Direction
@@ -671,8 +752,12 @@ void loop()
 		}
 		case 79: // O - Sync Axis Speed
 		{
-			configMain.speedPercentAxis_SyncZ = GetSerialInteger();
+			configMain.speedPercentAxis_SyncZ = (int)GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("speedPercentAxis_SyncZ:");
+			Serial.println(configMain.speedPercentAxis_SyncZ);
+#endif // DEBUG
 			break;
 		}
 		case 80: // P - Index1 by divisions
@@ -704,14 +789,22 @@ void loop()
 		}
 		case 83: // S - Set Index1 speed
 		{
-			configMain.speedPercent_Index1 = GetSerialInteger();
+			configMain.speedPercent_Index1 = (int)GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("speedPercent_Index1:");
+			Serial.println(configMain.speedPercent_Index1);
+#endif // DEBUG
 			break;
 		}
 		case 84: // T - Rose: n
 		{
 			configRose.n = (int)GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Rose, configRose);
+#ifdef DEBUG
+			Serial.print("n:");
+			Serial.println(configRose.n);
+#endif // DEBUG
 			break;
 		}
 		case 85: //U - MoveZ total distance
@@ -720,6 +813,10 @@ void loop()
 			distanceTotal_MoveZ = GetSerialFloat(serialId);
 
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("distanceTotal_MoveZ:");
+			Serial.println(distanceTotal_MoveZ);
+#endif // DEBUG
 			break;
 		}
 		case 86: // V - Sync Axis Direction
@@ -750,6 +847,7 @@ void loop()
 			configMain.size_Index1 = (configMain.microsteps_Spindle * configMain.steps360_Spindle * configMain.gearRatio_Spindle) * (newIndexSize / 360);
 			configMain.type_Index1 = BY_DEGREES;
 			EEPROM.put(eePromAddress_Setup, configMain);
+
 			break;
 		}
 		case 88:  // X - Update Index1 size
@@ -767,19 +865,29 @@ void loop()
 			}
 
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("newIndexSize_Index1:");
+			Serial.println(newIndexSize);
+			Serial.print("size_Index1:");
+			Serial.println(configMain.size_Index1);
+#endif // DEBUG
 			break;
 		}
 		case 89:  // Y - Rose: d
 		{
 			configRose.d = (int)GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Rose, configRose);
+#ifdef DEBUG
+			Serial.print("d:");
+			Serial.println(configRose.d);
+#endif // DEBUG
 			break;
 		}
 		case 90:  // Z - Main Axis Clockwise
 		{
-			// Get current axis speed 
-			configMain.speedPercent_Axis_Z = GetSerialInteger();
-			EEPROM.put(eePromAddress_Setup, configMain);
+			//// Get current axis speed 
+			//configMain.speedPercent_Axis_Z = GetSerialInteger();
+			//EEPROM.put(eePromAddress_Setup, configMain);
 			RunTwoSteppers_SpZ(
 				DIR_CW,
 				DIR_CW,
@@ -788,9 +896,9 @@ void loop()
 		}
 		case 91:  // [ - Z Axis Counterclockwise
 		{
-			// Set Speed
-			configMain.speedPercent_Axis_Z = GetSerialInteger();
-			EEPROM.put(eePromAddress_Setup, configMain);
+			//// Set Speed
+			//configMain.speedPercent_Axis_Z = GetSerialInteger();
+			//EEPROM.put(eePromAddress_Setup, configMain);
 
 			// Run
 			accelStep_Axis_Z.enableOutputs();
@@ -869,8 +977,12 @@ void loop()
 		}
 		case 97: // a - Z Axis Speed
 		{
-			configMain.speedPercent_Axis_Z = GetSerialInteger();
+			configMain.speedPercent_Axis_Z = (int)GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("speedPercent_Axis_Z:");
+			Serial.println(configMain.speedPercent_Axis_Z);
+#endif // DEBUG
 			break;
 		}
 		case 98: // b - Test EEPROM settings Setup screen
@@ -880,48 +992,60 @@ void loop()
 		}
 		case 99: // c - Z Axis Stop
 		{
-			Serial1.print("pageSpZ.va2.val=0");
-			Serial1.write(0xff);
-			Serial1.write(0xff);
-			Serial1.write(0xff);
+			Serial3.print("pageSpZ.va2.val=0");
+			Serial3.write(0xff);
+			Serial3.write(0xff);
+			Serial3.write(0xff);
 			break;
 		}
 		case 100: // d - Sp2 Clockwise
 		{
-			// Set Speed
-			configMain.speedPercent_Sp2 = GetSerialInteger();
-			EEPROM.put(eePromAddress_Setup, configMain);
+			//// Set Speed
+			//configMain.speedPercent_Sp2 = GetSerialInteger();
+			//EEPROM.put(eePromAddress_Setup, configMain);
 
 			// Run
-			RunStepper(DIR_CW, accelStep_Spindle, configSp.accel_Spindle, configMain.speedPercent_Sp2, configSp.maxSpd_Spindle);
+			RunStepper(DIR_CW, accelStep_Spindle, configSp.accel, configMain.speedPercent_Sp2, configSp.maxSpd);
 			break;
 		}
 		case 101: // e - Sp2 CounterClockwise
 		{
-			// Set Speed
-			configMain.speedPercent_Sp2 = GetSerialInteger();
-			EEPROM.put(eePromAddress_Setup, configMain);
+			//// Set Speed
+			//configMain.speedPercent_Sp2 = GetSerialInteger();
+			//EEPROM.put(eePromAddress_Setup, configMain);
 
 			// Run
-			RunStepper(DIR_CCW, accelStep_Spindle, configSp.accel_Spindle, configMain.speedPercent_Sp2, configSp.maxSpd_Spindle);
+			RunStepper(DIR_CCW, accelStep_Spindle, configSp.accel, configMain.speedPercent_Sp2, configSp.maxSpd);
 			break;
 		}
 		case 102: // f - Set Sp2 Speed
 		{
-			configMain.speedPercent_Sp2 = GetSerialInteger();
+			configMain.speedPercent_Sp2 = (int)GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("speedPercent_Sp2:");
+			Serial.println(configMain.speedPercent_Sp2);
+#endif // DEBUG
 			break;
 		}
 		case 103: // g - Rose: Spindle MaxSpd
 		{
 			configRose.maxSpd_Spindle = (int)GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Rose, configRose);
+#ifdef DEBUG
+			Serial.print("maxSpd_Spindle:");
+			Serial.println(configRose.maxSpd_Spindle);
+#endif // DEBUG
 			break;
 		}
 		case 104: // h - Rose: Spindle Accel
 		{
 			configRose.accel_Spindle = (int)GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Rose, configRose);
+#ifdef DEBUG
+			Serial.print("accel_Spindle:");
+			Serial.println(configRose.accel_Spindle);
+#endif // DEBUG
 			break;
 		}
 		case 105: // i - 
@@ -960,8 +1084,8 @@ void loop()
 		}
 		case 106: // j - Move Z counter clockwise
 		{
-			configMain.speedPercent_MoveZ = GetSerialInteger();
-			EEPROM.put(eePromAddress_Setup, configMain);
+			//configMain.speedPercent_MoveZ = GetSerialInteger();
+			//EEPROM.put(eePromAddress_Setup, configMain);
 #ifdef FOUR_AXES
 			// Run
 			MoveAxis(ID_AXIS_Z, DIR_CCW);
@@ -970,9 +1094,9 @@ void loop()
 		}
 		case 107: // k - Z Spindle Clockwise
 		{
-			// Set Speed
-			configMain.speedPercentSpindle_SpZ = GetSerialInteger();
-			EEPROM.put(eePromAddress_Setup, configMain);
+			//// Set Speed
+			//configMain.speedPercentSpindle_SpZ = GetSerialInteger();
+			//EEPROM.put(eePromAddress_Setup, configMain);
 
 			RunTwoSteppers_SpZ(
 				DIR_CW,
@@ -982,9 +1106,9 @@ void loop()
 		}
 		case 108: // l - Z spindle counter clockwise
 		{
-			// Set Speed
-			configMain.speedPercentSpindle_SpZ = GetSerialInteger();
-			EEPROM.put(eePromAddress_Setup, configMain);
+			//// Set Speed
+			//configMain.speedPercentSpindle_SpZ = GetSerialInteger();
+			//EEPROM.put(eePromAddress_Setup, configMain);
 
 			// Run
 			RunTwoSteppers_SpZ(
@@ -1000,27 +1124,40 @@ void loop()
 		}
 		case 110: // n - Set SpZ (Main) Spindle Speed
 		{
-			configMain.speedPercentSpindle_SpZ = GetSerialInteger();
+			configMain.speedPercentSpindle_SpZ = (int)GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("speedPercentSpindle_SpZ:");
+			Serial.println(configMain.speedPercentSpindle_SpZ);
+#endif // DEBUG
 			break;
 		}
 		case 111: // o - Rose: Spindle Steps per rev
 		{
-			configRose.speedPercent_Axis = GetSerialInteger();
+			configRose.speedPercent_Axis = (int)GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Rose, configRose);
+#ifdef DEBUG
+			Serial.print("speedPercent_Axis:");
+			Serial.println(configRose.speedPercent_Axis);
+#endif // DEBUG
 			break;
 		}
 		case 112: // p - Z/Sync Spindle Microsteps
 		{
-			configMain.microsteps_Spindle = GetSerialFloat(serialId);
+			//ToDo:
+			configMain.microsteps_Spindle = (int)GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Setup, configMain);
 			SetMicrosteppingMode(configMain.microsteps_Spindle, PIN_SPINDLE_MS0, PIN_SPINDLE_MS1, PIN_SPINDLE_MS2);
+#ifdef DEBUG
+			Serial.print("microsteps_Spindle:");
+			Serial.println(configMain.microsteps_Spindle);
+#endif // DEBUG
 			break;
 		}
 		case 113: // q - Move Z clockwise
 		{
-			configMain.speedPercent_MoveZ = GetSerialInteger();
-			EEPROM.put(eePromAddress_Setup, configMain);
+			//configMain.speedPercent_MoveZ = GetSerialInteger();
+			//EEPROM.put(eePromAddress_Setup, configMain);
 #ifdef FOUR_AXES
 			// Run
 			MoveAxis(ID_AXIS_Z,DIR_CW);
@@ -1029,14 +1166,22 @@ void loop()
 		}
 		case 114: // r - Main/Sync/Sp2 Spindle FullSteps
 		{
-			configMain.steps360_Spindle = GetSerialFloat(serialId);
+			configMain.steps360_Spindle = (int)GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("steps360_Spindle:");
+			Serial.println(configMain.steps360_Spindle);
+#endif // DEBUG
 			break;
 		}
 		case 115: // s - Main/Sync/Sp2 Spindle Gear Ratio
 		{
 			configMain.gearRatio_Spindle = GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("gearRatio_Spindle:");
+			Serial.println(configMain.gearRatio_Spindle);
+#endif // DEBUG
 			break;
 		}
 //#ifdef FOUR_AXES
@@ -1047,8 +1192,12 @@ void loop()
 			{
 				case PAGE_SPB:
 				{
-					configSpB.accel_Axis_B = GetSerialFloat(serialId);
+					configSpB.accel_Axis = GetSerialFloat(serialId);
 					EEPROM.put(eePromAddress_SpB, configSpB);
+#ifdef DEBUG
+					Serial.print("accel_Axis:");
+					Serial.println(configSpB.accel_Axis);
+#endif // DEBUG
 					break;
 				}
 			}
@@ -1061,8 +1210,12 @@ void loop()
 			{
 				case PAGE_SPB:
 				{
-					configSpB.maxSpd_Axis_B = GetSerialFloat(serialId);
+					configSpB.maxSpd_Axis = GetSerialFloat(serialId);
 					EEPROM.put(eePromAddress_SpB, configSpB);
+#ifdef DEBUG
+					Serial.print("maxSpd_Axis:");
+					Serial.println(configSpB.maxSpd_Axis);
+#endif // DEBUG
 					break;
 				}
 			}
@@ -1070,41 +1223,66 @@ void loop()
 		}
 		case 118: // v - B axis microsteps
 		{
-			configMain.microsteps_Axis_B = GetSerialFloat(serialId);
+			configMain.microsteps_Axis_B = (int)GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Setup, configMain);
+			//ToDo:
 			//SetMicrosteppingMode(configMain.microsteps_Axis_B, PIN_AXIS_B_MS0, PIN_AXIS_B_MS1, PIN_AXIS_B_MS2);
+#ifdef DEBUG
+			Serial.print("microsteps_Axis_B:");
+			Serial.println(configMain.microsteps_Axis_B);
+#endif // DEBUG
 			break;
 		}
 		case 119: // w - B axis Steps/360 
 		{
-			configMain.steps360_Axis_B = GetSerialFloat(serialId);
+			configMain.steps360_Axis_B = (int)GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("steps360_Axis_B:");
+			Serial.println(configMain.steps360_Axis_B);
+#endif // DEBUG
 			break;
 		}
 		case 120: // x - B axis Gear Ratio
 		{
 			configMain.gearRatio_AxisB = GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("gearRatio_AxisB:");
+			Serial.println(configMain.gearRatio_AxisB);
+#endif // DEBUG
 			break;
 		}
 //#endif // FOUR_AXES
 		case 121: // y - Z Axis Microsteps
 		{
-			configMain.microsteps_Axis_Z = GetSerialFloat(serialId);
+			configMain.microsteps_Axis_Z = (int)GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Setup, configMain);
 			SetMicrosteppingMode(configMain.microsteps_Axis_Z, PIN_AXIS_Z_MS0, PIN_AXIS_Z_MS1, PIN_AXIS_Z_MS2);
+#ifdef DEBUG
+			Serial.print("microsteps_Axis_Z:");
+			Serial.println(configMain.microsteps_Axis_Z);
+#endif // DEBUG
 			break;
 		}
 		case 122: // z - Z Axis FullSteps
 		{
-			configMain.steps360_Axis_Z = GetSerialFloat(serialId);
+			configMain.steps360_Axis_Z = (int)GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("steps360_Axis_Z:");
+			Serial.println(configMain.steps360_Axis_Z);
+#endif // DEBUG
 			break;
 		}
 		case 123: // { - Z Distance per revolution
 		{
 			configMain.distancePerRev_AxisZ = GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("distancePerRev_AxisZ:");
+			Serial.println(configMain.distancePerRev_AxisZ);
+#endif // DEBUG
 			break;
 		}
 		case 124: // | - Z Axis Acceleration
@@ -1114,32 +1292,54 @@ void loop()
 			{
 				case PAGE_SPZ:
 				{
-					configSpZ.accel_Axis_Z = GetSerialFloat(serialId);
+					configSpZ.accel_Axis = GetSerialFloat(serialId);
 					EEPROM.put(eePromAddress_SpZ, configSpZ);
+#ifdef DEBUG
+					Serial.print("accel_Axis:");
+					Serial.println(configSpZ.accel_Axis);
+#endif // DEBUG
 					break;
 				}
 				case PAGE_SYNCZ:
 				{
-					configSyncZ.accel_Axis_Z = GetSerialFloat(serialId);
+					configSyncZ.accel_Axis = GetSerialFloat(serialId);
 					EEPROM.put(eePromAddress_SyncZ, configSyncZ);
+#ifdef DEBUG
+					Serial.print("accel_Axis:");
+					Serial.println(configSyncZ.accel_Axis);
+#endif // DEBUG
 					break;
 				}
-				case PAGE_REC1_Z:
+				case PAGE_RECI_AXIAL_Z:
+				case PAGE_RECI_RADIAL_Z:
 				{
-					configRec1_Z.accel_Axis_Z = GetSerialFloat(serialId);
-					EEPROM.put(eePromAddress_Rec1_Z, configRec1_Z);
+					configReci.accel_Axis_Z = GetSerialFloat(serialId);
+					EEPROM.put(eePromAddress_Reci, configReci);
+#ifdef DEBUG
+					Serial.print("accel_Axis_Z:");
+					Serial.println(configReci.accel_Axis_Z);
+#endif // DEBUG
 					break;
 				}
-				case PAGE_REC1_S:
+				case PAGE_RECI_AXIAL_X:
+				case PAGE_RECI_RADIAL_X:
 				{
-					configRec1_S.accel_Axis_Z = GetSerialFloat(serialId);
-					EEPROM.put(eePromAddress_Rec1_S, configRec1_S);
+					configReci.accel_Axis_X = GetSerialFloat(serialId);
+					EEPROM.put(eePromAddress_Reci, configReci);
+#ifdef DEBUG
+					Serial.print("accel_Axis_X:");
+					Serial.println(configReci.accel_Axis_X);
+#endif // DEBUG
 					break;
 				}
 				case PAGE_MOVEZ:
 				{
-					configMoveZ.accel_Axis_Z = GetSerialFloat(serialId);
+					configMoveZ.accel = GetSerialFloat(serialId);
 					EEPROM.put(eePromAddress_MoveZ, configMoveZ);
+#ifdef DEBUG
+					Serial.print("accel:");
+					Serial.println(configMoveZ.accel);
+#endif // DEBUG
 					break;
 				}
 			}
@@ -1150,10 +1350,22 @@ void loop()
 		{
 			configRose.accel_Axis_Z = (int)GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Rose, configRose);
+#ifdef DEBUG
+			Serial.print("accel_Axis_Z:");
+			Serial.println(configRose.accel_Axis_Z);
+#endif // DEBUG
 			break;
 		}
 		case 126: // ~ - Test EEPROM settings Config screen
 		{
+			SerialPrint("pageConfig.t19.txt=");
+			SerialWrite(0x22);
+			SerialPrint("Config");
+			SerialWrite(0x22);
+			SerialWrite(0xff);
+			SerialWrite(0xff);
+			SerialWrite(0xff);
+			delay(2000);
 			TestEEPROMConfig();
 			break;
 		}
@@ -1295,22 +1507,30 @@ void loop()
 		}
 		case 161: // ¡ - Sp-X spindle speed
 		{
-			configMain.speedPercentSpindle_SpX = GetSerialInteger();
+			configMain.speedPercentSpindle_SpX = (int)GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("speedPercentSpindle_SpX:");
+			Serial.println(configMain.speedPercentSpindle_SpX);
+#endif // DEBUG
 			break;
 		}
 		case 162: // ¢ - Sp-X axis speed
 		{
-			configMain.speedPercent_Axis_X = GetSerialInteger();
+			configMain.speedPercent_Axis_X = (int)GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("speedPercent_Axis_X:");
+			Serial.println(configMain.speedPercent_Axis_X);
+#endif // DEBUG
 			break;
 		}
 		case 163: // £ - Sp-X spindle CCW
 		{
 			// Set Speed
-			configMain.speedPercentSpindle_SpX = GetSerialInteger();
-			accelStep_Spindle.setCurrentPosition(0);
-			EEPROM.put(eePromAddress_Setup, configMain);
+			//configMain.speedPercentSpindle_SpX = GetSerialInteger();
+			//accelStep_Spindle.setCurrentPosition(0);
+			//EEPROM.put(eePromAddress_Setup, configMain);
 
 			RunTwoSteppers_SpX(
 				DIR_CCW,
@@ -1320,10 +1540,10 @@ void loop()
 		}
 		case 164: // ¤ - Sp-X spindle CW
 		{
-			// Set Speed
-			configMain.speedPercentSpindle_SpX = GetSerialInteger();
-			accelStep_Spindle.setCurrentPosition(0);
-			EEPROM.put(eePromAddress_Setup, configMain);
+			//// Set Speed
+			//configMain.speedPercentSpindle_SpX = GetSerialInteger();
+			//accelStep_Spindle.setCurrentPosition(0);
+			//EEPROM.put(eePromAddress_Setup, configMain);
 
 			RunTwoSteppers_SpX(
 				DIR_CW,
@@ -1333,9 +1553,9 @@ void loop()
 		}
 		case 165: // ¥ - Sp-X Axis CCW
 		{
-			// Set Speed
-			configMain.speedPercent_Axis_X = GetSerialInteger();
-			EEPROM.put(eePromAddress_Setup, configMain);
+			//// Set Speed
+			//configMain.speedPercent_Axis_X = GetSerialInteger();
+			//EEPROM.put(eePromAddress_Setup, configMain);
 
 			// Run
 			accelStep_Axis_X.enableOutputs();
@@ -1347,9 +1567,9 @@ void loop()
 		}
 		case 166: // ¦ - Sp-X Axis CW
 		{
-			// Set Speed
-			configMain.speedPercent_Axis_X = GetSerialInteger();
-			EEPROM.put(eePromAddress_Setup, configMain);
+			//// Set Speed
+			//configMain.speedPercent_Axis_X = GetSerialInteger();
+			//EEPROM.put(eePromAddress_Setup, configMain);
 
 			// Run
 			accelStep_Axis_X.enableOutputs();
@@ -1363,22 +1583,30 @@ void loop()
 
 		case 167: // § - Sp-B spindle speed
 		{
-			configMain.speedPercentSpindle_SpB = GetSerialInteger();
+			configMain.speedPercentSpindle_SpB = (int)GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("speedPercentSpindle_SpB:");
+			Serial.println(configMain.speedPercentSpindle_SpB);
+#endif // DEBUG
 			break;
 		}
 		case 168: // ¨ - Sp-B axis speed
 		{
-			configMain.speedPercent_Axis_B = GetSerialInteger();
+			configMain.speedPercent_Axis_B = (int)GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("speedPercent_Axis_B:");
+			Serial.println(configMain.speedPercent_Axis_B);
+#endif // DEBUG
 			break;
 		}
 		case 169: // © - Sp-B spindle CCW
 		{
 			// Set Speed
-			configMain.speedPercentSpindle_SpB = GetSerialInteger();
-			accelStep_Spindle.setCurrentPosition(0);
-			EEPROM.put(eePromAddress_Setup, configMain);
+			//configMain.speedPercentSpindle_SpB = GetSerialInteger();
+			//accelStep_Spindle.setCurrentPosition(0);
+			//EEPROM.put(eePromAddress_Setup, configMain);
 
 			RunTwoSteppers_SpB(
 				DIR_CCW,
@@ -1389,9 +1617,9 @@ void loop()
 		case 170: // ª - Sp-B spindle CW
 		{
 			// Set Speed
-			configMain.speedPercentSpindle_SpB = GetSerialInteger();
-			//accelStep_Spindle.setCurrentPosition(0);
-			EEPROM.put(eePromAddress_Setup, configMain);
+			//configMain.speedPercentSpindle_SpB = GetSerialInteger();
+			////accelStep_Spindle.setCurrentPosition(0);
+			//EEPROM.put(eePromAddress_Setup, configMain);
 			accelStep_Axis_B.enableOutputs();
 			RunTwoSteppers_SpB(
 				DIR_CW,
@@ -1402,8 +1630,8 @@ void loop()
 		case 171: // « - Sp-B Axis CCW
 		{
 			// Set Speed
-			configMain.speedPercent_Axis_B = GetSerialInteger();
-			EEPROM.put(eePromAddress_Setup, configMain);
+			//configMain.speedPercent_Axis_B = GetSerialInteger();
+			//EEPROM.put(eePromAddress_Setup, configMain);
 
 			// Run
 			accelStep_Axis_B.enableOutputs();
@@ -1416,8 +1644,8 @@ void loop()
 		case 172: // ¬ - Sp-B Axis CW
 		{
 			// Set Speed
-			configMain.speedPercent_Axis_B = GetSerialInteger();
-			EEPROM.put(eePromAddress_Setup, configMain);
+			//configMain.speedPercent_Axis_B = GetSerialInteger();
+			//EEPROM.put(eePromAddress_Setup, configMain);
 
 			// Run
 			accelStep_Axis_B.enableOutputs();
@@ -1435,20 +1663,32 @@ void loop()
 //#ifndef TWO_AXES_V2
 		case 174: // ® - SyncX axis speed
 		{
-			configMain.speedPercentAxis_SyncX = GetSerialInteger();
+			configMain.speedPercentAxis_SyncX = (int)GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("speedPercentAxis_SyncX:");
+			Serial.println(configMain.speedPercentAxis_SyncX);
+#endif // DEBUG
 			break;
 		}
 		case 175: // ¯ - SyncX spindle speed
 		{
-			configMain.speedPercentSpindle_SyncX = GetSerialInteger();
+			configMain.speedPercentSpindle_SyncX = (int)GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("speedPercentSpindle_SyncX:");
+			Serial.println(configMain.speedPercentSpindle_SyncX);
+#endif // DEBUG
 			break;
 		}
 		case 176: // ° - SyncX Helix direction
 		{
 			configMain.helixType_SyncX = GetSerialInteger();
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("helixType_SyncX:");
+			Serial.println(configMain.helixType_SyncX);
+#endif // DEBUG
 			break;
 		}
 		case 177: // ± - SyncX In
@@ -1507,8 +1747,12 @@ void loop()
 		}
 		case 179: // ³ - MvX Speed 
 		{
-			configMain.speedPercent_MoveX = GetSerialInteger();
+			configMain.speedPercent_MoveX = (int)GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("speedPercent_MoveX:");
+			Serial.println(configMain.speedPercent_MoveX);
+#endif // DEBUG
 			break;
 		}
 		//case 180: // Don't use
@@ -1521,19 +1765,26 @@ void loop()
 			float newDistance = GetSerialFloat(serialId);
 			configMain.distance_MoveX = newDistance;
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("distance_MoveX:");
+			Serial.println(configMain.distance_MoveX);
+#endif // DEBUG
 			break;
 		}
 		case 182: // ¶ - MvX Total
 		{
 			// Total distance only valid for current session
 			distanceTotal_MoveX = GetSerialFloat(serialId);
-			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("distanceTotal_MoveX:");
+			Serial.println(distanceTotal_MoveX);
+#endif // DEBUG
 			break;
 		}
 		case 183: // · - MvX CCW
 		{
-			configMain.speedPercent_MoveX = GetSerialInteger();
-			EEPROM.put(eePromAddress_Setup, configMain);
+			//configMain.speedPercent_MoveX = GetSerialInteger();
+			//EEPROM.put(eePromAddress_Setup, configMain);
 
 			// Run
 			//MoveAxisX(DIR_CCW);
@@ -1542,8 +1793,8 @@ void loop()
 		}
 		case 184: // ¸ - MvX CW
 		{
-			configMain.speedPercent_MoveX = GetSerialInteger();
-			EEPROM.put(eePromAddress_Setup, configMain);
+			//configMain.speedPercent_MoveX = GetSerialInteger();
+			//EEPROM.put(eePromAddress_Setup, configMain);
 
 			// Run
 			//MoveAxisX(DIR_CW);
@@ -1557,20 +1808,32 @@ void loop()
 			{
 				case PAGE_SPX:
 				{
-					configSpX.maxSpd_Axis_X = GetSerialFloat(serialId);
+					configSpX.maxSpd_Axis = GetSerialFloat(serialId);
 					EEPROM.put(eePromAddress_SpX, configSpX);
+#ifdef DEBUG
+					Serial.print("maxSpd_Axis:");
+					Serial.println(configSpX.maxSpd_Axis);
+#endif // DEBUG
 					break;
 				}
 				case PAGE_SYNCX:
 				{
-					configSyncX.maxSpd_Axis_X = GetSerialFloat(serialId);
+					configSyncX.maxSpd_Axis = GetSerialFloat(serialId);
 					EEPROM.put(eePromAddress_SyncX, configSyncX);
+#ifdef DEBUG
+					Serial.print("maxSpd_Axis:");
+					Serial.println(configSyncX.maxSpd_Axis);
+#endif // DEBUG
 					break;
 				}
 				case PAGE_MOVEX:
 				{
-					configMoveX.maxSpd_Axis_X = GetSerialFloat(serialId);
+					configMoveX.maxSpd = GetSerialFloat(serialId);
 					EEPROM.put(eePromAddress_MoveX, configMoveX);
+#ifdef DEBUG
+					Serial.print("maxSpd:");
+					Serial.println(configMoveX.maxSpd);
+#endif // DEBUG
 					break;
 				}
 			}
@@ -1583,20 +1846,32 @@ void loop()
 			{
 				case PAGE_SPX:
 				{
-					configSpX.accel_Axis_X = GetSerialFloat(serialId);
+					configSpX.accel_Axis = GetSerialFloat(serialId);
 					EEPROM.put(eePromAddress_SpX, configSpX);
+#ifdef DEBUG
+					Serial.print("accel_Axis:");
+					Serial.println(configSpX.accel_Axis);
+#endif // DEBUG
 					break;
 				}
 				case PAGE_SYNCX:
 				{
-					configSyncX.accel_Axis_X = GetSerialFloat(serialId);
+					configSyncX.accel_Axis = GetSerialFloat(serialId);
 					EEPROM.put(eePromAddress_SyncX, configSyncX);
+#ifdef DEBUG
+					Serial.print("accel_Axis:");
+					Serial.println(configSyncX.accel_Axis);
+#endif // DEBUG
 					break;
 				}
 				case PAGE_MOVEX:
 				{
-					configMoveX.accel_Axis_X = GetSerialFloat(serialId);
+					configMoveX.accel = GetSerialFloat(serialId);
 					EEPROM.put(eePromAddress_MoveX, configMoveX);
+#ifdef DEBUG
+					Serial.print("microsteps_Axis_X:");
+					Serial.println(configMoveX.accel);
+#endif // DEBUG
 					break;
 				}
 			}
@@ -1604,26 +1879,38 @@ void loop()
 		}
 		case 187: // » - X microsteps
 		{
-			configMain.microsteps_Axis_X = GetSerialFloat(serialId);
+			configMain.microsteps_Axis_X = (int)GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Setup, configMain);
 #ifndef TWO_AXES_V2
 			SetMicrosteppingMode(configMain.microsteps_Axis_X, PIN_AXIS_X_MS0, PIN_AXIS_X_MS1, PIN_AXIS_X_MS2);
 #endif // !TWO_AXES_V2
+#ifdef DEBUG
+			Serial.print("microsteps_Axis_X:");
+			Serial.println(configMain.microsteps_Axis_X);
+#endif // DEBUG
 			break;
 		}
 		case 188: // ¼ - X Full Steps
 		{
-			configMain.steps360_Axis_X = GetSerialFloat(serialId);
+			configMain.steps360_Axis_X = (int)GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("steps360_Axis_X:");
+			Serial.println(configMain.steps360_Axis_X);
+#endif // DEBUG
 			break;
 		}
 		case 189: // ½ - X Distance per revolution (Text)
 		{
 			configMain.distancePerRev_AxisX = GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("distancePerRev_AxisX:");
+			Serial.println(configMain.distancePerRev_AxisX);
+#endif // DEBUG
 			break;
 		}
-//#endif // TWO_AXES_V2
+
 		case 190: // ¾ - Index1 Source:Fixed
 		{
 			configMain.source_Index1 = FIXED;
@@ -1643,24 +1930,40 @@ void loop()
 		{
 			configMain.revolutionsSyncZ_Spindle = GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("revolutionsSyncZ_Spindle:");
+			Serial.println(configMain.revolutionsSyncZ_Spindle);
+#endif // DEBUG
 			break;
 		}
 		case 193: // Á - Distance_SyncZ
 		{
 			configMain.distanceSyncZ = GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("distanceSyncZ:");
+			Serial.println(configMain.distanceSyncZ);
+#endif // DEBUG
 			break;
 		}
 		case 194: // À - Revolutions_SyncX
 		{
 			configMain.revolutionsSyncX_Spindle = GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("revolutionsSyncX_Spindle:");
+			Serial.println(configMain.revolutionsSyncX_Spindle);
+#endif // DEBUG
 			break;
 		}
 		case 195: // Á - Distance_SyncZ
 		{
 			configMain.distanceSyncX = GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("distanceSyncX:");
+			Serial.println(configMain.distanceSyncX);
+#endif // DEBUG
 			break;
 		}
 		case 196: // Ä - Index2_SourceFixed
@@ -1675,6 +1978,10 @@ void loop()
 				configMain.source_Index2 = 0;
 			}
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("source_Index2:");
+			Serial.println(configMain.source_Index2);
+#endif // DEBUG
 			break;
 		}
 		case 197: // Å - Index2_SourceFile
@@ -1682,9 +1989,13 @@ void loop()
 			GetIndex2FilenameFromSerial1();
 			configMain.source_Index2 = FILE_SD;
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("source_Index2:");
+			Serial.println(configMain.source_Index2);
+#endif // DEBUG
 			break;
 		}
-		case 198: // Æ - Do Rec1_Z 
+		case 198: // Æ - Do Reci AxialZ 
 		{
 			int waveDir = GetSerialFloat(serialId);
 
@@ -1694,13 +2005,41 @@ void loop()
 				waveDir = -1;
 			}
 
-			DoRec1_Z(waveDir);
+			switch (pageCallerId)
+			{
+			case PAGE_RECI_AXIAL_Z:
+			{
+				DoReci_AxialZ(waveDir);
+				break;
+			}
+			case PAGE_RECI_RADIAL_Z:
+			{
+				DoReci_RadialZ(waveDir);
+				break;
+			}
+			case PAGE_RECI_AXIAL_X:
+			{
+				DoReci_AxialX(waveDir);
+				break;
+			}
+			case PAGE_RECI_RADIAL_X:
+			{
+				DoReci_RadialX(waveDir);
+				break;
+			}
+			}
+
+			
 			break;
 		}
 		case 199: // Ç - Rose: Spindle Axis Amplitude
 		{
 			configRose.amplitude_Axis_Z = GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Rose, configRose);
+#ifdef DEBUG
+			Serial.print("amplitude_Axis_Z:");
+			Serial.println(configRose.amplitude_Axis_Z);
+#endif // DEBUG
 			break;
 		}
 		case 200: // È - Rose: Show EEPROM settings
@@ -1720,60 +2059,94 @@ void loop()
 			{
 				case PAGE_SPZ:
 				{
-					configSpZ.maxSpd_Axis_Z = GetSerialFloat(serialId);
+					configSpZ.maxSpd_Axis = GetSerialFloat(serialId);
 					EEPROM.put(eePromAddress_SpZ, configSpZ);
+#ifdef DEBUG
+					Serial.print("maxSpd:");
+					Serial.println(configSpZ.maxSpd_Axis);
+#endif // DEBUG
 					break;
 				}
 				case PAGE_SYNCZ:
 				{
-					configSyncZ.maxSpd_Axis_Z = GetSerialFloat(serialId);
+					configSyncZ.maxSpd_Axis = GetSerialFloat(serialId);
 					EEPROM.put(eePromAddress_SyncZ, configSyncZ);
-					break;
-				}
+#ifdef DEBUG
+					Serial.print("maxSpd:");
+					Serial.println(configSyncZ.maxSpd_Axis);
+#endif // DEBUG
 
-				case PAGE_REC1_Z:
-				{
-					configRec1_Z.maxSpd_Axis_Z = GetSerialFloat(serialId);
-					EEPROM.put(eePromAddress_Rec1_Z, configRec1_Z);
 					break;
 				}
-				case PAGE_REC1_S:
+				case PAGE_RECI_AXIAL_Z:
+				case PAGE_RECI_RADIAL_Z:
 				{
-					configRec1_S.maxSpd_Axis_Z = GetSerialFloat(serialId);
-					EEPROM.put(eePromAddress_Rec1_S, configRec1_S);
+					configReci.maxSpd_Axis_Z = GetSerialFloat(serialId);
+					EEPROM.put(eePromAddress_Reci, configReci);
+#ifdef DEBUG
+					Serial.print("maxSpd_Axis_Z:");
+					Serial.println(configReci.maxSpd_Axis_Z);
+#endif // DEBUG
+					break;
+				}
+				case PAGE_RECI_AXIAL_X:
+				case PAGE_RECI_RADIAL_X:
+				{
+					configReci.maxSpd_Axis_X = GetSerialFloat(serialId);
+					EEPROM.put(eePromAddress_Reci, configReci);
+#ifdef DEBUG
+					Serial.print("maxSpd_Axis_X:");
+					Serial.println(configReci.maxSpd_Axis_X);
+#endif // DEBUG
 					break;
 				}
 				case PAGE_MOVEZ:
 				{
-					configMoveZ.maxSpd_Axis_Z = GetSerialFloat(serialId);
+					configMoveZ.maxSpd = GetSerialFloat(serialId);
 					EEPROM.put(eePromAddress_MoveZ, configMoveZ);
+#ifdef DEBUG
+					Serial.print("maxSpd:");
+					Serial.println(configMoveZ.maxSpd);
+#endif // DEBUG
 					break;
 				}
 			}
 
 			break;
 		}
-		case 203: // Ì - Rec1_Z Repeats (Count)
+		case 203: // Ì - Rec1_Z Waves (Count)
 		{
-			configMain.waves_Rec1_Z = GetSerialFloat(serialId);
+			configReci.waves_AxialZ = (int)GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("waves_AxialZ:");
+			Serial.println(configReci.waves_AxialZ);
+#endif // DEBUG
 			break;
 		}
 		case 204: // Ë - Rec1_Z Distance
 		{
-			configMain.distance_Rec1_Z = GetSerialFloat(serialId);
-			EEPROM.put(eePromAddress_Setup, configMain);
+			configReci.distance_AxialZ = GetSerialFloat(serialId);
+			EEPROM.put(eePromAddress_Setup, configReci);
+#ifdef DEBUG
+			Serial.print("distance_AxialZ:");
+			Serial.println(configReci.distance_AxialZ);
+#endif // DEBUG
 			break;
 		}
 		case 205: // Í - Rec1_Z Amplitude
 		{
-			configMain.amplitude_Rec1_Z = GetSerialFloat(serialId);
-			EEPROM.put(eePromAddress_Setup, configMain);
+			configReci.amplitude_AxialZ = GetSerialFloat(serialId);
+			EEPROM.put(eePromAddress_Setup, configReci);
+#ifdef DEBUG
+			Serial.print("amplitude_AxialZ:");
+			Serial.println(configReci.amplitude_AxialZ);
+#endif // DEBUG
 			break;
 		}
-		case 206: // Î -  Return
+		case 206: // Î -  Return Spindle and Z axis
 		{
-			// Spindle and Z axis
+			
 			pageCallerId = GetSerialInteger();
 			ReturnToStartPosition(0);
 			break;
@@ -1787,54 +2160,76 @@ void loop()
 			{
 				waveDir = -1;
 			}
-			DoRec1_Spindle(waveDir);
+			DoReci_RadialZ(waveDir);
 			break;
 		}
-		case 208: // Ð - Rec1_Z Spindle Speed percentage
+		case 208: // Ð - 
 		{
-			configMain.speedPercentSpindle_Rec1Z = GetSerialFloat(serialId);
-			EEPROM.put(eePromAddress_Setup, configMain);
+
 			break;
 		}
-		case 209: // Ñ - Rec1_Z Axis Speed percentage
+		case 209: // Ñ - Reci AxialX and RadialX Axis Speed percentage
 		{
-			configMain.speedPercentAxis_Rec1Z = GetSerialFloat(serialId);
-			EEPROM.put(eePromAddress_Setup, configMain);
+			configReci.speedPercent_Axis_X = (int)GetSerialFloat(serialId);
+			EEPROM.put(eePromAddress_Setup, configReci);
+#ifdef DEBUG
+			Serial.print("speedPercent_Axis_X:");
+			Serial.println(configReci.speedPercent_Axis_X);
+#endif // DEBUG
 			break;
 		}
 		case 210: // Ò - Rec1_Spindle Spindle Speed percentage
 		{
-			configMain.speedPercentSpindle_Rec1S = GetSerialFloat(serialId);
-			EEPROM.put(eePromAddress_Setup, configMain);
+			configReci.speedPercent_Spindle = (int)GetSerialFloat(serialId);
+			EEPROM.put(eePromAddress_Setup, configReci);
+#ifdef DEBUG
+			Serial.print("speedPercentSpindle:");
+			Serial.println(configReci.speedPercent_Spindle);
+#endif // DEBUG
 			break;
 		}
-		case 211: // Ó - Rec1_Spindle Axis Speed percentage 
+		case 211: // Ó - Reci AxialZ and RadialZ Axis Speed percentage 
 		{
-			configMain.speedPercentAxis_Rec1S = GetSerialFloat(serialId);
-			EEPROM.put(eePromAddress_Setup, configMain);
+			configReci.speedPercent_Axis_Z = (int)GetSerialFloat(serialId);
+			EEPROM.put(eePromAddress_Setup, configReci);
+#ifdef DEBUG
+			Serial.print("speedPercentAxis:");
+			Serial.println(configReci.speedPercent_Axis_Z);
+#endif // DEBUG
 			break;
 		}
 		case 212: // Ô - Rec1_S Repeats (Count)
 		{
-			configMain.waves_Rec1_S = GetSerialFloat(serialId);
-			EEPROM.put(eePromAddress_Setup, configMain);
+			configReci.waves_RadialZ = (int)GetSerialFloat(serialId);
+			EEPROM.put(eePromAddress_Setup, configReci);
+#ifdef DEBUG
+			Serial.print("waves_RadialZ:");
+			Serial.println(configReci.waves_RadialZ);
+#endif // DEBUG
 			break;
 		}
-		case 213: // Õ - Rec1_S Distance
+		case 213: // Õ - Rec1_S Degrees
 		{
-			configMain.degrees_Rec1_S = GetSerialFloat(serialId);
-			EEPROM.put(eePromAddress_Setup, configMain);
+			configReci.degrees_RadialZ = GetSerialFloat(serialId);
+			EEPROM.put(eePromAddress_Setup, configReci);
+#ifdef DEBUG
+			Serial.print("degrees_RadialZ:");
+			Serial.println(configReci.degrees_RadialZ);
+#endif // DEBUG
 			break;
 		}
-		case 214: // Ö - Rec1_S Amplitude
+		case 214: // Ö - Rec1_S Amplitude Axis
 		{
-			configMain.amplitude_Rec1_S = GetSerialFloat(serialId);
-			EEPROM.put(eePromAddress_Setup, configMain);
+			configReci.amplitude_RadialZ = GetSerialFloat(serialId);
+			EEPROM.put(eePromAddress_Setup, configReci);
+#ifdef DEBUG
+			Serial.print("amplitude_RadialZ:");
+			Serial.println(configReci.amplitude_RadialZ);
+#endif // DEBUG
 			break;
 		}
-		case 215: // × - Return
+		case 215: // × - Return Spindle and X axis
 		{
-			// Spindle and X axis
 			pageCallerId = GetSerialInteger();
 			ReturnToStartPosition(1);
 			break;
@@ -1879,60 +2274,100 @@ void loop()
 		{
 			configMain.limit_Min_Z = (int)GetSerial1Float();
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("limit_Min_Z:");
+			Serial.println(configMain.limit_Min_Z);
+#endif // DEBUG
 			break;
 		}
 		case 221: // Ý - Limit switch Z Max
 		{
 			configMain.limit_Max_Z = (int)GetSerial1Float();
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("limit_Max_Z:");
+			Serial.println(configMain.limit_Max_Z);
+#endif // DEBUG
 			break;
 		}
 		case 222: // Þ - Limit switch X Min
 		{
 			configMain.limit_Min_X = (int)GetSerial1Float();
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("limit_Min_X:");
+			Serial.println(configMain.limit_Min_X);
+#endif // DEBUG
 			break;
 		}
 		case 223: // ß - Limit switch X Max
 		{
 			configMain.limit_Max_X = (int)GetSerial1Float();
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("limit_Max_X:");
+			Serial.println(configMain.limit_Max_X);
+#endif // DEBUG
 			break;
 		}
 		case 224: // à - Limit switch B Min
 		{
 			configMain.limit_Min_B = (int)GetSerial1Float();
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("limit_Min_B:");
+			Serial.println(configMain.limit_Min_B);
+#endif // DEBUG
 			break;
 		}
 		case 225: // á - Limit switch B Max
 		{
 			configMain.limit_Max_B = (int)GetSerial1Float();
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("limit_Max_B:");
+			Serial.println(configMain.limit_Max_B);
+#endif // DEBUG
 			break;
 		}
 		case 226: // â - Rose: X Axis MaxSpd
 		{
 			configRose.maxSpd_Axis_X = (int)GetSerial1Float();
 			EEPROM.put(eePromAddress_Rose, configRose);
+#ifdef DEBUG
+			Serial.print("maxSpd_Axis_X:");
+			Serial.println(configRose.maxSpd_Axis_X);
+#endif // DEBUG
 			break;
 		}
 		case 227: // ã - Rose: X Axis Accel
 		{
 			configRose.accel_Axis_X = (int)GetSerial1Float();
 			EEPROM.put(eePromAddress_Rose, configRose);
+#ifdef DEBUG
+			Serial.print("accel_Axis_X:");
+			Serial.println(configRose.accel_Axis_X);
+#endif // DEBUG
 			break;
 		}
 		case 228: // ä - Rose: X Axis Amplitude
 		{
 			configRose.amplitude_Axis_X = GetSerial1Float();
 			EEPROM.put(eePromAddress_Rose, configRose);
+#ifdef DEBUG
+			Serial.print("amplitude_Axis_X:");
+			Serial.println(configRose.amplitude_Axis_X);
+#endif // DEBUG
 			break;
 		}
 		case 229: // å - Rose: Spindle Amplitude
 		{
 			configRose.amplitude_Spindle = GetSerial1Float();
 			EEPROM.put(eePromAddress_Rose, configRose);
+#ifdef DEBUG
+			Serial.print("amplitude_Spindle:");
+			Serial.println(configRose.amplitude_Spindle);
+#endif // DEBUG
 			break;
 		}
 		case 230: // å - Rose: DoRoseSpindle
@@ -1951,33 +2386,124 @@ void loop()
 		{
 			configMain.maxSpd_Return_Spindle = GetSerial1Float();
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("maxSpd_Return_Spindle:");
+			Serial.println(configMain.maxSpd_Return_Spindle);
+#endif // DEBUG
 			break;
 		}
 		case 233: // é - Return Spindle Accel
 		{
 			configMain.accel_Return_Spindle = GetSerial1Float();
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("accel_Return_Spindle:");
+			Serial.println(configMain.accel_Return_Spindle);
+#endif // DEBUG
 			break;
 		}
 		case 234: // ê - Return Spindle Accel
 		{
 			configMain.maxSpd_Return_Axis = GetSerial1Float();
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("maxSpd_Return_Axis:");
+			Serial.println(configMain.maxSpd_Return_Axis);
+#endif // DEBUG
 			break;
 		}
 		case 235: // ë - Return Spindle Accel
 		{
 			configMain.accel_Return_Axis = GetSerial1Float();
 			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("accel_Return_Axis:");
+			Serial.println(configMain.accel_Return_Axis);
+#endif // DEBUG
 			break;
 		}
-		case 236:
+		case 236: //ì- Clear Stepper positions
 		{
 			endPosition_Axis = 0;
 			endPosition_Spindle = 0;
 			teensyStep_Spindle.setPosition(0);
 			teensyStep_Axis_Z.setPosition(0);
 			teensyStep_Axis_X.setPosition(0);
+			pageCallerId = GetSerialInteger();
+		}
+		case 237: // í - Track Positions
+		{
+			configMain.trackPositions = GetSerialInteger();
+			EEPROM.put(eePromAddress_Setup, configMain);
+#ifdef DEBUG
+			Serial.print("trackPositions:");
+			Serial.println(configMain.trackPositions);
+#endif // DEBUG
+			break;
+		}
+		case 238: // î - Rec1 type Id
+		{
+			break;
+		}
+		case 239: // ï - Rec1 AxialX Waves
+		{
+			configReci.waves_AxialX = (int)GetSerialFloat(serialId);
+			EEPROM.put(eePromAddress_Setup, configReci);
+#ifdef DEBUG
+			Serial.print("waves_AxialX:");
+			Serial.println(configReci.waves_AxialX);
+#endif // DEBUG
+			break;
+		}
+		case 240: // ð - Rec1 AxialX Amplitude
+		{
+			configReci.amplitude_AxialX = GetSerialFloat(serialId);
+			EEPROM.put(eePromAddress_Setup, configReci);
+#ifdef DEBUG
+			Serial.print("amplitude_AxialX:");
+			Serial.println(configReci.amplitude_AxialX);
+#endif // DEBUG
+			break;
+		}
+		case 241: // ñ - Rec1 AxialX Distance
+		{
+			configReci.distance_AxialX = GetSerialFloat(serialId);
+			EEPROM.put(eePromAddress_Setup, configReci);
+#ifdef DEBUG
+			Serial.print("distance_AxialX:");
+			Serial.println(configReci.distance_AxialX);
+#endif // DEBUG
+			break;
+		}
+		case 242: // ò - Rec1 RadialX Waves
+		{
+			configReci.waves_RadialX = (int)GetSerialFloat(serialId);
+			EEPROM.put(eePromAddress_Setup, configReci);
+#ifdef DEBUG
+			Serial.print("waves_RadialX:");
+			Serial.println(configReci.waves_RadialX);
+#endif // DEBUG
+			break;
+		}
+		case 243: // ó - Rec1 RadialX Degrees
+		{
+			configReci.degrees_RadialX = GetSerialFloat(serialId);
+			EEPROM.put(eePromAddress_Setup, configReci);
+#ifdef DEBUG
+			Serial.print("degrees_RadialX:");
+			Serial.println(configReci.degrees_RadialX);
+#endif // DEBUG
+			break;
+		}
+		case 244: // ô - Rec1 RadialX Amplitude
+		{
+			configReci.amplitude_RadialX = GetSerialFloat(serialId);
+			EEPROM.put(eePromAddress_Setup, configReci);
+#ifdef DEBUG
+			Serial.print("amplitude_RadialX:");
+			Serial.println(configReci.amplitude_RadialX);
+#endif // DEBUG
+			break;
 		}
 		default:
 			SerialPrint("Input:");
