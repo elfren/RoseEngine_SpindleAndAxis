@@ -7,7 +7,7 @@
 //#define THREE_AXES // Teensy 3.2
 //#define TWO_AXES_V2 // Teensy 3.2
 //#define SHOW_POSITION
-//#define DEBUG
+#define DEBUG
 
 //==================================================================
 // Pin assignments
@@ -41,11 +41,12 @@
 // X axis
 #define ID_AXIS_X 1
 #define PIN_AXIS_X_DIR 20  // Stepper direction
-#define PIN_AXIS_X_STEP 21  // Stepper step
+#define PIN_AXIS_X_STEP 21 // Stepper step
 #define PIN_AXIS_X_ENABLE 22 // Enable 
 #define PIN_AXIS_X_MS0 30
 #define PIN_AXIS_X_MS1 31 
 #define PIN_AXIS_X_MS2 32
+
 
 // B axis
 #define ID_AXIS_B 2
@@ -68,8 +69,8 @@
 #define PIN_SPINDLE_MS2 20
 
 // Axes
-#define PIN_LIMIT_MIN 16 // Limit switch: Moving towards headstock
-#define PIN_LIMIT_MAX 17 // Limit switch: Moving away from headstock
+//#define PIN_LIMIT_MIN 16 // Limit switch: Moving towards headstock
+//#define PIN_LIMIT_MAX 17 // Limit switch: Moving away from headstock
 
 // Z axis
 #define ID_AXIS_Z 0
@@ -181,7 +182,7 @@ struct configs
 	int speedPercentAxis_SyncX;
 	int speedPercent_Index1;
 	int speedPercent_Index2;
-	int speedPercent_Sp2;
+	int speedPercent_Sp2; // Not used
 	int speedPercent_Axis_Z;
 	int speedPercent_Axis_X;
 	int speedPercent_Axis_B;
@@ -217,7 +218,7 @@ struct configs
 	float distanceSyncX;
 	float revolutionsSyncZ_Spindle;
 	float revolutionsSyncX_Spindle;
-	bool enable_Spindle;
+	bool polarity_Spindle;
 	bool polarity_Axis_Z;
 	bool polarity_Axis_X;
 	bool polarity_Axis_B;
@@ -293,34 +294,25 @@ struct configPageRose // page 12
 	float amplitude_Spindle;
 };
 
+struct configPageSp  // page 7
+{
+	int activeAxis;
+	int maxSpd_Spindle;
+	int maxSpd_Axis_Z;
+	int maxSpd_Axis_X;
+	int maxSpd_Axis_B;
+	int speedPercent_Spindle;
+	int speedPercent_Axis_Z;
+	int speedPercent_Axis_X;
+	int speedPercent_Axis_B;
+	int accel_Spindle;
+	int accel_Axis_Z;
+	int accel_Axis_X;
+	int accel_Axis_B;
+};
 //==================================================================
 // Global Variables
 //==================================================================
-
-//// Initialize AccelStepper object
-//AccelStepper accelStep_Spindle(AccelStepper::DRIVER, PIN_SPINDLE_STEP, PIN_SPINDLE_DIR);
-//AccelStepper accelStep_Axis_Z(AccelStepper::DRIVER, PIN_AXIS_Z_STEP, PIN_AXIS_Z_DIR);
-//
-//// TeensyStep initialization
-//Stepper teensyStep_Spindle(PIN_SPINDLE_STEP, PIN_SPINDLE_DIR);
-//Stepper teensyStep_Axis_Z(PIN_AXIS_Z_STEP, PIN_AXIS_Z_DIR);
-//
-//
-////#ifndef TWO_AXES_V2 // Three and four axes boards
-//Stepper teensyStep_Axis_X(PIN_AXIS_X_STEP, PIN_AXIS_X_DIR);
-//AccelStepper accelStep_Axis_X(AccelStepper::DRIVER, PIN_AXIS_X_STEP, PIN_AXIS_X_DIR);
-////#endif // TWO_AXES_V2
-//
-////#ifdef FOUR_AXES
-//AccelStepper accelStep_Axis_B(AccelStepper::DRIVER, PIN_AXIS_B_STEP, PIN_AXIS_B_DIR);
-//Stepper teensyStep_Axis_B(PIN_AXIS_B_STEP, PIN_AXIS_B_DIR);
-////#endif // B_AXIS_ENABLED
-//
-//// TeensyStep controllers
-//StepControl controller_Spindle;
-//StepControl controller_Axis;
-//RotateControl controllerRose_Spindle;
-//RotateControl controllerRose_Axis;
 
 int serialId = 9; // Initialize with unused serial id.  Serial-0, Serial3-1
 byte incomingByte = 0;	// store incoming Serial data
@@ -335,7 +327,7 @@ unsigned int eePromAddress_SyncZ = 1048;  // EEProm address for SyncZ
 unsigned int eePromAddress_SyncX = 1064;  // EEProm address for SyncX 
 //unsigned int eePromAddress_Rec1_Z = 1080;  // EEProm address for Rec1_ZAxis 
 //unsigned int eePromAddress_Rec1_S = 1096;  // EEProm address for Rec1_Spindle 
-unsigned int eePromAddress_Sp = 1112;  // EEProm address for Sp 
+
 unsigned int eePromAddress_Index1 = 1128;  // EEProm address for Index1 
 unsigned int eePromAddress_Index2 = 1144;  // EEProm address for Index2 
 unsigned int eePromAddress_MoveZ = 1160;  // EEProm address for MoveZ 
@@ -343,6 +335,7 @@ unsigned int eePromAddress_MoveX = 1176;  // EEProm address for MoveX
 unsigned int eePromAddress_Rose = 1200; // EEProm address for Rose
 
 unsigned int eePromAddress_Reci = 1300;
+unsigned int eePromAddress_Sp = 1500;  // EEProm address for Sp 
 
 float distanceTotal_MoveZ = 0;
 float distanceTotal_MoveX = 0;
@@ -352,8 +345,9 @@ int filenameLength = 0;
 String filename_Index2a;
 char * filename_Index2;
 
-double returnSteps_Rec1_Z = 0;
-double returnSteps_Rec1_S = 0;
+double returnSteps_Axis = 0;
+double returnSteps_Spindle = 0;
+
 
 /////////////////////////////////////////////////////////////////////////
 // Rose settings
@@ -373,10 +367,16 @@ float degrees_Spindle = 0;
 float distance_Axis = 0;
 
 // Accuracy interval 
-constexpr unsigned recalcPeriod = 25'000; //?s  period for calculation of new target points. Straight lines between those points. 
-constexpr float dtRose = recalcPeriod / 1E6;  // seconds 
+constexpr unsigned recalcPeriod = 35'000;
+//constexpr unsigned recalcPeriod = 25'000; //?s  period for calculation of new target points. Straight lines between those points. 
+constexpr float dtRose = recalcPeriod / 1E6;  //seconds  1E6 = 1,000,000 
 
+constexpr unsigned PID_Interval = 10; // ms  
+constexpr float P = 0.01;             // (P)roportional constant of the regulator needs to be adjusted (depends on speed and acceleration setting)
 /////////////////////////////////////////////////////////////////////////////
+
+
+
 // Page defines
 int pageCallerId = 20;
 #define PAGE_SPZ 0
@@ -402,17 +402,8 @@ configSteppers configSpX;
 configSteppers configSpB;
 configSteppers configSyncZ;
 configSteppers configSyncX;
-//configPageRec1 configRec1;
-//configPageRecZ configRecZ_Axis;
-//configSteppers configRecZ_Spindle;
-
-//configPageRec1b configAxialZ;
-//configPageRec1b configAxialX;
-//configPageRec1b configRadialZ;
-//configPageRec1b configRadialX;
 configPageReci configReci;
-
-configStepper configSp;
+configPageSp configSp;
 configStepper configIndex1;
 configStepper configIndex2;
 configStepper configMoveZ;
