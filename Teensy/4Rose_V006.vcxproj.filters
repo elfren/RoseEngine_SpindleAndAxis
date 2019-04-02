@@ -15,14 +15,17 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="4Rose_V005.ino" />
+    <None Include="4Rose_V006.ino" />
     <None Include="4RoseMethods.ino" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="__vm\.4Rose_V005.vsarduino.h">
+    <ClInclude Include="__vm\.4Rose_V006.vsarduino.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="4RoseDefines.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="__vm\.4Rose_V006_S3.vsarduino.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
