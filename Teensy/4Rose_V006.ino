@@ -9,11 +9,15 @@
 #include "4RoseDefines.h"
 #include "SD.h"
 #include "SPI.h"
+#include "AccelStepper.h"
 #include "TeensyStep.h"
 
 //==================================================================
 // Pin assignments:  See 4RoseDefines.h
 //==================================================================
+	// Initialize AccelStepper object
+AccelStepper accelStep_Spindle(AccelStepper::DRIVER, PIN_SPINDLE_STEP, PIN_SPINDLE_DIR);
+AccelStepper accelStep_Axis_Z(AccelStepper::DRIVER, PIN_AXIS_Z_STEP, PIN_AXIS_Z_DIR);
 
 // TeensyStep initialization
 Stepper stepperSpindle(PIN_SPINDLE_STEP, PIN_SPINDLE_DIR);
@@ -94,12 +98,30 @@ void setup()
 	pinMode(PIN_AXIS_Z_MS2, OUTPUT);
 	SetMicrosteppingMode(configMain.microsteps_Spindle, PIN_SPINDLE_MS0, PIN_SPINDLE_MS1, PIN_SPINDLE_MS2);
 	SetMicrosteppingMode(configMain.microsteps_Axis_Z, PIN_AXIS_Z_MS0, PIN_AXIS_Z_MS1, PIN_AXIS_Z_MS2);
+	///////////////////////////////////////////////////
+	// Configure AccelStepper for Z axis bug
+		// Set the enable pin for the stepper motor
+	accelStep_Spindle.setEnablePin(PIN_SPINDLE_ENABLE);
 
+	// Set pins "inverted", HIGH == off
+	accelStep_Spindle.setPinsInverted(false, false, true);
+
+	// Disable the spindle stepper motor
+	accelStep_Spindle.disableOutputs();
+
+	// Z Axis stepper motor initialization
+	// Configure Enable Z Axis stepper
+	accelStep_Axis_Z.setEnablePin(PIN_AXIS_Z_ENABLE);
+	accelStep_Axis_Z.setPinsInverted(false, false, true);
+
+	// Disable the Z Axis stepper motor (enable in run method)
+	accelStep_Axis_Z.disableOutputs();
+	///////////////////////////////////////////////////
 #ifdef FOUR_AXES
 	pinMode(PIN_AXIS_B_ENABLE, OUTPUT);
 	digitalWrite(PIN_AXIS_B_ENABLE, HIGH);  // Disable 
 
-											// Set Microstepping mode
+	// Set Microstepping mode
 	SetMicrosteppingMode(configMain.microsteps_Axis_B, PIN_AXIS_B_MS0, PIN_AXIS_B_MS1, PIN_AXIS_B_MS2);
 	stepperAxis_B.setStepPinPolarity(configMain.polarity_Axis_B ? (LOW) : (HIGH)); // driver expects active low pulses
 #endif //FOUR_AXES
@@ -153,7 +175,6 @@ void setup()
 		digitalWrite(LED_BUILTIN, LOW);
 		delay(300);
 	}
-
 }
 
 /// <summary>
@@ -175,8 +196,6 @@ void loop()
 	{
 		//Nextion connected
 		serialId = 1;
-
-
 	}
 	serialId = 1;
 
@@ -903,12 +922,14 @@ void loop()
 		case 90:  // Z - Main Axis Clockwise
 		{
 			RunTwoSteppers_SpZ(DIR_CW, DIR_CW, 0);
+			// BugBug: Z axis only runs one direction in following.
 			//RunTwoSteppers_Sp_Axis(DIR_CW, DIR_CW, ID_AXIS_Z, ID_AXIS_Z);
 			break;
 		}
 		case 91:  // [ - Z Axis Counterclockwise
 		{
 			RunTwoSteppers_SpZ(DIR_CCW, DIR_CCW, 0);
+			// BugBug: Z axis only runs one direction in following.
 			//RunTwoSteppers_Sp_Axis(DIR_CCW, DIR_CCW, ID_AXIS_Z, ID_AXIS_Z);
 			break;
 		}
@@ -1016,17 +1037,11 @@ void loop()
 		}
 		case 100: // d - Sp2 Clockwise
 		{
-
-			// Run
-			//RunSpindle(DIR_CW);
 			RunOneStepper(DIR_CW);
 			break;
 		}
 		case 101: // e - Sp2 CounterClockwise
 		{
-
-			// Run
-			//RunSpindle(DIR_CCW);
 			RunOneStepper(DIR_CCW);
 			break;
 		}
@@ -1134,26 +1149,29 @@ void loop()
 
 			break;
 		}
-		case 106: // j - Move Z counter clockwise
+		case 106: // j - Move Z clockwise
 		{
-			//configMain.speedPercent_MoveZ = GetSerialInteger();
-			//EEPROM.put(eePromAddress_Setup, configMain);
-
-			// Run
-			MoveAxis(ID_AXIS_Z, DIR_CCW);
-
+			MoveAxis(ID_AXIS_Z, DIR_CW);
 			break;
 		}
 		case 107: // k - Z Spindle Clockwise
 		{
-			//RunTwoSteppers_SpZ(DIR_CW, DIR_CW, 3);
-			RunTwoSteppers_Sp_Axis(DIR_CW, DIR_CW, ID_SPINDLE, ID_AXIS_Z);
+#ifdef DEBUG
+			Serial.print("1:spindle CW:");
+#endif // DEBUG
+			RunTwoSteppers_SpZ(DIR_CW, DIR_CW, 3);
+			// BugBug: 
+			//RunTwoSteppers_Sp_Axis(DIR_CW, DIR_CW, ID_SPINDLE, ID_AXIS_Z);
 			break;
 		}
 		case 108: // l - Z spindle counter clockwise
 		{
-			//RunTwoSteppers_SpZ(DIR_CCW, DIR_CCW, 3);
-			RunTwoSteppers_Sp_Axis(DIR_CCW, DIR_CCW, ID_SPINDLE, ID_AXIS_Z);
+#ifdef DEBUG
+			Serial.print("1:spindle CCW:");
+#endif // DEBUG
+			RunTwoSteppers_SpZ(DIR_CCW, DIR_CCW, 3);
+			// BugBug:
+			//RunTwoSteppers_Sp_Axis(DIR_CCW, DIR_CCW, ID_SPINDLE, ID_AXIS_Z);
 			break;
 		}
 		case 109: // m - 
@@ -1192,14 +1210,9 @@ void loop()
 #endif // DEBUG
 			break;
 		}
-		case 113: // q - Move Z clockwise
+		case 113: // q - Move Z counterclockwise
 		{
-			//configMain.speedPercent_MoveZ = GetSerialInteger();
-			//EEPROM.put(eePromAddress_Setup, configMain);
-
-			// Run
-			MoveAxis(ID_AXIS_Z,DIR_CW);
-
+			MoveAxis(ID_AXIS_Z,DIR_CCW);
 			break;
 		}
 		case 114: // r - Main/Sync/Sp2 Spindle FullSteps
@@ -1263,8 +1276,9 @@ void loop()
 		{
 			configMain.microsteps_Axis_B = (int)GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Setup, configMain);
-			//ToDo:
-			//SetMicrosteppingMode(configMain.microsteps_Axis_B, PIN_AXIS_B_MS0, PIN_AXIS_B_MS1, PIN_AXIS_B_MS2);
+#ifdef FOUR_AXES
+			SetMicrosteppingMode(configMain.microsteps_Axis_B, PIN_AXIS_B_MS0, PIN_AXIS_B_MS1, PIN_AXIS_B_MS2);
+#endif //FOUR_AXES
 #ifdef DEBUG
 			Serial.print("microsteps_Axis_B:");
 			Serial.println(configMain.microsteps_Axis_B);
@@ -1565,30 +1579,24 @@ void loop()
 		}
 		case 163: // £ - Sp-X spindle CCW
 		{
-			//RunTwoSteppers_SpX(DIR_CCW, DIR_CCW, 3);
 			RunTwoSteppers_Sp_Axis(DIR_CCW, DIR_CCW, ID_SPINDLE, ID_AXIS_X);
 			break;
 		}
 		case 164: // ¤ - Sp-X spindle CW
 		{
-			//RunTwoSteppers_SpX(DIR_CW, DIR_CW, 3);
 			RunTwoSteppers_Sp_Axis(DIR_CW, DIR_CW, ID_SPINDLE, ID_AXIS_X);
 			break;
 		}
 		case 165: // ¥ - Sp-X Axis CCW
 		{
-			//RunTwoSteppers_SpX(DIR_CCW, DIR_CW, ID_AXIS_X);
 			RunTwoSteppers_Sp_Axis(DIR_CCW, DIR_CCW, ID_AXIS_X, ID_AXIS_X);
 			break;
 		}
 		case 166: // ¦ - Sp-X Axis CW
 		{
-			//RunTwoSteppers_SpX(DIR_CW, DIR_CW, ID_AXIS_X);
 			RunTwoSteppers_Sp_Axis(DIR_CW, DIR_CW, ID_AXIS_X, ID_AXIS_X);
 			break;
 		}
-//#ifdef FOUR_AXES
-
 		case 167: // § - Sp-B spindle speed
 		{
 			configMain.speedPercentSpindle_SpB = (int)GetSerialFloat(serialId);
@@ -1611,34 +1619,21 @@ void loop()
 		}
 		case 169: // © - Sp-B spindle CCW
 		{
-			Serial.print("incomingByte:");
-			Serial.println(incomingByte);
-			//RunTwoSteppers_SpB(DIR_CCW, DIR_CCW, 3);
 			RunTwoSteppers_Sp_Axis(DIR_CCW, DIR_CCW, ID_SPINDLE, ID_AXIS_B);
-
 			break;
 		}
 		case 170: // ª - Sp-B spindle CW
 		{
-			Serial.print("incomingByte:");
-			Serial.println(incomingByte);
-			//RunTwoSteppers_SpB(DIR_CW, DIR_CW, 3);
 			RunTwoSteppers_Sp_Axis(DIR_CW, DIR_CW, ID_SPINDLE, ID_AXIS_B);
 			break;
 		}
 		case 171: // « - Sp-B Axis CCW
 		{
-			Serial.print("incomingByte:");
-			Serial.println(incomingByte);
-			//RunTwoSteppers_SpB( DIR_CCW, DIR_CW, 0);
 			RunTwoSteppers_Sp_Axis(DIR_CCW, DIR_CCW, ID_AXIS_B, ID_AXIS_B);
 			break;
 		}
 		case 172: // ¬ - Sp-B Axis CW
 		{
-			Serial.print("incomingByte:");
-			Serial.println(incomingByte);
-			//RunTwoSteppers_SpB(DIR_CW, DIR_CW, 0);
 			RunTwoSteppers_Sp_Axis(DIR_CW, DIR_CW, ID_AXIS_B, ID_AXIS_B);
 			break;
 		}
@@ -1646,8 +1641,6 @@ void loop()
 		//{
 		//	break;
 		//}
-//#endif // FOUR_AXES
-//#ifndef TWO_AXES_V2
 		case 174: // ® - SyncX axis speed
 		{
 			configMain.speedPercentAxis_SyncX = (int)GetSerialFloat(serialId);

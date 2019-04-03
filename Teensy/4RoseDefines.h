@@ -25,9 +25,6 @@
 #define PIN_SPINDLE_MS1 25 
 #define PIN_SPINDLE_MS2 26
 
-// Axes
-//#define PIN_LIMIT_MIN 18 // Limit switch: Moving towards headstock
-//#define PIN_LIMIT_MAX 19 // Limit switch: Moving away from headstock
 
 // Z axis
 #define ID_AXIS_Z 0
@@ -68,10 +65,6 @@
 #define PIN_SPINDLE_MS1 19 
 #define PIN_SPINDLE_MS2 20
 
-// Axes
-//#define PIN_LIMIT_MIN 16 // Limit switch: Moving towards headstock
-//#define PIN_LIMIT_MAX 17 // Limit switch: Moving away from headstock
-
 // Z axis
 #define ID_AXIS_Z 0
 #define PIN_AXIS_Z_DIR 5  // Stepper direction
@@ -110,12 +103,6 @@
 #define PIN_SPINDLE_MS0 24
 #define PIN_SPINDLE_MS1 25 
 #define PIN_SPINDLE_MS2 26
-
-// Limit Switches
-//#define PIN_LIMIT_MIN_Z 16 // Limit switch: Moving towards headstock
-//#define PIN_LIMIT_MAX_Z 17 // Limit switch: Moving away from headstock
-//#define PIN_LIMIT_MIN_X 16 // Limit switch: Moving towards center.  Change to 18 if separate limit switches.
-//#define PIN_LIMIT_MAX_X 17 // Limit switch: Moving away from center. Change to 19 if separate limit switches.
 
 // Z axis
 #define ID_AXIS_Z 0
@@ -325,8 +312,6 @@ unsigned int eePromAddress_SpX = 1016;  // EEProm address for SpX
 unsigned int eePromAddress_SpB = 1032;  // EEProm address for SpB 
 unsigned int eePromAddress_SyncZ = 1048;  // EEProm address for SyncZ 
 unsigned int eePromAddress_SyncX = 1064;  // EEProm address for SyncX 
-//unsigned int eePromAddress_Rec1_Z = 1080;  // EEProm address for Rec1_ZAxis 
-//unsigned int eePromAddress_Rec1_S = 1096;  // EEProm address for Rec1_Spindle 
 
 unsigned int eePromAddress_Index1 = 1128;  // EEProm address for Index1 
 unsigned int eePromAddress_Index2 = 1144;  // EEProm address for Index2 
@@ -373,9 +358,6 @@ constexpr float dtRose = recalcPeriod / 1E6;  //seconds  1E6 = 1,000,000
 
 constexpr unsigned PID_Interval = 10; // ms  
 constexpr float P = 0.01;             // (P)roportional constant of the regulator needs to be adjusted (depends on speed and acceleration setting)
-/////////////////////////////////////////////////////////////////////////////
-
-
 
 // Page defines
 int pageCallerId = 20;
