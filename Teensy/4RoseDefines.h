@@ -7,7 +7,7 @@
 //#define THREE_AXES // Teensy 3.2
 //#define TWO_AXES_V2 // Teensy 3.2
 //#define SHOW_POSITION
-#define DEBUG
+//#define DEBUG
 
 //==================================================================
 // Pin assignments
@@ -330,8 +330,8 @@ int filenameLength = 0;
 String filename_Index2a;
 char * filename_Index2;
 
-double returnSteps_Axis = 0;
-double returnSteps_Spindle = 0;
+int32_t returnSteps_Axis = 0;
+int32_t returnSteps_Spindle = 0;
 
 
 /////////////////////////////////////////////////////////////////////////
@@ -352,8 +352,8 @@ float degrees_Spindle = 0;
 float distance_Axis = 0;
 
 // Accuracy interval 
-constexpr unsigned recalcPeriod = 35'000;
-//constexpr unsigned recalcPeriod = 25'000; //?s  period for calculation of new target points. Straight lines between those points. 
+//constexpr unsigned recalcPeriod = 35'000;
+constexpr unsigned recalcPeriod = 25'000; //?s  period for calculation of new target points. Straight lines between those points. 
 constexpr float dtRose = recalcPeriod / 1E6;  //seconds  1E6 = 1,000,000 
 
 constexpr unsigned PID_Interval = 10; // ms  
