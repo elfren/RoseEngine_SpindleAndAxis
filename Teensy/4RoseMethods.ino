@@ -3682,31 +3682,31 @@ void ReturnToStartPosition(int selection)
 	while (stepControllerAxis.isRunning())
 	{
 
-#ifdef DEBUG
-		switch (selection)
-		{
-			case 0:
-			case 2:
-			{
-				endPosition_Axis = stepper_Z.getPosition();
-				break;
-			}
-			case 1:
-			case 3:
-			{
-				endPosition_Axis = stepper_X.getPosition();
-				break;
-			}
-		}
-		Serial.print("Selection: ");
-		Serial.println(selection);
-		endPosition_Spindle = stepper_Spindle.getPosition();
-		Serial.print("Spindle: ");
-		Serial.println(endPosition_Spindle);
-
-		Serial.print("Axis: ");
-		Serial.println(endPosition_Axis);
-#endif // DEBUG
+//#ifdef DEBUG
+//		switch (selection)
+//		{
+//			case 0:
+//			case 2:
+//			{
+//				endPosition_Axis = stepper_Z.getPosition();
+//				break;
+//			}
+//			case 1:
+//			case 3:
+//			{
+//				endPosition_Axis = stepper_X.getPosition();
+//				break;
+//			}
+//		}
+//		Serial.print("Selection: ");
+//		Serial.println(selection);
+//		endPosition_Spindle = stepper_Spindle.getPosition();
+//		Serial.print("Spindle: ");
+//		Serial.println(endPosition_Spindle);
+//
+//		Serial.print("Axis: ");
+//		Serial.println(endPosition_Axis);
+//#endif // DEBUG
 		// Check for Cancel code  
 		if (SerialAvailable() >= 0)
 		{
@@ -4163,6 +4163,12 @@ void RoseRadial_Z(int direction)
 		.setAcceleration(configRose.accel_Axis_Z)
 		.setPosition(initialPosition_Axis); // set start position of counter
 
+	int beginPosition = stepperAxis_Z.getPosition();
+#ifdef DEBUG
+	Serial.print("BeginPosition: ");
+	Serial.println(beginPosition);
+	Serial.println("^^^^^^^^^^^^^^^^^");
+#endif // DEBUG
 
 #ifdef DEBUG
 
@@ -4194,6 +4200,8 @@ void RoseRadial_Z(int direction)
 	Serial.print("amplitude_Axis_Z:");
 	Serial.println(configRose.amplitude_Axis_Z);
 	Serial.println("+++++++++++++++++++++++++++");
+	Serial.print("initialPosition_Axis:");
+	Serial.println(initialPosition_Axis);
 	Serial.println("+++++++++++++++++++++++++++");
 
 #endif // DEBUG
@@ -4265,16 +4273,20 @@ void RoseRadial_Z(int direction)
 	}
 	endPosition_Spindle = stepperSpindle.getPosition();
 	endPosition_Axis = stepperAxis_Z.getPosition();
+	returnSteps_Axis = endPosition_Axis - initialPosition_Axis;// *direction);
+	returnSteps_Spindle = endPosition_Spindle;
+
 #ifdef DEBUG
 	Serial.print("Spindle:");
 	Serial.println(endPosition_Spindle);
 	Serial.print("Axis:");
 	Serial.println(endPosition_Axis);
+	Serial.print("returnSteps_Axis: ");
+	Serial.println(returnSteps_Axis);
 #endif // DEBUG
 
 
-	returnSteps_Axis = endPosition_Axis;
-	returnSteps_Spindle = endPosition_Spindle;
+
 	stepperSpindle.setPosition(0);
 	stepperAxis_Z.setPosition(0);
 
@@ -4406,6 +4418,7 @@ void RoseRadial_X(int direction)
 #endif // DEBUG
 		delay(15);
 	}
+
 	endPosition_Spindle = stepperSpindle.getPosition();
 	endPosition_Axis = stepperAxis_X.getPosition();
 	returnSteps_Axis = endPosition_Axis;
