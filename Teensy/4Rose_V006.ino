@@ -1,6 +1,6 @@
 //#pragma once
 /* *****************************************************************
-* 4Rose_V006 main entry
+* 4Rose_V007 main entry
 * Author: Edward French
 ******************************************************************/
 #include "math.h"
@@ -61,6 +61,7 @@ void setup()
 	Serial3.write(0xFF);
 	Serial3.write(0xFF);
 	delay(50);
+
 
 	// Update with values from EEProm
 	EEPROM.get(eePromAddress_Setup, configMain);
