@@ -3,9 +3,9 @@
 * Author: Edward French
 ******************************************************************/
 #pragma once
-#define FOUR_AXES  // Teensy 3.5
+//#define FOUR_AXES  // Teensy 3.5
 //#define THREE_AXES // Teensy 3.2
-//#define TWO_AXES_V2 // Teensy 3.2
+#define TWO_AXES_V2 // Teensy 3.2
 //#define SHOW_POSITION
 //#define DEBUG
 
