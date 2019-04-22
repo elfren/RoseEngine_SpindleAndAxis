@@ -18,6 +18,7 @@
 	// Initialize AccelStepper object
 AccelStepper accelStep_Spindle(AccelStepper::DRIVER, PIN_SPINDLE_STEP, PIN_SPINDLE_DIR);
 AccelStepper accelStep_Axis_Z(AccelStepper::DRIVER, PIN_AXIS_Z_STEP, PIN_AXIS_Z_DIR);
+AccelStepper accelStep_Axis_X(AccelStepper::DRIVER, PIN_AXIS_X_STEP, PIN_AXIS_X_DIR);
 
 // TeensyStep initialization
 Stepper stepperSpindle(PIN_SPINDLE_STEP, PIN_SPINDLE_DIR);
@@ -122,18 +123,27 @@ void setup()
 	pinMode(PIN_AXIS_B_ENABLE, OUTPUT);
 	digitalWrite(PIN_AXIS_B_ENABLE, HIGH);  // Disable 
 
+
 	// Set Microstepping mode
 	SetMicrosteppingMode(configMain.microsteps_Axis_B, PIN_AXIS_B_MS0, PIN_AXIS_B_MS1, PIN_AXIS_B_MS2);
 	stepperAxis_B.setStepPinPolarity(configMain.polarity_Axis_B ? (LOW) : (HIGH)); // driver expects active low pulses
 #endif //FOUR_AXES
 #ifndef TWO_AXES_V2
-	pinMode(PIN_AXIS_Z_MS2, OUTPUT);
+	pinMode(PIN_AXIS_X_MS2, OUTPUT);
 	pinMode(PIN_AXIS_X_MS0, OUTPUT);
 	pinMode(PIN_AXIS_X_MS1, OUTPUT);
 	SetMicrosteppingMode(configMain.microsteps_Axis_X, PIN_AXIS_X_MS0, PIN_AXIS_X_MS1, PIN_AXIS_X_MS2);
 
 	// Configure TeensyStep motors
 	stepperAxis_X.setStepPinPolarity(configMain.polarity_Axis_X ? (LOW) : (HIGH)); // driver expects active low pulses
+
+	//X Axis Accelstep motor initialization
+	// Configure Enable Z Axis stepper
+	accelStep_Axis_X.setEnablePin(PIN_AXIS_X_ENABLE);
+	accelStep_Axis_X.setPinsInverted(false, false, true);
+
+	// Disable the X Axis stepper motor (enable in run method)
+	accelStep_Axis_X.disableOutputs();
 
 #endif // TWO_AXES_V2
 	stepperSpindle.setStepPinPolarity(configMain.polarity_Spindle ? (LOW) : (HIGH)); // DRV8825 driver expects active low pulses
@@ -1580,22 +1590,26 @@ void loop()
 		}
 		case 163: // £ - Sp-X spindle CCW
 		{
-			RunTwoSteppers_Sp_Axis(DIR_CCW, DIR_CCW, ID_SPINDLE, ID_AXIS_X);
+			//RunTwoSteppers_Sp_Axis(DIR_CCW, DIR_CCW, ID_SPINDLE, ID_AXIS_X);
+			RunTwoSteppers_SpX(DIR_CCW, DIR_CCW, ID_SPINDLE);
 			break;
 		}
 		case 164: // ¤ - Sp-X spindle CW
 		{
-			RunTwoSteppers_Sp_Axis(DIR_CW, DIR_CW, ID_SPINDLE, ID_AXIS_X);
+			//RunTwoSteppers_Sp_Axis(DIR_CW, DIR_CW, ID_SPINDLE, ID_AXIS_X);
+			RunTwoSteppers_SpX(DIR_CW, DIR_CW, ID_SPINDLE);
 			break;
 		}
 		case 165: // ¥ - Sp-X Axis CCW
 		{
-			RunTwoSteppers_Sp_Axis(DIR_CCW, DIR_CCW, ID_AXIS_X, ID_AXIS_X);
+			//RunTwoSteppers_Sp_Axis(DIR_CCW, DIR_CCW, ID_AXIS_X, ID_AXIS_X);
+			RunTwoSteppers_SpX(DIR_CCW, DIR_CCW, ID_AXIS_X);
 			break;
 		}
 		case 166: // ¦ - Sp-X Axis CW
 		{
-			RunTwoSteppers_Sp_Axis(DIR_CW, DIR_CW, ID_AXIS_X, ID_AXIS_X);
+			//RunTwoSteppers_Sp_Axis(DIR_CW, DIR_CW, ID_AXIS_X, ID_AXIS_X);
+			RunTwoSteppers_SpX(DIR_CW, DIR_CW, ID_AXIS_X);
 			break;
 		}
 		case 167: // § - Sp-B spindle speed
