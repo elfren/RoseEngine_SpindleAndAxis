@@ -19,6 +19,7 @@
 AccelStepper accelStep_Spindle(AccelStepper::DRIVER, PIN_SPINDLE_STEP, PIN_SPINDLE_DIR);
 AccelStepper accelStep_Axis_Z(AccelStepper::DRIVER, PIN_AXIS_Z_STEP, PIN_AXIS_Z_DIR);
 AccelStepper accelStep_Axis_X(AccelStepper::DRIVER, PIN_AXIS_X_STEP, PIN_AXIS_X_DIR);
+AccelStepper accelStep_Axis_B(AccelStepper::DRIVER, PIN_AXIS_B_STEP, PIN_AXIS_B_DIR);
 
 // TeensyStep initialization
 Stepper stepperSpindle(PIN_SPINDLE_STEP, PIN_SPINDLE_DIR);
@@ -90,7 +91,7 @@ void setup()
 	digitalWrite(PIN_SPINDLE_ENABLE, HIGH);  // Disable 
 	digitalWrite(PIN_AXIS_Z_ENABLE, HIGH);  // Disable 
 	digitalWrite(PIN_AXIS_X_ENABLE, HIGH);  // Disable 
-
+ 
 	// Set Microstepping mode
 	pinMode(PIN_SPINDLE_MS0, OUTPUT);
 	pinMode(PIN_SPINDLE_MS1, OUTPUT);
@@ -123,10 +124,22 @@ void setup()
 	pinMode(PIN_AXIS_B_ENABLE, OUTPUT);
 	digitalWrite(PIN_AXIS_B_ENABLE, HIGH);  // Disable 
 
+	// B Axis accelste[ stepper motor initialization
+	// Configure Enable B Axis stepper
+	accelStep_Axis_B.setEnablePin(PIN_AXIS_B_ENABLE);
+	accelStep_Axis_B.setPinsInverted(false, false, true);
+
+	// Disable the B Axis stepper motor (enable in run method)
+	accelStep_Axis_B.disableOutputs();
 
 	// Set Microstepping mode
+	pinMode(PIN_AXIS_B_MS2, OUTPUT);
+	pinMode(PIN_AXIS_B_MS0, OUTPUT);
+	pinMode(PIN_AXIS_B_MS1, OUTPUT);
 	SetMicrosteppingMode(configMain.microsteps_Axis_B, PIN_AXIS_B_MS0, PIN_AXIS_B_MS1, PIN_AXIS_B_MS2);
 	stepperAxis_B.setStepPinPolarity(configMain.polarity_Axis_B ? (LOW) : (HIGH)); // driver expects active low pulses
+
+
 #endif //FOUR_AXES
 #ifndef TWO_AXES_V2
 	pinMode(PIN_AXIS_X_MS2, OUTPUT);
@@ -208,7 +221,7 @@ void loop()
 		//Nextion connected
 		serialId = 1;
 	}
-	serialId = 1;
+	serialId = 1; //***Hardcoded to Serial3*** 
 
 	// All Nextion incoming data packets are terminated with one 0xFF byte
 	if (serialId <9) // If serial data is available, parse the data
@@ -1585,6 +1598,9 @@ void loop()
 #ifdef DEBUG
 			Serial.print("speedPercent_Axis_X:");
 			Serial.println(configMain.speedPercent_Axis_X);
+			float nextSpeed_AxisX = configMain.speedPercent_Axis_X  * configSpX.maxSpd_Axis * .01;
+			Serial.print("nextSpeed_AxisX:");
+			Serial.println(nextSpeed_AxisX);
 #endif // DEBUG
 			break;
 		}
