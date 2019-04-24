@@ -357,6 +357,7 @@ constexpr float dtRose = recalcPeriod / 1E6;  //seconds  1E6 = 1,000,000
 
 constexpr unsigned PID_Interval = 10; // ms  
 constexpr float P = 0.01;             // (P)roportional constant of the regulator needs to be adjusted (depends on speed and acceleration setting)
+constexpr unsigned priorityLevel = 64; //128
 
 // Page defines
 int pageCallerId = 20;
