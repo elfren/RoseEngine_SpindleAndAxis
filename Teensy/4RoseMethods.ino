@@ -1395,7 +1395,7 @@ int RunTwoSteppers_SpZ(
 	accelStep_Axis_Z.setMaxSpeed(nextSpeed_Axis);
 	accelStep_Axis_Z.setAcceleration(configSpZ.accel_Axis);
 	accelStep_Axis_Z.setCurrentPosition(0);
-	long moveTo_Axis = 1000000000;
+	long moveTo_Axis = 2000000000;
 	if (direction_Axis == DIR_CW)
 	{
 		moveTo_Axis = -moveTo_Axis;
@@ -1411,7 +1411,7 @@ int RunTwoSteppers_SpZ(
 	accelStep_Spindle.setMaxSpeed(nextSpeed_Spindle);
 	accelStep_Spindle.setAcceleration(configSpZ.accel_Spindle);
 	accelStep_Spindle.setCurrentPosition(0);
-	long moveTo_Spindle = 1000000000;
+	long moveTo_Spindle = 2000000000;
 
 	if (direction_Spindle == DIR_CCW)
 	{
@@ -2291,7 +2291,7 @@ int RunTwoSteppers_SpB(
 	accelStep_Axis_B.setMaxSpeed(nextSpeed_Axis);
 	accelStep_Axis_B.setAcceleration(configSpB.accel_Axis);
 	accelStep_Axis_B.setCurrentPosition(0);
-	long moveTo_Axis = 1000000000;
+	long moveTo_Axis = 2000000000;
 	if (direction_Axis == DIR_CW)
 	{
 		moveTo_Axis = -moveTo_Axis;
@@ -2307,7 +2307,7 @@ int RunTwoSteppers_SpB(
 	accelStep_Spindle.setMaxSpeed(nextSpeed_Spindle);
 	accelStep_Spindle.setAcceleration(configSpB.accel_Spindle);
 	accelStep_Spindle.setCurrentPosition(0);
-	long moveTo_Spindle = 1000000000;
+	long moveTo_Spindle = 2000000000;
 
 	if (direction_Spindle == DIR_CCW)
 	{
@@ -4172,7 +4172,7 @@ void RosePattern_Axial_Z(int direction)
 	tickZ();
 
 	// use a timer to periodically calculate new targets for the slide
-	tickTimerZ.priority(128); // lowest priority, potentially long caclulations need to be interruptable by TeensyStep
+	tickTimerZ.priority(priorityLevel); // lowest priority, potentially long caclulations need to be interruptable by TeensyStep
 	tickTimerZ.begin(tickZ, recalcPeriod);
 
 	while (runPattern)
@@ -4853,7 +4853,7 @@ void RoseRadial_Z(int direction)
 	tickZ();
 
 	// use a timer to periodically calculate new targets for the slide
-	tickTimerZ.priority(128); // lowest priority, potentially long caclulations need to be interruptable by TeensyStep
+	tickTimerZ.priority(priorityLevel); // lowest priority, potentially long caclulations need to be interruptable by TeensyStep
 	tickTimerZ.begin(tickZ, recalcPeriod);
 
 	while (runPattern)
@@ -4904,8 +4904,9 @@ void RoseRadial_Z(int direction)
 			}
 			}
 		}
-		delay(15);
-	}
+		delay(5);
+	} // End while
+
 	endPosition_Spindle = stepperSpindle.getPosition();
 	endPosition_Axis = stepperAxis_Z.getPosition();
 	returnSteps_Axis = endPosition_Axis - initialPosition_Axis;// *direction);
@@ -4995,7 +4996,7 @@ void RoseRadial_X(int direction)
 	tickX();
 
 	// use a timer to periodically calculate new targets for the slide
-	tickTimerX.priority(128); // lowest priority, potentially long caclulations need to be interruptable by TeensyStep
+	tickTimerX.priority(priorityLevel); // lowest priority, potentially long caclulations need to be interruptable by TeensyStep
 	tickTimerX.begin(tickX, recalcPeriod);
 
 	while (runPatternX)
@@ -5053,7 +5054,7 @@ void RoseRadial_X(int direction)
 		Serial.print("Axis:");
 		Serial.println(endPosition_Axis);
 #endif // DEBUG
-		delay(15);
+		delay(5);
 	}
 
 	endPosition_Spindle = stepperSpindle.getPosition();
