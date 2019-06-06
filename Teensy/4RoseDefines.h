@@ -166,6 +166,7 @@
 #define RADIAL 0
 #define AXIAL 1
 
+
 /////////////////////////////////////////////////////////////////////////
 // Structs
 /////////////////////////////////////////////////////////////////////////
@@ -317,12 +318,14 @@ struct configPageGreekKey
 	int patternId;
 	int countPattern360;
 	int countPattern;
+	int radialOrAxial_Pattern;
 	float segmentLengthPattern;
 
 	// pageGrkFile settings
 	int countPatternFile;
 	int countPatternFile360;
 	int segmentOrActual;
+	int radialOrAxial_File;
 	float segmentLengthForFile;
 	//float segmentDegrees_Pattern;	
 };
@@ -428,7 +431,8 @@ bool exitGreekKey = false;
 String comment;
 int spindleShortLegSteps = 0;
 int axisShortLegSteps = 0;
-
+String sdFilename;
+bool badFilename = false;
 /////////////////////////////////////////////////////////////////////////
 // Page defines
 /////////////////////////////////////////////////////////////////////////
