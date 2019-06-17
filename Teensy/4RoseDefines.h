@@ -3,13 +3,11 @@
 * Author: Edward French
 ******************************************************************/
 #pragma once
-//#define FOUR_AXES  // Teensy 3.5
+#define FOUR_AXES  // Teensy 3.5
 //#define THREE_AXES // Teensy 3.2
-#define TWO_AXES_V2 // Teensy 3.2
+//#define TWO_AXES_V2 // Teensy 3.2
 #define SHOW_POSITION
-//#define RUN_ALL // ToDo: Main page switch axes while running spindle
-#define RUN_OLD
-//#define DEBUG
+#define DEBUG
 
 //==================================================================
 // Pin assignments
@@ -316,14 +314,14 @@ struct configPageGreekKey
 	int fileOrPattern;
 	// pageGrk settings
 	int patternId;
-	int countPattern360;
+	float countPattern360;
 	int countPattern;
 	int radialOrAxial_Pattern;
 	float segmentLengthPattern;
 
 	// pageGrkFile settings
 	int countPatternFile;
-	int countPatternFile360;
+	float countPatternFile360;
 	int segmentOrActual;
 	int radialOrAxial_File;
 	float segmentLengthForFile;
@@ -371,7 +369,7 @@ unsigned int eePromAddress_Rose = 1200; // EEProm address for Rose
 unsigned int eePromAddress_Rec = 1300;
 unsigned int eePromAddress_pageOne = 1500;  // EEProm address for Sp 
 unsigned int eePromAddress_GreekKey_Main = 1600;  // EEProm address for Greek Key Main
-unsigned int eePromAddress_GreekKey_Z = 1650; //  EEProm address for Greek Key Z
+unsigned int eePromAddress_GreekKey_Z = 1670; //  EEProm address for Greek Key Z
 unsigned int eePromAddress_GreekKey_X = 1700; //  EEProm address for Greek Key X 
 
 unsigned int eePromAddress_Index_Main = 1800;  // EEProm address for Index_Main
@@ -433,6 +431,8 @@ int spindleShortLegSteps = 0;
 int axisShortLegSteps = 0;
 String sdFilename;
 bool badFilename = false;
+float hVal = 0; // Horizontal component of angular move
+float vVal = 0; // Vertical component of angular move
 /////////////////////////////////////////////////////////////////////////
 // Page defines
 /////////////////////////////////////////////////////////////////////////
