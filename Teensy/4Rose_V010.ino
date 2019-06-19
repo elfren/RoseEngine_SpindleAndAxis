@@ -38,7 +38,6 @@ RotateControl rotateController1;
 /// <returns></returns>
 void setup()
 {
-	digitalWrite(1, HIGH);
 	pinMode(LED_BUILTIN, OUTPUT);
 
 	// Initialize Serial0 (USB port)
@@ -89,10 +88,10 @@ void setup()
 	pinMode(PIN_AXIS_Z_ENABLE, OUTPUT);
 	pinMode(PIN_AXIS_X_ENABLE, OUTPUT);
 
-	digitalWrite(PIN_SPINDLE_ENABLE, HIGH);  // Disable 
-	digitalWrite(PIN_AXIS_Z_ENABLE, HIGH);  // Disable 
-	digitalWrite(PIN_AXIS_X_ENABLE, HIGH);  // Disable 
- 
+	SetEnable(ID_SPINDLE, false);
+
+	SetEnable(ID_AXIS_Z, false);
+	SetEnable(ID_AXIS_X, false);
 	// Set Microstepping mode (Microsteps configured on hardware.)
 	/*pinMode(PIN_SPINDLE_MS0, OUTPUT);
 	pinMode(PIN_SPINDLE_MS1, OUTPUT);
@@ -107,7 +106,7 @@ void setup()
 
 #ifdef FOUR_AXES
 	pinMode(PIN_AXIS_B_ENABLE, OUTPUT);
-	digitalWrite(PIN_AXIS_B_ENABLE, HIGH);  // Disable 
+	SetEnable(ID_AXIS_B, false);
 
 
 	// Set Microstepping mode (Microsteps configured on hardware.)
@@ -117,8 +116,6 @@ void setup()
 	// Microsteps set on PCB
 	//SetMicrosteppingMode(configMain.microsteps_Axis_B, PIN_AXIS_B_MS0, PIN_AXIS_B_MS1, PIN_AXIS_B_MS2);
 	// Microsteps set on PCB
-	//stepperAxis_B.setStepPinPolarity(configMain.polarity_Axis_B ? (LOW) : (HIGH)); // driver expects active low pulses
-
 
 #endif //FOUR_AXES
 #ifndef TWO_AXES_V2
@@ -130,12 +127,8 @@ void setup()
 	//SetMicrosteppingMode(configMain.microsteps_Axis_X, PIN_AXIS_X_MS0, PIN_AXIS_X_MS1, PIN_AXIS_X_MS2);
 
 	// Configure TeensyStep motors
-	stepperAxis_X.setStepPinPolarity(configMain.polarity_Axis_X ? (LOW) : (HIGH)); // driver expects active low pulses
-
 
 #endif // TWO_AXES_V2
-	stepperSpindle.setStepPinPolarity(configMain.polarity_Spindle ? (LOW) : (HIGH)); // DRV8825 driver expects active low pulses
-	stepperAxis_Z.setStepPinPolarity(configMain.polarity_Axis_Z ? (LOW) : (HIGH)); // driver expects active low pulses
 
 	// Initialize Limit switches
 	pinMode(configMain.limit_Min_Z, INPUT_PULLUP);
@@ -168,17 +161,31 @@ void setup()
 
 	// Configure Accelsteppers
 	accelStep_Spindle.setEnablePin(PIN_SPINDLE_ENABLE);
-	accelStep_Spindle.setPinsInverted(false, false, true);
-	accelStep_Spindle.disableOutputs();
+
+	// Accelstepper default for Enable is HIGH.  setPinsInverted(false, false,true) for Enable LOW
+	if(!configMain.polarity_Spindle)
+	{ 
+		accelStep_Spindle.setPinsInverted(false, false, true);
+	}
+
+	SetEnable(ID_SPINDLE, false);
 
 	accelStep_Axis_Z.setEnablePin(PIN_AXIS_Z_ENABLE);
-	accelStep_Axis_Z.setPinsInverted(false, false, true);
-	accelStep_Axis_Z.disableOutputs();
+	if (!configMain.polarity_Axis_Z)
+	{
+		accelStep_Axis_Z.setPinsInverted(false, false, true);
+	}
+
+	SetEnable(ID_AXIS_Z, false);
 
 #ifdef FOUR_AXES
 	accelStep_Axis_X.setEnablePin(PIN_AXIS_X_ENABLE);
-	accelStep_Axis_X.setPinsInverted(false, false, true);
-	accelStep_Axis_X.disableOutputs();
+	if (!configMain.polarity_Axis_X)
+	{
+		accelStep_Axis_X.setPinsInverted(false, false, true);
+	}
+	SetEnable(ID_AXIS_X, false);
+
 #endif // FOUR_AXES
 
 	for (int i = 0; i < 3; i++) // Verify Teensy is operational
@@ -223,11 +230,6 @@ void loop()
 		incomingByte = SerialRead(serialId);
 		delay(100);
 
-//#ifdef DEBUG
-//		Serial.print("incomingByte:");
-//		Serial.println(incomingByte);
-//#endif // DEBUG
-
 		switch (incomingByte)
 		{
 		case 41: // ) - 
@@ -269,7 +271,6 @@ void loop()
 			Serial.print("countPattern:");
 			Serial.println(configGreekKey_Main.countPattern);
 #endif // DEBUG
-
 
 			EEPROM.put(eePromAddress_GreekKey_Main, configGreekKey_Main);
 			break;
@@ -392,7 +393,6 @@ void loop()
 #endif // DEBUG
 					break;
 				}
-
 			}
 			break;
 		}
@@ -465,10 +465,8 @@ void loop()
 						{
 							configOne.accel_Spindle = GetSerialFloat(serialId);
 	#ifdef DEBUG
-
 							Serial.print("accel_Spindle:");
 							Serial.println(configOne.accel_Spindle);
-
 	#endif // DEBUG
 							break;
 						}
@@ -514,8 +512,12 @@ void loop()
 			reverseDirection = GetSerialInteger();
 			if (reverseDirection == 0)
 			{
-				reverseDirection = -1; // Nextion can't send negative number
-		}
+				reverseDirection = DIR_CCW; // Nextion can't send negative number
+			}
+			else
+			{
+				reverseDirection = DIR_CW;
+			}
 #ifdef DEBUG
 			Serial.print("configGreekKey_Main.axisId:");
 			Serial.println(configGreekKey_Main.axisId);
@@ -523,7 +525,7 @@ void loop()
 			Serial.println(reverseDirection);
 			Serial.println("++++++++++++++++++");
 #endif // DEBUG
-			GreekKeyFromFile();
+			GreekKeyFromFile(reverseDirection);
 
 			break;
 		}
@@ -559,14 +561,12 @@ void loop()
 #endif // DEBUG
 			break;
 		}
-		case 65: // A - Enable spindle stepper
+		case 65: // A - Not Used
 		{
-			digitalWrite(PIN_SPINDLE_ENABLE, LOW);
 			break;
 		}
-		case 66: //B - Disable spindle stepper
+		case 66: //B - Not Used
 		{
-			digitalWrite(PIN_SPINDLE_ENABLE, HIGH);
 			break;
 		}
 		// C: -> Cancel Stop Main/Sp2 Spindle
@@ -587,7 +587,6 @@ void loop()
 		}
 		case 69: //E - Index by divisions or degrees
 		{
-
 			switch (configIndex_Main.indexId)
 			{
 				case 1:
@@ -605,7 +604,6 @@ void loop()
 				{
 					// Set degreeOrDivision
 					configIndex_2.degreeOrDivision = GetSerialIntegerOnly();
-
 #ifdef DEBUG
 					Serial.print("Index2-DegreeOrDivision(69):");
 					Serial.println(configIndex_2.degreeOrDivision);
@@ -630,7 +628,6 @@ void loop()
 		}
 		case 70: // F - Rose: Radial or axial
 		{
-
 			configRose.radial_Axial = GetSerialInteger();
 			EEPROM.put(eePromAddress_Rose, configRose);
 			break;
@@ -1222,7 +1219,6 @@ void loop()
 		}
 		case 88:  // X - Return to start: Spindle
 		{
-
 			pageCallerId = GetSerialInteger();
 			ReturnToStartPosition(ID_SPINDLE);
 			break;
@@ -1239,14 +1235,11 @@ void loop()
 		}
 		case 90:  // Z - Main Axis Clockwise
 		{
-			//RunTwoSteppers_Sp_Axis(DIR_CW, DIR_CW, ID_AXIS_Z, ID_AXIS_Z);
 			RunTwoSteppers_All(DIR_CW, DIR_CW, ID_AXIS_Z);
 			break;
 		}
 		case 91:  // [ - Z Axis Counterclockwise
 		{
-
-			//RunTwoSteppers_Sp_Axis(DIR_CCW, DIR_CCW, ID_AXIS_Z, ID_AXIS_Z);
 			RunTwoSteppers_All(DIR_CCW, DIR_CCW, ID_AXIS_Z);
 			break;
 		}
@@ -1269,22 +1262,24 @@ void loop()
 #endif // DEBUG
 			switch (axisId)
 			{
-				case 1:
+				case ID_AXIS_Z:
 				{
-					digitalWrite(PIN_AXIS_Z_ENABLE, LOW);
+					SetEnable(ID_AXIS_Z, true);
 					break;
 				}
-				case 2:
+				case ID_AXIS_X:
 				{
-					digitalWrite(PIN_AXIS_X_ENABLE, LOW);
-
+					SetEnable(ID_AXIS_X, true);
 					break;
 				}
-				case 3:
+				case ID_AXIS_B:
 				{
-					digitalWrite(PIN_AXIS_B_ENABLE, LOW);
-					Serial.print("PIN_AXIS_B_ENABLE:");
-					Serial.println(LOW);
+					SetEnable(ID_AXIS_B, true);
+					break;
+				}
+				case ID_SPINDLE:
+				{
+					SetEnable(ID_SPINDLE, true);
 					break;
 				}
 			}
@@ -1293,29 +1288,26 @@ void loop()
 		case 95: //_ - Disable Z axis stepper
 		{
 			int axisId = GetSerialInteger();
-#ifdef DEBUG
-			Serial.print("axisId:");
-			Serial.println(axisId);
-			Serial.print("Loop-IncomingByte:");
-			Serial.println(incomingByte);
-#endif // DEBUG
 			switch (axisId)
 			{
-				case 1:
+				case ID_AXIS_Z:
 				{
-					digitalWrite(PIN_AXIS_Z_ENABLE, HIGH);
+					SetEnable(ID_AXIS_Z, false);
 					break;
 				}
-				case 2:
+				case ID_AXIS_X:
 				{
-					digitalWrite(PIN_AXIS_X_ENABLE, HIGH);
+					SetEnable(ID_AXIS_X, false);
 					break;
 				}
-				case 3:
+				case ID_AXIS_B:
 				{
-					digitalWrite(PIN_AXIS_B_ENABLE, HIGH);
-					Serial.print("PIN_AXIS_B_ENABLE:");
-					Serial.println(HIGH);
+					SetEnable(ID_AXIS_B, false);
+					break;
+				}
+				case ID_SPINDLE:
+				{
+					SetEnable(ID_SPINDLE, false);
 					break;
 				}
 			}
@@ -1341,7 +1333,6 @@ void loop()
 					Serial.print("speedPercent_Axis_Z:");
 					Serial.println(configMain.speedPercent_Axis_Z);
 #endif // DEBUG
-
 					EEPROM.put(eePromAddress_Setup, configMain);
 					break;
 				}
@@ -1365,15 +1356,11 @@ void loop()
 #endif // DEBUG
 					break;
 				}
-
-
 			}
 #ifdef DEBUG
 				Serial.print("3-newSpeedPercentage:");
 				Serial.println(newSpeedPercentage);
 #endif // DEBUG
-
-
 			break;
 		}
 		case 98: // b - Test EEPROM settings Setup screen
@@ -1498,15 +1485,12 @@ void loop()
 		}
 		case 107: // k - Z Spindle Clockwise
 		{
-			//RunTwoSteppers_Sp_Axis(DIR_CW, DIR_CW, ID_SPINDLE, ID_AXIS_Z);
 			RunTwoSteppers_All(DIR_CW, DIR_CW, ID_SPINDLE);
 			break;
 		}
 		case 108: // l - Z spindle counter clockwise
 		{
-			//RunTwoSteppers_Sp_Axis(DIR_CCW, DIR_CCW, ID_SPINDLE, ID_AXIS_Z);
 			RunTwoSteppers_All(DIR_CCW, DIR_CCW, ID_SPINDLE);
-
 			break;
 		}
 		case 109: // m - //Not used
@@ -1531,7 +1515,6 @@ void loop()
 			}
 			
 			EEPROM.put(eePromAddress_Rose, configRose);
-
 			break;
 		}
 		case 112: // p - Z/Sync Spindle Microsteps
@@ -1930,23 +1913,19 @@ void loop()
 		}
 		case 163: // £ - Not used
 		{
-
 			break;
 		}
 		case 164: // ¤ - Not used
 		{
-
 			break;
 		}
 		case 165: // ¥ - Sp-X Axis CCW
 		{
-			//RunTwoSteppers_Sp_Axis(DIR_CCW, DIR_CCW, ID_AXIS_X, ID_AXIS_X);
 			RunTwoSteppers_All(DIR_CCW, DIR_CCW, ID_AXIS_X);
 			break;
 		}
 		case 166: // ¦ - Sp-X Axis CW
 		{
-			//RunTwoSteppers_Sp_Axis(DIR_CW, DIR_CW, ID_AXIS_X, ID_AXIS_X);
 			RunTwoSteppers_All(DIR_CW, DIR_CW, ID_AXIS_X);
 
 			break;
@@ -1981,14 +1960,11 @@ void loop()
 		}
 		case 171: // « - Sp-B Axis CCW
 		{
-
-			//RunTwoSteppers_Sp_Axis(DIR_CCW, DIR_CCW, ID_AXIS_B, ID_AXIS_B);
 			RunTwoSteppers_All(DIR_CCW, DIR_CCW, ID_AXIS_B);
 			break;
 		}
 		case 172: // ¬ - Sp-B Axis CW
 		{
-			//RunTwoSteppers_Sp_Axis(DIR_CW, DIR_CW, ID_AXIS_B, ID_AXIS_B);
 			RunTwoSteppers_All(DIR_CW, DIR_CW, ID_AXIS_B);
 			break;
 		}
@@ -2132,10 +2108,8 @@ void loop()
 			pageCallerId = GetSerialIntegerOnly();
 			switch (pageCallerId)
 			{
-
 				case PAGE_MAIN:
 				{
-
 					configPageMain.maxSpd_Axis_X = GetSerialFloat(serialId);
 					EEPROM.put(eePromAddress_pageMain, configPageMain);
 #ifdef DEBUG
@@ -2172,7 +2146,6 @@ void loop()
 			pageCallerId = GetSerialIntegerOnly();
 			switch (pageCallerId)
 			{
-
 				case PAGE_MAIN:
 				{
 					configPageMain.accel_Axis_X = GetSerialFloat(serialId);
@@ -2243,7 +2216,6 @@ void loop()
 		case 190: // ¾ - Index Source:Fixed or File
 		{
 			GetFilenameFromSerial();
-
 			break;
 		}
 		case 191: // ¿ - Index: Size
@@ -2441,7 +2413,6 @@ void loop()
 		case 198: // Æ - Do Rec AxialZ 
 		{
 			int waveDir = GetSerialFloat(serialId);
-
 #ifdef DEBUG
 			Serial.print("waveDir(197: ");
 			Serial.println(waveDir);
@@ -2521,20 +2492,17 @@ void loop()
 			switch (configGreekKey_Main.axisId)
 			{
 				case ID_AXIS_Z: // Greek Key Z: Spindle accel
-				//case 48:
 				{
 					configGreekKey_Z.accel_Spindle = accel;
 					EEPROM.put(eePromAddress_GreekKey_Z, configGreekKey_Z);
 					break;
 				}
 				case ID_AXIS_X: // Greek Key X: Spindle accel
-				//case 49:
 				{
 					configGreekKey_X.accel_Spindle = accel;
 					EEPROM.put(eePromAddress_GreekKey_X, configGreekKey_X);
 					break;
 				}
-			
 			}
 			break;
 		}
@@ -2584,7 +2552,6 @@ void loop()
 					Serial.print("maxSpd:");
 					Serial.println(configSyncZ.maxSpd_Axis);
 #endif // DEBUG
-
 					break;
 				}
 				case PAGE_REC:
@@ -2642,7 +2609,6 @@ void loop()
 		case 204: // Ë - Rec1_Z Axial Amplitude
 		{
 			configReci.amplitude_AxialZ = GetSerialFloat(serialId);
-			
 			EEPROM.put(eePromAddress_Rec, configReci);
 #ifdef DEBUG
 			Serial.print("amplitude_AxialZ:");
@@ -2652,7 +2618,6 @@ void loop()
 		}
 		case 205: // Í - Rec_Z Axial Distance
 		{
-
 			configReci.distance_AxialZ = GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Rec, configReci);
 #ifdef DEBUG
@@ -2754,9 +2719,17 @@ void loop()
 		case 216: // Ø - Polarity Spindle (High or Low)
 		{
 			int polaritySpindle = GetSerialInteger();
+#ifdef DEBUG
+			Serial.print("polaritySpindle:");
+			Serial.println(polaritySpindle);
+#endif // DEBUG
+			// HIGH = 1, LOW = 0
 			polaritySpindle >= 1 ? (configMain.polarity_Spindle = true) : (configMain.polarity_Spindle = false);
 			EEPROM.put(eePromAddress_Setup, configMain);
-
+#ifdef DEBUG
+			Serial.print("configMain.polarity_Spindle:");
+			Serial.println(configMain.polarity_Spindle);
+#endif // DEBUG
 			break;
 		}
 		case 217: // Ù - Polarity Z (High or Low)
@@ -2888,16 +2861,12 @@ void loop()
 		}
 		case 230: // å - Greek Key File: Pattern Count/360
 		{
-
 			configGreekKey_Main.countPatternFile360 = GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_GreekKey_Main, configGreekKey_Main);
 #ifdef DEBUG
 			Serial.print("configGreekKey_Main.countPatternFile360:");
 			Serial.println(configGreekKey_Main.countPatternFile360);
 #endif // DEBUG
-
-		    //configGreekKey_Main.segmentDegrees_Pattern = GetSerialFloat(serialId);
-			//EEPROM.put(eePromAddress_GreekKey_Main, configGreekKey_Main);
 			break;
 		}
 		case 231: // ç - Rose: Return Z and Spindle
@@ -2962,7 +2931,7 @@ void loop()
 			Serial.print("pageCallerId:");
 			Serial.println(pageCallerId);
 #endif // DEBUG
-
+			break;
 		}
 		case 237: // í - Track Positions
 		{
@@ -3042,7 +3011,6 @@ void loop()
 		}
 		case 245: // õ - Rose X Axial Amplitude
 		{
-
 			configRose.amplitude_Axial_X = GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Rose, configRose);
 #ifdef DEBUG
@@ -3147,8 +3115,6 @@ void loop()
 		}
 		case 249: // ù - Do Greek Key Axis Speed Percentage
 		{
-
-			//int speedBarId = GetSerialIntegerOnly();
 			int percentage = (int)GetSerialFloat(serialId);
 
 #ifdef DEBUG
@@ -3247,7 +3213,6 @@ void loop()
 				configGreekKey_X.speedPercent_Spindle = percentage;
 				EEPROM.put(eePromAddress_GreekKey_X, configGreekKey_X);
 			}
-
 #ifdef DEBUG
 			Serial.print("percentage:");
 			Serial.println(percentage);
@@ -3266,4 +3231,3 @@ void loop()
 		delay(50);
 	}
 } // End loop()
-
