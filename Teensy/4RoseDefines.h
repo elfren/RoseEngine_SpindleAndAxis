@@ -7,7 +7,7 @@
 //#define THREE_AXES // Teensy 3.2
 //#define TWO_AXES_V2 // Teensy 3.2
 #define SHOW_POSITION
-#define DEBUG
+//#define DEBUG
 
 //==================================================================
 // Pin assignments
@@ -267,7 +267,6 @@ struct configPageReci // page 5,6,13,14
 	int radial_axial;
 };
 
-
 struct configPageRose // page 12
 {
 	int maxSpd_Spindle;
@@ -287,7 +286,6 @@ struct configPageRose // page 12
 	float amplitude_Axial_X;
 	float amplitude_Radial_Z;
 	float amplitude_Radial_X;
-
 };
 
 struct configPageMainOne  // page 7 and page 0 (pageMain)
@@ -343,7 +341,6 @@ struct configIndex
 	int size;
 };
 
-
 //==================================================================
 // Global Variables
 //==================================================================
@@ -388,7 +385,6 @@ char * filename_Index2;
 int32_t returnSteps_Axis = 0;
 int32_t returnSteps_Spindle = 0;
 
-
 /////////////////////////////////////////////////////////////////////////
 // Rose settings
 /////////////////////////////////////////////////////////////////////////
@@ -407,7 +403,6 @@ float degrees_Spindle = 0;
 float distance_Axis = 0;
 
 // Accuracy interval 
-//constexpr unsigned recalcPeriod = 35'000;
 constexpr unsigned recalcPeriod = 25'000; //?s  period for calculation of new target points. Straight lines between those points. 
 constexpr float dtRose = recalcPeriod / 1E6;  //seconds  1E6 = 1,000,000 
 
@@ -475,5 +470,3 @@ configSteppers configGreekKey_X;
 
 // End Global Variables
 //==================================================================
-
-
