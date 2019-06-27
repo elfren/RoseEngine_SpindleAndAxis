@@ -685,7 +685,7 @@ void RunOneStepper(int direction) // pageOne
 	int limitPin_Max = configMain.limit_Max_Z;
 	int limitPin_Min = configMain.limit_Min_Z;
 
-	int polarity = LOW;
+	//int polarity = LOW;
 	int maxSpd = 0;
 	int accel = 0;
 
@@ -700,7 +700,7 @@ void RunOneStepper(int direction) // pageOne
 			stepPin = PIN_AXIS_Z_STEP;
 			dirPin = PIN_AXIS_Z_DIR;
 			//enablePin = PIN_AXIS_Z_ENABLE;
-			polarity = configMain.polarity_Axis_Z ? (LOW) : (HIGH);
+			//polarity = configMain.polarity_Axis_Z ? (LOW) : (HIGH);
 			maxSpd = configOne.maxSpd_Axis_Z;
 			accel = configOne.accel_Axis_Z;
 			speedPercent = configOne.speedPercent_Axis_Z;
@@ -714,7 +714,7 @@ void RunOneStepper(int direction) // pageOne
 		{
 			stepPin = PIN_AXIS_X_STEP;
 			dirPin = PIN_AXIS_X_DIR;
-			polarity = configMain.polarity_Axis_X ? (LOW) : (HIGH);
+			//polarity = configMain.polarity_Axis_X ? (LOW) : (HIGH);
 			maxSpd = configOne.maxSpd_Axis_X;
 			accel = configOne.accel_Axis_X;
 			speedPercent = configOne.speedPercent_Axis_X;
@@ -727,7 +727,7 @@ void RunOneStepper(int direction) // pageOne
 		{
 			stepPin = PIN_AXIS_B_STEP;
 			dirPin = PIN_AXIS_B_DIR;
-			polarity = configMain.polarity_Axis_B ? (LOW) : (HIGH);
+			//polarity = configMain.polarity_Axis_B ? (LOW) : (HIGH);
 			maxSpd = configOne.maxSpd_Axis_B;
 			accel = configOne.accel_Axis_B;
 			speedPercent = configOne.speedPercent_Axis_B;
@@ -740,7 +740,7 @@ void RunOneStepper(int direction) // pageOne
 		{
 			stepPin = PIN_SPINDLE_STEP;
 			dirPin = PIN_SPINDLE_DIR;
-			polarity = configMain.polarity_Spindle ? (LOW) : (HIGH);
+			//polarity = configMain.polarity_Spindle ? (LOW) : (HIGH);
 			maxSpd = configOne.maxSpd_Spindle;
 			accel = configOne.accel_Spindle;
 			speedPercent = configOne.speedPercent_Spindle;
@@ -763,7 +763,7 @@ void RunOneStepper(int direction) // pageOne
 	Serial.print("direction:");
 	Serial.println(direction);
 	Serial.print("polarity:");
-	Serial.println(polarity);
+	//Serial.println(polarity);
 	Serial.print("maxSpd:");
 	Serial.println(maxSpd);
 	Serial.print("accel:");
@@ -1007,6 +1007,15 @@ void RunTwoSteppers_All(
 		.setAcceleration(accel_Spindle)
 		.setTargetAbs(targetPosition_Spindle);
 
+#ifdef DEBUG
+	Serial.print("maxSpd_Spindle:");
+	Serial.println(maxSpd_Spindle);
+	Serial.print("accel_Spindle:");
+	Serial.println(accel_Spindle);
+	Serial.print("targetPosition_Spindle:");
+	Serial.println(targetPosition_Spindle);
+#endif // DEBUG
+
 	if (stepper_Axis_Go)
 	{
 		switch (configPageMain.axisId)
@@ -1046,6 +1055,10 @@ void RunTwoSteppers_All(
 	{
 		SetEnable(ID_SPINDLE, true);
 		delay(5);
+#ifdef DEBUG
+		Serial.println("PIN_SPINDLE_ENABLE:");
+		Serial.println(digitalRead(PIN_SPINDLE_ENABLE));
+#endif // DEBUG
 		rotateController1.rotateAsync(stepper_Spindle);
 		rotateController1.overrideSpeed(0);
 		delay(100);
@@ -1883,28 +1896,28 @@ void Reciprocate_RadialZ(int wavDir)
 
 	// Set speed and acceleration
 	stepper_Spindle
-		.setMaxSpeed(configReci.maxSpd_Spindle * configReci.speedPercent_Spindle * .01)
-		.setAcceleration(configReci.accel_Spindle);
+		.setMaxSpeed(configRec.maxSpd_Spindle * configRec.speedPercent_Spindle * .01)
+		.setAcceleration(configRec.accel_Spindle);
 	stepper_Spindle.setPosition(0);
 
-	float spindleDegrees = configReci.degrees_RadialZ/ (configReci.waves_RadialZ * 2);
+	float spindleDegrees = configRec.degrees_RadialZ/ (configRec.waves_RadialZ * 2);
 	int spindleSteps = round((configMain.microsteps_Spindle * configMain.steps360_Spindle * configMain.gearRatio_Spindle) * (spindleDegrees / 360) * wavDir);
-	returnSteps_Spindle = spindleSteps* configReci.waves_RadialZ * 2;
+	returnSteps_Spindle = spindleSteps* configRec.waves_RadialZ * 2;
 
 	stepper_Z
-		.setMaxSpeed(configReci.maxSpd_Axis_Z * configReci.speedPercent_Axis_Z * .01)
-		.setAcceleration(configReci.accel_Axis_Z);
+		.setMaxSpeed(configRec.maxSpd_Axis_Z * configRec.speedPercent_Axis_Z * .01)
+		.setAcceleration(configRec.accel_Axis_Z);
 	stepper_Z.setPosition(0);
-	float axisDistance = configReci.amplitude_RadialZ;
+	float axisDistance = configRec.amplitude_RadialZ;
 	int axisSteps = round((axisDistance / configMain.distancePerRev_AxisZ) * configMain.microsteps_Axis_Z * configMain.steps360_Axis_Z * wavDir);
 
 #ifdef DEBUG
 	Serial.print("SpindleMaxSpd:");
-	Serial.println(configReci.maxSpd_Spindle);
+	Serial.println(configRec.maxSpd_Spindle);
 	Serial.print("SpindleSpeedPercent:");
-	Serial.println(configReci.speedPercent_Spindle);
+	Serial.println(configRec.speedPercent_Spindle);
 	Serial.print("SpindleAccel:");
-	Serial.println(configReci.accel_Spindle);
+	Serial.println(configRec.accel_Spindle);
 
 	Serial.print("microsteps_Spindle:");
 	Serial.println(configMain.microsteps_Spindle);
@@ -1913,7 +1926,7 @@ void Reciprocate_RadialZ(int wavDir)
 	Serial.print("gearRatio_Spindle:");
 	Serial.println(configMain.gearRatio_Spindle);
 	Serial.print("amplitude_AxialZ:");
-	Serial.println(configReci.amplitude_AxialZ);
+	Serial.println(configRec.amplitude_AxialZ);
 
 	Serial.print("distancePerRev_AxisZ:");
 	Serial.println(configMain.distancePerRev_AxisZ);
@@ -1922,9 +1935,9 @@ void Reciprocate_RadialZ(int wavDir)
 	Serial.print("microsteps_Axis_Z:");
 	Serial.println(configMain.microsteps_Axis_Z);
 	Serial.print("amplitude_RadialZ:");
-	Serial.println(configReci.amplitude_RadialZ);
+	Serial.println(configRec.amplitude_RadialZ);
 	Serial.print("waves_RadialZ:");
-	Serial.println(configReci.waves_RadialZ);
+	Serial.println(configRec.waves_RadialZ);
 
 	Serial.print("spindleSteps:");
 	Serial.println(spindleSteps);
@@ -1932,16 +1945,16 @@ void Reciprocate_RadialZ(int wavDir)
 	Serial.println(axisSteps);
 
 	Serial.print("AxisMaxSpd:");
-	Serial.println(configReci.maxSpd_Axis_Z);
+	Serial.println(configRec.maxSpd_Axis_Z);
 	Serial.print("AxisSpeedPercent:");
-	Serial.println(configReci.speedPercent_Axis_Z);
+	Serial.println(configRec.speedPercent_Axis_Z);
 	Serial.print("AxisAccel:");
-	Serial.println(configReci.accel_Axis_Z);
+	Serial.println(configRec.accel_Axis_Z);
 #endif // DEBUG
 
 	SetEnable(ID_SPINDLE, true);
 	SetEnable(ID_AXIS_Z, true);
-	for (int i = 0; i < (configReci.waves_RadialZ * 2); i++)
+	for (int i = 0; i < (configRec.waves_RadialZ * 2); i++)
 	{
 		axisSteps *= -1;
 
@@ -2084,35 +2097,35 @@ void Reciprocate_RadialX(int wavDir)
 
 	// Set speed and acceleration
 	stepper_Spindle
-		.setMaxSpeed(configReci.maxSpd_Spindle * configReci.speedPercent_Spindle * .01)
-		.setAcceleration(configReci.accel_Spindle);
+		.setMaxSpeed(configRec.maxSpd_Spindle * configRec.speedPercent_Spindle * .01)
+		.setAcceleration(configRec.accel_Spindle);
 	stepper_Spindle.setPosition(0);
 
-	float spindleDegrees = configReci.degrees_RadialX / (configReci.waves_RadialX * 2);
+	float spindleDegrees = configRec.degrees_RadialX / (configRec.waves_RadialX * 2);
 	int spindleSteps = (int)round((stepsPerRevolution_Spindle) * (spindleDegrees / 360) * wavDir);
-	returnSteps_Spindle = spindleSteps * configReci.waves_RadialX * 2;
+	returnSteps_Spindle = spindleSteps * configRec.waves_RadialX * 2;
 
 
 #ifdef DEBUG
 	Serial.print("stepsPerRevolution_Spindle:");
 	Serial.println(stepsPerRevolution_Spindle);
 	Serial.print("degrees_RadialX:");
-    Serial.println(configReci.degrees_RadialX);
+    Serial.println(configRec.degrees_RadialX);
 	Serial.print("waves_RadialX  x 2:");
-	Serial.println(configReci.waves_RadialX * 2);
+	Serial.println(configRec.waves_RadialX * 2);
 #endif
 
 
 	stepper_X
-		.setMaxSpeed(configReci.maxSpd_Axis_X * configReci.speedPercent_Axis_X * .01)
-		.setAcceleration(configReci.accel_Axis_X);
+		.setMaxSpeed(configRec.maxSpd_Axis_X * configRec.speedPercent_Axis_X * .01)
+		.setAcceleration(configRec.accel_Axis_X);
 	stepper_X.setPosition(0);
-	float axisDistance = configReci.amplitude_RadialX;
+	float axisDistance = configRec.amplitude_RadialX;
 	int axisSteps = round((axisDistance / configMain.distancePerRev_AxisX) * configMain.microsteps_Axis_X * configMain.steps360_Axis_X * wavDir);
 
 #ifdef DEBUG
 	Serial.print("amplitude_AxialX:");
-	Serial.println(configReci.amplitude_AxialX);
+	Serial.println(configRec.amplitude_AxialX);
 
 	Serial.print("distancePerRev_AxisX:");
 	Serial.println(configMain.distancePerRev_AxisX);
@@ -2121,9 +2134,9 @@ void Reciprocate_RadialX(int wavDir)
 	Serial.print("microsteps_Axis_X:");
 	Serial.println(configMain.microsteps_Axis_X);
 	Serial.print("amplitude_RadialX:");
-	Serial.println(configReci.amplitude_RadialX);
+	Serial.println(configRec.amplitude_RadialX);
 	Serial.print("waves_RadialX:");
-	Serial.println(configReci.waves_RadialX);
+	Serial.println(configRec.waves_RadialX);
 
 	Serial.print("spindleSteps:");
 	Serial.println(spindleSteps);
@@ -2131,16 +2144,16 @@ void Reciprocate_RadialX(int wavDir)
 	Serial.println(axisSteps);
 
 	Serial.print("maxSpd_Axis_X:");
-	Serial.println(configReci.maxSpd_Axis_X);
+	Serial.println(configRec.maxSpd_Axis_X);
 	Serial.print("speedPercent_Axis_X:");
-	Serial.println(configReci.speedPercent_Axis_X);
+	Serial.println(configRec.speedPercent_Axis_X);
 	Serial.print("accel_Axis_X:");
-	Serial.println(configReci.accel_Axis_X);
+	Serial.println(configRec.accel_Axis_X);
 #endif // DEBUG
 
 	SetEnable(ID_SPINDLE, true);
 	SetEnable(ID_AXIS_X, true);
-	for (int i = 0; i < (configReci.waves_RadialX * 2); i++)
+	for (int i = 0; i < (configRec.waves_RadialX * 2); i++)
 	{
 		axisSteps *= -1;
 
@@ -2280,14 +2293,14 @@ void Reciprocate_AxialZ(int wavDir)
 	Stepper stepper_Z(PIN_AXIS_Z_STEP, PIN_AXIS_Z_DIR);
 	// Set speed and acceleration
 	stepper_Spindle
-		.setMaxSpeed(configReci.maxSpd_Spindle * configReci.speedPercent_Spindle * .01)
-		.setAcceleration(configReci.accel_Spindle);
+		.setMaxSpeed(configRec.maxSpd_Spindle * configRec.speedPercent_Spindle * .01)
+		.setAcceleration(configRec.accel_Spindle);
 	stepper_Spindle.setPosition(0);
 
-	int spindleSteps = (configMain.microsteps_Spindle * configMain.steps360_Spindle * configMain.gearRatio_Spindle) * (configReci.amplitude_AxialZ / 360) * wavDir;
+	int spindleSteps = (configMain.microsteps_Spindle * configMain.steps360_Spindle * configMain.gearRatio_Spindle) * (configRec.amplitude_AxialZ / 360) * wavDir;
 
-	long axisSteps = (((configReci.distance_AxialZ / (configMain.distancePerRev_AxisZ)) * (configMain.steps360_Axis_Z * configMain.microsteps_Axis_Z)) / (configReci.waves_AxialZ * 2));
-	returnSteps_Axis = (configReci.distance_AxialZ / configMain.distancePerRev_AxisZ) * (configMain.steps360_Axis_Z * configMain.microsteps_Axis_Z);
+	long axisSteps = (((configRec.distance_AxialZ / (configMain.distancePerRev_AxisZ)) * (configMain.steps360_Axis_Z * configMain.microsteps_Axis_Z)) / (configRec.waves_AxialZ * 2));
+	returnSteps_Axis = (configRec.distance_AxialZ / configMain.distancePerRev_AxisZ) * (configMain.steps360_Axis_Z * configMain.microsteps_Axis_Z);
 
 #ifdef DEBUG
 	Serial.print("1-wavDir:");
@@ -2308,13 +2321,13 @@ void Reciprocate_AxialZ(int wavDir)
 	Serial.println(axisSteps);
 #endif // DEBUG
 	stepper_Z
-		.setMaxSpeed(configReci.maxSpd_Axis_Z * configReci.speedPercent_Axis_Z * .01)
-		.setAcceleration(configReci.accel_Axis_Z);
+		.setMaxSpeed(configRec.maxSpd_Axis_Z * configRec.speedPercent_Axis_Z * .01)
+		.setAcceleration(configRec.accel_Axis_Z);
 	stepper_Z.setPosition(0);
 
 #ifdef DEBUG
 	Serial.print("waves_AxialZ:");
-	Serial.println(configReci.waves_AxialZ);
+	Serial.println(configRec.waves_AxialZ);
 	Serial.print("spindleSteps:");
 	Serial.println(spindleSteps);
 	Serial.println("========================");
@@ -2326,7 +2339,7 @@ void Reciprocate_AxialZ(int wavDir)
 
 	SetEnable(ID_SPINDLE, true);
 	SetEnable(ID_AXIS_Z, true);
-	for (int i = 0; i < (configReci.waves_AxialZ * 2); i++)
+	for (int i = 0; i < (configRec.waves_AxialZ * 2); i++)
 	{
 		spindleSteps *= -1;
 
@@ -2468,26 +2481,26 @@ void Reciprocate_AxialX(int wavDir)
 
 	// Set speed and acceleration
 	stepper_Spindle
-		.setMaxSpeed(configReci.maxSpd_Spindle * configReci.speedPercent_Spindle * .01)
-		.setAcceleration(configReci.accel_Spindle);
+		.setMaxSpeed(configRec.maxSpd_Spindle * configRec.speedPercent_Spindle * .01)
+		.setAcceleration(configRec.accel_Spindle);
 	stepper_Spindle.setPosition(0);
 
-int spindleSteps = (configMain.microsteps_Spindle * configMain.steps360_Spindle * configMain.gearRatio_Spindle) * (configReci.amplitude_AxialX / 360) * wavDir;
-	long axisSteps = (((configReci.distance_AxialX / (configMain.distancePerRev_AxisX)) * (configMain.steps360_Axis_X * configMain.microsteps_Axis_X)) / (configReci.waves_AxialX * 2)) * wavDir;
-	returnSteps_Axis = (configReci.distance_AxialX / configMain.distancePerRev_AxisX) * (configMain.steps360_Axis_X * configMain.microsteps_Axis_X);
+int spindleSteps = (configMain.microsteps_Spindle * configMain.steps360_Spindle * configMain.gearRatio_Spindle) * (configRec.amplitude_AxialX / 360) * wavDir;
+	long axisSteps = (((configRec.distance_AxialX / (configMain.distancePerRev_AxisX)) * (configMain.steps360_Axis_X * configMain.microsteps_Axis_X)) / (configRec.waves_AxialX * 2)) * wavDir;
+	returnSteps_Axis = (configRec.distance_AxialX / configMain.distancePerRev_AxisX) * (configMain.steps360_Axis_X * configMain.microsteps_Axis_X);
 
 	stepper_X
-		.setMaxSpeed(configReci.maxSpd_Axis_X * configReci.speedPercent_Axis_X * .01)
-		.setAcceleration(configReci.accel_Axis_X);
+		.setMaxSpeed(configRec.maxSpd_Axis_X * configRec.speedPercent_Axis_X * .01)
+		.setAcceleration(configRec.accel_Axis_X);
 	stepper_X.setPosition(0);
 
 #ifdef DEBUG
 	Serial.print("SpindleMaxSpd:");
-	Serial.println(configReci.maxSpd_Spindle);
+	Serial.println(configRec.maxSpd_Spindle);
 	Serial.print("SpindleSpeedPercent:");
-	Serial.println(configReci.speedPercent_Spindle);
+	Serial.println(configRec.speedPercent_Spindle);
 	Serial.print("SpindleAccel:");
-	Serial.println(configReci.accel_Spindle);
+	Serial.println(configRec.accel_Spindle);
 
 	Serial.print("microsteps_Spindle:");
 	Serial.println(configMain.microsteps_Spindle);
@@ -2496,7 +2509,7 @@ int spindleSteps = (configMain.microsteps_Spindle * configMain.steps360_Spindle 
 	Serial.print("gearRatio_Spindle:");
 	Serial.println(configMain.gearRatio_Spindle);
 	Serial.print("amplitude_AxialX:");
-	Serial.println(configReci.amplitude_AxialX);
+	Serial.println(configRec.amplitude_AxialX);
 
 	Serial.print("distancePerRev_AxisX:");
 	Serial.println(configMain.distancePerRev_AxisX);
@@ -2505,9 +2518,9 @@ int spindleSteps = (configMain.microsteps_Spindle * configMain.steps360_Spindle 
 	Serial.print("microsteps_Axis_X:");
 	Serial.println(configMain.microsteps_Axis_X);
 	Serial.print("distance_AxialX:");
-	Serial.println(configReci.distance_AxialX);
+	Serial.println(configRec.distance_AxialX);
 	Serial.print("waves_AxialX:");
-	Serial.println(configReci.waves_AxialX);
+	Serial.println(configRec.waves_AxialX);
 
 	Serial.print("spindleSteps:");
 	Serial.println(spindleSteps);
@@ -2515,16 +2528,16 @@ int spindleSteps = (configMain.microsteps_Spindle * configMain.steps360_Spindle 
 	Serial.println(axisSteps);
 
 	Serial.print("AxisMaxSpd:");
-	Serial.println(configReci.maxSpd_Axis_X);
+	Serial.println(configRec.maxSpd_Axis_X);
 	Serial.print("AxisSpeedPercent:");
-	Serial.println(configReci.speedPercent_Axis_X);
+	Serial.println(configRec.speedPercent_Axis_X);
 	Serial.print("AxisAccel:");
-	Serial.println(configReci.accel_Axis_X);
+	Serial.println(configRec.accel_Axis_X);
 #endif // DEBUG
 
 	SetEnable(ID_SPINDLE, true);
 	SetEnable(ID_AXIS_X, true);
-	for (int i = 0; i < (configReci.waves_AxialX * 2); i++)
+	for (int i = 0; i < (configRec.waves_AxialX * 2); i++)
 	{
 		spindleSteps *= -1;
 
@@ -3748,6 +3761,10 @@ void GreekKey_Pattern_2a()
 	}
 
 	GreekKeyPattern_Initial(totalSpindleSegments);
+#ifdef DEBUG
+	Serial.print("1.axisShortLegSteps:");
+	Serial.println(axisShortLegSteps);
+#endif // DEBUG
 
 	for (int i = 1; i <= configGreekKey_Main.countPattern; i++)
 	{
@@ -3813,6 +3830,11 @@ void GreekKey_Pattern_2a()
 			}
 			case AXIAL: // Spindle Up CCW
 			{
+#ifdef DEBUG
+				Serial.print("2.axisShortLegSteps:");
+				Serial.println(axisShortLegSteps);
+#endif // DEBUG
+
 
 				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, DIR_CW); //0a
 				if (StopGreekKey() || stopAll)
@@ -4091,33 +4113,37 @@ void GreekKeyPattern_Initial(int segmentCount)
 	endPosition_Axis = 0;
 
 	// Set spindle segment steps
-	int stepsPerRevolution_Spindle = (int)round(configMain.microsteps_Spindle * configMain.steps360_Spindle * configMain.gearRatio_Spindle);
-	spindleShortLegSteps = (stepsPerRevolution_Spindle) / (configGreekKey_Main.countPattern360) / segmentCount;
+	float revolutions_Spindle = configMain.microsteps_Spindle * configMain.steps360_Spindle * configMain.gearRatio_Spindle;
+	spindleShortLegSteps = (int)round((revolutions_Spindle) / (configGreekKey_Main.countPattern360) / segmentCount);
 
 	// Set axis segment steps
-	int stepsPerRevolution_Axis = 0;
+	float revolutions_Axis = 0;
 	switch (configGreekKey_Main.axisId)
 	{
 		case ID_AXIS_Z: // Z Axis
 		{
-			stepsPerRevolution_Axis = (int)round(configGreekKey_Main.segmentLengthPattern / configMain.distancePerRev_AxisZ);
-			axisShortLegSteps = ((stepsPerRevolution_Axis) * configMain.steps360_Axis_Z * configMain.microsteps_Axis_Z);
+			revolutions_Axis = configGreekKey_Main.segmentLengthPattern / configMain.distancePerRev_AxisZ;
+			axisShortLegSteps = (int)round(revolutions_Axis * configMain.steps360_Axis_Z * configMain.microsteps_Axis_Z);
+			break;
 		}
 		case ID_AXIS_X: // X Axis
 		{
-			stepsPerRevolution_Axis = (int)round(configGreekKey_Main.segmentLengthPattern / configMain.distancePerRev_AxisX);
-			axisShortLegSteps = ((configGreekKey_Main.segmentLengthPattern / configMain.distancePerRev_AxisX) * configMain.steps360_Axis_X * configMain.microsteps_Axis_X);
+			revolutions_Axis = configGreekKey_Main.segmentLengthPattern / configMain.distancePerRev_AxisX;
+			axisShortLegSteps = (int)round(revolutions_Axis * configMain.steps360_Axis_X * configMain.microsteps_Axis_X);
+			break;
 		}
 	}
 
 #ifdef DEBUG
 	Serial.print("spindleShortLegSteps:");
 	Serial.println(spindleShortLegSteps);
-	Serial.print("configGreekKey_Main.count:");
+	Serial.print("configGreekKey_Main.countPattern360:");
 	Serial.println(configGreekKey_Main.countPattern360);
 
-	Serial.print("configGreekKey_Main.legLength:");
+	Serial.print("configGreekKey_Main.segmentLengthPattern:");
 	Serial.println(configGreekKey_Main.segmentLengthPattern);
+	Serial.print("0.axisShortLegSteps:");
+	Serial.println(axisShortLegSteps);
 	Serial.println("--------------------");
 #endif // DEBUG
 }
@@ -4200,7 +4226,8 @@ bool GreekKey_Move_Axis(float shortLegLength, float multiplier, int direction)
 	bool retVal = false;
 	int newDirection = direction * reverseDirection;
 
-	Serial.println("Enter GreekKey_Move_Axis.......................");
+	Serial.print("Enter GreekKey_Move_Axis.......................:");
+	Serial.println(configGreekKey_Main.axisId);
 	Serial.print("Move_Axis:shortLegLength ");
 	Serial.println(shortLegLength);
 	Serial.print("Move_Axis:multiplier ");
@@ -4725,11 +4752,17 @@ bool GreekKey_Move_Angular_TeensyStep(
 		.setMaxSpeed(maxSpd_Spindle * currentSpeedPercent_Spindle)
 		.setAcceleration(accel_Spindle);
 	stepperSpindle.setPosition(0);
-	int32_t targetSteps_Spindle = shortLegLength_Spindle * multiplier_Spindle;
+	float spindleSteps = shortLegLength_Spindle * multiplier_Spindle;
+	int32_t targetSteps_Spindle = (int32_t)round(spindleSteps);
+
+	// Convert Up to negative and Down to positive
+	targetSteps_Spindle = targetSteps_Spindle * (-1);
 	stepperSpindle.setTargetRel(targetSteps_Spindle);
 
 #ifdef DEBUG
 	Serial.println("-=-=-=-=-=-=-=-=-=-=-=-===-=-=-==-=-=-=-");
+	Serial.print("spindleSteps:");
+	Serial.println(spindleSteps);
 	Serial.print("targetSteps_Spindle:");
 	Serial.println(targetSteps_Spindle);
 	Serial.print("targetSteps_Axis:");
@@ -5118,6 +5151,8 @@ void GreekKeyFromFile(int direction)
 		Serial.println(lineCounter);
 		Serial.print("patternDivisor:");
 		Serial.println(patternDivisor);
+		Serial.print("spindleShortLegSteps:");
+		Serial.println(spindleShortLegSteps);
 #endif // DEBUG
 	}
 
@@ -5170,13 +5205,15 @@ void GreekKeyFromFile(int direction)
 			Serial.println(moveType);
 			Serial.print("Segment/Actual:");
 			Serial.println(configGreekKey_Main.segmentOrActual);
+			Serial.print("Line Number:");
+			Serial.println(i);
 
 	#endif // DEBUG
 
 	#ifdef DEBUG
 
-			Serial.print("Comment0:");
-			Serial.println(comment);
+			//Serial.print("Comment0:");
+			//Serial.println(comment);
 	#endif // DEBUG
 
 			switch (moveType)
@@ -6055,15 +6092,18 @@ double GetGreekKeyDataFromSD(int lineNumber)
 		//String horizontal = nStr.substring(0,nStr.find)
 		//String h = split(nStr, "V");
 		char *val;
-		char charBuf[10];
-		nStr.toCharArray(charBuf, 10);
+		char charBuf[20];
+		nStr.toCharArray(charBuf, 20);
 		val = strtok(charBuf, "V");
 		hVal = atof(val);
 		val = strtok(NULL, "\n");
 		vVal = atof(val);
-
+		Serial.print("nStr: ");
+		Serial.println(nStr);
 		Serial.print("hVal: ");
 		Serial.println(hVal);
+		Serial.print("val: ");
+		Serial.println(val);
 		Serial.print("vVal: ");
 		Serial.println(vVal);
 	}
@@ -7248,6 +7288,7 @@ void TestEEPROMConfig()
 			Serial3.write(0xff);
 			Serial3.write(0xff);
 			delay(2000);
+
 			switch (eePageMain.axisId)
 			{
 				case ID_AXIS_Z:
@@ -7426,7 +7467,8 @@ void TestEEPROMConfig()
 			Serial3.write(0xff);
 			Serial3.write(0xff);
 			delay(2000);
-			if (configReci.axisId == ID_AXIS_Z) // Z axis
+
+			if (configRec.axisId == ID_AXIS_Z) // Z axis
 			{
 				Serial3.print("pageConfig.t19.txt=");
 				Serial3.write(0x22);
@@ -7711,6 +7753,12 @@ void TestEEPROMConfig()
 		case PAGE_GRK:
 		case PAGE_GRKFILE:
 		{
+#ifdef DEBUG
+			Serial.print("pageCallerId:");
+			Serial.println(pageCallerId);
+			Serial.print("eePageMain.axisId:");
+			Serial.println(configGreekKey_Main.axisId);
+#endif // DEBUG
 			if (configGreekKey_Main.axisId == ID_AXIS_Z)
 			{			
 				configSteppers eePageGrkZ;

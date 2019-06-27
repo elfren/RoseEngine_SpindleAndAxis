@@ -76,7 +76,7 @@ void setup()
 	EEPROM.get(eePromAddress_MoveZ, configMoveZ);
 	EEPROM.get(eePromAddress_MoveX, configMoveX);
 	EEPROM.get(eePromAddress_Rose, configRose);
-	EEPROM.get(eePromAddress_Rec, configReci);
+	EEPROM.get(eePromAddress_Rec, configRec);
 	EEPROM.get(eePromAddress_GreekKey_Main, configGreekKey_Main);
 	EEPROM.get(eePromAddress_GreekKey_Z, configGreekKey_Z);
 	EEPROM.get(eePromAddress_GreekKey_X, configGreekKey_X);
@@ -329,11 +329,11 @@ void loop()
 				}
 				case PAGE_REC:
 				{
-					configReci.maxSpd_Spindle = GetSerialFloat(serialId);
-					EEPROM.put(eePromAddress_Rec, configReci);
+					configRec.maxSpd_Spindle = GetSerialFloat(serialId);
+					EEPROM.put(eePromAddress_Rec, configRec);
 #ifdef DEBUG
 					Serial.print("maxSpd:");
-					Serial.println(configReci.maxSpd_Spindle);
+					Serial.println(configRec.maxSpd_Spindle);
 #endif // DEBUG
 					break;
 				}
@@ -433,12 +433,12 @@ void loop()
 				}
 				case PAGE_REC:
 				{
-					configReci.accel_Spindle = GetSerialFloat(serialId);
-					Serial.println(configReci.accel_Spindle);
-					EEPROM.put(eePromAddress_Rec, configReci);
+					configRec.accel_Spindle = GetSerialFloat(serialId);
+					Serial.println(configRec.accel_Spindle);
+					EEPROM.put(eePromAddress_Rec, configRec);
 #ifdef DEBUG
 					Serial.print("accel_Spindle:");
-					Serial.println(configReci.accel_Spindle);
+					Serial.println(configRec.accel_Spindle);
 #endif // DEBUG
 					break;
 				}
@@ -660,6 +660,9 @@ void loop()
 		case 72: // H - Rose: AxisId
 		{
 			configRose.axisId = GetSerialInteger();
+#ifdef TWO_AXES_V2
+			configRose.axisId = ID_AXIS_Z;
+#endif //TWO_AXES_V2
 			EEPROM.put(eePromAddress_Rose, configRose);
 			break;
 		}
@@ -1213,8 +1216,8 @@ void loop()
 		}
 		case 87: // W - Set Index1 type to Degrees or Divisions
 		{
-			configReci.radial_axial = GetSerialInteger();
-			EEPROM.put(eePromAddress_Rec, configReci);
+			configRec.radial_axial = GetSerialInteger();
+			EEPROM.put(eePromAddress_Rec, configRec);
 			break;
 		}
 		case 88:  // X - Return to start: Spindle
@@ -1490,6 +1493,10 @@ void loop()
 		}
 		case 108: // l - Z spindle counter clockwise
 		{
+#ifdef DEBUG
+			Serial.println("108-RunTwoSteppers-Spindle");
+#endif // DEBUG
+
 			RunTwoSteppers_All(DIR_CCW, DIR_CCW, ID_SPINDLE);
 			break;
 		}
@@ -1689,25 +1696,25 @@ void loop()
 				}
 				case PAGE_REC:
 				{
-					switch (configReci.axisId)
+					switch (configRec.axisId)
 					{
 						case ID_AXIS_Z:
 						{
-							configReci.accel_Axis_Z = GetSerialFloat(serialId);
-							EEPROM.put(eePromAddress_Rec, configReci);
+							configRec.accel_Axis_Z = GetSerialFloat(serialId);
+							EEPROM.put(eePromAddress_Rec, configRec);
 	#ifdef DEBUG
 							Serial.print("accel_Axis_Z:");
-							Serial.println(configReci.accel_Axis_Z);
+							Serial.println(configRec.accel_Axis_Z);
 	#endif // DEBUG
 							break;
 						}
 						case ID_AXIS_X:
 						{
-							configReci.accel_Axis_X = GetSerialFloat(serialId);
-							EEPROM.put(eePromAddress_Rec, configReci);
+							configRec.accel_Axis_X = GetSerialFloat(serialId);
+							EEPROM.put(eePromAddress_Rec, configRec);
 	#ifdef DEBUG
 							Serial.print("accel_Axis_X:");
-							Serial.println(configReci.accel_Axis_X);
+							Serial.println(configRec.accel_Axis_X);
 	#endif // DEBUG
 							break;
 						}
@@ -1749,6 +1756,18 @@ void loop()
 			SerialWrite(0xff);
 			SerialWrite(0xff);
 			delay(2000);
+#ifdef TWO_AXES_V2
+			// Pages Main
+			configPageMain.axisId = ID_AXIS_Z;
+			EEPROM.put(eePromAddress_pageMain, configPageMain);
+			configRec.axisId = ID_AXIS_Z;
+			EEPROM.put(eePromAddress_Rec, configRec);
+			configRose.axisId = ID_AXIS_Z;
+			EEPROM.put(eePromAddress_Rose, configRose);
+			configGreekKey_Main.axisId = ID_AXIS_Z;
+			EEPROM.put(eePromAddress_GreekKey_Main, configGreekKey_Main);
+#endif //TWO_AXES_V2
+
 			TestEEPROMConfig();
 			break;
 		}
@@ -2403,6 +2422,9 @@ void loop()
 			Serial.print("configPageMain.axisId:");
 			Serial.println(configPageMain.axisId);
 #endif // DEBUG
+#ifdef TWO_AXES_V2
+			configPageMain.axisId = ID_AXIS_Z;
+#endif //TWO_AXES_V2
 			EEPROM.put(eePromAddress_pageMain, configPageMain);
 #ifdef DEBUG
 			Serial.print("configPageMain.axisId:");
@@ -2428,16 +2450,16 @@ void loop()
 			Serial.print("waveDir(197: ");
 			Serial.println(waveDir);
 			Serial.print("configReci.axisId(197: ");
-			Serial.println(configReci.axisId);
+			Serial.println(configRec.axisId);
 			Serial.print("configReci.radial_axial(197: ");
-			Serial.println(configReci.radial_axial);
+			Serial.println(configRec.radial_axial);
 #endif // DEBUG
 
-			switch (configReci.axisId)
+			switch (configRec.axisId)
 			{
 				case ID_AXIS_Z: // Z Axis
 				{
-					switch (configReci.radial_axial)
+					switch (configRec.radial_axial)
 					{
 						case RADIAL: // Radial
 						{
@@ -2454,7 +2476,7 @@ void loop()
 				}
 				case ID_AXIS_X: // X Axis
 				{
-					switch (configReci.radial_axial)
+					switch (configRec.radial_axial)
 					{
 						case RADIAL: // Radial
 						{
@@ -2532,6 +2554,11 @@ void loop()
 		case 202: // Ê - Axis MaxSpeed 
 		{
 			pageCallerId = GetSerialIntegerOnly();
+
+#ifdef DEBUG
+			Serial.print("202-pageCallerId:");
+			Serial.println(pageCallerId);
+#endif // DEBUG
 			switch (pageCallerId)
 			{
 				case PAGE_MAIN:
@@ -2556,25 +2583,25 @@ void loop()
 				}
 				case PAGE_REC:
 				{
-					switch (configReci.axisId)
+					switch (configRec.axisId)
 					{
 						case ID_AXIS_Z:
 						{
-							configReci.maxSpd_Axis_Z = GetSerialFloat(serialId);
-							EEPROM.put(eePromAddress_Rec, configReci);
+							configRec.maxSpd_Axis_Z = GetSerialFloat(serialId);
+							EEPROM.put(eePromAddress_Rec, configRec);
 	#ifdef DEBUG
 							Serial.print("maxSpd_Axis_Z:");
-							Serial.println(configReci.maxSpd_Axis_Z);
+							Serial.println(configRec.maxSpd_Axis_Z);
 	#endif // DEBUG
 							break;
 						}
 						case ID_AXIS_X:
 						{
-							configReci.maxSpd_Axis_X = GetSerialFloat(serialId);
-							EEPROM.put(eePromAddress_Rec, configReci);
+							configRec.maxSpd_Axis_X = GetSerialFloat(serialId);
+							EEPROM.put(eePromAddress_Rec, configRec);
 	#ifdef DEBUG
 							Serial.print("maxSpd_Axis_X:");
-							Serial.println(configReci.maxSpd_Axis_X);
+							Serial.println(configRec.maxSpd_Axis_X);
 	#endif // DEBUG
 							break;
 						}
@@ -2598,31 +2625,31 @@ void loop()
 		}
 		case 203: // Ì - Rec1_Z Axial Waves (Count)
 		{
-			configReci.waves_AxialZ = (int)GetSerialFloat(serialId);
+			configRec.waves_AxialZ = (int)GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Setup, configMain);
 #ifdef DEBUG
 			Serial.print("waves_AxialZ:");
-			Serial.println(configReci.waves_AxialZ);
+			Serial.println(configRec.waves_AxialZ);
 #endif // DEBUG
 			break;
 		}
 		case 204: // Ë - Rec1_Z Axial Amplitude
 		{
-			configReci.amplitude_AxialZ = GetSerialFloat(serialId);
-			EEPROM.put(eePromAddress_Rec, configReci);
+			configRec.amplitude_AxialZ = GetSerialFloat(serialId);
+			EEPROM.put(eePromAddress_Rec, configRec);
 #ifdef DEBUG
 			Serial.print("amplitude_AxialZ:");
-			Serial.println(configReci.amplitude_AxialZ);
+			Serial.println(configRec.amplitude_AxialZ);
 #endif // DEBUG
 			break;
 		}
 		case 205: // Í - Rec_Z Axial Distance
 		{
-			configReci.distance_AxialZ = GetSerialFloat(serialId);
-			EEPROM.put(eePromAddress_Rec, configReci);
+			configRec.distance_AxialZ = GetSerialFloat(serialId);
+			EEPROM.put(eePromAddress_Rec, configRec);
 #ifdef DEBUG
 			Serial.print("distance_AxialZ:");
-			Serial.println(configReci.distance_AxialZ);
+			Serial.println(configRec.distance_AxialZ);
 #endif // DEBUG
 			break;
 		}
@@ -2652,61 +2679,61 @@ void loop()
 		}
 		case 209: // Ñ - Reci AxialX and RadialX Axis Speed percentage
 		{
-			configReci.speedPercent_Axis_X = (int)GetSerialFloat(serialId);
-			EEPROM.put(eePromAddress_Rec, configReci);
+			configRec.speedPercent_Axis_X = (int)GetSerialFloat(serialId);
+			EEPROM.put(eePromAddress_Rec, configRec);
 #ifdef DEBUG
 			Serial.print("speedPercent_Axis_X:");
-			Serial.println(configReci.speedPercent_Axis_X);
+			Serial.println(configRec.speedPercent_Axis_X);
 #endif // DEBUG
 			break;
 		}
 		case 210: // Ò - Rec1_Spindle Spindle Speed percentage
 		{
-			configReci.speedPercent_Spindle = (int)GetSerialFloat(serialId);
-			EEPROM.put(eePromAddress_Rec, configReci);
+			configRec.speedPercent_Spindle = (int)GetSerialFloat(serialId);
+			EEPROM.put(eePromAddress_Rec, configRec);
 #ifdef DEBUG
 			Serial.print("speedPercentSpindle:");
-			Serial.println(configReci.speedPercent_Spindle);
+			Serial.println(configRec.speedPercent_Spindle);
 #endif // DEBUG
 			break;
 		}
 		case 211: // Ó - Rec AxialZ and RadialZ Axis Speed percentage 
 		{
-			configReci.speedPercent_Axis_Z = (int)GetSerialFloat(serialId);
-			EEPROM.put(eePromAddress_Rec, configReci);
+			configRec.speedPercent_Axis_Z = (int)GetSerialFloat(serialId);
+			EEPROM.put(eePromAddress_Rec, configRec);
 #ifdef DEBUG
 			Serial.print("speedPercentAxis:");
-			Serial.println(configReci.speedPercent_Axis_Z);
+			Serial.println(configRec.speedPercent_Axis_Z);
 #endif // DEBUG
 			break;
 		}
 		case 212: // Ô - Rec Z radial Waves (Count)
 		{
-			configReci.waves_RadialZ = (int)GetSerialFloat(serialId);
-			EEPROM.put(eePromAddress_Rec, configReci);
+			configRec.waves_RadialZ = (int)GetSerialFloat(serialId);
+			EEPROM.put(eePromAddress_Rec, configRec);
 #ifdef DEBUG
 			Serial.print("waves_RadialZ:");
-			Serial.println(configReci.waves_RadialZ);
+			Serial.println(configRec.waves_RadialZ);
 #endif // DEBUG
 			break;
 		}
 		case 213: // Õ - Rec Z radial Degrees
 		{
-			configReci.degrees_RadialZ = GetSerialFloat(serialId);
-			EEPROM.put(eePromAddress_Rec, configReci);
+			configRec.degrees_RadialZ = GetSerialFloat(serialId);
+			EEPROM.put(eePromAddress_Rec, configRec);
 #ifdef DEBUG
 			Serial.print("degrees_RadialZ:");
-			Serial.println(configReci.degrees_RadialZ);
+			Serial.println(configRec.degrees_RadialZ);
 #endif // DEBUG
 			break;
 		}
 		case 214: // Ö - Rec1 Z radial Amplitude Axis
 		{
-			configReci.amplitude_RadialZ = GetSerialFloat(serialId);
-			EEPROM.put(eePromAddress_Rec, configReci);
+			configRec.amplitude_RadialZ = GetSerialFloat(serialId);
+			EEPROM.put(eePromAddress_Rec, configRec);
 #ifdef DEBUG
 			Serial.print("amplitude_RadialZ:");
-			Serial.println(configReci.amplitude_RadialZ);
+			Serial.println(configRec.amplitude_RadialZ);
 #endif // DEBUG
 			break;
 		}
@@ -2943,69 +2970,72 @@ void loop()
 #endif // DEBUG
 			break;
 		}
-		case 238: // î - Rec1 axisId
+		case 238: // î - Rec axisId
 		{
-			configReci.axisId = GetSerialInteger();
-			EEPROM.put(eePromAddress_Rec, configReci);
+			configRec.axisId = GetSerialInteger();
+#ifdef TWO_AXES_V2
+			configRec.axisId = ID_AXIS_Z;
+#endif //TWO_AXES_V2
+			EEPROM.put(eePromAddress_Rec, configRec);
 			break;
 		}
 		case 239: // ï - Rec1 AxialX Waves
 		{
-			configReci.waves_AxialX = (int)GetSerialFloat(serialId);
-			EEPROM.put(eePromAddress_Rec, configReci);
+			configRec.waves_AxialX = (int)GetSerialFloat(serialId);
+			EEPROM.put(eePromAddress_Rec, configRec);
 #ifdef DEBUG
 			Serial.print("waves_AxialX:");
-			Serial.println(configReci.waves_AxialX);
+			Serial.println(configRec.waves_AxialX);
 #endif // DEBUG
 			break;
 		}
 		case 240: // ð - Rec1 AxialX Amplitude
 		{
-			configReci.amplitude_AxialX = GetSerialFloat(serialId);
-			EEPROM.put(eePromAddress_Rec, configReci);
+			configRec.amplitude_AxialX = GetSerialFloat(serialId);
+			EEPROM.put(eePromAddress_Rec, configRec);
 #ifdef DEBUG
 			Serial.print("amplitude_AxialX:");
-			Serial.println(configReci.amplitude_AxialX);
+			Serial.println(configRec.amplitude_AxialX);
 #endif // DEBUG
 			break;
 		}
 		case 241: // ñ - Rec1 AxialX Distance
 		{
-			configReci.distance_AxialX = GetSerialFloat(serialId);
-			EEPROM.put(eePromAddress_Rec, configReci);
+			configRec.distance_AxialX = GetSerialFloat(serialId);
+			EEPROM.put(eePromAddress_Rec, configRec);
 #ifdef DEBUG
 			Serial.print("distance_AxialX:");
-			Serial.println(configReci.distance_AxialX);
+			Serial.println(configRec.distance_AxialX);
 #endif // DEBUG
 			break;
 		}
 		case 242: // ò - Rec1 RadialX Waves
 		{
-			configReci.waves_RadialX = (int)GetSerialFloat(serialId);
-			EEPROM.put(eePromAddress_Rec, configReci);
+			configRec.waves_RadialX = (int)GetSerialFloat(serialId);
+			EEPROM.put(eePromAddress_Rec, configRec);
 #ifdef DEBUG
 			Serial.print("waves_RadialX:");
-			Serial.println(configReci.waves_RadialX);
+			Serial.println(configRec.waves_RadialX);
 #endif // DEBUG
 			break;
 		}
 		case 243: // ó - Rec1 RadialX Degrees
 		{
-			configReci.degrees_RadialX = GetSerialFloat(serialId);
-			EEPROM.put(eePromAddress_Rec, configReci);
+			configRec.degrees_RadialX = GetSerialFloat(serialId);
+			EEPROM.put(eePromAddress_Rec, configRec);
 #ifdef DEBUG
 			Serial.print("degrees_RadialX:");
-			Serial.println(configReci.degrees_RadialX);
+			Serial.println(configRec.degrees_RadialX);
 #endif // DEBUG
 			break;
 		}
 		case 244: // ô - Rec1 RadialX Amplitude
 		{
-			configReci.amplitude_RadialX = GetSerialFloat(serialId);
-			EEPROM.put(eePromAddress_Rec, configReci);
+			configRec.amplitude_RadialX = GetSerialFloat(serialId);
+			EEPROM.put(eePromAddress_Rec, configRec);
 #ifdef DEBUG
 			Serial.print("amplitude_RadialX:");
-			Serial.println(configReci.amplitude_RadialX);
+			Serial.println(configRec.amplitude_RadialX);
 #endif // DEBUG
 			break;
 		}
@@ -3189,14 +3219,10 @@ void loop()
 		case 253: // ü - Greek Key AxisId
 		{
 			configGreekKey_Main.axisId = GetSerialInteger();
+#ifdef TWO_AXES_V2
+			configGreekKey_Main.axisId = ID_AXIS_Z;
+#endif //TWO_AXES_V2
 			EEPROM.put(eePromAddress_GreekKey_Main, configGreekKey_Main);
-
-#ifdef DEBUG
-			Serial.print("configGreekKey_Main.axisId:");
-			Serial.println(configGreekKey_Main.axisId);
-			Serial.print("configGreekKey_Main.axisId:");
-			Serial.println(configGreekKey_Main.axisId);
-#endif // DEBUG
 			break;
 		}
 		case 254: // þ - Greek Key Spindle Speed Percentage

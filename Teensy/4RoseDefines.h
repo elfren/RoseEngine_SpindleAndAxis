@@ -7,7 +7,7 @@
 //#define THREE_AXES // Teensy 3.2
 //#define TWO_AXES_V2 // Teensy 3.2
 #define SHOW_POSITION
-//#define DEBUG
+#define DEBUG
 
 //==================================================================
 // Pin assignments
@@ -455,7 +455,7 @@ configs configMain;
 configPageMainOne configPageMain;
 configSteppers configSyncZ;
 configSteppers configSyncX;
-configPageReci configReci;
+configPageReci configRec;
 configPageMainOne configOne;
 configPageIndex configIndex_Main;
 configIndex configIndex_1;
