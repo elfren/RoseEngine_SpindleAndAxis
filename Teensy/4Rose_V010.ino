@@ -3,6 +3,7 @@
 * 4Rose_V010 main entry
 * Author: Edward French
 ******************************************************************/
+//#include "IniFile"
 #include "math.h"
 #include <string>
 #include <EEPROM.h>
@@ -11,6 +12,9 @@
 #include "SPI.h"
 #include "TeensyStep.h" //  https://github.com/luni64/TeensyStep
 #include "AccelStepper.h"
+//#include "IniFile.h" // https://github.com/stevemarple/IniFile
+
+
 
 //==================================================================
 // Pin assignments:  See 4RoseDefines.h
@@ -561,8 +565,9 @@ void loop()
 #endif // DEBUG
 			break;
 		}
-		case 65: // A - Not Used
+		case 65: // A - Load Settings.ini
 		{
+			LoadSettings();
 			break;
 		}
 		case 66: //B - Not Used

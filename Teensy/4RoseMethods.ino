@@ -8405,3 +8405,32 @@ void SetMicrosteppingMode(int microsteps, int pinMs0, int pinMs1, int pinMs2)
 		}
 	}
 }
+
+void LoadSettings()
+{
+	//const size_t bufferLen = 80;
+	//char buffer[bufferLen];
+
+	//const char *filename = "/Settings.ini";
+//	// Open Settings.ini
+
+	//IniFile ini(filename);
+
+	//if (!ini.open()) {
+	//	Serial.print("Ini file ");
+	//	Serial.print(filename);
+	//	Serial.println(" does not exist");
+	//	// Cannot do anything else
+	//	while (1)
+	//		;
+	//}
+	Serial.println("Ini file exists");
+	// Read file
+
+	// Parse line
+
+	// Token: "="
+
+	// Line End: "\n
+
+}
