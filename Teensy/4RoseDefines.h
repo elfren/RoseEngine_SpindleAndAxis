@@ -21,36 +21,36 @@
 #define PIN_SPINDLE_ENABLE 4 //Enable
 //  User runtime settable microstepping: Uncomment all microstepping #defines. 
 //  Uncomment calls to SetMicrosteppingMode().
-#define PIN_SPINDLE_MS0 24
-#define PIN_SPINDLE_MS1 25 
-#define PIN_SPINDLE_MS2 26
+#define PIN_SPINDLE_MS0 46
+#define PIN_SPINDLE_MS1 47 
+#define PIN_SPINDLE_MS2 48
 
 // Z axis
 #define ID_AXIS_Z 0
 #define PIN_AXIS_Z_DIR 5 // Stepper direction
 #define PIN_AXIS_Z_STEP 6 // Stepper step
 #define PIN_AXIS_Z_ENABLE 14 // Enable 
-#define PIN_AXIS_Z_MS0 27
-#define PIN_AXIS_Z_MS1 28 
-#define PIN_AXIS_Z_MS2 29
+#define PIN_AXIS_Z_MS0 49
+#define PIN_AXIS_Z_MS1 50 
+#define PIN_AXIS_Z_MS2 51
 
 // X axis
 #define ID_AXIS_X 1
 #define PIN_AXIS_X_DIR 20  // Stepper direction
 #define PIN_AXIS_X_STEP 21 // Stepper step
 #define PIN_AXIS_X_ENABLE 22 // Enable 
-#define PIN_AXIS_X_MS0 30
-#define PIN_AXIS_X_MS1 31 
-#define PIN_AXIS_X_MS2 32
+#define PIN_AXIS_X_MS0 52
+#define PIN_AXIS_X_MS1 53 
+#define PIN_AXIS_X_MS2 54
 
 // B axis
 #define ID_AXIS_B 2
 #define PIN_AXIS_B_DIR 23  // Stepper direction
 #define PIN_AXIS_B_STEP 16  // Stepper step
 #define PIN_AXIS_B_ENABLE 17 // Enable 
-#define PIN_AXIS_B_MS0 33
-#define PIN_AXIS_B_MS1 34
-#define PIN_AXIS_B_MS2 35
+#define PIN_AXIS_B_MS0 55
+#define PIN_AXIS_B_MS1 56
+#define PIN_AXIS_B_MS2 57
 
 #elif defined(TWO_AXES_V2)
 // Spindle
@@ -455,7 +455,7 @@ configs configMain;
 configPageMainOne configPageMain;
 configSteppers configSyncZ;
 configSteppers configSyncX;
-configPageReci configReci;
+configPageReci configRec;
 configPageMainOne configOne;
 configPageIndex configIndex_Main;
 configIndex configIndex_1;
