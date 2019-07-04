@@ -1646,6 +1646,7 @@ void RunTwoSteppers_All(
 				{
 					if (!rotateControllerAxis.isRunning())
 					{
+						stepper_Axis_Go = true;
 						direction_Axis = DIR_CW;
 						targetPosition_Axis = 2000000000;
 						speedPercentAxis = (float)((configPageMain.speedPercent_Axis_B) * .01);
@@ -1666,6 +1667,7 @@ void RunTwoSteppers_All(
 				{
 					if (!rotateControllerAxis.isRunning())
 					{
+						stepper_Axis_Go = true;
 						direction_Axis = DIR_CW;
 						targetPosition_Axis = 2000000000;
 						speedPercentAxis = (float)((configPageMain.speedPercent_Axis_Z) * .01);
@@ -1683,8 +1685,10 @@ void RunTwoSteppers_All(
 				}
 				case 166: // ¦ - Sp-X Axis CW
 				{
+					
 					if (!rotateControllerAxis.isRunning())
 					{
+						stepper_Axis_Go = true;
 						direction_Axis = DIR_CW;
 						targetPosition_Axis = 2000000000;
 						speedPercentAxis = (float)(configPageMain.speedPercent_Axis_X * .01);
@@ -1705,6 +1709,7 @@ void RunTwoSteppers_All(
 				{
 					if (!rotateControllerAxis.isRunning())
 					{
+						stepper_Axis_Go = true;
 						direction_Axis = DIR_CCW;
 						targetPosition_Axis = -2000000000;
 
@@ -1726,6 +1731,7 @@ void RunTwoSteppers_All(
 				{
 					if (!rotateControllerAxis.isRunning())
 					{
+						stepper_Axis_Go = true;
 						direction_Axis = DIR_CCW;
 						targetPosition_Axis = -2000000000;
 						speedPercentAxis = (float)((configPageMain.speedPercent_Axis_Z) * .01);
@@ -1745,6 +1751,7 @@ void RunTwoSteppers_All(
 				{
 					if (!rotateControllerAxis.isRunning())
 					{
+						stepper_Axis_Go = true;
 						direction_Axis = DIR_CCW;
 						targetPosition_Axis = -2000000000;
 						speedPercentAxis = (float)(configPageMain.speedPercent_Axis_X * .01);
@@ -1923,25 +1930,25 @@ void RunTwoSteppers_All(
 #endif // DEBUG
 		}
 
-		if (stepper_Axis_Go)
-		{
-			if (digitalRead(limitPin_Max) == LOW)
-			{
-				rotateControllerAxis.overrideSpeed(0);
-				rotateControllerAxis.stop();
-				stepper_Axis_Go = false;
-			}
-		}
-		else
-		{
-			if (digitalRead(limitPin_Min) == LOW)
-			{
-				rotateControllerAxis.overrideSpeed(0);
-				rotateControllerAxis.stop();
-				stepper_Axis_Go = false;
-			}
-		}
-
+//		/*if (stepper_Axis_Go)
+//		{
+//			if (digitalRead(limitPin_Max) == LOW)
+//			{
+//				rotateControllerAxis.overrideSpeed(0);
+//				rotateControllerAxis.stop();
+//				stepper_Axis_Go = false;
+//			}
+//		}
+//		else
+//		{
+//			if (digitalRead(limitPin_Min) == LOW)
+//			{
+//				rotateControllerAxis.overrideSpeed(0);
+//				rotateControllerAxis.stop();
+//				stepper_Axis_Go = false;
+//			}
+//		}
+//*/
 		delay(5);
 	}
 
