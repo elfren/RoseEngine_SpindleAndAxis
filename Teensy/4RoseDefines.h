@@ -7,7 +7,7 @@
 //#define THREE_AXES // Teensy 3.2
 //#define TWO_AXES_V2 // Teensy 3.2
 #define SHOW_POSITION
-//#define DEBUG
+#define DEBUG
 
 //==================================================================
 // Pin assignments
@@ -168,92 +168,104 @@
 /////////////////////////////////////////////////////////////////////////
 // Structs
 /////////////////////////////////////////////////////////////////////////
-struct configs
+struct configPageMov
 {
-	int speedPercentSpindle_Main;
-
-	int speedPercentSpindle_SyncZ;
-	int speedPercentSpindle_SyncX;
-	int speedPercentAxis_SyncZ;
-	int speedPercentAxis_SyncX;
+	uint32_t axisId;
+	int maxSpd_Axis_Z;
+	uint32_t accel_Axis_Z;
+	int maxSpd_Axis_X;
+	uint32_t accel_Axis_X;
 	int speedPercent_Axis_Z;
 	int speedPercent_Axis_X;
-	int speedPercent_Axis_B;
-	int speedPercent_MoveZ;
-	int speedPercent_MoveX;
-	int microsteps_Spindle;
-	int microsteps_Axis_Z;
-	int microsteps_Axis_X;
-	int microsteps_Axis_B;
-	int steps360_Spindle;
-	int steps360_Axis_Z;
-	int steps360_Axis_X;
-	int steps360_Axis_B;
-	int spindleDir_SyncZ;
-	int spindleDir_SyncX;
-	int axisDir_SyncZ;
-	int axisDir_SyncX;
-	int helixType_SyncZ;
-	int helixType_SyncX;
 	float distance_MoveZ;
 	float distance_MoveX;
-	float gearRatio_Spindle;
-	float gearRatio_AxisB;
-	float distancePerRev_AxisZ;
-	float distancePerRev_AxisX;
-	float distanceSyncZ;
-	float distanceSyncX;
-	float revolutionsSyncZ_Spindle;
-	float revolutionsSyncX_Spindle;
+
+};
+
+struct configPageSync
+{
+	uint32_t axisId;
+	int32_t maxSpd_Spindle;
+	uint32_t accel_Spindle;
+	int32_t maxSpd_Axis_Z;
+	uint32_t accel_Axis_Z;
+	int32_t maxSpd_Axis_X;
+	uint32_t accel_Axis_X;
+	int32_t speedPercent_Spindle;
+	int32_t speedPercent_Axis_Z;
+	int32_t speedPercent_Axis_X;
+	uint32_t helixType;
+	float distance;
+	float revolutions_Spindle;
+};
+
+// Config page Setup
+struct configPageSetup
+{
+	uint32_t microsteps_Spindle;
 	bool polarity_Spindle;
+	uint32_t steps360_Spindle;
+	float gearRatio_Spindle;
+
+	uint32_t microsteps_Axis_Z;
 	bool polarity_Axis_Z;
+	uint32_t steps360_Axis_Z;
+	float distancePerRev_AxisZ;
+	uint32_t limit_Min_Z;
+	uint32_t limit_Max_Z;
+
+	uint32_t microsteps_Axis_X;
 	bool polarity_Axis_X;
+	uint32_t steps360_Axis_X;
+	float distancePerRev_AxisX;
+	uint32_t limit_Min_X;
+	uint32_t limit_Max_X;
+
+	uint32_t microsteps_Axis_B;
 	bool polarity_Axis_B;
-	int limit_Min_Z;
-	int limit_Max_Z;
-	int limit_Min_X;
-	int limit_Max_X;
-	int limit_Min_B;
-	int limit_Max_B;
-	int maxSpd_Return_Spindle;
-	int accel_Return_Spindle;
-	int maxSpd_Return_Axis;
-	int accel_Return_Axis;
-	int trackPositions;
+	uint32_t steps360_Axis_B;
+	float gearRatio_AxisB;
+	uint32_t limit_Min_B;
+	uint32_t limit_Max_B;
+
+	int32_t maxSpd_Return_Spindle;
+	uint32_t accel_Return_Spindle;
+	int32_t maxSpd_Return_Axis;
+	uint32_t accel_Return_Axis;
 };
 
 // Config Structs
 struct configSteppers // 
 {
-	int maxSpd_Spindle;
-	int accel_Spindle;
-	int maxSpd_Axis;
-	int accel_Axis;
-	int speedPercent_Spindle;
-	int speedPercent_Axis;
+	int32_t maxSpd_Spindle;
+	uint32_t accel_Spindle;
+	int32_t maxSpd_Axis;
+	uint32_t accel_Axis;
+	int32_t speedPercent_Spindle;
+	int32_t speedPercent_Axis;
 };
 
 struct configStepper //
 {
-	int maxSpd;
-	int accel;
+	int32_t maxSpd;
+	uint32_t accel;
 };
 
 struct configPageReci // page 5,6,13,14
 {
-	int maxSpd_Spindle;
-	int accel_Spindle;
-	int maxSpd_Axis_Z;
-	int maxSpd_Axis_X;
-	int speedPercent_Spindle;
-	int speedPercent_Axis_Z;
-	int speedPercent_Axis_X;
-	int accel_Axis_Z;
-	int accel_Axis_X;
-	int waves_AxialZ;
-	int waves_AxialX;
-	int waves_RadialZ;
-	int waves_RadialX;
+	int32_t maxSpd_Spindle;
+	uint32_t accel_Spindle;
+	int32_t maxSpd_Axis_Z;
+	int32_t maxSpd_Axis_X;
+	int32_t speedPercent_Spindle;
+	int32_t speedPercent_Axis_Z;
+	int32_t speedPercent_Axis_X;
+	uint32_t accel_Axis_Z;
+	uint32_t accel_Axis_X;
+	int32_t waves_AxialZ;
+	int32_t waves_AxialX;
+	int32_t waves_RadialZ;
+	int32_t waves_RadialX;
 
 	float distance_AxialZ;
 	float distance_AxialX;
@@ -263,25 +275,25 @@ struct configPageReci // page 5,6,13,14
 	float amplitude_RadialX;
 	float degrees_RadialZ;
 	float degrees_RadialX;
-	int axisId;
-	int radial_axial;
+	uint32_t axisId;
+	uint32_t radial_axial;
 };
 
 struct configPageRose // page 12
 {
-	int maxSpd_Spindle;
-	int accel_Spindle;
-	int maxSpd_Axis_Z;
-	int accel_Axis_Z;
-	int maxSpd_Axis_X;
-	int accel_Axis_X;
-	int speedPercent_Spindle;
-	int n;
-	int d;
-	int axisId;
-	int radial_Axial;
-	int speedPercent_Axis_Z;
-	int speedPercent_Axis_X;
+	int32_t maxSpd_Spindle;
+	uint32_t accel_Spindle;
+	int32_t maxSpd_Axis_Z;
+	uint32_t accel_Axis_Z;
+	uint32_t maxSpd_Axis_X;
+	uint32_t accel_Axis_X;
+	int32_t speedPercent_Spindle;
+	int32_t n;
+	int32_t d;
+	uint32_t axisId;
+	uint32_t radial_Axial;
+	int32_t speedPercent_Axis_Z;
+	int32_t speedPercent_Axis_X;
 	float amplitude_Axial_Z;
 	float amplitude_Axial_X;
 	float amplitude_Radial_Z;
@@ -290,55 +302,55 @@ struct configPageRose // page 12
 
 struct configPageMainOne  // page 7 and page 0 (pageMain)
 {
-	int activeAxis; // Spindle, Z, X, or B
-	int maxSpd_Spindle;
-	int maxSpd_Axis_Z;
-	int maxSpd_Axis_X;
-	int maxSpd_Axis_B;
-	int speedPercent_Spindle;
-	int speedPercent_Axis_Z;
-	int speedPercent_Axis_X;
-	int speedPercent_Axis_B;
-	int accel_Spindle;
-	int accel_Axis_Z;
-	int accel_Axis_X;
-	int accel_Axis_B;
-	int axisId; // Z, X, or B
+	uint32_t activeAxis; // Spindle, Z, X, or B
+	int32_t maxSpd_Spindle;
+	int32_t maxSpd_Axis_Z;
+	int32_t maxSpd_Axis_X;
+	int32_t maxSpd_Axis_B;
+	int32_t speedPercent_Spindle;
+	int32_t speedPercent_Axis_Z;
+	int32_t speedPercent_Axis_X;
+	int32_t speedPercent_Axis_B;
+	uint32_t accel_Spindle;
+	uint32_t accel_Axis_Z;
+	uint32_t accel_Axis_X;
+	uint32_t accel_Axis_B;
+	uint32_t axisId; // Z, X, or B
 };
 
 struct configPageGreekKey
 {
-	int axisId;
-	int fileOrPattern;
+	uint32_t axisId;
+	uint32_t fileOrPattern;
 	// pageGrk settings
-	int patternId;
+	uint32_t patternId;
 	float countPattern360;
-	int countPattern;
-	int radialOrAxial_Pattern;
+	int32_t countPattern;
+	int32_t radialOrAxial_Pattern;
 	float segmentLengthPattern;
 
 	// pageGrkFile settings
-	int countPatternFile;
+	int32_t countPatternFile;
 	float countPatternFile360;
-	int segmentOrActual;
-	int radialOrAxial_File;
+	int32_t segmentOrActual;
+	int32_t radialOrAxial_File;
 	float segmentLengthForFile;
-	//float segmentDegrees_Pattern;	
 };
 
 struct configPageIndex
 {
-	int indexId;
-	int maxSpd;
-	int speedPercent;
-	int accel;
+	int32_t indexId;
+	int32_t maxSpd;
+	int32_t speedPercent;
+	uint32_t accel;
+	 
 };
 
 struct configIndex
 {
-	int degreeOrDivision; // Type
-	int fileOrFixed; // Source
-	int size;
+	uint32_t degreeOrDivision; // Type
+	uint32_t fileOrFixed; // Source
+	int32_t size;
 };
 
 //==================================================================
@@ -347,22 +359,16 @@ struct configIndex
 
 int serialId = 9; // Initialize with unused serial id.  Serial-0, Serial3-1
 byte incomingByte = 0;	// store incoming Serial data
-unsigned int eePromAddress_Setup = 0;  // EEProm address for spindleConfig values
-
+unsigned int eePromAddress_PageSetup = 0; // EEProm address for Setup
+unsigned int eePromAddress_Sync = 200;  // EEProm address for Sync
 unsigned int eePromAddress_Filename_Index = 900; // EEProm address for Index2 filename
 unsigned int eePromAddress_Filename_Length_Index = 920; // EEProm address for length of Index2 filename
 unsigned int eePromAddress_Filename_Grk = 925; // EEProm address for Index2 filename
 unsigned int eePromAddress_Filename_Length_Grk = 945; // EEProm address for length of Index2 filename
+unsigned int eePromAddress_pageMain = 1000;  // EEProm address for Main
 
-unsigned int eePromAddress_pageMain = 1000;  // EEProm address for SpZ
-
-unsigned int eePromAddress_SyncX = 1064;  // EEProm address for SyncX 
-unsigned int eePromAddress_SyncZ = 1090;  // EEProm address for SyncZ 
-
-unsigned int eePromAddress_MoveZ = 1160;  // EEProm address for MoveZ 
-unsigned int eePromAddress_MoveX = 1176;  // EEProm address for MoveX 
+unsigned int eePromAddress_pageMov = 1100; // EEProm address for Move
 unsigned int eePromAddress_Rose = 1200; // EEProm address for Rose
-
 unsigned int eePromAddress_Rec = 1300;
 unsigned int eePromAddress_pageOne = 1500;  // EEProm address for Sp 
 unsigned int eePromAddress_GreekKey_Main = 1600;  // EEProm address for Greek Key Main
@@ -428,20 +434,32 @@ String sdFilename;
 bool badFilename = false;
 float hVal = 0; // Horizontal component of angular move
 float vVal = 0; // Vertical component of angular move
+
+/////////////////////////////////////////////////////////////////////////
+// FreeMemory
+/////////////////////////////////////////////////////////////////////////
+#ifdef __arm__
+// should use uinstd.h to define sbrk but Due causes a conflict
+extern "C" char* sbrk(int incr);
+#else  // __ARM__
+extern char *__brkval;
+#endif  // __arm__
+
+
 /////////////////////////////////////////////////////////////////////////
 // Page defines
 /////////////////////////////////////////////////////////////////////////
 int pageCallerId = 20;
 #define PAGE_MAIN 0
 #define PAGE_SYNCZ 3
-#define PAGE_SYNCX 4
+#define PAGE_4 4
 #define PAGE_REC 5
 #define PAGE_6 6
 #define PAGE_ONE 7
-#define PAGE_INDEX1 8
+#define PAGE_INDEX 8
 #define PAGE_BE 9
-#define PAGE_MOVEZ 10
-#define PAGE_MOVEX 11
+#define PAGE_MOVE 10
+#define PAGE_11 11
 #define PAGE_GEO 12  
 #define PAGE_13 13
 #define PAGE_14 14
@@ -451,18 +469,16 @@ int pageCallerId = 20;
 /////////////////////////////////////////////////////////////////////////
 // Config and Setup variables
 /////////////////////////////////////////////////////////////////////////
-configs configMain;
+configPageSetup configSetup;
 configPageMainOne configPageMain;
-configSteppers configSyncZ;
-configSteppers configSyncX;
+configPageSync configSync;
 configPageReci configRec;
 configPageMainOne configOne;
 configPageIndex configIndex_Main;
 configIndex configIndex_1;
 configIndex configIndex_2;
 configIndex configIndex_3;
-configStepper configMoveZ;
-configStepper configMoveX;
+configPageMov configMove;
 configPageRose configRose;
 configPageGreekKey configGreekKey_Main;
 configSteppers configGreekKey_Z;
