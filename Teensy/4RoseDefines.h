@@ -3,11 +3,11 @@
 * Author: Edward French
 ******************************************************************/
 #pragma once
-#define FOUR_AXES  // Teensy 3.5
+//#define FOUR_AXES  // Teensy 3.5
 //#define THREE_AXES // Teensy 3.2
-//#define TWO_AXES_V2 // Teensy 3.2
+#define TWO_AXES_V2 // Teensy 3.2
 #define SHOW_POSITION
-#define DEBUG
+//#define DEBUG
 
 //==================================================================
 // Pin assignments
@@ -164,6 +164,21 @@
 #define RADIAL 0
 #define AXIAL 1
 
+/////////////////////////////////////////////////////////////////////////
+// Page defines
+/////////////////////////////////////////////////////////////////////////
+
+#define PAGE_MAIN 0
+#define PAGE_SPLASH 1
+#define PAGE_ONE 2
+#define PAGE_INDEX 3
+#define PAGE_MOVE 4
+#define PAGE_BE 5
+#define PAGE_SYNCZ 6
+#define PAGE_REC 7
+#define PAGE_GRK 8
+#define PAGE_GRKFILE 9
+#define PAGE_GEO 10 
 
 /////////////////////////////////////////////////////////////////////////
 // Structs
@@ -171,12 +186,12 @@
 struct configPageMov
 {
 	uint32_t axisId;
-	int maxSpd_Axis_Z;
+	int32_t maxSpd_Axis_Z;
 	uint32_t accel_Axis_Z;
-	int maxSpd_Axis_X;
+	int32_t maxSpd_Axis_X;
 	uint32_t accel_Axis_X;
-	int speedPercent_Axis_Z;
-	int speedPercent_Axis_X;
+	int32_t speedPercent_Axis_Z;
+	int32_t speedPercent_Axis_X;
 	float distance_MoveZ;
 	float distance_MoveX;
 
@@ -203,35 +218,31 @@ struct configPageSync
 struct configPageSetup
 {
 	uint32_t microsteps_Spindle;
-	bool polarity_Spindle;
 	uint32_t steps360_Spindle;
 	float gearRatio_Spindle;
-
 	uint32_t microsteps_Axis_Z;
-	bool polarity_Axis_Z;
 	uint32_t steps360_Axis_Z;
 	float distancePerRev_AxisZ;
 	uint32_t limit_Min_Z;
 	uint32_t limit_Max_Z;
-
 	uint32_t microsteps_Axis_X;
-	bool polarity_Axis_X;
 	uint32_t steps360_Axis_X;
 	float distancePerRev_AxisX;
 	uint32_t limit_Min_X;
 	uint32_t limit_Max_X;
-
 	uint32_t microsteps_Axis_B;
-	bool polarity_Axis_B;
 	uint32_t steps360_Axis_B;
 	float gearRatio_AxisB;
 	uint32_t limit_Min_B;
 	uint32_t limit_Max_B;
-
 	int32_t maxSpd_Return_Spindle;
 	uint32_t accel_Return_Spindle;
 	int32_t maxSpd_Return_Axis;
 	uint32_t accel_Return_Axis;
+	bool polarity_Spindle;
+	bool polarity_Axis_Z;
+	bool polarity_Axis_X;
+	bool polarity_Axis_B;
 };
 
 // Config Structs
@@ -245,13 +256,7 @@ struct configSteppers //
 	int32_t speedPercent_Axis;
 };
 
-struct configStepper //
-{
-	int32_t maxSpd;
-	uint32_t accel;
-};
-
-struct configPageReci // page 5,6,13,14
+struct configPageRec // page 5,6,13,14
 {
 	int32_t maxSpd_Spindle;
 	uint32_t accel_Spindle;
@@ -302,7 +307,6 @@ struct configPageRose // page 12
 
 struct configPageMainOne  // page 7 and page 0 (pageMain)
 {
-	uint32_t activeAxis; // Spindle, Z, X, or B
 	int32_t maxSpd_Spindle;
 	int32_t maxSpd_Axis_Z;
 	int32_t maxSpd_Axis_X;
@@ -315,7 +319,7 @@ struct configPageMainOne  // page 7 and page 0 (pageMain)
 	uint32_t accel_Axis_Z;
 	uint32_t accel_Axis_X;
 	uint32_t accel_Axis_B;
-	uint32_t axisId; // Z, X, or B
+	uint32_t axisId; // Z:0, X:1, B:2, Spindle:3
 };
 
 struct configPageGreekKey
@@ -353,32 +357,54 @@ struct configIndex
 	int32_t size;
 };
 
+
+/////////////////////////////////////////////////////////////////////////
+// Config and Setup variables
+/////////////////////////////////////////////////////////////////////////
+configPageSetup configSetup;
+configPageMainOne configPageMain;
+configPageSync configSync;
+configPageRec configRec;
+configPageMainOne configOne;
+configPageIndex configIndex_Main;
+configIndex configIndex_1;
+configIndex configIndex_2;
+configIndex configIndex_3;
+configPageMov configMove;
+configPageRose configRose;
+configPageGreekKey configGreekKey_Main;
+configSteppers configGreekKey_Z;
+configSteppers configGreekKey_X;
+
+unsigned int eePromAddress_Setup = 100; // EEProm address for Setup
+unsigned int eePromAddress_Sync = 225;  // EEProm address for Sync
+unsigned int eePromAddress_Main = 300;  // EEProm address for Main
+unsigned int eePromAddress_Mov = 375; // EEProm address for Move
+unsigned int eePromAddress_Rose = 420; // EEProm address for Rose
+unsigned int eePromAddress_Rec = 500;
+unsigned int eePromAddress_One = 600;  // EEProm address for Sp 
+unsigned int eePromAddress_Grk_Main = 675;  // EEProm address for Greek Key Main
+unsigned int eePromAddress_Grk_Z = 735; //  EEProm address for Greek Key Z
+unsigned int eePromAddress_Grk_X = 780; //  EEProm address for Greek Key X 
+
+unsigned int eePromAddress_Ind_Main = 810;  // EEProm address for Index_Main
+unsigned int eePromAddress_Ind_1 = 840;  // EEProm address for Index_1
+unsigned int eePromAddress_Ind_2 = 860;  // EEProm address for Index_2
+unsigned int eePromAddress_Ind_3 = 880;  // EEProm address for Index_3 
+
+unsigned int eePromAddress_Filename_Ind = 900; // EEProm address for Index2 filename
+unsigned int eePromAddress_Filename_Length_Ind = 920; // EEProm address for length of Index2 filename
+unsigned int eePromAddress_Filename_Grk = 925; // EEProm address for Index2 filename
+unsigned int eePromAddress_Filename_Length_Grk = 945; // EEProm address for length of Index2 filename
+
 //==================================================================
 // Global Variables
 //==================================================================
-
+int pageCallerId = 20;
 int serialId = 9; // Initialize with unused serial id.  Serial-0, Serial3-1
 byte incomingByte = 0;	// store incoming Serial data
-unsigned int eePromAddress_PageSetup = 0; // EEProm address for Setup
-unsigned int eePromAddress_Sync = 200;  // EEProm address for Sync
-unsigned int eePromAddress_Filename_Index = 900; // EEProm address for Index2 filename
-unsigned int eePromAddress_Filename_Length_Index = 920; // EEProm address for length of Index2 filename
-unsigned int eePromAddress_Filename_Grk = 925; // EEProm address for Index2 filename
-unsigned int eePromAddress_Filename_Length_Grk = 945; // EEProm address for length of Index2 filename
-unsigned int eePromAddress_pageMain = 1000;  // EEProm address for Main
 
-unsigned int eePromAddress_pageMov = 1100; // EEProm address for Move
-unsigned int eePromAddress_Rose = 1200; // EEProm address for Rose
-unsigned int eePromAddress_Rec = 1300;
-unsigned int eePromAddress_pageOne = 1500;  // EEProm address for Sp 
-unsigned int eePromAddress_GreekKey_Main = 1600;  // EEProm address for Greek Key Main
-unsigned int eePromAddress_GreekKey_Z = 1670; //  EEProm address for Greek Key Z
-unsigned int eePromAddress_GreekKey_X = 1700; //  EEProm address for Greek Key X 
 
-unsigned int eePromAddress_Index_Main = 1800;  // EEProm address for Index_Main
-unsigned int eePromAddress_Index_1 = 1820;  // EEProm address for Index_1
-unsigned int eePromAddress_Index_2 = 1840;  // EEProm address for Index_2
-unsigned int eePromAddress_Index_3 = 1860;  // EEProm address for Index_3 
 
 float distanceTotal_MoveZ = 0;
 float distanceTotal_MoveX = 0;
@@ -438,51 +464,16 @@ float vVal = 0; // Vertical component of angular move
 /////////////////////////////////////////////////////////////////////////
 // FreeMemory
 /////////////////////////////////////////////////////////////////////////
-#ifdef __arm__
-// should use uinstd.h to define sbrk but Due causes a conflict
-extern "C" char* sbrk(int incr);
-#else  // __ARM__
-extern char *__brkval;
-#endif  // __arm__
+//#ifdef __arm__
+//// should use uinstd.h to define sbrk but Due causes a conflict
+//extern "C" char* sbrk(int incr);
+//#else  // __ARM__
+//extern char *__brkval;
+//#endif  // __arm__
+//
 
 
-/////////////////////////////////////////////////////////////////////////
-// Page defines
-/////////////////////////////////////////////////////////////////////////
-int pageCallerId = 20;
-#define PAGE_MAIN 0
-#define PAGE_SYNCZ 3
-#define PAGE_4 4
-#define PAGE_REC 5
-#define PAGE_6 6
-#define PAGE_ONE 7
-#define PAGE_INDEX 8
-#define PAGE_BE 9
-#define PAGE_MOVE 10
-#define PAGE_11 11
-#define PAGE_GEO 12  
-#define PAGE_13 13
-#define PAGE_14 14
-#define PAGE_GRK 15
-#define PAGE_GRKFILE 16
 
-/////////////////////////////////////////////////////////////////////////
-// Config and Setup variables
-/////////////////////////////////////////////////////////////////////////
-configPageSetup configSetup;
-configPageMainOne configPageMain;
-configPageSync configSync;
-configPageReci configRec;
-configPageMainOne configOne;
-configPageIndex configIndex_Main;
-configIndex configIndex_1;
-configIndex configIndex_2;
-configIndex configIndex_3;
-configPageMov configMove;
-configPageRose configRose;
-configPageGreekKey configGreekKey_Main;
-configSteppers configGreekKey_Z;
-configSteppers configGreekKey_X;
 
 // End Global Variables
 //==================================================================
