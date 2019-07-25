@@ -261,7 +261,7 @@ void loop()
 	const char * fileOrFixed_Char = " File or Fixed:";
 	const char * lineNumber_Char = "Line Number:";
 	const char * pageIndex_t7_Char = "pageIndex.t7.txt=";
-	const char * pageIndex_bt3_pco_Char = "pageIndex.bt3.pco=59391";
+	//const char * pageIndex_bt3_pco_Char = "pageIndex.bt3.pco=59391";
 	const char * pageIndex_va0_Char = "pageIndex.va0.val=0";
 	const char * pageIndex_bt3_Char = "pageIndex.bt3.val=0";
 	const char * pageIndex_bt2_Char = "pageIndex.bt2.val=0";
@@ -798,7 +798,8 @@ void loop()
 			}
 			case 78: // N - Not Used
 			{
-
+				File root = SD.open("/");
+				GetFileListFromSD(root,0 );
 				break;
 			}
 			case 79: // O - Sync Axis Speed
@@ -958,8 +959,8 @@ void loop()
 				else
 				{
 					// Update Index flag on Nextion. 
-					Serial3.print(pageIndex_bt3_pco_Char);
-					Serial3.print(nextionEnd);
+					//Serial3.print(pageIndex_bt3_pco_Char);
+					//Serial3.print(nextionEnd);
 					Serial3.print(pageIndex_va0_Char);
 					Serial3.print(nextionEnd);
 					Serial3.print(pageIndex_bt3_Char);
@@ -1101,8 +1102,8 @@ void loop()
 				else
 				{
 					// On fail reset Index flag on Nextion. 
-					Serial3.print(pageIndex_bt3_pco_Char);
-					Serial3.print(nextionEnd);
+					//Serial3.print(pageIndex_bt3_pco_Char);
+					//Serial3.print(nextionEnd);
 					Serial3.print(pageIndex_va0_Char);
 					Serial3.print(nextionEnd);
 					Serial3.print(pageIndex_bt3_Char);
@@ -1843,14 +1844,8 @@ void loop()
 			{
 				break;
 			}
-			case 161: // ¡ - Sp-X spindle speed
+			case 161: // ¡ - Not used
 			{
-				configPageMain.speedPercent_Spindle = (int)GetSerialFloat(serialId);
-				EEPROM.put(eePromAddress_Main, configPageMain);
-	#ifdef DEBUG
-				Serial.print(spindle_SpeedPercent_Char);
-				Serial.println(configPageMain.speedPercent_Spindle);
-	#endif // DEBUG
 				break;
 			}
 			case 162: // ¢ - Sp-X axis speed
@@ -1889,14 +1884,8 @@ void loop()
 
 				break;
 			}
-			case 167: // § - SpB spindle speed
+			case 167: // § - Not used
 			{
-				configPageMain.speedPercent_Spindle = (int)GetSerialFloat(serialId);
-				EEPROM.put(eePromAddress_Main, configPageMain);
-	#ifdef DEBUG
-				Serial.print(spindle_SpeedPercent_Char);
-				Serial.println(configPageMain.speedPercent_Spindle);
-	#endif // DEBUG
 				break;
 			}
 			case 168: // ¨ - SpB axis speed
