@@ -7013,6 +7013,51 @@ void ReturnToStartPosition(int axisId)
 			Serial3.print(nextionEnd);
 			Serial3.print("pageOne.bt0.val=0");
 			Serial3.print(nextionEnd);
+
+			switch (configOne.axisId)
+			{
+				case ID_AXIS_Z:
+				{
+					Serial3.print("pageOne.bt11.val=1");
+					Serial3.print(nextionEnd);
+					Serial3.print("pageOne.bt11.txt=");
+					Serial3.write(0x22);
+					Serial3.print("Disabled");
+					Serial3.print(nextionQuoteEnd);
+					break;
+				}
+				case ID_AXIS_X:
+				{
+					Serial3.print("pageOne.bt12.val=1");
+					Serial3.print(nextionEnd);
+					Serial3.print("pageOne.bt12.txt=");
+					Serial3.write(0x22);
+					Serial3.print("Disabled");
+					Serial3.print(nextionQuoteEnd);
+					break;
+				}
+				case ID_AXIS_B:
+				{
+					Serial3.print("pageOne.bt13.val=1");
+					Serial3.print(nextionEnd);
+					Serial3.print("pageOne.bt13.txt=");
+					Serial3.write(0x22);
+					Serial3.print("Disabled");
+					Serial3.print(nextionQuoteEnd);
+					break;
+				}
+				case ID_SPINDLE:
+				{
+					Serial3.print("pageOne.bt10.val=1");
+					Serial3.print(nextionEnd);
+					Serial3.print("pageOne.bt10.txt=");
+					Serial3.write(0x22);
+					Serial3.print("Disabled");
+					Serial3.print(nextionQuoteEnd);
+					break;
+				}
+			}
+
 			Serial3.print("pageBE.t1.txt=");
 			Serial3.write(0x22);
 			Serial3.print(endPosition_Spindle);
@@ -8565,18 +8610,17 @@ void SetMicrosteppingMode(int microsteps, int pinMs0, int pinMs1, int pinMs2)
 void LoadSettings()
 {
 	const char* nextionEnd = "\xFF\xFF\xFF";
-
-	LoadSettings_PageReturns();
 	LoadSettings_PageSetup();
-	LoadSettings_PageSync();
+	LoadSettings_PageReturns();
+	LoadSettings_PageLimits();
 	LoadSettings_PageMain();
 	LoadSettings_PageOne();
+	LoadSettings_PageIndex();
+	LoadSettings_PageMove();
+	LoadSettings_PageSync();
 	LoadSettings_PageRec();
 	LoadSettings_PageGrk();
-	LoadSettings_PageMove();
 	LoadSettings_PageGeo();
-	LoadSettings_PageIndex();
-	LoadSettings_PageLimits();
 
 	// Update Nextion
 	Serial3.print("pageSplash.bt0.bco=9563");
@@ -8624,6 +8668,11 @@ void LoadSettings_PageIndex()
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configIndex_1.fileOrFixed = (int)returnVal;
 
+	iniValue = "Size_1";
+	eePromAddress_Nextion = 345;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configIndex_1.size = returnVal;
+
 	// Index 2
 	iniValue = "DivisionsOrDegrees_1";
 	eePromAddress_Nextion = 162;
@@ -8635,6 +8684,11 @@ void LoadSettings_PageIndex()
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configIndex_2.fileOrFixed = (int)returnVal;
 
+	iniValue = "Size_2";
+	eePromAddress_Nextion = 360;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configIndex_2.size = returnVal;
+
 	// Index 3
 	iniValue = "DivisionsOrDegrees_3";
 	eePromAddress_Nextion = 154;
@@ -8645,6 +8699,12 @@ void LoadSettings_PageIndex()
 	eePromAddress_Nextion = 592;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configIndex_3.fileOrFixed = (int)returnVal;
+
+	iniValue = "Size_3";
+	eePromAddress_Nextion = 582;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configIndex_3.size = returnVal;
+
 
 	EEPROM.put(eePromAddress_Ind_Main, configIndex_Main);
 	EEPROM.put(eePromAddress_Ind_1, configIndex_1);
@@ -8664,6 +8724,16 @@ void LoadSettings_PageGeo()
 	eePromAddress_Nextion = 948;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configRose.radial_Axial = (int)returnVal;
+
+	iniValue = "Rose_n";
+	eePromAddress_Nextion = 116;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configRose.n = (int)returnVal;
+
+	iniValue = "Rose_d";
+	eePromAddress_Nextion = 120;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configRose.d = (int)returnVal;
 
 	iniValue = "MaxSpeed_Spindle";
 	eePromAddress_Nextion = 124;
@@ -8696,6 +8766,16 @@ void LoadSettings_PageGeo()
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configRose.speedPercent_Axis_Z = (int)returnVal;
 
+	iniValue = "RadialAmplitude_Z";
+	eePromAddress_Nextion = 285;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configRose.amplitude_Radial_Z = (int)returnVal;
+
+	iniValue = "AxialAmplitude_Z";
+	eePromAddress_Nextion = 315;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configRose.amplitude_Axial_Z = (int)returnVal;
+
 	// X axis
 	iniValue = "MaxSpeed_X";
 	eePromAddress_Nextion = 148;
@@ -8711,6 +8791,16 @@ void LoadSettings_PageGeo()
 	eePromAddress_Nextion = 712;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configRose.speedPercent_Axis_X = (int)returnVal;
+
+	iniValue = "RadialAmplitude_X";
+	eePromAddress_Nextion = 300;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configRose.amplitude_Radial_X = (int)returnVal;
+
+	iniValue = "AxialAmplitude_X";
+	eePromAddress_Nextion = 226;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configRose.amplitude_Axial_X = (int)returnVal;
 
 	EEPROM.put(eePromAddress_Rose, configRose);
 }
@@ -8739,6 +8829,11 @@ void LoadSettings_PageMove()
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configMove.speedPercent_Axis_Z = (int)returnVal;
 
+	iniValue = "Distance_Z";
+	eePromAddress_Nextion = 174;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configMove.distance_MoveZ = returnVal;
+
 	// X axis
 	iniValue = "MaxSpeed_X";
 	eePromAddress_Nextion = 1000;
@@ -8755,6 +8850,11 @@ void LoadSettings_PageMove()
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configMove.speedPercent_Axis_X = (int)returnVal;
 
+	iniValue = "Distance_X";
+	eePromAddress_Nextion = 40;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configMove.distance_MoveX = returnVal;
+
 	EEPROM.put(eePromAddress_Mov, configMove);
 }
 
@@ -8767,15 +8867,58 @@ void LoadSettings_PageGrk()
 	float returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configGreekKey_Main.axisId = (int)returnVal;
 
-	iniValue = "RadialOrAxial";
+	iniValue = "RadialOrAxial_Pattern";
 	eePromAddress_Nextion = 432;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configGreekKey_Main.radialOrAxial_Pattern = (int)returnVal;
+
+	iniValue = "RadialOrAxial_File";
+	eePromAddress_Nextion = 436;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configGreekKey_Main.radialOrAxial_File = (int)returnVal;
 
 	iniValue = "FileOrPattern";
 	eePromAddress_Nextion = 108;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configGreekKey_Main.fileOrPattern = (int)returnVal;
+
+	iniValue = "PatternType";
+	eePromAddress_Nextion = 698;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configGreekKey_Main.patternId = (int)returnVal;
+
+	iniValue = "Pattern_PatternsPer360";
+	eePromAddress_Nextion = 678;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configGreekKey_Main.countPattern360 = (int)returnVal;
+
+	iniValue = "Pattern_PatternCount";
+	eePromAddress_Nextion = 984;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configGreekKey_Main.countPattern = (int)returnVal;
+
+	iniValue = "Pattern_SegmentLength";
+	eePromAddress_Nextion = 638;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configGreekKey_Main.segmentLengthPattern = (int)returnVal;
+
+	//////////////////////
+	iniValue = "File_PatternsPer360";
+	eePromAddress_Nextion = 658;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configGreekKey_Main.countPatternFile360 = (int)returnVal;
+
+	iniValue = "File_PatternCount";
+	eePromAddress_Nextion = 770;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configGreekKey_Main.countPatternFile = (int)returnVal;
+
+	iniValue = "File_SegmentLength";
+	eePromAddress_Nextion = 325;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configGreekKey_Main.segmentLengthForFile = (int)returnVal;
+
+	/////////////////////
 
 	// Greek Key Spindle (Shared by Z and X in Pattern and File)
 	iniValue = "MaxSpeed_Spindle";
@@ -8861,6 +9004,7 @@ void LoadSettings_PageRec()
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configRec.speedPercent_Spindle = (int)returnVal;
 
+	// Z axis
 	iniValue = "MaxSpeed_Z";
 	eePromAddress_Nextion = 964;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
@@ -8876,6 +9020,37 @@ void LoadSettings_PageRec()
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configRec.speedPercent_Axis_Z = (int)returnVal;
 
+	iniValue = "Radial_Waves_Z";
+	eePromAddress_Nextion = 812;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configRec.waves_RadialZ = (int)returnVal;
+
+	iniValue = "Radial_Spindle_Amplitude_Z";
+	eePromAddress_Nextion = 816;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configRec.amplitude_RadialZ = returnVal;
+
+	iniValue = "Radial_Axis_Distance_Z";
+	eePromAddress_Nextion = 836;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configRec.amplitude_RadialZ = returnVal;
+
+	iniValue = "Axial_Waves_Z";
+	eePromAddress_Nextion = 752;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configRec.waves_AxialZ = (int)returnVal;
+
+	iniValue = "Axial_Spindle_Degrees_Z";
+	eePromAddress_Nextion = 756;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configRec.amplitude_AxialZ = returnVal;
+
+	iniValue = "Axial_Axis_Amplitude_Z";
+	eePromAddress_Nextion = 776;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configRec.distance_AxialZ = returnVal;
+
+	// X Axis
 	iniValue = "MaxSpeed_X";
 	eePromAddress_Nextion = 960;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
@@ -8890,7 +9065,37 @@ void LoadSettings_PageRec()
 	eePromAddress_Nextion = 800;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configRec.speedPercent_Axis_X = (int)returnVal;
+
+	iniValue = "Radial_Waves_X";
+	eePromAddress_Nextion = 204;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configRec.waves_RadialX = returnVal;
+
+	iniValue = "Radial_Spindle_Amplitude_X";
+	eePromAddress_Nextion = 826;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configRec.amplitude_RadialX = (int)returnVal;
 	
+	iniValue = "Radial_Axis_Distance_X";
+	eePromAddress_Nextion = 184;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configRec.amplitude_RadialX = returnVal;
+
+	iniValue = "Axial_Waves_X";
+	eePromAddress_Nextion = 196;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configRec.waves_AxialX = (int)returnVal;
+
+	iniValue = "Axial_Spindle_Degrees_X";
+	eePromAddress_Nextion = 216;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configRec.amplitude_AxialX = returnVal;
+
+	iniValue = "Axial_Axis_Amplitude_X";
+	eePromAddress_Nextion = 786;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configRec.distance_AxialX = returnVal;
+
 	EEPROM.put(eePromAddress_Rec, configRec);
 }
 
@@ -9044,10 +9249,20 @@ void LoadSettings_PageSync()
 	float returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configSync.axisId = (int)returnVal;
 
-	iniValue = "LeftOrRight"; //Helix Type
+	iniValue = "HelixType"; //Helix Type
 	eePromAddress_Nextion = 420;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configSync.helixType = (int)returnVal;
+
+	iniValue = "Revolutions";
+	eePromAddress_Nextion = 628;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configSync.revolutions_Spindle = returnVal;
+
+	iniValue = "Distance"; 
+	eePromAddress_Nextion = 648;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configSync.distance = returnVal;
 
 	iniValue = "MaxSpeed_Spindle";
 	eePromAddress_Nextion = 884;
