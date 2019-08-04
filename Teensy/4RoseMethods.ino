@@ -432,7 +432,7 @@ void MoveAxis(int axisId, int directionAxis)
 	const char * nextSpeed_Char = "Next Speed:";
 	const char * accel_Char = "Accel:";
 	const char * position_Char = "Position:";
-	const char * pageMove_bt2_pco_Char = "pageMove.bt2.pco = 59391";
+	//const char * pageMove_bt2_pco_Char = "pageMove.bt2.pco = 59391";
 	const char * pageMove_bt2_val_Char = "pageMove.bt2.val=0";
 	const char * pageMove_va0_Char = "pageMove.va0.val=0";
 	const char * pageMove_bt1_Char = "pageMove.bt1.val=0";
@@ -628,8 +628,8 @@ void MoveAxis(int axisId, int directionAxis)
 #endif // DEBUG
 	}
 	// Update Move flag on Nextion. 
-	Serial3.print(pageMove_bt2_pco_Char);// The first one may be ignored by Nextion
-	Serial3.print(nextionEnd);
+	//Serial3.print(pageMove_bt2_pco_Char);// The first one may be ignored by Nextion
+	//Serial3.print(nextionEnd);
 	Serial3.print(pageMove_va0_Char);
 	Serial3.print(nextionEnd);
 	Serial3.print(pageMove_bt1_Char);
@@ -1449,9 +1449,7 @@ void RunTwoSteppers_All(
 					}
 					break;
 				}
-				case 110: // n - Sp-Z spindle speed
-				case 161: // ¡ - Sp-X spindle speed
-				case 167: // § - Sp-B spindle speed
+				case 110: // n - Main spindle speed
 				{
 					configPageMain.speedPercent_Spindle = (int)GetSerialFloat(serialId);
 					speedPercentSpindle = (float)(configPageMain.speedPercent_Spindle * .01);
@@ -2054,7 +2052,7 @@ void IndexSpindle(int directionSpindle)
 	const char * size_Char = "Size:";
 	const char * direction_Char = "Direction:";
 	const char * stepsToMove_Char = "Steps to Move:";
-	const char * pageIndex_bt3_pco_Char = "pageIndex.bt3.pco=59391";
+	//const char * pageIndex_bt3_pco_Char = "pageIndex.bt3.pco=59391";
 	const char * pageIndex_bt3_val_Char = "pageIndex.bt3.val=0";
 	const char * pageIndex_va0_Char = "pageIndex.va0.val=0";
 	const char * pageIndex_bt1_val_Char = "pageIndex.bt1.val=0";
@@ -2140,8 +2138,8 @@ void IndexSpindle(int directionSpindle)
 		MilliDelay(10);
 	}
 	// Update Index flag on Nextion. 
-	Serial3.print(pageIndex_bt3_pco_Char);
-	Serial3.print(nextionEnd);
+	//Serial3.print(pageIndex_bt3_pco_Char);
+	//Serial3.print(nextionEnd);
 	Serial3.print(pageIndex_va0_Char);
 	Serial3.print(nextionEnd);
 	Serial3.print(pageIndex_bt3_val_Char);
@@ -2606,8 +2604,8 @@ endLoop:
 	Serial3.print(nextionQuoteEnd);
 #endif // Show Position
 	// Update Nextion
-	Serial3.print("pageRec.bt3.pco=0");// The first one may be ignored by Nextion, so resend.
-	Serial3.print(nextionEnd);
+	//Serial3.print("pageRec.bt3.pco=0");// The first one may be ignored by Nextion, so resend.
+	//Serial3.print(nextionEnd);
 	Serial3.print("pageRec.va0.val=0");
 	Serial3.print(nextionEnd);
 	Serial3.print("pageRec.bt3.val=0");
@@ -2793,8 +2791,8 @@ endLoop:
 	Serial3.print(nextionQuoteEnd);
 #endif // Show Position
 	// Update Nextion
-	Serial3.print("pageRec.bt3.pco=0");// The first one may be ignored by Nextion, so resend.
-	Serial3.print(nextionEnd);
+	//Serial3.print("pageRec.bt3.pco=0");// The first one may be ignored by Nextion, so resend.
+	//Serial3.print(nextionEnd);
 	Serial3.print("pageRec.va0.val=0");
 	Serial3.print(nextionEnd);
 	Serial3.print("pageRec.bt3.val=0");
@@ -2966,8 +2964,8 @@ endLoop:
 #endif //Show position
 
 	// Update Nextion
-	Serial3.print("pageRec.bt3.pco=59391");
-	Serial3.print(nextionEnd);
+	//Serial3.print("pageRec.bt3.pco=59391");
+	//Serial3.print(nextionEnd);
 	Serial3.print("pageRec.va0.val=0");
 	Serial3.print(nextionEnd);
 	Serial3.print("pageRec.bt3.val=0");// The first one may be ignored by Nextion, so resend.
@@ -3150,8 +3148,8 @@ endLoop:
 	Serial3.print(nextionQuoteEnd);
 #endif //SHOW_POSITION
 	// Update Nextion
-	Serial3.print("pageRec.bt3.pco=59391");
-	Serial3.print(nextionEnd);
+	//Serial3.print("pageRec.bt3.pco=59391");
+	//Serial3.print(nextionEnd);
 	Serial3.print("pageRec.va0.val=0");
 	Serial3.print(nextionEnd);
 	Serial3.print("pageRec.bt3.val=0");// The first one may be ignored by Nextion, so resend.
@@ -4665,8 +4663,8 @@ void GreekKeyPattern_End()
 	const char* nextionEnd = "\xFF\xFF\xFF";
 
 	// Update Nextion
-	Serial3.print("pageGrk.bt3.pco=0");// The first one may be ignored by Nextion, so resend.
-	Serial3.print(nextionEnd);
+	//Serial3.print("pageGrk.bt3.pco=0");
+	//Serial3.print(nextionEnd);
 	Serial3.print("pageGrk.va0.val=0");
 	Serial3.print(nextionEnd);
 	Serial3.print("pageGrk.bt3.val=0");
@@ -6235,8 +6233,8 @@ void GreekKeyFromFile(int direction)
 
 EndLoops:
 		// Update Nextion
-	Serial3.print("pageGrkFile.bt3.pco=0");// The first one may be ignored by Nextion, so resend.
-	Serial3.print(nextionEnd);
+	//Serial3.print("pageGrkFile.bt3.pco=0");// The first one may be ignored by Nextion, so resend.
+	//Serial3.print(nextionEnd);
 	Serial3.print("pageGrkFile.va0.val=0");
 	Serial3.print(nextionEnd);
 	Serial3.print("pageGrkFile.bt3.val=0");
@@ -6531,6 +6529,162 @@ double GetIndexDataFromSD(int lineNumber)
 	return atof(newSizeChar);
 }
 
+void GetFileListFromSD(File dir, int numTabs)
+{
+	const char* pageGrkFile_t21 = "pageGrkFile.t21.txt=";
+	const char* pageGrkFile_t22 = "pageGrkFile.t22.txt=";
+	const char* pageGrkFile_t23 = "pageGrkFile.t23.txt=";
+	const char* pageGrkFile_t24 = "pageGrkFile.t24.txt=";
+	const char* pageGrkFile_t25 = "pageGrkFile.t25.txt=";
+
+	const char* pageIndex_t21 = "pageIndex.t21.txt=";
+	const char* pageIndex_t22 = "pageIndex.t22.txt=";
+	const char* pageIndex_t23 = "pageIndex.t23.txt=";
+	const char* pageIndex_t24 = "pageIndex.t24.txt=";
+	const char* pageIndex_t25 = "pageIndex.t25.txt=";
+
+	const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
+	const char* nextionEnd = "\xFF\xFF\xFF";
+
+	const char* infile_4 = "4AXES.INI";
+	const char* infile_2 = "2AXES.INI";
+	int iniCharCount = 9;
+	int iCompare = 0;
+
+	int iCounter = 0;
+
+	while (true) {
+		
+		File entry = dir.openNextFile();
+		if (!entry) 
+		{
+			// no more files
+			break;
+		}
+		iCounter++;
+		if (!entry.isDirectory())
+		{
+
+			iCompare = strcmp(infile_4, entry.name());
+
+			if (iCompare == 0)
+			{
+#ifdef DEBUG
+				Serial.print("Compare1: ");
+				Serial.print(entry.name());
+#endif // DEBUG
+			}else
+			{ 
+				iCompare = strcoll(entry.name(), infile_2);
+				if (iCompare == 0)
+				{
+#ifdef DEBUG
+					Serial.print("Compare2: ");
+					Serial.print(entry.name());
+#endif // DEBUG
+				}
+			}
+
+			if (iCompare == 0) // One of the ini files
+			{
+				iCounter--;
+				goto IniFileFound;
+			}
+			if(iCounter<=5)
+			{ 
+				Serial.print("iCounter: ");
+				Serial.println(iCounter);
+				switch (iCounter)
+				{
+					case 1:
+					{
+						SerialPrint(pageIndex_t21);
+						Serial3.print("\x22");
+						SerialPrint(entry.name());
+						Serial3.print(nextionQuoteEnd);
+						Serial.println("/t");
+
+						SerialPrint(pageGrkFile_t21);
+						Serial3.print("\x22");
+						SerialPrint(entry.name());
+						Serial3.print(nextionQuoteEnd);
+						Serial.println("/t");
+						break;
+					}
+					case 2:
+					{
+						SerialPrint(pageIndex_t22);
+						Serial3.print("\x22");
+						SerialPrint(entry.name());
+						Serial3.print(nextionQuoteEnd);
+						Serial.println("/t");
+
+						SerialPrint(pageGrkFile_t22);
+						Serial3.print("\x22");
+						SerialPrint(entry.name());
+						Serial3.print(nextionQuoteEnd);
+						Serial.println("/t");
+						break;
+					}
+					case 3:
+					{
+						SerialPrint(pageIndex_t23);
+						Serial3.print("\x22");
+						SerialPrint(entry.name());
+						Serial3.print(nextionQuoteEnd);
+						Serial.println("/t");
+	
+						SerialPrint(pageGrkFile_t23);
+						Serial3.print("\x22");
+						SerialPrint(entry.name());
+						Serial3.print(nextionQuoteEnd);
+						Serial.println("/t");
+						break;
+					}
+					case 4:
+					{
+						SerialPrint(pageIndex_t24);
+						Serial3.print("\x22");
+						SerialPrint(entry.name());
+						Serial3.print(nextionQuoteEnd);
+						Serial.println("/t");
+
+						SerialPrint(pageGrkFile_t24);
+						Serial3.print("\x22");
+						SerialPrint(entry.name());
+						Serial3.print(nextionQuoteEnd);
+						Serial.println("/t");
+						break;
+					}
+					case 5:
+					{
+						SerialPrint(pageIndex_t25);
+						Serial3.print("\x22");
+						SerialPrint(entry.name());
+						Serial3.print(nextionQuoteEnd);
+						Serial.println("/t");
+
+						SerialPrint(pageGrkFile_t25);
+						Serial3.print("\x22");
+						SerialPrint(entry.name());
+						Serial3.print(nextionQuoteEnd);
+						Serial.println("/t");
+						break;
+					}
+				}
+			}
+		}
+		else
+		{
+			iCounter--;
+		}
+
+		IniFileFound:
+		entry.close();
+
+	}
+}
+
 /// <summary>
 /// GetGreekKeyDataFromSD
 /// </summary>
@@ -6562,6 +6716,7 @@ double GetGreekKeyDataFromSD(int lineNumber)
 
 	// Open file
 	File sdFile = SD.open(arChar, FILE_READ);
+
 	if (!sdFile)
 	{
 		badFilename = true;
@@ -6858,6 +7013,51 @@ void ReturnToStartPosition(int axisId)
 			Serial3.print(nextionEnd);
 			Serial3.print("pageOne.bt0.val=0");
 			Serial3.print(nextionEnd);
+
+			switch (configOne.axisId)
+			{
+				case ID_AXIS_Z:
+				{
+					Serial3.print("pageOne.bt11.val=1");
+					Serial3.print(nextionEnd);
+					Serial3.print("pageOne.bt11.txt=");
+					Serial3.write(0x22);
+					Serial3.print("Disabled");
+					Serial3.print(nextionQuoteEnd);
+					break;
+				}
+				case ID_AXIS_X:
+				{
+					Serial3.print("pageOne.bt12.val=1");
+					Serial3.print(nextionEnd);
+					Serial3.print("pageOne.bt12.txt=");
+					Serial3.write(0x22);
+					Serial3.print("Disabled");
+					Serial3.print(nextionQuoteEnd);
+					break;
+				}
+				case ID_AXIS_B:
+				{
+					Serial3.print("pageOne.bt13.val=1");
+					Serial3.print(nextionEnd);
+					Serial3.print("pageOne.bt13.txt=");
+					Serial3.write(0x22);
+					Serial3.print("Disabled");
+					Serial3.print(nextionQuoteEnd);
+					break;
+				}
+				case ID_SPINDLE:
+				{
+					Serial3.print("pageOne.bt10.val=1");
+					Serial3.print(nextionEnd);
+					Serial3.print("pageOne.bt10.txt=");
+					Serial3.write(0x22);
+					Serial3.print("Disabled");
+					Serial3.print(nextionQuoteEnd);
+					break;
+				}
+			}
+
 			Serial3.print("pageBE.t1.txt=");
 			Serial3.write(0x22);
 			Serial3.print(endPosition_Spindle);
@@ -8410,18 +8610,17 @@ void SetMicrosteppingMode(int microsteps, int pinMs0, int pinMs1, int pinMs2)
 void LoadSettings()
 {
 	const char* nextionEnd = "\xFF\xFF\xFF";
-
-	LoadSettings_PageReturns();
 	LoadSettings_PageSetup();
-	LoadSettings_PageSync();
+	LoadSettings_PageReturns();
+	LoadSettings_PageLimits();
 	LoadSettings_PageMain();
 	LoadSettings_PageOne();
+	LoadSettings_PageIndex();
+	LoadSettings_PageMove();
+	LoadSettings_PageSync();
 	LoadSettings_PageRec();
 	LoadSettings_PageGrk();
-	LoadSettings_PageMove();
 	LoadSettings_PageGeo();
-	LoadSettings_PageIndex();
-	LoadSettings_PageLimits();
 
 	// Update Nextion
 	Serial3.print("pageSplash.bt0.bco=9563");
@@ -8469,6 +8668,11 @@ void LoadSettings_PageIndex()
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configIndex_1.fileOrFixed = (int)returnVal;
 
+	iniValue = "Size_1";
+	eePromAddress_Nextion = 345;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configIndex_1.size = returnVal;
+
 	// Index 2
 	iniValue = "DivisionsOrDegrees_1";
 	eePromAddress_Nextion = 162;
@@ -8480,6 +8684,11 @@ void LoadSettings_PageIndex()
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configIndex_2.fileOrFixed = (int)returnVal;
 
+	iniValue = "Size_2";
+	eePromAddress_Nextion = 360;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configIndex_2.size = returnVal;
+
 	// Index 3
 	iniValue = "DivisionsOrDegrees_3";
 	eePromAddress_Nextion = 154;
@@ -8490,6 +8699,12 @@ void LoadSettings_PageIndex()
 	eePromAddress_Nextion = 592;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configIndex_3.fileOrFixed = (int)returnVal;
+
+	iniValue = "Size_3";
+	eePromAddress_Nextion = 582;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configIndex_3.size = returnVal;
+
 
 	EEPROM.put(eePromAddress_Ind_Main, configIndex_Main);
 	EEPROM.put(eePromAddress_Ind_1, configIndex_1);
@@ -8509,6 +8724,16 @@ void LoadSettings_PageGeo()
 	eePromAddress_Nextion = 948;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configRose.radial_Axial = (int)returnVal;
+
+	iniValue = "Rose_n";
+	eePromAddress_Nextion = 116;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configRose.n = (int)returnVal;
+
+	iniValue = "Rose_d";
+	eePromAddress_Nextion = 120;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configRose.d = (int)returnVal;
 
 	iniValue = "MaxSpeed_Spindle";
 	eePromAddress_Nextion = 124;
@@ -8541,6 +8766,16 @@ void LoadSettings_PageGeo()
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configRose.speedPercent_Axis_Z = (int)returnVal;
 
+	iniValue = "RadialAmplitude_Z";
+	eePromAddress_Nextion = 285;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configRose.amplitude_Radial_Z = (int)returnVal;
+
+	iniValue = "AxialAmplitude_Z";
+	eePromAddress_Nextion = 315;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configRose.amplitude_Axial_Z = (int)returnVal;
+
 	// X axis
 	iniValue = "MaxSpeed_X";
 	eePromAddress_Nextion = 148;
@@ -8556,6 +8791,16 @@ void LoadSettings_PageGeo()
 	eePromAddress_Nextion = 712;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configRose.speedPercent_Axis_X = (int)returnVal;
+
+	iniValue = "RadialAmplitude_X";
+	eePromAddress_Nextion = 300;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configRose.amplitude_Radial_X = (int)returnVal;
+
+	iniValue = "AxialAmplitude_X";
+	eePromAddress_Nextion = 226;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configRose.amplitude_Axial_X = (int)returnVal;
 
 	EEPROM.put(eePromAddress_Rose, configRose);
 }
@@ -8584,6 +8829,11 @@ void LoadSettings_PageMove()
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configMove.speedPercent_Axis_Z = (int)returnVal;
 
+	iniValue = "Distance_Z";
+	eePromAddress_Nextion = 174;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configMove.distance_MoveZ = returnVal;
+
 	// X axis
 	iniValue = "MaxSpeed_X";
 	eePromAddress_Nextion = 1000;
@@ -8600,6 +8850,11 @@ void LoadSettings_PageMove()
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configMove.speedPercent_Axis_X = (int)returnVal;
 
+	iniValue = "Distance_X";
+	eePromAddress_Nextion = 40;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configMove.distance_MoveX = returnVal;
+
 	EEPROM.put(eePromAddress_Mov, configMove);
 }
 
@@ -8612,15 +8867,58 @@ void LoadSettings_PageGrk()
 	float returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configGreekKey_Main.axisId = (int)returnVal;
 
-	iniValue = "RadialOrAxial";
+	iniValue = "RadialOrAxial_Pattern";
 	eePromAddress_Nextion = 432;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configGreekKey_Main.radialOrAxial_Pattern = (int)returnVal;
+
+	iniValue = "RadialOrAxial_File";
+	eePromAddress_Nextion = 436;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configGreekKey_Main.radialOrAxial_File = (int)returnVal;
 
 	iniValue = "FileOrPattern";
 	eePromAddress_Nextion = 108;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configGreekKey_Main.fileOrPattern = (int)returnVal;
+
+	iniValue = "PatternType";
+	eePromAddress_Nextion = 698;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configGreekKey_Main.patternId = (int)returnVal;
+
+	iniValue = "Pattern_PatternsPer360";
+	eePromAddress_Nextion = 678;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configGreekKey_Main.countPattern360 = (int)returnVal;
+
+	iniValue = "Pattern_PatternCount";
+	eePromAddress_Nextion = 984;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configGreekKey_Main.countPattern = (int)returnVal;
+
+	iniValue = "Pattern_SegmentLength";
+	eePromAddress_Nextion = 638;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configGreekKey_Main.segmentLengthPattern = (int)returnVal;
+
+	//////////////////////
+	iniValue = "File_PatternsPer360";
+	eePromAddress_Nextion = 658;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configGreekKey_Main.countPatternFile360 = (int)returnVal;
+
+	iniValue = "File_PatternCount";
+	eePromAddress_Nextion = 770;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configGreekKey_Main.countPatternFile = (int)returnVal;
+
+	iniValue = "File_SegmentLength";
+	eePromAddress_Nextion = 325;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configGreekKey_Main.segmentLengthForFile = (int)returnVal;
+
+	/////////////////////
 
 	// Greek Key Spindle (Shared by Z and X in Pattern and File)
 	iniValue = "MaxSpeed_Spindle";
@@ -8706,6 +9004,7 @@ void LoadSettings_PageRec()
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configRec.speedPercent_Spindle = (int)returnVal;
 
+	// Z axis
 	iniValue = "MaxSpeed_Z";
 	eePromAddress_Nextion = 964;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
@@ -8721,6 +9020,37 @@ void LoadSettings_PageRec()
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configRec.speedPercent_Axis_Z = (int)returnVal;
 
+	iniValue = "Radial_Waves_Z";
+	eePromAddress_Nextion = 812;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configRec.waves_RadialZ = (int)returnVal;
+
+	iniValue = "Radial_Spindle_Amplitude_Z";
+	eePromAddress_Nextion = 816;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configRec.amplitude_RadialZ = returnVal;
+
+	iniValue = "Radial_Axis_Distance_Z";
+	eePromAddress_Nextion = 836;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configRec.amplitude_RadialZ = returnVal;
+
+	iniValue = "Axial_Waves_Z";
+	eePromAddress_Nextion = 752;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configRec.waves_AxialZ = (int)returnVal;
+
+	iniValue = "Axial_Spindle_Degrees_Z";
+	eePromAddress_Nextion = 756;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configRec.amplitude_AxialZ = returnVal;
+
+	iniValue = "Axial_Axis_Amplitude_Z";
+	eePromAddress_Nextion = 776;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configRec.distance_AxialZ = returnVal;
+
+	// X Axis
 	iniValue = "MaxSpeed_X";
 	eePromAddress_Nextion = 960;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
@@ -8735,7 +9065,37 @@ void LoadSettings_PageRec()
 	eePromAddress_Nextion = 800;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configRec.speedPercent_Axis_X = (int)returnVal;
+
+	iniValue = "Radial_Waves_X";
+	eePromAddress_Nextion = 204;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configRec.waves_RadialX = returnVal;
+
+	iniValue = "Radial_Spindle_Amplitude_X";
+	eePromAddress_Nextion = 826;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configRec.amplitude_RadialX = (int)returnVal;
 	
+	iniValue = "Radial_Axis_Distance_X";
+	eePromAddress_Nextion = 184;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configRec.amplitude_RadialX = returnVal;
+
+	iniValue = "Axial_Waves_X";
+	eePromAddress_Nextion = 196;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configRec.waves_AxialX = (int)returnVal;
+
+	iniValue = "Axial_Spindle_Degrees_X";
+	eePromAddress_Nextion = 216;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configRec.amplitude_AxialX = returnVal;
+
+	iniValue = "Axial_Axis_Amplitude_X";
+	eePromAddress_Nextion = 786;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configRec.distance_AxialX = returnVal;
+
 	EEPROM.put(eePromAddress_Rec, configRec);
 }
 
@@ -8889,10 +9249,20 @@ void LoadSettings_PageSync()
 	float returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configSync.axisId = (int)returnVal;
 
-	iniValue = "LeftOrRight"; //Helix Type
+	iniValue = "HelixType"; //Helix Type
 	eePromAddress_Nextion = 420;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configSync.helixType = (int)returnVal;
+
+	iniValue = "Revolutions";
+	eePromAddress_Nextion = 628;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configSync.revolutions_Spindle = returnVal;
+
+	iniValue = "Distance"; 
+	eePromAddress_Nextion = 648;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configSync.distance = returnVal;
 
 	iniValue = "MaxSpeed_Spindle";
 	eePromAddress_Nextion = 884;
