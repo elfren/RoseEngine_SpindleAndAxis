@@ -1,2 +1,0 @@
-Compiled for four axes board with no microSD card reader.
-MicroSD card support can be enabled by commenting all of the code on the Preinitialize Event tab on pages pageIndex1 and pageIndex2. Corresponding changes must be made in the Teensy code.
