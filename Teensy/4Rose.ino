@@ -2,7 +2,7 @@
 /* *****************************************************************
 * 4Rose main entry
 * Author: Edward French
-* Version: 12
+* Version: 12 - 092019
 ******************************************************************/
 //#include "IniFile"
 #include "math.h"
@@ -225,9 +225,9 @@ void loop()
 	const char * x_SpeedPercent_Char = "X axis Speed Percent:";
 	const char * b_SpeedPercent_Char = "B axis Speed Percent:";
 	const char * z_SpeedPercent_Char = "Z axis Speed Percent:";
-	const char * microsteps_Char = "Microsteps";
-	const char * steps360_Char = "Steps/360";
-	const char * gearRatio_Char = "Gear Ratio";
+	const char * microsteps_Char = "Microsteps: ";
+	const char * steps360_Char = "Steps/360: ";
+	const char * gearRatio_Char = "Gear Ratio: ";
 	const char * maxSpd_Char = "MaxSpeed:";
 	const char * accel_Char = "Accel:";
 	const char * polarity_Char = "Polarity:";
