@@ -2,9 +2,9 @@
 /* *****************************************************************
 * 4Rose main entry
 * Author: Edward French
-* Version: 12 - 092019
+* Version: 13 - xxxxxxx
 ******************************************************************/
-//#include "IniFile"
+
 #include "math.h"
 #include <string>
 #include <EEPROM.h>
@@ -14,10 +14,7 @@
 #include "TeensyStep.h" //  https://github.com/luni64/TeensyStep
 #include "AccelStepper.h"
 #include "IniFile.h" // https://github.com/stevemarple/IniFile
-#include <MemoryFree.h>
-//#include "4RoseMethods.ino"
-
-
+//#include <MemoryFree.h>
 
 //==================================================================
 // Pin assignments:  See 4RoseDefines.h
@@ -55,8 +52,44 @@ void setup()
 	Serial.print("Baud:");
 	Serial.println(serialBaud);
 
-	// Initialize Nextion LCD for 115200 baud
+	// Initialize Nextion LCD for 115200 baud and enable Serial1,2,or3.
 	// Note: Nextion requires 3 0xFF bytes to signal end of transmission
+	// Serial1
+	Serial1.begin(115200); //Nextion Serial baud rate set in Nextion pageMain Preinitialize Event tab
+	Serial1.print("bauds=115200");
+	Serial1.print(nextionEnd);
+	MilliDelay(50);
+	Serial1.print("bauds=115200");
+	Serial1.print(nextionEnd);
+	MilliDelay(50);
+	Serial1.print("bkcmd=0");  // Set Nextion to return NO replies to each command
+	Serial1.print(nextionEnd);
+	MilliDelay(50);
+
+	if (Serial1.available() > 0)
+	{
+		serialId = 1;
+		Serial.print("1-serialId: ");
+		Serial.println(serialId);
+	}
+	// Serial2
+	Serial2.begin(115200); //Nextion Serial baud rate set in Nextion pageMain Preinitialize Event tab
+	Serial2.print("bauds=115200");
+	Serial2.print(nextionEnd);
+	MilliDelay(50);
+	Serial2.print("bauds=115200");
+	Serial2.print(nextionEnd);
+	MilliDelay(50);
+	Serial2.print("bkcmd=0");  // Set Nextion to return NO replies to each command
+	Serial2.print(nextionEnd);
+	MilliDelay(50);
+	if (Serial2.available() > 0)
+	{
+		serialId = 2;
+		Serial.print("2-serialId: ");
+		Serial.println(serialId);
+	}
+	// Serial3
 	Serial3.begin(115200); //Nextion Serial baud rate set in Nextion pageMain Preinitialize Event tab
 	Serial3.print("bauds=115200");
 	Serial3.print(nextionEnd);
@@ -67,6 +100,14 @@ void setup()
 	Serial3.print("bkcmd=0");  // Set Nextion to return NO replies to each command
 	Serial3.print(nextionEnd);
 	MilliDelay(50);
+	if (Serial3.available() > 0)
+	{
+		serialId = 3;
+		Serial.print("3-serialId: ");
+		Serial.println(serialId);
+	}
+	Serial.print("serialId: ");
+	Serial.println(serialId);
 
 	// Update with values from EEProm
 	EEPROM.get(eePromAddress_Setup, configSetup);
@@ -93,48 +134,8 @@ void setup()
 	pinMode(PIN_AXIS_Z_ENABLE, OUTPUT);
 	pinMode(PIN_AXIS_X_ENABLE, OUTPUT);
 
-	//SetEnable(ID_SPINDLE, false);
-
-	//SetEnable(ID_AXIS_Z, false);
-	//SetEnable(ID_AXIS_X, false);
-
-	// Set Microstepping mode (Microsteps configured on hardware.)
-	/*pinMode(PIN_SPINDLE_MS0, OUTPUT);
-	pinMode(PIN_SPINDLE_MS1, OUTPUT);
-	pinMode(PIN_SPINDLE_MS2, OUTPUT);
-	pinMode(PIN_AXIS_Z_MS0, OUTPUT);
-	pinMode(PIN_AXIS_Z_MS1, OUTPUT);
-	pinMode(PIN_AXIS_Z_MS2, OUTPUT);*/
-	// Microsteps set on PCB
-	//SetMicrosteppingMode(configSetup.microsteps_Spindle, PIN_SPINDLE_MS0, PIN_SPINDLE_MS1, PIN_SPINDLE_MS2);
-	// Microsteps set on PCB
-	//SetMicrosteppingMode(configSetup.microsteps_Axis_Z, PIN_AXIS_Z_MS0, PIN_AXIS_Z_MS1, PIN_AXIS_Z_MS2);
-
-#ifdef FOUR_AXES
 	pinMode(PIN_AXIS_B_ENABLE, OUTPUT);
 	SetEnable(ID_AXIS_B, false);
-
-
-	// Set Microstepping mode (Microsteps configured on hardware.)
-	//pinMode(PIN_AXIS_B_MS2, OUTPUT);
-	//pinMode(PIN_AXIS_B_MS0, OUTPUT);
-	//pinMode(PIN_AXIS_B_MS1, OUTPUT);
-	// Microsteps set on PCB
-	//SetMicrosteppingMode(configSetup.microsteps_Axis_B, PIN_AXIS_B_MS0, PIN_AXIS_B_MS1, PIN_AXIS_B_MS2);
-	// Microsteps set on PCB
-
-#endif //FOUR_AXES
-#ifndef TWO_AXES_V2
-	// Set Microstepping mode (Microsteps configured on hardware.)
-	//pinMode(PIN_AXIS_X_MS2, OUTPUT);
-	//pinMode(PIN_AXIS_X_MS0, OUTPUT);
-	//pinMode(PIN_AXIS_X_MS1, OUTPUT);
-	// Microsteps set on PCB
-	//SetMicrosteppingMode(configSetup.microsteps_Axis_X, PIN_AXIS_X_MS0, PIN_AXIS_X_MS1, PIN_AXIS_X_MS2);
-
-	// Configure TeensyStep motors
-
-#endif // TWO_AXES_V2
 
 	// Initialize Limit switches
 	pinMode(configSetup.limit_Min_Z, INPUT_PULLUP);
@@ -142,28 +143,33 @@ void setup()
 	delayMicroseconds(10);
 	digitalWrite(configSetup.limit_Min_Z, HIGH);  // Enable
 	digitalWrite(configSetup.limit_Max_Z, HIGH);  // Enable
-#ifndef TWO_AXES_V2 // Three and Four axes boards
+
 	pinMode(configSetup.limit_Min_X, INPUT_PULLUP);
 	pinMode(configSetup.limit_Max_X, INPUT_PULLUP);
 
 	delayMicroseconds(10);
 	digitalWrite(configSetup.limit_Min_X, HIGH);  // Enable
 	digitalWrite(configSetup.limit_Max_X, HIGH);  // Enable
-#endif
-#ifdef FOUR_AXES
+
 	pinMode(configSetup.limit_Min_B, INPUT_PULLUP);
 	pinMode(configSetup.limit_Max_B, INPUT_PULLUP);
 	digitalWrite(configSetup.limit_Min_B, HIGH);  // Enable
 	digitalWrite(configSetup.limit_Max_B, HIGH);  // Enable
-#endif
+
 	delayMicroseconds(10);
 
 	// Enable SD card reader
-#ifdef FOUR_AXES
-	SD.begin(BUILTIN_SDCARD);
-#else
-	SD.begin(PIN_SPI_CS);
-#endif // FOUR_AXES
+	pinMode(PIN_SPI_CS_24, OUTPUT);
+	digitalWrite(PIN_SPI_CS_24, HIGH);
+	pinMode(PIN_SPI_CS_15, OUTPUT);
+	digitalWrite(PIN_SPI_CS_15, HIGH);
+	pinMode(PIN_SPI_CS_10, OUTPUT);
+	digitalWrite(PIN_SPI_CS_10, HIGH);
+	pinMode(PIN_SPI_CS_9, OUTPUT);
+	digitalWrite(PIN_SPI_CS_9, HIGH);
+
+	// Start SD
+	BeginSD();
 
 	// Configure Accelsteppers
 	accelStep_Spindle.setEnablePin(PIN_SPINDLE_ENABLE);
@@ -175,24 +181,17 @@ void setup()
 	}
 
 	SetEnable(ID_SPINDLE, false);
-
 	accelStep_Axis_Z.setEnablePin(PIN_AXIS_Z_ENABLE);
 	if (!configSetup.polarity_Axis_Z)
 	{
 		accelStep_Axis_Z.setPinsInverted(false, false, true);
 	}
 
-	//SetEnable(ID_AXIS_Z, false);
-
-#ifdef FOUR_AXES
 	accelStep_Axis_X.setEnablePin(PIN_AXIS_X_ENABLE);
 	if (!configSetup.polarity_Axis_X)
 	{
 		accelStep_Axis_X.setPinsInverted(false, false, true);
 	}
-	//SetEnable(ID_AXIS_X, false);
-
-#endif // FOUR_AXES
 
 	for (int i = 0; i < 3; i++) // Verify Teensy is operational
 	{
@@ -201,6 +200,7 @@ void setup()
 		digitalWrite(LED_BUILTIN, LOW);
 		MilliDelay(300);
 	}
+
 #ifdef DEBUG
 	const char * initialized = "Initialized...";
 	Serial.println(initialized);
@@ -225,7 +225,6 @@ void loop()
 	const char * x_SpeedPercent_Char = "X axis Speed Percent:";
 	const char * b_SpeedPercent_Char = "B axis Speed Percent:";
 	const char * z_SpeedPercent_Char = "Z axis Speed Percent:";
-	const char * microsteps_Char = "Microsteps: ";
 	const char * steps360_Char = "Steps/360: ";
 	const char * gearRatio_Char = "Gear Ratio: ";
 	const char * maxSpd_Char = "MaxSpeed:";
@@ -277,20 +276,34 @@ void loop()
 	const char * nextionQuoteEnd = "\x22\xFF\xFF\xFF";
 	const char * nextionEnd = "\xFF\xFF\xFF";
 
-//#ifdef DEBUG
-	//Serial.println("1.Enter loop.");
-	//MilliDelay(200);
-//#endif // DEBUG
-	// ToDo: Auto select serial port
-	serialId = 1; //***Hardcoded to Serial3*** 
+	if (Serial1.available() > 0)
+	{
+		serialId = 1;
+		Serial.print("1.serialId: ");
+	}
+	else if (Serial2.available() > 0)
+	{
+		serialId = 2;
+		//Serial.print("2.serialId: ");
+	}
+	else if (Serial3.available() > 0)
+	{
+		serialId = 3;
+		Serial.print("3.serialId: ");
+	}
+
+	//Serial.print("serialId: ");
+	//Serial.println(serialId);
 
 	// All Nextion incoming data packets are terminated with one 0xFF byte
-	if (Serial3.available() > 0)
+	//if (serialId < 9)
+	if ((Serial1.available() > 0) || (Serial2.available() > 0)|| (Serial3.available() > 0))
 	{
-		//Serial.print("Serial Read - ");
 		incomingByte = SerialRead(serialId);
 
 //#ifdef DEBUG
+//		Serial.print("serialId: ");
+//		Serial.println(serialId);
 //		Serial.print("incomingByte: ");
 //		Serial.println(incomingByte);
 //		Serial.println("MilliDelay");
@@ -708,9 +721,6 @@ void loop()
 			case 72: // H - Rose: AxisId
 			{
 				configRose.axisId = GetSerialInteger();
-	#ifdef TWO_AXES_V2
-				configRose.axisId = ID_AXIS_Z;
-	#endif //TWO_AXES_V2
 				EEPROM.put(eePromAddress_Rose, configRose);
 				break;
 			}
@@ -797,10 +807,11 @@ void loop()
 				EEPROM.put(eePromAddress_Grk_Main, configGreekKey_Main);
 				break;
 			}
-			case 78: // N - Not Used
+			case 78: // N - GetFileListFromSD
 			{
-				File root = SD.open("/");
-				GetFileListFromSD(root,0 );
+				Serial.println("GetFileListFromSD");
+				GetFileListFromSD();
+
 				break;
 			}
 			case 79: // O - Sync Axis Speed
@@ -857,15 +868,15 @@ void loop()
 							Serial.println(configIndex_1.size);
 							Serial.println("");
 	#endif // DEBUG
-							Serial3.print(pageIndex_t7_Char); // Nextion may not get the first packet
-							Serial3.write(0x22);
-							Serial3.print(newIndexSize);
-							Serial3.print(nextionQuoteEnd);
+							SerialPrint(pageIndex_t7_Char); // Nextion may not get the first packet
+							SerialWrite(0x22);
+							SerialPrint(newIndexSize);
+							SerialPrint(nextionQuoteEnd);
 
-							Serial3.print(pageIndex_t7_Char);
-							Serial3.write(0x22);
-							Serial3.print(newIndexSize);
-							Serial3.print(nextionQuoteEnd);
+							SerialPrint(pageIndex_t7_Char);
+							SerialWrite(0x22);
+							SerialPrint(newIndexSize);
+							SerialPrint(nextionQuoteEnd);
 						}
 
 						break;
@@ -897,15 +908,15 @@ void loop()
 							Serial.print(indexSizeChar);
 							Serial.println(configIndex_2.size);
 	#endif // DEBUG
-							Serial3.print(pageIndex_t7_Char);
-							Serial3.write(0x22);
-							Serial3.print(newIndexSize);
-							Serial3.print(nextionQuoteEnd);
+							SerialPrint(pageIndex_t7_Char);
+							SerialWrite(0x22);
+							SerialPrint(newIndexSize);
+							SerialPrint(nextionQuoteEnd);
 
-							Serial3.print(pageIndex_t7_Char);
-							Serial3.write(0x22);
-							Serial3.print(newIndexSize);
-							Serial3.print(nextionQuoteEnd);
+							SerialPrint(pageIndex_t7_Char);
+							SerialWrite(0x22);
+							SerialPrint(newIndexSize);
+							SerialPrint(nextionQuoteEnd);
 						}
 
 						break;
@@ -938,15 +949,15 @@ void loop()
 							Serial.print(indexSizeChar);
 							Serial.println(configIndex_3.size);
 	#endif // DEBUG
-							Serial3.print(pageIndex_t7_Char); // Nextion may not get the first packet
-							Serial3.write(0x22);
-							Serial3.print(newIndexSize);
-							Serial3.print(nextionQuoteEnd);
+							SerialPrint(pageIndex_t7_Char); // Nextion may not get the first packet
+							SerialWrite(0x22);
+							SerialPrint(newIndexSize);
+							SerialPrint(nextionQuoteEnd);
 
-							Serial3.print(pageIndex_t7_Char);
-							Serial3.write(0x22);
-							Serial3.print(newIndexSize);
-							Serial3.print(nextionQuoteEnd);
+							SerialPrint(pageIndex_t7_Char);
+							SerialWrite(0x22);
+							SerialPrint(newIndexSize);
+							SerialPrint(nextionQuoteEnd);
 						}
 
 						break;
@@ -960,20 +971,20 @@ void loop()
 				else
 				{
 					// Update Index flag on Nextion. 
-					//Serial3.print(pageIndex_bt3_pco_Char);
-					//Serial3.print(nextionEnd);
-					Serial3.print(pageIndex_va0_Char);
-					Serial3.print(nextionEnd);
-					Serial3.print(pageIndex_bt3_Char);
-					Serial3.print(nextionEnd);
-					Serial3.print(pageIndex_bt2_Char);
-					Serial3.print(nextionEnd);
-					Serial3.print(pageIndex_bt1_Char);
-					Serial3.print(nextionEnd);
-					Serial3.print(pageSync_b6_Char);
-					Serial3.print(nextionEnd);
-					Serial3.print(pageSync_b5_Char);
-					Serial3.print(nextionEnd);
+					//SerialPrint(pageIndex_bt3_pco_Char);
+					//SerialPrint(nextionEnd);
+					SerialPrint(pageIndex_va0_Char);
+					SerialPrint(nextionEnd);
+					SerialPrint(pageIndex_bt3_Char);
+					SerialPrint(nextionEnd);
+					SerialPrint(pageIndex_bt2_Char);
+					SerialPrint(nextionEnd);
+					SerialPrint(pageIndex_bt1_Char);
+					SerialPrint(nextionEnd);
+					SerialPrint(pageSync_b6_Char);
+					SerialPrint(nextionEnd);
+					SerialPrint(pageSync_b5_Char);
+					SerialPrint(nextionEnd);
 				}
 				break;
 			}
@@ -1012,15 +1023,15 @@ void loop()
 							Serial.println(configIndex_1.size);
 							Serial.println("");
 		#endif // DEBUG
-							Serial3.print(pageIndex_t7_Char); // Nextion may not get the first packet
-							Serial3.write(0x22);
-							Serial3.print(newIndexSize);
-							Serial3.print(nextionQuoteEnd);
+							SerialPrint(pageIndex_t7_Char); // Nextion may not get the first packet
+							SerialWrite(0x22);
+							SerialPrint(newIndexSize);
+							SerialPrint(nextionQuoteEnd);
 
-							Serial3.print(pageIndex_t7_Char);
-							Serial3.write(0x22);
-							Serial3.print(newIndexSize);
-							Serial3.print(nextionQuoteEnd);
+							SerialPrint(pageIndex_t7_Char);
+							SerialWrite(0x22);
+							SerialPrint(newIndexSize);
+							SerialPrint(nextionQuoteEnd);
 						}
 
 						break;
@@ -1048,15 +1059,15 @@ void loop()
 							Serial.println(configIndex_2.size);
 							Serial.println("");
 #endif // DEBUG
-							Serial3.print(pageIndex_t7_Char);
-							Serial3.write(0x22);
-							Serial3.print(newIndexSize);
-							Serial3.print(nextionQuoteEnd);
+							SerialPrint(pageIndex_t7_Char);
+							SerialWrite(0x22);
+							SerialPrint(newIndexSize);
+							SerialPrint(nextionQuoteEnd);
 
-							Serial3.print(pageIndex_t7_Char);
-							Serial3.write(0x22);
-							Serial3.print(newIndexSize);
-							Serial3.print(nextionQuoteEnd);
+							SerialPrint(pageIndex_t7_Char);
+							SerialWrite(0x22);
+							SerialPrint(newIndexSize);
+							SerialPrint(nextionQuoteEnd);
 						}
 						break;
 					}
@@ -1081,15 +1092,15 @@ void loop()
 							Serial.println(configIndex_3.size);
 							Serial.println("");
 		#endif // DEBUG
-							Serial3.print(pageIndex_t7_Char); // Nextion may not get the first packet
-							Serial3.write(0x22);
-							Serial3.print(newIndexSize);
-							Serial3.print(nextionQuoteEnd);
+							SerialPrint(pageIndex_t7_Char); // Nextion may not get the first packet
+							SerialWrite(0x22);
+							SerialPrint(newIndexSize);
+							SerialPrint(nextionQuoteEnd);
 
-							Serial3.print(pageIndex_t7_Char);
-							Serial3.write(0x22);
-							Serial3.print(newIndexSize);
-							Serial3.print(nextionQuoteEnd);
+							SerialPrint(pageIndex_t7_Char);
+							SerialWrite(0x22);
+							SerialPrint(newIndexSize);
+							SerialPrint(nextionQuoteEnd);
 						}
 
 						break;
@@ -1103,20 +1114,20 @@ void loop()
 				else
 				{
 					// On fail reset Index flag on Nextion. 
-					//Serial3.print(pageIndex_bt3_pco_Char);
-					//Serial3.print(nextionEnd);
-					Serial3.print(pageIndex_va0_Char);
-					Serial3.print(nextionEnd);
-					Serial3.print(pageIndex_bt3_Char);
-					Serial3.print(nextionEnd);
-					Serial3.print(pageIndex_bt2_Char);
-					Serial3.print(nextionEnd);
-					Serial3.print(pageIndex_bt1_Char);
-					Serial3.print(nextionEnd);
-					Serial3.print(pageSync_b6_Char);
-					Serial3.print(nextionEnd);
-					Serial3.print(pageSync_b5_Char);
-					Serial3.print(nextionEnd);
+					//SerialPrint(pageIndex_bt3_pco_Char);
+					//SerialPrint(nextionEnd);
+					SerialPrint(pageIndex_va0_Char);
+					SerialPrint(nextionEnd);
+					SerialPrint(pageIndex_bt3_Char);
+					SerialPrint(nextionEnd);
+					SerialPrint(pageIndex_bt2_Char);
+					SerialPrint(nextionEnd);
+					SerialPrint(pageIndex_bt1_Char);
+					SerialPrint(nextionEnd);
+					SerialPrint(pageSync_b6_Char);
+					SerialPrint(nextionEnd);
+					SerialPrint(pageSync_b5_Char);
+					SerialPrint(nextionEnd);
 
 				}
 				break;
@@ -1308,8 +1319,8 @@ void loop()
 			case 99: // c - Z Axis Stop
 			{
 				// Implemented in individual methods
-				Serial3.print(pageMain_va2_Char);
-				Serial3.print(nextionEnd);
+				SerialPrint(pageMain_va2_Char);
+				SerialPrint(nextionEnd);
 				break;
 			}
 			case 100: // d - pageOne Clockwise
@@ -1440,9 +1451,7 @@ void loop()
 				Serial.print("configMove.axisId:");
 				Serial.println(configMove.axisId);
 #endif // DEBUG
-#ifdef TWO_AXES_V2
-				configPageMain.axisId = ID_AXIS_Z;
-#endif //TWO_AXES_V2
+
 				EEPROM.put(eePromAddress_Mov, configMove);
 #ifdef DEBUG
 				Serial.print(axisId_Char);
@@ -1471,15 +1480,10 @@ void loop()
 				break;
 			}
 			case 112: // p - Z/Sync Spindle Microsteps
-			{	
+			{
 				configSetup.microsteps_Spindle = (int)GetSerialFloat(serialId);
 				EEPROM.put(eePromAddress_Setup, configSetup);
-				// Microsteps set on PCB
-				//SetMicrosteppingMode(configSetup.microsteps_Spindle, PIN_SPINDLE_MS0, PIN_SPINDLE_MS1, PIN_SPINDLE_MS2);
-	#ifdef DEBUG
-				Serial.print(microsteps_Char);
-				Serial.println(configSetup.microsteps_Spindle);
-	#endif // DEBUG
+
 				break;
 			}
 			case 113: // q - Move Z counterclockwise
@@ -1547,14 +1551,6 @@ void loop()
 			{
 				configSetup.microsteps_Axis_B = (int)GetSerialFloat(serialId);
 				EEPROM.put(eePromAddress_Setup, configSetup);
-	#ifdef FOUR_AXES
-				// Microsteps set on PCB
-				//SetMicrosteppingMode(configSetup.microsteps_Axis_B, PIN_AXIS_B_MS0, PIN_AXIS_B_MS1, PIN_AXIS_B_MS2);
-	#endif //FOUR_AXES
-	#ifdef DEBUG
-				Serial.print(microsteps_Char);
-				Serial.println(configSetup.microsteps_Axis_B);
-	#endif // DEBUG
 				break;
 			}
 			case 119: // w - B axis Steps/360 
@@ -1577,17 +1573,11 @@ void loop()
 	#endif // DEBUG
 				break;
 			}
-	//#endif // FOUR_AXES
+
 			case 121: // y - Z Axis Microsteps
 			{
 				configSetup.microsteps_Axis_Z = (int)GetSerialFloat(serialId);
 				EEPROM.put(eePromAddress_Setup, configSetup);
-				// Microsteps set on PCB
-				//SetMicrosteppingMode(configSetup.microsteps_Axis_Z, PIN_AXIS_Z_MS0, PIN_AXIS_Z_MS1, PIN_AXIS_Z_MS2);
-	#ifdef DEBUG
-				Serial.print(microsteps_Char);
-				Serial.println(configSetup.microsteps_Axis_Z);
-	#endif // DEBUG
 				break;
 			}
 			case 122: // z - Z Axis FullSteps
@@ -1693,17 +1683,6 @@ void loop()
 				Serial.print("PageCallerId:");
 				Serial.println(pageCallerId);
 
-	#ifdef TWO_AXES_V2
-				// Ensure axisId is set to Z for 2 axes machines
-				configPageMain.axisId = ID_AXIS_Z;
-				EEPROM.put(eePromAddress_Main, configPageMain);
-				configRec.axisId = ID_AXIS_Z;
-				EEPROM.put(eePromAddress_Rec, configRec);
-				configRose.axisId = ID_AXIS_Z;
-				EEPROM.put(eePromAddress_Rose, configRose);
-				configGreekKey_Main.axisId = ID_AXIS_Z;
-				EEPROM.put(eePromAddress_Grk_Main, configGreekKey_Main);
-	#endif //TWO_AXES_V2
 				//Serial.print("Call TestEEPROMConfig:");
 				Serial.println(pageCallerId);
 				TestEEPROMConfig(pageCallerId);
@@ -2132,14 +2111,6 @@ void loop()
 			{
 				configSetup.microsteps_Axis_X = (int)GetSerialFloat(serialId);
 				EEPROM.put(eePromAddress_Setup, configSetup);
-	#ifndef TWO_AXES_V2
-				// Microsteps set on PCB
-				//SetMicrosteppingMode(configSetup.microsteps_Axis_X, PIN_AXIS_X_MS0, PIN_AXIS_X_MS1, PIN_AXIS_X_MS2);
-	#endif // !TWO_AXES_V2
-	#ifdef DEBUG
-				Serial.print(microsteps_Char);
-				Serial.println(configSetup.microsteps_Axis_X);
-	#endif // DEBUG
 				break;
 			}
 			case 188: // ¼ - X Full Steps
@@ -2353,9 +2324,6 @@ void loop()
 				Serial.print("configPageMain.axisId:");
 				Serial.println(configPageMain.axisId);
 	#endif // DEBUG
-	#ifdef TWO_AXES_V2
-				configPageMain.axisId = ID_AXIS_Z;
-	#endif //TWO_AXES_V2
 				EEPROM.put(eePromAddress_Main, configPageMain);
 	#ifdef DEBUG
 				Serial.print(axisId_Char);
@@ -2877,6 +2845,17 @@ void loop()
 				endPosition_Spindle = 0;
 
 				pageCallerId = GetSerialInteger();
+				
+				// Show the Load ini button
+				switch (pageCallerId)
+				{
+					case 1:
+					{
+						Serial.println ("vis bt0,1");
+						SerialPrint("vis bt0,1");
+						SerialPrint(nextionEnd);
+					}
+				}
 	#ifdef DEBUG
 				Serial.print(pageCallerId_Char);
 				Serial.println(pageCallerId);
@@ -2897,9 +2876,6 @@ void loop()
 			case 238: // î - Rec axisId
 			{
 				configRec.axisId = GetSerialInteger();
-	#ifdef TWO_AXES_V2
-				configRec.axisId = ID_AXIS_Z;
-	#endif //TWO_AXES_V2
 				EEPROM.put(eePromAddress_Rec, configRec);
 				break;
 			}
@@ -3143,9 +3119,6 @@ void loop()
 			case 253: // ü - Greek Key AxisId
 			{
 				configGreekKey_Main.axisId = GetSerialInteger();
-	#ifdef TWO_AXES_V2
-				configGreekKey_Main.axisId = ID_AXIS_Z;
-	#endif //TWO_AXES_V2
 				EEPROM.put(eePromAddress_Grk_Main, configGreekKey_Main);
 				break;
 			}
