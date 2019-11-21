@@ -81,6 +81,7 @@
 #define PAGE_GRK 8
 #define PAGE_GRKFILE 9
 #define PAGE_GEO 10 
+#define PAGE_MORE 11
 
 /////////////////////////////////////////////////////////////////////////
 // Structs
@@ -310,7 +311,9 @@ float distanceTotal_MoveX = 0;
 int microSD_Id = 0; // 0 = card not found, 1 = Builtin SD, 9 = PIN_SPI_CS_9, 10 = PIN_SPI_CS_10, 15 = PIN_SPI_CS_15,24 = PIN_SPI_CS_24,  
 String filename_Index1;
 int filenameLength = 0;
-
+int currentFileIndex = 0;
+int lastFileIndex = -1;
+int maxFiles = 100;
 String sdFilename;
 bool badFilename = false;
 bool fileDataAvailable = false;

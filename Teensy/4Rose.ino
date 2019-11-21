@@ -140,14 +140,14 @@ void setup()
 	// Initialize Limit switches
 	pinMode(configSetup.limit_Min_Z, INPUT_PULLUP);
 	pinMode(configSetup.limit_Max_Z, INPUT_PULLUP);
-	delayMicroseconds(10);
+	MilliDelay(10);
 	digitalWrite(configSetup.limit_Min_Z, HIGH);  // Enable
 	digitalWrite(configSetup.limit_Max_Z, HIGH);  // Enable
 
 	pinMode(configSetup.limit_Min_X, INPUT_PULLUP);
 	pinMode(configSetup.limit_Max_X, INPUT_PULLUP);
 
-	delayMicroseconds(10);
+	MilliDelay(10);
 	digitalWrite(configSetup.limit_Min_X, HIGH);  // Enable
 	digitalWrite(configSetup.limit_Max_X, HIGH);  // Enable
 
@@ -156,7 +156,7 @@ void setup()
 	digitalWrite(configSetup.limit_Min_B, HIGH);  // Enable
 	digitalWrite(configSetup.limit_Max_B, HIGH);  // Enable
 
-	delayMicroseconds(10);
+	MilliDelay(10);
 
 	// Enable SD card reader
 	pinMode(PIN_SPI_CS_24, OUTPUT);
@@ -809,8 +809,11 @@ void loop()
 			}
 			case 78: // N - GetFileListFromSD
 			{
-				Serial.println("GetFileListFromSD");
-				GetFileListFromSD();
+				currentFileIndex = GetSerialInteger();
+				
+				Serial.print("GetFileListFromSD: ");
+				Serial.println(currentFileIndex);
+				GetFileListFromSD(currentFileIndex);
 
 				break;
 			}

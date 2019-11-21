@@ -4885,6 +4885,7 @@ bool GreekKey_Move_Angular_TeensyStep(
 	return retVal;
 }
 
+
 /// <summary>
 /// GreekKey_Move_Spindle
 /// </summary>
@@ -5041,9 +5042,11 @@ bool GreekKey_Move_X(float shortLegLength, float multiplier, int direction, bool
 	Serial.print("endPosition_Axis:");
 	Serial.println(endPosition_Axis);
 #endif // DEBUG
-
-	endPosition_Axis = endPosition_Axis + stepper_X.getPosition();
-
+	if (updatePosition)
+	{
+		// Update position only for R(ight) and L(eft), not O(ut) or I(n).
+		endPosition_Axis = endPosition_Axis + stepper_X.getPosition();
+	}
 #ifdef DEBUG
 	Serial.print("endPosition_Axis:");
 	Serial.println(endPosition_Axis);
@@ -5125,7 +5128,11 @@ bool GreekKey_Move_Z(float shortLegLength, float multiplier, int direction, bool
 	Serial.print("endPosition_Axis:");
 	Serial.println(endPosition_Axis);
 #endif // DEBUG
-	endPosition_Axis = endPosition_Axis + stepper_Z.getPosition();
+	if (updatePosition)
+	{
+		// Update position only for R(ight) and L(eft), not O(ut) or I(n).
+		endPosition_Axis = endPosition_Axis + stepper_Z.getPosition();
+	}
 #ifdef DEBUG
 	Serial.print("endPosition_Axis:");
 	Serial.println(endPosition_Axis);
@@ -6170,7 +6177,7 @@ double GetIndexDataFromSD(int lineNumber)
 }
 
 //(File dir, int numTabs)
-void GetFileListFromSD()
+void GetFileListFromSD(int fileIndex)
 {
 	File dir;
 	const char* pageGrkFile_t21 = "pageGrkFile.t21.txt=";
@@ -6191,18 +6198,22 @@ void GetFileListFromSD()
 	const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
 
 	const char* infile_4 = "4AXES.INI";
-	const char* infile_2 = "2AXES.INI";
 
 	int iCompare = 0;
 
-	int iCounter = 0;
+	//int iCounter = 0;
+	int fileArrayIndex = 0;
+	String* fileNames = NULL;
 
+	fileNames = new String[8];
 #ifdef DEBUG
 	Serial.println("Enter GetFileListFromSD");
 #endif // DEBUG
 
 	dir = SD.open("/");
-	if(dir)
+
+	// Verify card exists
+	if (dir)
 	{
 		uint32_t dirSize = dir.size();
 		Serial.print("Dir Size: ");
@@ -6215,169 +6226,213 @@ void GetFileListFromSD()
 		return;
 	}
 
-	while (true) {
-		
+	// Reset lastFileIndex
+	if (fileIndex == 0)
+	{
+		// Default maximum files is 100
+		lastFileIndex = 100;
+	}
+	else
+	{
+		// Set lastFileIndex to requested fileIndex plus 8
+		// fileIndex is set whenever the up or down arrows are touched.
+		// lastFileIndex = fileIndex + 6;
+	}
+
+	//////////////////////////////////////////////
+	//int i = fileIndex;
+
+	for (int iCounter = 0; iCounter < fileIndex + 7; iCounter++)
+	{
 		File entry = dir.openNextFile();
-		if (!entry) 
+
+		Serial.println(entry.name());
+
+		if (entry.isDirectory())
 		{
-			// no more files
-			break;
+			iCounter--;
 		}
-
-		iCounter++;
-		if (!entry.isDirectory())
+		else
 		{
-
+			// Exclude ini files
+			// 4Axes.ini
 			iCompare = strcmp(infile_4, entry.name());
-
 			if (iCompare == 0)
 			{
 #ifdef DEBUG
 				Serial.print("Compare1: ");
 				Serial.println(entry.name());
 #endif // DEBUG
-			}else
-			{ 
-				iCompare = strcoll(entry.name(), infile_2);
-				if (iCompare == 0)
-				{
-#ifdef DEBUG
-					Serial.print("Compare2: ");
-					Serial.print(entry.name());
-#endif // DEBUG
-				}
-			}
-
-			if (iCompare == 0) // One of the ini files
-			{
+				// Decrement iCounter
 				iCounter--;
 				goto IniFileFound;
 			}
-			if(iCounter<=7)
+
+			// fileIndex is the top line in the dropdown list on the Nextion
+			Serial.print("iCounter: ");
+			Serial.print(iCounter);
+			Serial.print(" : ");
+			Serial.print(entry.name());
+			Serial.print(" : ");
+
+			if(iCounter >= fileIndex)
 			{ 
-				Serial.print("iCounter: ");
-				Serial.print(iCounter);
-				Serial.print(" : ");
-				Serial.println(entry.name());
-				switch (iCounter)
-				{
-					case 1:
-					{
-						SerialPrint(pageIndex_t21);
-						SerialPrint("\x22");
-						SerialPrint(entry.name());
-						SerialPrint(nextionQuoteEnd);
-						////Serial.println("/t");
-
-						SerialPrint(pageGrkFile_t21);
-						SerialPrint("\x22");
-						SerialPrint(entry.name());
-						SerialPrint(nextionQuoteEnd);
-						////Serial.println("/t");
-
-						break;
-					}
-					case 2:
-					{
-						SerialPrint(pageIndex_t22);
-						SerialPrint("\x22");
-						SerialPrint(entry.name());
-						SerialPrint(nextionQuoteEnd);
-						////Serial.println("/t");
-
-						SerialPrint(pageGrkFile_t22);
-						SerialPrint("\x22");
-						SerialPrint(entry.name());
-						SerialPrint(nextionQuoteEnd);
-						////Serial.println("/t");
-						break;
-					}
-					case 3:
-					{
-						SerialPrint(pageIndex_t23);
-						SerialPrint("\x22");
-						SerialPrint(entry.name());
-						SerialPrint(nextionQuoteEnd);
-						////Serial.println("/t");
-	
-						SerialPrint(pageGrkFile_t23);
-						SerialPrint("\x22");
-						SerialPrint(entry.name());
-						SerialPrint(nextionQuoteEnd);
-						////Serial.println("/t");
-						break;
-					}
-					case 4:
-					{
-						SerialPrint(pageIndex_t24);
-						SerialPrint("\x22");
-						SerialPrint(entry.name());
-						SerialPrint(nextionQuoteEnd);
-						////Serial.println("/t");
-
-						SerialPrint(pageGrkFile_t24);
-						SerialPrint("\x22");
-						SerialPrint(entry.name());
-						SerialPrint(nextionQuoteEnd);
-						////Serial.println("/t");
-						break;
-					}
-					case 5:
-					{
-						SerialPrint(pageIndex_t25);
-						SerialPrint("\x22");
-						SerialPrint(entry.name());
-						SerialPrint(nextionQuoteEnd);
-						////Serial.println("/t");
-
-						SerialPrint(pageGrkFile_t25);
-						SerialPrint("\x22");
-						SerialPrint(entry.name());
-						SerialPrint(nextionQuoteEnd);
-						////Serial.println("/t");
-						break;
-					}
-					case 6:
-					{
-						SerialPrint(pageIndex_t26);
-						SerialPrint("\x22");
-						SerialPrint(entry.name());
-						SerialPrint(nextionQuoteEnd);
-						////Serial.println("/t");
-
-						SerialPrint(pageGrkFile_t26);
-						SerialPrint("\x22");
-						SerialPrint(entry.name());
-						SerialPrint(nextionQuoteEnd);
-						////Serial.println("/t");
-						break;
-					}
-					case 7:
-					{
-						SerialPrint(pageIndex_t27);
-						SerialPrint("\x22");
-						SerialPrint(entry.name());
-						SerialPrint(nextionQuoteEnd);
-						////Serial.println("/t");
-
-						SerialPrint(pageGrkFile_t27);
-						SerialPrint("\x22");
-						SerialPrint(entry.name());
-						SerialPrint(nextionQuoteEnd);
-						////Serial.println("/t");
-						break;
-					}
-				}
+			   fileNames[fileArrayIndex] = entry.name();
+			   fileArrayIndex++;
 			}
-		}
-		else
-		{
-			iCounter--;
+
+			Serial.println(fileNames[fileArrayIndex]);
 		}
 
-		IniFileFound:
+		// Exit when last file found
+		if (!entry)
+		{
+			// no more files
+			Serial.print("No More Files: ");
+			Serial.print(iCounter);
+			Serial.print(" : ");
+			Serial.print(lastFileIndex);
+			lastFileIndex = iCounter + 8;
+			Serial.print(" : ");
+			Serial.println(lastFileIndex);
+			///////////////////////////////////////////////
+			//Serial.println("iCounter = lastFileIndex");
+			//iCounter--;
+			//SerialPrint("pageSplash.vaLastFile.val=");
+			//SerialWrite(0x22);
+			//SerialPrint(lastFileIndex);
+			//SerialPrint(nextionQuoteEnd);
+			//Serial.print("lastFileIndex: ");
+			//Serial.println(lastFileIndex);
+
+			SerialPrint("pageSplash.t13.txt=");
+			SerialWrite(0x22);
+			SerialPrint(iCounter-1);
+			SerialPrint(nextionQuoteEnd);
+			MilliDelay(15);
+			SerialPrint("pageIndex.t14.txt=");
+			SerialWrite(0x22);
+			SerialPrint(iCounter-1);
+			SerialPrint(nextionQuoteEnd);
+			SerialPrint("pageIndex.t14.txt=");
+			SerialWrite(0x22);
+			SerialPrint(iCounter-1);
+			SerialPrint(nextionQuoteEnd);
+		}
+	IniFileFound:
 		entry.close();
 	}
+
+
+		for (int j=0; j < 7; j++)
+		{
+			Serial.print("j: ");
+			Serial.print(j);
+			Serial.print(" : ");
+			Serial.println(fileNames[j]);
+			// Copy filenames to Nextion
+			switch (j)
+			{
+				case 0:
+				{
+					SerialPrint(pageIndex_t21);
+					SerialPrint("\x22");
+					SerialPrint(fileNames[j]);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint(pageGrkFile_t21);
+					SerialPrint("\x22");
+					SerialPrint(fileNames[j]);
+					SerialPrint(nextionQuoteEnd);
+					break;
+				}
+				case 1:
+				{
+					SerialPrint(pageIndex_t22);
+					SerialPrint("\x22");
+					SerialPrint(fileNames[j]);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint(pageGrkFile_t22);
+					SerialPrint("\x22");
+					SerialPrint(fileNames[j]);
+					SerialPrint(nextionQuoteEnd);
+					break;
+				}
+				case 2:
+				{
+					SerialPrint(pageIndex_t23);
+					SerialPrint("\x22");
+					SerialPrint(fileNames[j]);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint(pageGrkFile_t23);
+					SerialPrint("\x22");
+					SerialPrint(fileNames[j]);
+					SerialPrint(nextionQuoteEnd);
+					break;
+				}
+				case 3:
+				{
+					SerialPrint(pageIndex_t24);
+					SerialPrint("\x22");
+					SerialPrint(fileNames[j]);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint(pageGrkFile_t24);
+					SerialPrint("\x22");
+					SerialPrint(fileNames[j]);
+					SerialPrint(nextionQuoteEnd);
+					break;
+				}
+				case 4:
+				{
+					SerialPrint(pageIndex_t25);
+					SerialPrint("\x22");
+					SerialPrint(fileNames[j]);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint(pageGrkFile_t25);
+					SerialPrint("\x22");
+					SerialPrint(fileNames[j]);
+					SerialPrint(nextionQuoteEnd);
+					break;
+				}
+				case 5:
+				{
+					SerialPrint(pageIndex_t26);
+					SerialPrint("\x22");
+					SerialPrint(fileNames[j]);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint(pageGrkFile_t26);
+					SerialPrint("\x22");
+					SerialPrint(fileNames[j]);
+					SerialPrint(nextionQuoteEnd);
+					////Serial.println("/t");
+					break;
+				}
+				case 6:
+				{
+					SerialPrint(pageIndex_t27);
+					SerialPrint("\x22");
+					SerialPrint(fileNames[j]);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint(pageGrkFile_t27);
+					SerialPrint("\x22");
+					SerialPrint(fileNames[j]);
+					SerialPrint(nextionQuoteEnd);
+
+					//lastFileIndex = iCounter;
+
+					break;
+				}
+
+			}
+		}
+
+	return;
 }
 
 /// <summary>
@@ -8217,11 +8272,11 @@ void LoadSettings()
 	{
 		Serial.println("No Card.................");
 		// Update Nextion
-		SerialPrint("pageSplash.bt0.bco=9563");
-		Serial.println("pageSplash.bt0.bco=9563");
+		SerialPrint("bt0.bco=9563");
+		Serial.println("bt0.bco=9563");
 		SerialPrint(nextionEnd);
-		SerialPrint("pageSplash.bt0.val=0");
-		Serial.println("pageSplash.bt0.val=0");
+		SerialPrint("bt0.val=0");
+		Serial.println("bt0.val=0");
 		SerialPrint(nextionEnd);
 		Serial.println("vis t1,1");
 		SerialPrint("vis t1,1");
@@ -8233,7 +8288,6 @@ void LoadSettings()
 		Serial.println("Ini file found......");
 		ini.close();
 	}
-
 
 	LoadSettings_PageSetup();
 	LoadSettings_PageReturns();
@@ -8249,9 +8303,10 @@ void LoadSettings()
 
 	// Update Nextion
 	Serial.println("Show restart");
-	SerialPrint("pageSplash.bt0.bco=9563");
+	SerialPrint("bt0.bco=9563");
 	SerialPrint(nextionEnd);
-	SerialPrint("pageSplash.bt0.val=0");
+	MilliDelay(15);
+	SerialPrint("bt0.val=0");
 	SerialPrint(nextionEnd);
 	SerialPrint("vis g0,1");
 	SerialPrint(nextionEnd);
@@ -8513,7 +8568,7 @@ void LoadSettings_PageGrk()
 
 	iniValue = "Pattern_PatternsPer360";
 	eePromAddress_Nextion = 678;
-	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
 	configGreekKey_Main.countPattern360 = (int)returnVal;
 
 	iniValue = "Pattern_PatternCount";
@@ -8523,12 +8578,12 @@ void LoadSettings_PageGrk()
 
 	iniValue = "Pattern_SegmentLength";
 	eePromAddress_Nextion = 638;
-	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
 	configGreekKey_Main.segmentLengthPattern = (int)returnVal;
 
 	iniValue = "File_PatternsPer360";
 	eePromAddress_Nextion = 658;
-	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
 	configGreekKey_Main.countPatternFile360 = (int)returnVal;
 
 	iniValue = "File_PatternCount";
@@ -8538,7 +8593,7 @@ void LoadSettings_PageGrk()
 
 	iniValue = "File_SegmentLength";
 	eePromAddress_Nextion = 325;
-	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
 	configGreekKey_Main.segmentLengthForFile = (int)returnVal;
 
 	// Greek Key Spindle (Shared by Z and X in Pattern and File)
@@ -9106,10 +9161,6 @@ float GetIniValue(const char* iniKey, const char* iniValue, int eePromNextion, b
 		SerialPrint("vis t1,1");
 		SerialPrint(nextionEnd);
 #endif // DEBUG
-
-
-
-
 		return 0;
 	}
 #ifdef DEBUG
