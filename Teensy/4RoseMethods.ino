@@ -6180,21 +6180,21 @@ double GetIndexDataFromSD(int lineNumber)
 void GetFileListFromSD(int fileIndex)
 {
 	File dir;
-	const char* pageGrkFile_t21 = "pageGrkFile.t21.txt=";
-	const char* pageGrkFile_t22 = "pageGrkFile.t22.txt=";
-	const char* pageGrkFile_t23 = "pageGrkFile.t23.txt=";
-	const char* pageGrkFile_t24 = "pageGrkFile.t24.txt=";
-	const char* pageGrkFile_t25 = "pageGrkFile.t25.txt=";
-	const char* pageGrkFile_t26 = "pageGrkFile.t26.txt=";
-	const char* pageGrkFile_t27 = "pageGrkFile.t27.txt=";
+	const char* pageFileList_t21 = "pageFileList.t21.txt=";
+	const char* pageFileList_t22 = "pageFileList.t22.txt=";
+	const char* pageFileList_t23 = "pageFileList.t23.txt=";
+	const char* pageFileList_t24 = "pageFileList.t24.txt=";
+	const char* pageFileList_t25 = "pageFileList.t25.txt=";
+	const char* pageFileList_t26 = "pageFileList.t26.txt=";
+	const char* pageFileList_t27 = "pageFileList.t27.txt=";
 
-	const char* pageIndex_t21 = "pageIndex.t21.txt=";
-	const char* pageIndex_t22 = "pageIndex.t22.txt=";
-	const char* pageIndex_t23 = "pageIndex.t23.txt=";
-	const char* pageIndex_t24 = "pageIndex.t24.txt=";
-	const char* pageIndex_t25 = "pageIndex.t25.txt=";
-	const char* pageIndex_t26 = "pageIndex.t26.txt=";
-	const char* pageIndex_t27 = "pageIndex.t27.txt=";
+	//const char* pageIndex_t21 = "pageIndex.t21.txt=";
+	//const char* pageIndex_t22 = "pageIndex.t22.txt=";
+	//const char* pageIndex_t23 = "pageIndex.t23.txt=";
+	//const char* pageIndex_t24 = "pageIndex.t24.txt=";
+	//const char* pageIndex_t25 = "pageIndex.t25.txt=";
+	//const char* pageIndex_t26 = "pageIndex.t26.txt=";
+	//const char* pageIndex_t27 = "pageIndex.t27.txt=";
 	const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
 
 	const char* infile_4 = "4AXES.INI";
@@ -6309,15 +6309,15 @@ void GetFileListFromSD(int fileIndex)
 			SerialWrite(0x22);
 			SerialPrint(iCounter-1);
 			SerialPrint(nextionQuoteEnd);
-			MilliDelay(15);
-			SerialPrint("pageIndex.t14.txt=");
-			SerialWrite(0x22);
-			SerialPrint(iCounter-1);
-			SerialPrint(nextionQuoteEnd);
-			SerialPrint("pageIndex.t14.txt=");
-			SerialWrite(0x22);
-			SerialPrint(iCounter-1);
-			SerialPrint(nextionQuoteEnd);
+			////MilliDelay(15);
+			////SerialPrint("pageIndex.t14.txt=");
+			////SerialWrite(0x22);
+			////SerialPrint(iCounter-1);
+			////SerialPrint(nextionQuoteEnd);
+			////SerialPrint("pageIndex.t14.txt=");
+			////SerialWrite(0x22);
+			////SerialPrint(iCounter-1);
+			////SerialPrint(nextionQuoteEnd);
 		}
 	IniFileFound:
 		entry.close();
@@ -6335,12 +6335,12 @@ void GetFileListFromSD(int fileIndex)
 			{
 				case 0:
 				{
-					SerialPrint(pageIndex_t21);
-					SerialPrint("\x22");
-					SerialPrint(fileNames[j]);
-					SerialPrint(nextionQuoteEnd);
+					//SerialPrint(pageIndex_t21);
+					//SerialPrint("\x22");
+					//SerialPrint(fileNames[j]);
+					//SerialPrint(nextionQuoteEnd);
 
-					SerialPrint(pageGrkFile_t21);
+					SerialPrint(pageFileList_t21);
 					SerialPrint("\x22");
 					SerialPrint(fileNames[j]);
 					SerialPrint(nextionQuoteEnd);
@@ -6348,12 +6348,12 @@ void GetFileListFromSD(int fileIndex)
 				}
 				case 1:
 				{
-					SerialPrint(pageIndex_t22);
-					SerialPrint("\x22");
-					SerialPrint(fileNames[j]);
-					SerialPrint(nextionQuoteEnd);
+					//SerialPrint(pageIndex_t22);
+					//SerialPrint("\x22");
+					//SerialPrint(fileNames[j]);
+					//SerialPrint(nextionQuoteEnd);
 
-					SerialPrint(pageGrkFile_t22);
+					SerialPrint(pageFileList_t22);
 					SerialPrint("\x22");
 					SerialPrint(fileNames[j]);
 					SerialPrint(nextionQuoteEnd);
@@ -6361,12 +6361,12 @@ void GetFileListFromSD(int fileIndex)
 				}
 				case 2:
 				{
-					SerialPrint(pageIndex_t23);
-					SerialPrint("\x22");
-					SerialPrint(fileNames[j]);
-					SerialPrint(nextionQuoteEnd);
+					//SerialPrint(pageIndex_t23);
+					//SerialPrint("\x22");
+					//SerialPrint(fileNames[j]);
+					//SerialPrint(nextionQuoteEnd);
 
-					SerialPrint(pageGrkFile_t23);
+					SerialPrint(pageFileList_t23);
 					SerialPrint("\x22");
 					SerialPrint(fileNames[j]);
 					SerialPrint(nextionQuoteEnd);
@@ -6374,12 +6374,12 @@ void GetFileListFromSD(int fileIndex)
 				}
 				case 3:
 				{
-					SerialPrint(pageIndex_t24);
-					SerialPrint("\x22");
-					SerialPrint(fileNames[j]);
-					SerialPrint(nextionQuoteEnd);
+					//SerialPrint(pageIndex_t24);
+					//SerialPrint("\x22");
+					//SerialPrint(fileNames[j]);
+					//SerialPrint(nextionQuoteEnd);
 
-					SerialPrint(pageGrkFile_t24);
+					SerialPrint(pageFileList_t24);
 					SerialPrint("\x22");
 					SerialPrint(fileNames[j]);
 					SerialPrint(nextionQuoteEnd);
@@ -6387,12 +6387,12 @@ void GetFileListFromSD(int fileIndex)
 				}
 				case 4:
 				{
-					SerialPrint(pageIndex_t25);
-					SerialPrint("\x22");
-					SerialPrint(fileNames[j]);
-					SerialPrint(nextionQuoteEnd);
+					//SerialPrint(pageIndex_t25);
+					//SerialPrint("\x22");
+					//SerialPrint(fileNames[j]);
+					//SerialPrint(nextionQuoteEnd);
 
-					SerialPrint(pageGrkFile_t25);
+					SerialPrint(pageFileList_t25);
 					SerialPrint("\x22");
 					SerialPrint(fileNames[j]);
 					SerialPrint(nextionQuoteEnd);
@@ -6400,12 +6400,12 @@ void GetFileListFromSD(int fileIndex)
 				}
 				case 5:
 				{
-					SerialPrint(pageIndex_t26);
-					SerialPrint("\x22");
-					SerialPrint(fileNames[j]);
-					SerialPrint(nextionQuoteEnd);
+					//SerialPrint(pageIndex_t26);
+					//SerialPrint("\x22");
+					//SerialPrint(fileNames[j]);
+					//SerialPrint(nextionQuoteEnd);
 
-					SerialPrint(pageGrkFile_t26);
+					SerialPrint(pageFileList_t26);
 					SerialPrint("\x22");
 					SerialPrint(fileNames[j]);
 					SerialPrint(nextionQuoteEnd);
@@ -6414,12 +6414,12 @@ void GetFileListFromSD(int fileIndex)
 				}
 				case 6:
 				{
-					SerialPrint(pageIndex_t27);
-					SerialPrint("\x22");
-					SerialPrint(fileNames[j]);
-					SerialPrint(nextionQuoteEnd);
+					//SerialPrint(pageIndex_t27);
+					//SerialPrint("\x22");
+					//SerialPrint(fileNames[j]);
+					//SerialPrint(nextionQuoteEnd);
 
-					SerialPrint(pageGrkFile_t27);
+					SerialPrint(pageFileList_t27);
 					SerialPrint("\x22");
 					SerialPrint(fileNames[j]);
 					SerialPrint(nextionQuoteEnd);
