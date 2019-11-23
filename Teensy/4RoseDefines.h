@@ -3,9 +3,6 @@
 * Author: Edward French
 ******************************************************************/
 #pragma once
-#define FOUR_AXES  // Teensy 3.5
-//#define THREE_AXES // Teensy 3.2
-//#define TWO_AXES_V2 // Teensy 3.2
 #define SHOW_POSITION
 #define DEBUG
 
@@ -13,133 +10,38 @@
 // Pin assignments
 //==================================================================
 
-#ifdef FOUR_AXES
 // Spindle
 #define ID_SPINDLE 3
 #define PIN_SPINDLE_DIR 2  //Stepper direction
 #define PIN_SPINDLE_STEP 3  //Stepper step
 #define PIN_SPINDLE_ENABLE 4 //Enable
-//  User runtime settable microstepping: Uncomment all microstepping #defines. 
-//  Uncomment calls to SetMicrosteppingMode().
-#define PIN_SPINDLE_MS0 46
-#define PIN_SPINDLE_MS1 47 
-#define PIN_SPINDLE_MS2 48
 
 // Z axis
 #define ID_AXIS_Z 0
 #define PIN_AXIS_Z_DIR 5 // Stepper direction
 #define PIN_AXIS_Z_STEP 6 // Stepper step
 #define PIN_AXIS_Z_ENABLE 14 // Enable 
-#define PIN_AXIS_Z_MS0 49
-#define PIN_AXIS_Z_MS1 50 
-#define PIN_AXIS_Z_MS2 51
 
 // X axis
 #define ID_AXIS_X 1
 #define PIN_AXIS_X_DIR 20  // Stepper direction
 #define PIN_AXIS_X_STEP 21 // Stepper step
 #define PIN_AXIS_X_ENABLE 22 // Enable 
-#define PIN_AXIS_X_MS0 52
-#define PIN_AXIS_X_MS1 53 
-#define PIN_AXIS_X_MS2 54
 
 // B axis
 #define ID_AXIS_B 2
 #define PIN_AXIS_B_DIR 23  // Stepper direction
 #define PIN_AXIS_B_STEP 16  // Stepper step
 #define PIN_AXIS_B_ENABLE 17 // Enable 
-#define PIN_AXIS_B_MS0 55
-#define PIN_AXIS_B_MS1 56
-#define PIN_AXIS_B_MS2 57
-
-#elif defined(TWO_AXES_V2)
-// Spindle
-#define ID_SPINDLE 3
-#define PIN_SPINDLE_DIR 2 // Stepper direction
-#define PIN_SPINDLE_STEP 3  // Stepper step
-#define PIN_SPINDLE_ENABLE 4 // Enable
-// User runtime settable microstepping requires inner pins on Teensy 3.2
-#define PIN_SPINDLE_MS0 18
-#define PIN_SPINDLE_MS1 19 
-#define PIN_SPINDLE_MS2 20
-
-// Z axis
-#define ID_AXIS_Z 0
-#define PIN_AXIS_Z_DIR 5  // Stepper direction
-#define PIN_AXIS_Z_STEP 6  // Stepper step
-#define PIN_AXIS_Z_ENABLE 14 // Enable 
-// User runtime settable microstepping requires inner pins on Teensy 3.2
-#define PIN_AXIS_Z_MS0 21
-#define PIN_AXIS_Z_MS1 22
-#define PIN_AXIS_Z_MS2 23
-
-// X axis
-#define ID_AXIS_X 1
-#define PIN_AXIS_X_DIR 24  // Stepper direction
-#define PIN_AXIS_X_STEP 25  // Stepper step
-#define PIN_AXIS_X_ENABLE 26 // Enable 
-//#define PIN_AXIS_X_MS0 30
-//#define PIN_AXIS_X_MS1 31 
-//#define PIN_AXIS_X_MS2 32
-
-// B axis
-#define ID_AXIS_B 2
-#define PIN_AXIS_B_DIR 24  // Stepper direction
-#define PIN_AXIS_B_STEP 25  // Stepper step
-#define PIN_AXIS_B_ENABLE 26 // Enable 
-//#define PIN_AXIS_B_MS0 27
-//#define PIN_AXIS_B_MS1 28 
-//#define PIN_AXIS_B_MS2 29
-
-#elif defined(THREE_AXES) // Three axes board
-// Spindle
-#define ID_SPINDLE 3
-#define PIN_SPINDLE_DIR 3 // Stepper direction
-#define PIN_SPINDLE_STEP 2  // Stepper step
-#define PIN_SPINDLE_ENABLE 6 // Enable
-// User runtime settable microstepping requires inner pins on Teensy 3.2
-#define PIN_SPINDLE_MS0 24
-#define PIN_SPINDLE_MS1 25 
-#define PIN_SPINDLE_MS2 26
-
-// Z axis
-#define ID_AXIS_Z 0
-#define PIN_AXIS_Z_DIR 4  // Stepper direction
-#define PIN_AXIS_Z_STEP 5  // Stepper step
-#define PIN_AXIS_Z_ENABLE 20 //PCB jumper:33>>20 // Enable  
-
-// User runtime settable microstepping requires inner pins on Teensy 3.2
-#define PIN_AXIS_Z_MS0 27
-#define PIN_AXIS_Z_MS1 28 
-#define PIN_AXIS_Z_MS2 29
-
-// X axis
-#define ID_AXIS_X 1
-#define PIN_AXIS_X_DIR 23  //PCB jumper:24>>23 // Stepper direction
-#define PIN_AXIS_X_STEP 22  //PCB jumper:30>>22// Stepper step
-#define PIN_AXIS_X_ENABLE 21 //PCB jumper:29>>21 // Enable 
-
-// User runtime settable microstepping requires inner pins on Teensy 3.2
-#define PIN_AXIS_X_MS0 30
-#define PIN_AXIS_X_MS1 31 
-#define PIN_AXIS_X_MS2 32
-
-// B axis
-#define ID_AXIS_B 2
-#define PIN_AXIS_B_DIR 24  // Stepper direction
-#define PIN_AXIS_B_STEP 25  // Stepper step
-#define PIN_AXIS_B_ENABLE 26 // Enable 
-//#define PIN_AXIS_B_MS0 27
-//#define PIN_AXIS_B_MS1 28 
-//#define PIN_AXIS_B_MS2 29
-
-#endif //FOUR_AXES/Two Axes/3 Axes
 
 /////////////////////////////////////////////////////////////////////////
 // Constants
 /////////////////////////////////////////////////////////////////////////
 // SPI
-#define PIN_SPI_CS 10
+#define PIN_SPI_CS_10 10  // Primary pin for SPI
+#define PIN_SPI_CS_9 9
+#define PIN_SPI_CS_15 15
+#define PIN_SPI_CS_24 24
 
 // Index page ID
 #define ID_INDEX_1 1
@@ -179,6 +81,7 @@
 #define PAGE_GRK 8
 #define PAGE_GRKFILE 9
 #define PAGE_GEO 10 
+#define PAGE_MORE 11
 
 /////////////////////////////////////////////////////////////////////////
 // Structs
@@ -194,7 +97,6 @@ struct configPageMov
 	int32_t speedPercent_Axis_X;
 	float distance_MoveZ;
 	float distance_MoveX;
-
 };
 
 struct configPageSync
@@ -347,7 +249,6 @@ struct configPageIndex
 	int32_t maxSpd;
 	int32_t speedPercent;
 	uint32_t accel;
-	 
 };
 
 struct configIndex
@@ -356,7 +257,6 @@ struct configIndex
 	uint32_t fileOrFixed; // Source
 	int32_t size;
 };
-
 
 /////////////////////////////////////////////////////////////////////////
 // Config and Setup variables
@@ -401,16 +301,23 @@ unsigned int eePromAddress_Filename_Length_Grk = 945; // EEProm address for leng
 // Global Variables
 //==================================================================
 int pageCallerId = 20;
-int serialId = 9; // Initialize with unused serial id.  Serial-0, Serial3-1
+int serialId = 9; // Initialize with unused serial id.  Serial: 0 (Usb cable to PC), Serial1: 1, Serial2: 2, Serial3: 3
 byte incomingByte = 0;	// store incoming Serial data
-
-
 
 float distanceTotal_MoveZ = 0;
 float distanceTotal_MoveX = 0;
 
+// microSD id
+int microSD_Id = 0; // 0 = card not found, 1 = Builtin SD, 9 = PIN_SPI_CS_9, 10 = PIN_SPI_CS_10, 15 = PIN_SPI_CS_15,24 = PIN_SPI_CS_24,  
 String filename_Index1;
 int filenameLength = 0;
+int currentFileIndex = 0;
+int lastFileIndex = -1;
+int maxFiles = 100;
+String sdFilename;
+bool badFilename = false;
+bool fileDataAvailable = false;
+
 String filename_Index2a;
 char * filename_Index2;
 
@@ -450,14 +357,13 @@ int reverseDirection = 1;
 int moveType = 0;
 String axisAndDirection;
 String axisAndDirectionA;
-bool fileDataAvailable = false;
+
 int currentLineNumber = 0;
 bool exitGreekKey = false;
 String comment;
 int spindleShortLegSteps = 0;
 int axisShortLegSteps = 0;
-String sdFilename;
-bool badFilename = false;
+
 float hVal = 0; // Horizontal component of angular move
 float vVal = 0; // Vertical component of angular move
 
@@ -471,9 +377,6 @@ float vVal = 0; // Vertical component of angular move
 //extern char *__brkval;
 //#endif  // __arm__
 //
-
-
-
 
 // End Global Variables
 //==================================================================
