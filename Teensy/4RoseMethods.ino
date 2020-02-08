@@ -458,6 +458,25 @@ float DistanceToSteps_Axis(float distance, int axisId)
 	return retVal;
 }
 
+void AngularMaxSpeed(long spindleMaxSpeed, long axisMaxSpeed)
+{
+
+	// Pathagorean Theorem
+	if (angularSpindleLegLength < 0)
+	{
+		angularSpindleLegLength = angularSpindleLegLength * (-1);
+	}
+	if (angularAxisLegLength < 0)
+	{
+		angularAxisLegLength = angularAxisLegLength * (-1);
+	}
+	float hypotenuse = sqrt((angularSpindleLegLength * angularSpindleLegLength) + (angularAxisLegLength * angularAxisLegLength));
+	float axisMultiplier = hypotenuse / angularAxisLegLength;
+	float spindleMultiplier = hypotenuse / angularSpindleLegLength;
+	angularAxisLegLength = round(axisMaxSpeed * axisMultiplier);
+	angularSpindleLegLength = round(spindleMaxSpeed * spindleMultiplier);
+
+}
 /// <summary>
 /// Move axis
 /// </summary>
@@ -3950,18 +3969,18 @@ void GreekKey_Pattern_2a()
 		{
 			case RADIAL: // Axis Left CCW
 			{
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, DIR_CW); //0a
-				if (StopGreekKey() || stopAll)
-				{
-					goto EndLoop;
+				//stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, DIR_CW); //0a
+				//if (StopGreekKey() || stopAll)
+				//{
+				//	goto EndLoop;
 
-				}
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, DIR_CCW); //0b
-				if (StopGreekKey() || stopAll)
-				{
-					goto EndLoop;
+				//}
+				//stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, DIR_CCW); //0b
+				//if (StopGreekKey() || stopAll)
+				//{
+				//	goto EndLoop;
 
-				}
+				//}
 				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, DIR_CW); //1
 				if (StopGreekKey() || stopAll)
 				{
@@ -4009,19 +4028,19 @@ void GreekKey_Pattern_2a()
 #endif // DEBUG
 
 
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, DIR_CW); //0a
-				if (StopGreekKey() || stopAll)
-				{
-					goto EndLoop;
+				//stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, DIR_CW); //0a
+				//if (StopGreekKey() || stopAll)
+				//{
+				//	goto EndLoop;
 
-				}
+				//}
 			
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, DIR_CCW); //0b
-				if (StopGreekKey() || stopAll)
-				{
-					goto EndLoop;
+				//stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, DIR_CCW); //0b
+				//if (StopGreekKey() || stopAll)
+				//{
+				//	goto EndLoop;
 
-				}
+				//}
 			
 				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, DIR_CW); //1
 				if (StopGreekKey() || stopAll)
@@ -4297,6 +4316,12 @@ void GreekKeyPattern_Initial(int segmentCount)
 		{
 			distance_Axis = configGreekKey.segmentLengthPattern / configSetup.distancePerRev_AxisZ;
 			axisShortLegSteps = (int)round(distance_Axis * configSetup.steps360_Axis_Z * configSetup.microsteps_Axis_Z);
+			Serial.print("Z segmentLengthPattern: ");
+			Serial.println(configGreekKey.segmentLengthPattern);
+			Serial.print("Z configSetup.distancePerRev_AxisZ: ");
+			Serial.println(configSetup.distancePerRev_AxisZ);
+			Serial.print("Z distance_Axis: ");
+			Serial.println(distance_Axis);
 			break;
 		}
 		case ID_AXIS_X: // X Axis
@@ -4569,6 +4594,9 @@ bool GreekKey_Move_Angular_TeensyStep(
 			break;
 		}
 	}
+
+	// ToDo:
+	AngularMaxSpeed(maxSpd_Spindle, maxSpd_Axis);
 
 	SetEnable(ID_SPINDLE, true);
 	currentSpeedPercent_Axis = speedPercent_Axis * .01;
@@ -4917,7 +4945,7 @@ bool GreekKey_Move_Z(float segmentSteps, float multiplier, int direction, bool u
 	Serial.println(configGreekKey.maxSpd_Axis_Z);
 	Serial.print("speedPercent_Axis------------:");
 	Serial.println(configGreekKey.speedPercent_Axis_Z);
-	Serial.print("caccel_Axis------------:");
+	Serial.print("accel_Axis------------:");
 	Serial.println(configGreekKey.accel_Axis_Z);
 #endif // DEBUG
 
@@ -5143,8 +5171,8 @@ void GreekKeyFromFile(int direction)
 		for (int i = 0; i <= fileLineCount; i++)
 		{
 			// Reset hVal and vVal
-			hVal = 0;
-			vVal = 0;
+			angularAxisLegLength = 0;
+			angularSpindleLegLength = 0;
 
 			// Get data
 			segmentMultiplier = GetGreekKeyDataFromSD(i);
@@ -5283,17 +5311,17 @@ void GreekKeyFromFile(int direction)
 								{
 									case ID_AXIS_Z: // Z Axis is primary
 									{
-										stopAll = GreekKey_Move_Angular_TeensyStep(shortSegmentStepsAxisZ, hVal * direction, spindleShortLegSteps, vVal);
+										stopAll = GreekKey_Move_Angular_TeensyStep(shortSegmentStepsAxisZ, angularAxisLegLength * direction, spindleShortLegSteps, angularSpindleLegLength);
 										break;
 									}
 									case ID_AXIS_X: // X Axis is primary
 									{
-										stopAll = GreekKey_Move_Angular_TeensyStep(shortSegmentStepsAxisX, hVal * direction, spindleShortLegSteps, vVal);
+										stopAll = GreekKey_Move_Angular_TeensyStep(shortSegmentStepsAxisX, angularAxisLegLength * direction, spindleShortLegSteps, angularSpindleLegLength);
 										break;
 									}
 									case ID_AXIS_B: // B Axis is primary
 									{
-										stopAll = GreekKey_Move_Angular_TeensyStep(shortSegmentStepsAxisB, hVal * direction, spindleShortLegSteps, vVal);
+										stopAll = GreekKey_Move_Angular_TeensyStep(shortSegmentStepsAxisB, angularAxisLegLength * direction, spindleShortLegSteps, angularSpindleLegLength);
 										break;
 									}
 								}
@@ -5304,12 +5332,12 @@ void GreekKeyFromFile(int direction)
 								{
 									case ID_AXIS_Z: // Z Axis
 									{
-										axisSteps = round((hVal / configSetup.distancePerRev_AxisZ) * (configSetup.steps360_Axis_Z * configSetup.microsteps_Axis_Z));
+										axisSteps = round((angularAxisLegLength / configSetup.distancePerRev_AxisZ) * (configSetup.steps360_Axis_Z * configSetup.microsteps_Axis_Z));
 										break;
 									}
 									case ID_AXIS_X: // X Axis
 									{
-										axisSteps = round((hVal / configSetup.distancePerRev_AxisX) * (configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X));
+										axisSteps = round((angularAxisLegLength / configSetup.distancePerRev_AxisX) * (configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X));
 										break;
 									}
 									case ID_AXIS_B: // B Axis
@@ -5318,12 +5346,12 @@ void GreekKeyFromFile(int direction)
 										{
 											case RADIAL_B:
 											{
-												axisSteps = DistanceToSteps_RadialB(hVal);
+												axisSteps = DistanceToSteps_RadialB(angularAxisLegLength);
 												break;
 											}
 											case LINEAR_B:
 											{
-												axisSteps = DistanceToSteps_LinearB(hVal);
+												axisSteps = DistanceToSteps_LinearB(angularAxisLegLength);
 												break;
 											}
 										}
@@ -5333,7 +5361,7 @@ void GreekKeyFromFile(int direction)
 								}
 
 								axisSteps = axisSteps * direction;
-								spindleSteps = round((configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (vVal / 360));
+								spindleSteps = round((configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (angularSpindleLegLength / 360));
 								stopAll = GreekKey_Move_Angular_TeensyStep(axisSteps, 1, spindleSteps, 1);
 							}
 							break;
@@ -5346,17 +5374,17 @@ void GreekKeyFromFile(int direction)
 								{
 									case ID_AXIS_Z: //
 									{
-										stopAll = GreekKey_Move_Angular_TeensyStep(shortSegmentStepsAxisZ, vVal * direction, spindleShortLegSteps, hVal);
+										stopAll = GreekKey_Move_Angular_TeensyStep(shortSegmentStepsAxisZ, angularSpindleLegLength * direction, spindleShortLegSteps, angularAxisLegLength);
 										break;
 									}
 									case ID_AXIS_X: // 
 									{
-										stopAll = GreekKey_Move_Angular_TeensyStep(shortSegmentStepsAxisX, vVal * direction, spindleShortLegSteps, hVal);
+										stopAll = GreekKey_Move_Angular_TeensyStep(shortSegmentStepsAxisX, angularSpindleLegLength * direction, spindleShortLegSteps, angularAxisLegLength);
 										break;
 									}
 									case ID_AXIS_B: // 
 									{
-										stopAll = GreekKey_Move_Angular_TeensyStep(shortSegmentStepsAxisB, vVal * direction, spindleShortLegSteps, hVal);
+										stopAll = GreekKey_Move_Angular_TeensyStep(shortSegmentStepsAxisB, angularSpindleLegLength * direction, spindleShortLegSteps, angularAxisLegLength);
 										break;
 									}
 								}
@@ -5367,12 +5395,12 @@ void GreekKeyFromFile(int direction)
 								{
 									case ID_AXIS_Z: // Z Axis
 									{
-										axisSteps = round((vVal / configSetup.distancePerRev_AxisZ) * (configSetup.steps360_Axis_Z * configSetup.microsteps_Axis_Z));
+										axisSteps = round((angularSpindleLegLength / configSetup.distancePerRev_AxisZ) * (configSetup.steps360_Axis_Z * configSetup.microsteps_Axis_Z));
 										break;
 									}
 									case ID_AXIS_X: // X Axis
 									{
-										axisSteps = round((vVal / configSetup.distancePerRev_AxisX) * (configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X));
+										axisSteps = round((angularSpindleLegLength / configSetup.distancePerRev_AxisX) * (configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X));
 										break;
 									}
 									case ID_AXIS_B: // B Axis
@@ -5381,12 +5409,12 @@ void GreekKeyFromFile(int direction)
 										{
 											case RADIAL_B:
 											{
-												axisSteps = DistanceToSteps_RadialB(vVal);
+												axisSteps = DistanceToSteps_RadialB(angularSpindleLegLength);
 												break;
 											}
 											case LINEAR_B:
 											{
-												axisSteps = DistanceToSteps_LinearB(vVal);
+												axisSteps = DistanceToSteps_LinearB(angularSpindleLegLength);
 												break;
 											}
 										}
@@ -5395,7 +5423,7 @@ void GreekKeyFromFile(int direction)
 								}
 
 								axisSteps = axisSteps * direction;
-								spindleSteps = round((configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (hVal / 360));
+								spindleSteps = round((configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (angularAxisLegLength / 360));
 								stopAll = GreekKey_Move_Angular_TeensyStep(axisSteps, 1, spindleSteps, 1);
 							}
 
@@ -6506,18 +6534,18 @@ double GetGreekKeyDataFromSD(int lineNumber)
 		char charBuf[20];
 		nStr.toCharArray(charBuf, 20);
 		val = strtok(charBuf, "V");
-		hVal = atof(val);
+		angularAxisLegLength = atof(val);
 		val = strtok(NULL, "\n");
-		vVal = atof(val);
+		angularSpindleLegLength = atof(val);
 #ifdef DEBUG
 		Serial.print("nStr: ");
 		Serial.println(nStr);
 		Serial.print("hVal: ");
-		Serial.println(hVal);
+		Serial.println(angularAxisLegLength);
 		Serial.print("val: ");
 		Serial.println(val);
 		Serial.print("vVal: ");
-		Serial.println(vVal);
+		Serial.println(angularSpindleLegLength);
 #endif // DEBUG
 
 	}
@@ -8604,7 +8632,7 @@ void LoadSettings_PageIndex()
 	configIndex_2.degreeOrDivision = (int)returnVal;
 
 	iniValue = "FixedOrFile_2";
-	eePromAddress_Nextion = 592;
+	eePromAddress_Nextion = 708;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configIndex_2.fileOrFixed = (int)returnVal;
 
@@ -8838,68 +8866,22 @@ void LoadSettings_PageGrk()
 	float returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configGreekKey.axisId = (int)returnVal;
 
-	iniValue = "RadialOrAxial_Pattern";
-	eePromAddress_Nextion = 432;
-	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
-	configGreekKey.radialOrAxial_Pattern = (int)returnVal;
-
-	iniValue = "RadialOrAxial_File";
-	eePromAddress_Nextion = 436;
-	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
-	configGreekKey.radialOrAxial_File = (int)returnVal;
-
 	iniValue = "FileOrPattern";
 	eePromAddress_Nextion = 200;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configGreekKey.fileOrPattern = (int)returnVal;
 
-	iniValue = "PatternType";
-	eePromAddress_Nextion = 696;
-	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
-	configGreekKey.patternId = (int)returnVal;
 
-	iniValue = "Pattern_PatternsPer360";
-	eePromAddress_Nextion = 676;
-	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
-	configGreekKey.countPattern360 = (int)returnVal;
-
-	iniValue = "Pattern_PatternCount";
-	eePromAddress_Nextion = 496;
-	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
-	configGreekKey.countPattern = (int)returnVal;
-
-	iniValue = "Pattern_SegmentLength";
-	eePromAddress_Nextion = 620;
-	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
-	configGreekKey.segmentLengthPattern = (int)returnVal;
-
-	iniValue = "File_PatternsPer360";
-	eePromAddress_Nextion = 636;
-	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
-	configGreekKey.countPatternFile360 = (int)returnVal;
-
-	iniValue = "File_PatternCount";
-	eePromAddress_Nextion = 768;
-	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
-	configGreekKey.countPatternFile = (int)returnVal;
-
-	iniValue = "File_SegmentLength";
-	eePromAddress_Nextion = 300;
-	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
-	configGreekKey.segmentLengthForFile = (int)returnVal;
-
-	// Greek Key Spindle (Shared by Z and X in Pattern and File)
+	// Greek Key Spindle (Shared by Pattern and File)
 	iniValue = "MaxSpeed_Spindle";
 	eePromAddress_Nextion = 784;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configGreekKey.maxSpd_Spindle = (int)returnVal;
-	//configGreekKey_X.maxSpd_Spindle = (int)returnVal;
-
+	
 	iniValue = "Accel_Spindle";
 	eePromAddress_Nextion = 788;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configGreekKey.accel_Spindle = (int)returnVal;
-	//configGreekKey_X.accel_Spindle = (int)returnVal;
 
 	iniValue = "SpeedPercentage_Spindle";
 	eePromAddress_Nextion = 60;
@@ -8941,19 +8923,65 @@ void LoadSettings_PageGrk()
 
 	// B axis
 	iniValue = "MaxSpeed_B";
-	eePromAddress_Nextion = 852;
+	eePromAddress_Nextion = 816;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configGreekKey.maxSpd_Axis_B = (int)returnVal;
 
 	iniValue = "Accel_B";
-	eePromAddress_Nextion = 856;
+	eePromAddress_Nextion = 812;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configGreekKey.accel_Axis_B = (int)returnVal;
 
 	iniValue = "SpeedPercentage_B";
-	eePromAddress_Nextion = 68;
+	eePromAddress_Nextion = 28;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configGreekKey.speedPercent_Axis_B = (int)returnVal;
+
+	iniValue = "RadialOrAxial_Pattern";
+	eePromAddress_Nextion = 432;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configGreekKey.radialOrAxial_Pattern = (int)returnVal;
+
+	iniValue = "PatternType";
+	eePromAddress_Nextion = 696;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configGreekKey.patternId = (int)returnVal;
+
+	iniValue = "Pattern_PatternsPer360";
+	eePromAddress_Nextion = 676;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configGreekKey.countPattern360 = (int)returnVal;
+
+	iniValue = "Pattern_PatternCount";
+	eePromAddress_Nextion = 496;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configGreekKey.countPattern = (int)returnVal;
+
+	iniValue = "Pattern_SegmentLength";
+	eePromAddress_Nextion = 620;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configGreekKey.segmentLengthPattern = (int)returnVal;
+
+	iniValue = "RadialOrAxial_File";
+	eePromAddress_Nextion = 436;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configGreekKey.radialOrAxial_File = (int)returnVal;
+
+	iniValue = "File_PatternsPer360";
+	eePromAddress_Nextion = 636;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configGreekKey.countPatternFile360 = (int)returnVal;
+
+	iniValue = "File_PatternCount";
+	eePromAddress_Nextion = 768;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configGreekKey.countPatternFile = (int)returnVal;
+
+	iniValue = "File_SegmentLength";
+	eePromAddress_Nextion = 300;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configGreekKey.segmentLengthForFile = (int)returnVal;
+
 	EEPROM.put(eePromAddress_Grk, configGreekKey);
 
 }
@@ -8974,7 +9002,7 @@ void LoadSettings_PageRec()
 	iniValue = "MaxSpeed_Spindle";
 	eePromAddress_Nextion = 896;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
-	configRec.speedPercent_Spindle = (int)returnVal;
+	configRec.maxSpd_Spindle = (int)returnVal;
 
 	iniValue = "Accel_Spindle";
 	eePromAddress_Nextion = 936;
@@ -9006,12 +9034,12 @@ void LoadSettings_PageRec()
 	iniValue = "MaxSpeed_X";
 	eePromAddress_Nextion = 960;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
-	configRec.speedPercent_Axis_X = (int)returnVal;
+	configRec.maxSpd_Axis_X = (int)returnVal;
 
 	iniValue = "Accel_X";
 	eePromAddress_Nextion = 980;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
-	configRec.speedPercent_Axis_X = (int)returnVal;
+	configRec.accel_Axis_X = (int)returnVal;
 
 	iniValue = "SpeedPercentage_X";
 	eePromAddress_Nextion = 96;
@@ -9022,12 +9050,12 @@ void LoadSettings_PageRec()
 	iniValue = "MaxSpeed_B";
 	eePromAddress_Nextion = 776;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
-	configRec.speedPercent_Axis_B = (int)returnVal;
+	configRec.maxSpd_Axis_B = (int)returnVal;
 
 	iniValue = "Accel_B";
 	eePromAddress_Nextion = 780;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
-	configRec.speedPercent_Axis_B = (int)returnVal;
+	configRec.accel_Axis_B = (int)returnVal;
 
 	iniValue = "SpeedPercentage_B";
 	eePromAddress_Nextion = 48;
@@ -9144,7 +9172,7 @@ void LoadSettings_PageMain()
 {
 	const char* iniKey = "Main";
 	const char* iniValue = "AxisId";
-	int eePromAddress_Nextion = 570;
+	int eePromAddress_Nextion = 568;
 	float returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configMain.axisId = (int)returnVal;
 	
@@ -9174,7 +9202,7 @@ void LoadSettings_PageMain()
 	configMain.accel_Axis_Z = (int)returnVal;
 
 	iniValue = "SpeedPercentage_Z";
-	eePromAddress_Nextion = 440;
+	eePromAddress_Nextion = 16;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configMain.speedPercent_Axis_Z = (int)returnVal;
 
@@ -9553,6 +9581,6 @@ float GetIniValue(const char* iniKey, const char* iniValue, int eePromNextion, b
 		Serial.println(iniValue);
 	}
 	iniKey = "Main";
-
+	MilliDelay(100);
 	return atof(buffer);
 }

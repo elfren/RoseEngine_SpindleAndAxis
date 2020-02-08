@@ -410,9 +410,10 @@ String comment;
 int spindleShortLegSteps = 0;
 int axisShortLegSteps = 0;
 
-float hVal = 0; // Horizontal component of angular move
-float vVal = 0; // Vertical component of angular move
-
+float angularAxisLegLength = 0; // Horizontal component of angular move
+float angularSpindleLegLength = 0; // Vertical component of angular move
+long angularAxisSpeed = 0;
+long angularSpindleSpeed = 0;
 /////////////////////////////////////////////////////////////////////////
 // FreeMemory
 /////////////////////////////////////////////////////////////////////////
