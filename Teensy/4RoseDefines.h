@@ -68,6 +68,8 @@
 #define RADIAL_B 0
 #define LINEAR_B 1
 
+#define INI_4AXES 0
+#define INI_RESET 1
 /////////////////////////////////////////////////////////////////////////
 // Page defines
 /////////////////////////////////////////////////////////////////////////
@@ -151,8 +153,12 @@ struct configPageSetup
 	uint32_t limit_Max_B;
 	int32_t maxSpd_Return_Spindle;
 	uint32_t accel_Return_Spindle;
-	int32_t maxSpd_Return_Axis;
-	uint32_t accel_Return_Axis;
+	int32_t maxSpd_Return_Axis_Z;
+	uint32_t accel_Return_Axis_Z;
+	int32_t maxSpd_Return_Axis_X;
+	uint32_t accel_Return_Axis_X;
+	int32_t maxSpd_Return_Axis_B;
+	uint32_t accel_Return_Axis_B;
 	bool polarity_Spindle;
 	bool polarity_Axis_Z;
 	bool polarity_Axis_X;
@@ -239,6 +245,7 @@ struct configPageRose // page 12
 
 struct configPageMainOne  // page 2 (pageOne) and page 0 (pageMain)
 {
+	int32_t accel_Axis_B;
 	int32_t maxSpd_Spindle;
 	int32_t maxSpd_Axis_Z;
 	int32_t maxSpd_Axis_X;
@@ -247,11 +254,11 @@ struct configPageMainOne  // page 2 (pageOne) and page 0 (pageMain)
 	int32_t speedPercent_Axis_Z;
 	int32_t speedPercent_Axis_X;
 	int32_t speedPercent_Axis_B;
-	uint32_t accel_Spindle;
-	uint32_t accel_Axis_Z;
-	uint32_t accel_Axis_X;
-	uint32_t accel_Axis_B;
-	uint32_t axisId; // Z:0, X:1, B:2, Spindle:3
+	int32_t accel_Spindle;
+	int32_t accel_Axis_Z;
+	int32_t accel_Axis_X;
+	
+	int32_t axisId; // Z:0, X:1, B:2, Spindle:3
 };
 
 struct configPageGreekKey
@@ -414,6 +421,11 @@ float angularAxisLegLength = 0; // Horizontal component of angular move
 float angularSpindleLegLength = 0; // Vertical component of angular move
 long angularAxisSpeed = 0;
 long angularSpindleSpeed = 0;
+
+const char* filename_4Axes = "/4Axes.ini";
+const char* filename_Reset = "/Reset.ini";
+int iniFileType = INI_4AXES;
+
 /////////////////////////////////////////////////////////////////////////
 // FreeMemory
 /////////////////////////////////////////////////////////////////////////

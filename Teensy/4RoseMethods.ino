@@ -6597,6 +6597,8 @@ void ReturnToStartPosition(int axisId)
 	Serial.println("Begin ReturnToStartPosition()");
 	Serial.print("target_Spindle: ");
 	Serial.println(target_Spindle);
+	Serial.print("maxSpd_Return_Spindle: ");
+	Serial.println(configSetup.accel_Return_Spindle);
 	Serial.print("target_Axis: ");
 	Serial.println(target_Axis);
 #endif // DEBUG
@@ -6609,10 +6611,12 @@ void ReturnToStartPosition(int axisId)
 		{
 			stepper_Z.setPosition(0);
 			stepper_Z
-				.setMaxSpeed(configSetup.maxSpd_Return_Axis)
-				.setAcceleration(configSetup.accel_Return_Axis)
+				.setMaxSpeed(configSetup.maxSpd_Return_Axis_Z)
+				.setAcceleration(configSetup.accel_Return_Axis_Z)
 				.setTargetAbs(target_Axis);
 
+			Serial.print("maxSpd_Return_Axis_Z: ");
+			Serial.println(configSetup.accel_Return_Axis_Z);
 			SetEnable(ID_AXIS_Z, true);
 			if (pageCallerId == PAGE_MAIN)
 			{
@@ -6630,10 +6634,12 @@ void ReturnToStartPosition(int axisId)
 		{
 			stepper_X.setPosition(0);
 			stepper_X
-				.setMaxSpeed(configSetup.maxSpd_Return_Axis)
-				.setAcceleration(configSetup.accel_Return_Axis)
+				.setMaxSpeed(configSetup.maxSpd_Return_Axis_X)
+				.setAcceleration(configSetup.accel_Return_Axis_X)
 				.setTargetAbs(target_Axis);
 
+			Serial.print("maxSpd_Return_Axis_X: ");
+			Serial.println(configSetup.accel_Return_Axis_X);
 			SetEnable(ID_AXIS_X, true);
 			if (pageCallerId == PAGE_MAIN)
 			{
@@ -6651,10 +6657,12 @@ void ReturnToStartPosition(int axisId)
 		{
 			stepper_B.setPosition(0);
 			stepper_B
-				.setMaxSpeed(configSetup.maxSpd_Return_Axis)
-				.setAcceleration(configSetup.accel_Return_Axis)
+				.setMaxSpeed(configSetup.maxSpd_Return_Axis_B)
+				.setAcceleration(configSetup.accel_Return_Axis_B)
 				.setTargetAbs(target_Axis);
 
+			Serial.print("maxSpd_Return_Axis_B: ");
+			Serial.println(configSetup.accel_Return_Axis_B);
 			SetEnable(ID_AXIS_B, true);
 			if (pageCallerId == PAGE_MAIN)
 			{
@@ -7839,23 +7847,18 @@ void TestEEPROMConfig(int callerId)
 		{
 			configPageMainOne eePageMain;
 			EEPROM.get(eePromAddress_Main, eePageMain);
-			maxSpd_Spindle = eePageMain.maxSpd_Spindle;
-			accel_Spindle = eePageMain.accel_Spindle;
-			maxSpd_Axis_Z = eePageMain.maxSpd_Axis_Z;
-			accel_Axis_Z = eePageMain.accel_Axis_Z;
-			maxSpd_Axis_X = eePageMain.maxSpd_Axis_X;
-			accel_Axis_X = eePageMain.accel_Axis_X;
-			maxSpd_Axis_B = eePageMain.maxSpd_Axis_B;
-			accel_Axis_B = eePageMain.accel_Axis_B;
+
+			configPageMainOne configMain2;
+			EEPROM.get(eePromAddress_Main, configMain2);
 
 			SerialPrint(pageConfig_t10);
 			SerialPrint("\x22");
-			SerialPrint(maxSpd_Spindle);
+			SerialPrint(eePageMain.maxSpd_Spindle);
 			SerialPrint(nextionQuoteEnd);
  
 			SerialPrint(pageConfig_t11);
 			SerialPrint("\x22");
-			SerialPrint(accel_Spindle);
+			SerialPrint(eePageMain.accel_Spindle);
 			SerialPrint(nextionQuoteEnd);
 
 			switch (eePageMain.axisId)
@@ -7864,12 +7867,12 @@ void TestEEPROMConfig(int callerId)
 				{
 					SerialPrint(pageConfig_t12);
 					SerialPrint("\x22");
-					SerialPrint(maxSpd_Axis_Z);
+					SerialPrint(eePageMain.maxSpd_Axis_Z);
 					SerialPrint(nextionQuoteEnd);
 
 					SerialPrint(pageConfig_t13);
 					SerialPrint("\x22");
-					SerialPrint(accel_Axis_Z);
+					SerialPrint(eePageMain.accel_Axis_Z);
 					SerialPrint(nextionQuoteEnd);
 					break;
 				}
@@ -7877,25 +7880,31 @@ void TestEEPROMConfig(int callerId)
 				{
 					SerialPrint(pageConfig_t12);
 					SerialWrite(0x22);
-					SerialPrint(maxSpd_Axis_X);
+					SerialPrint(eePageMain.maxSpd_Axis_X);
 					SerialPrint(nextionQuoteEnd);
 
 					SerialPrint(pageConfig_t13);
 					SerialWrite(0x22);
-					SerialPrint(accel_Axis_X);
+					SerialPrint(eePageMain.accel_Axis_X);
 					SerialPrint(nextionQuoteEnd);
 					break;
 				}
 				case ID_AXIS_B:
 				{
+					Serial.print("configMain.accel_Axis_B:");
+					Serial.println(configMain.accel_Axis_B);
+					Serial.print("configMain2.accel_Axis_B:");
+					Serial.println(configMain2.accel_Axis_B);
+					Serial.print("eePageMain.accel_Axis_B:");
+					Serial.println(eePageMain.accel_Axis_B);
 					SerialPrint(pageConfig_t12);
 					SerialWrite(0x22);
-					SerialPrint(maxSpd_Axis_B);
+					SerialPrint(eePageMain.maxSpd_Axis_B);
 					SerialPrint(nextionQuoteEnd);
-
+					delay(100);
 					SerialPrint(pageConfig_t13);
 					SerialWrite(0x22);
-					SerialPrint(accel_Axis_B);
+					SerialPrint(eePageMain.accel_Axis_B);
 					SerialPrint(nextionQuoteEnd);
 					break;
 				}
@@ -8224,80 +8233,77 @@ void TestEEPROMConfig(int callerId)
 		case PAGE_GRK:
 		case PAGE_GRKFILE:
 		{
+			configPageGreekKey eePageGrk;
+			EEPROM.get(eePromAddress_Grk, eePageGrk);
 			switch (configGreekKey.axisId)
 			{
 				case ID_AXIS_Z:
 				{
-					configPageGreekKey eePageGrkZ;
-					EEPROM.get(eePromAddress_Grk, eePageGrkZ);
+
 					SerialPrint(pageConfig_t10);
 					SerialWrite(0x22);
-					SerialPrint(eePageGrkZ.maxSpd_Spindle);
+					SerialPrint(eePageGrk.maxSpd_Spindle);
 					SerialPrint(nextionQuoteEnd);
 
 					SerialPrint(pageConfig_t11);
 					SerialWrite(0x22);
-					SerialPrint(eePageGrkZ.accel_Spindle);
+					SerialPrint(eePageGrk.accel_Spindle);
 					SerialPrint(nextionQuoteEnd);
 
 					SerialPrint(pageConfig_t12);
 					SerialWrite(0x22);
-					SerialPrint(eePageGrkZ.maxSpd_Axis_Z);
+					SerialPrint(eePageGrk.maxSpd_Axis_Z);
 					SerialPrint(nextionQuoteEnd);
 
 					SerialPrint(pageConfig_t13);
 					SerialWrite(0x22);
-					SerialPrint(eePageGrkZ.accel_Axis_Z);
+					SerialPrint(eePageGrk.accel_Axis_Z);
 					SerialPrint(nextionQuoteEnd);
 					break;
 				}
 				case ID_AXIS_X: // X Axis
 				{
-					configPageGreekKey eePageGrkX;
-					EEPROM.get(eePromAddress_Grk, eePageGrkX);
 					SerialPrint(pageConfig_t10);
 					SerialWrite(0x22);
-					SerialPrint(eePageGrkX.maxSpd_Spindle);
+					SerialPrint(eePageGrk.maxSpd_Spindle);
 					SerialPrint(nextionQuoteEnd);
 
 					SerialPrint(pageConfig_t11);
 					SerialWrite(0x22);
-					SerialPrint(eePageGrkX.accel_Spindle);
+					SerialPrint(eePageGrk.accel_Spindle);
 					SerialPrint(nextionQuoteEnd);
 
 					SerialPrint(pageConfig_t12);
 					SerialWrite(0x22);
-					SerialPrint(eePageGrkX.maxSpd_Axis_X);
+					SerialPrint(eePageGrk.maxSpd_Axis_X);
 					SerialPrint(nextionQuoteEnd);
 
 					SerialPrint(pageConfig_t13);
 					SerialWrite(0x22);
-					SerialPrint(eePageGrkX.accel_Axis_X);
+					SerialPrint(eePageGrk.accel_Axis_X);
 					SerialPrint(nextionQuoteEnd);
 					break;
 				}
 				case ID_AXIS_B: // B Axis
 				{
-					configPageGreekKey eePageGrkB;
-					EEPROM.get(eePromAddress_Grk, eePageGrkB);
 					SerialPrint(pageConfig_t10);
 					SerialWrite(0x22);
-					SerialPrint(eePageGrkB.maxSpd_Spindle);
+					SerialPrint(eePageGrk.maxSpd_Spindle);
 					SerialPrint(nextionQuoteEnd);
 
 					SerialPrint(pageConfig_t11);
 					SerialWrite(0x22);
-					SerialPrint(eePageGrkB.accel_Spindle);
+					SerialPrint(eePageGrk.accel_Spindle);
 					SerialPrint(nextionQuoteEnd);
 
 					SerialPrint(pageConfig_t12);
 					SerialWrite(0x22);
-					SerialPrint(eePageGrkB.maxSpd_Axis_B);
+					SerialPrint(eePageGrk.maxSpd_Axis_B);
 					SerialPrint(nextionQuoteEnd);
 
 					SerialPrint(pageConfig_t13);
 					SerialWrite(0x22);
-					SerialPrint(eePageGrkB.accel_Axis_B);
+					SerialPrint(eePageGrk.accel_Axis_B);
 					SerialPrint(nextionQuoteEnd);
 					break;
 				}
@@ -8499,6 +8505,10 @@ void TestEEPROM_Returns()
 	const char * pageReturns_t1 = "pageReturns.t1.txt=";
 	const char * pageReturns_t2 = "pageReturns.t2.txt=";
 	const char * pageReturns_t3 = "pageReturns.t3.txt=";
+	const char* pageReturns_t7 = "pageReturns.t7.txt=";
+	const char* pageReturns_t8 = "pageReturns.t8.txt=";
+	const char* pageReturns_t9 = "pageReturns.t9.txt=";
+	const char* pageReturns_t10 = "pageReturns.t10.txt=";
 
 	const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
 	const char* nextionEnd = "\xFF\xFF\xFF";
@@ -8518,14 +8528,33 @@ void TestEEPROM_Returns()
 
 	SerialPrint(pageReturns_t2);
 	SerialWrite(0x22);
-	SerialPrint(eePromPageSetup.maxSpd_Return_Axis);
+	SerialPrint(eePromPageSetup.maxSpd_Return_Axis_Z);
 	SerialPrint(nextionQuoteEnd);
 
 	SerialPrint(pageReturns_t3);
 	SerialWrite(0x22);
-	SerialPrint(eePromPageSetup.accel_Return_Axis);
+	SerialPrint(eePromPageSetup.accel_Return_Axis_Z);
 	SerialPrint(nextionQuoteEnd);
 
+	SerialPrint(pageReturns_t7);
+	SerialWrite(0x22);
+	SerialPrint(eePromPageSetup.maxSpd_Return_Axis_X);
+	SerialPrint(nextionQuoteEnd);
+
+	SerialPrint(pageReturns_t8);
+	SerialWrite(0x22);
+	SerialPrint(eePromPageSetup.accel_Return_Axis_X);
+	SerialPrint(nextionQuoteEnd);
+
+	SerialPrint(pageReturns_t9);
+	SerialWrite(0x22);
+	SerialPrint(eePromPageSetup.maxSpd_Return_Axis_B);
+	SerialPrint(nextionQuoteEnd);
+
+	SerialPrint(pageReturns_t10);
+	SerialWrite(0x22);
+	SerialPrint(eePromPageSetup.accel_Return_Axis_B);
+	SerialPrint(nextionQuoteEnd);
 	// Update Nextion
 	SerialPrint("pageReturns.bt1.bco=23964");
 	SerialPrint(nextionEnd);
@@ -8538,7 +8567,11 @@ void LoadSettings()
 {
 	const char* nextionEnd = "\xFF\xFF\xFF";
 	// Verify ini file exists.
-	const char* filename = "/4Axes.ini";
+	const char* filename = filename_4Axes;
+	if (iniFileType==INI_RESET)
+	{
+		filename = filename_Reset;
+	}	
 	IniFile ini(filename);
 
 	if (!ini.open())
@@ -8862,7 +8895,7 @@ void LoadSettings_PageGrk()
 	// Greek Key Main
 	const char* iniKey = "Grk";
 	const char* iniValue = "AxisId";
-	int eePromAddress_Nextion = 764;
+	int eePromAddress_Nextion = 752;
 	float returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configGreekKey.axisId = (int)returnVal;
 
@@ -8874,12 +8907,12 @@ void LoadSettings_PageGrk()
 
 	// Greek Key Spindle (Shared by Pattern and File)
 	iniValue = "MaxSpeed_Spindle";
-	eePromAddress_Nextion = 784;
+	eePromAddress_Nextion = 804;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configGreekKey.maxSpd_Spindle = (int)returnVal;
 	
 	iniValue = "Accel_Spindle";
-	eePromAddress_Nextion = 788;
+	eePromAddress_Nextion = 808;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configGreekKey.accel_Spindle = (int)returnVal;
 
@@ -8887,7 +8920,6 @@ void LoadSettings_PageGrk()
 	eePromAddress_Nextion = 60;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configGreekKey.speedPercent_Spindle = (int)returnVal;
-
 
 	// Z axis
 	iniValue = "MaxSpeed_Z";
@@ -8973,7 +9005,7 @@ void LoadSettings_PageGrk()
 	configGreekKey.countPatternFile360 = (int)returnVal;
 
 	iniValue = "File_PatternCount";
-	eePromAddress_Nextion = 768;
+	eePromAddress_Nextion = 756;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configGreekKey.countPatternFile = (int)returnVal;
 
@@ -9048,12 +9080,12 @@ void LoadSettings_PageRec()
 
 	// B Axis
 	iniValue = "MaxSpeed_B";
-	eePromAddress_Nextion = 776;
+	eePromAddress_Nextion = 796;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configRec.maxSpd_Axis_B = (int)returnVal;
 
 	iniValue = "Accel_B";
-	eePromAddress_Nextion = 780;
+	eePromAddress_Nextion = 800;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configRec.accel_Axis_B = (int)returnVal;
 
@@ -9078,12 +9110,12 @@ void LoadSettings_PageRec()
 	configRec.amplitude_Radial = returnVal;
 
 	iniValue = "Axial_Waves";
-	eePromAddress_Nextion = 752;
+	eePromAddress_Nextion = 740;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configRec.waves_Axial = (int)returnVal;
 
 	iniValue = "Axial_Spindle_Degrees";
-	eePromAddress_Nextion = 756;
+	eePromAddress_Nextion = 744;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
 	configRec.amplitude_Axial = returnVal;
 
@@ -9473,25 +9505,44 @@ void LoadSettings_PageReturns()
 	// Return settings
 	const char* iniKey = "Returns";
 	const char* iniValue = "MaxSpeed_Spindle";
-	int eePromAddress_Nextion = 796;
+	int eePromAddress_Nextion = 760;
 	float returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configSetup.maxSpd_Return_Spindle = (int)returnVal;
 
 	iniValue = "Accel_Spindle";
-	eePromAddress_Nextion = 800;
+	eePromAddress_Nextion = 764;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configSetup.accel_Return_Spindle = (int)returnVal;
 
-	iniValue = "MaxSpeed_Axis";
-	eePromAddress_Nextion = 804;
+	iniValue = "MaxSpeed_Axis_Z";
+	eePromAddress_Nextion = 768;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
-	configSetup.maxSpd_Return_Axis = (int)returnVal;
+	configSetup.maxSpd_Return_Axis_Z = (int)returnVal;
 
-	iniValue = "Accel_Axis";
-	eePromAddress_Nextion = 808;
+	iniValue = "Accel_Axis_Z";
+	eePromAddress_Nextion = 772;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
-	configSetup.accel_Return_Axis = (int)returnVal;
+	configSetup.accel_Return_Axis_Z = (int)returnVal;
 
+	iniValue = "MaxSpeed_Axis_X";
+	eePromAddress_Nextion = 784;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configSetup.maxSpd_Return_Axis_X = (int)returnVal;
+
+	iniValue = "Accel_Axis_X";
+	eePromAddress_Nextion = 788;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configSetup.accel_Return_Axis_X = (int)returnVal;
+
+	iniValue = "MaxSpeed_Axis_B";
+	eePromAddress_Nextion = 776;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configSetup.maxSpd_Return_Axis_B = (int)returnVal;
+
+	iniValue = "Accel_Axis_B";
+	eePromAddress_Nextion = 780;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configSetup.accel_Return_Axis_B = (int)returnVal;
 	EEPROM.put(eePromAddress_Setup, configSetup);
 }
 
@@ -9500,10 +9551,13 @@ float GetIniValue(const char* iniKey, const char* iniValue, int eePromNextion, b
 	const char* nextionEnd = "\xFF\xFF\xFF";
 	const size_t bufferLen = 80;
 	char buffer[bufferLen];
-
-	const char *filename = "/4Axes.ini";
-
+	const char* filename = filename_4Axes;
+	if (iniFileType == INI_RESET)
+	{
+		filename = filename_Reset;
+	}
 	IniFile ini(filename);
+
 
 	if (!ini.open()) 
 	{

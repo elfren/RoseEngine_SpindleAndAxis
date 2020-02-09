@@ -599,13 +599,15 @@ void loop()
 
 				break;
 			}
-			case 64: // @ - Not Used
+			case 64: // @ - Debugging: Reset all Nextion values to 999
 			{
-
+				iniFileType = INI_RESET;
+				LoadSettings();
 				break;
 			}
 			case 65: // A - Load Settings.ini
 			{
+				iniFileType = INI_4AXES;
 				LoadSettings();
 				break;
 			}
@@ -2289,26 +2291,31 @@ void loop()
 					{
 						switch (configMain.axisId)
 						{
-						case ID_AXIS_Z:
-						{
-							configMain.accel_Axis_Z = GetSerialFloat(serialId);
-							break;
-						}
-						case ID_AXIS_X:
-						{
-							configMain.accel_Axis_X = GetSerialFloat(serialId);
-							break;
-						}
-						case ID_AXIS_B:
-						{
-							configMain.accel_Axis_B = GetSerialFloat(serialId);
-							break;
-						}
+							case ID_AXIS_Z:
+							{
+								configMain.accel_Axis_Z = GetSerialFloat(serialId);
+								break;
+							}
+							case ID_AXIS_X:
+							{
+								configMain.accel_Axis_X = GetSerialFloat(serialId);
+								break;
+							}
+							case ID_AXIS_B:
+							{
+								configMain.accel_Axis_B = GetSerialFloat(serialId);
 
+								Serial.print("axisId:");
+								Serial.println(configMain.axisId);
+								Serial.print("....................accel_Axis_B:");
+								Serial.println(configMain.accel_Axis_B);
+
+								break;
+							}
+						}
 						EEPROM.put(eePromAddress_Main, configMain);
-
 						break;
-						}
+						
 					}
 					case PAGE_SYNC:
 					{
@@ -2398,23 +2405,22 @@ void loop()
 							case ID_AXIS_Z: // Greek Key Z: Z Axis MaxSpd
 							{
 								configGreekKey.accel_Axis_Z = GetSerialFloat(serialId);
-								EEPROM.put(eePromAddress_Grk, eePromAddress_Grk);
 								break;
 							}
 							case ID_AXIS_X: // Greek Key X: X Axis MaxSpd
 							{
 								configGreekKey.accel_Axis_X = GetSerialFloat(serialId);
-								EEPROM.put(eePromAddress_Grk, configGreekKey);
 								break;
 							}
 							case ID_AXIS_B:
 							{
 								configGreekKey.accel_Axis_B = GetSerialFloat(serialId);
-								EEPROM.put(eePromAddress_Grk, configGreekKey);
+								
 								break;
 							}
 						}
 
+						EEPROM.put(eePromAddress_Grk, configGreekKey);
 						break;
 					}
 					case PAGE_GEO:
@@ -3053,21 +3059,71 @@ void loop()
 			}
 			case 234: // ê - Return: Axis MaxSpd
 			{
-				configSetup.maxSpd_Return_Axis = (int)GetSerialFloat(serialId);
+				Serial.print("returnAxisId: ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,");
+				//Serial.println(returnAxisId);
+				int returnAxisId = GetSerialIntegerOnly();
+				Serial.print("GetSerialIntegerOnly: ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,");
+				int newValue = (int)GetSerialFloat(serialId);
+				Serial.print("returnAxisId: ");
+				Serial.println(returnAxisId);
+				Serial.print("newValue: ");
+				Serial.println(newValue);
+
+				switch (returnAxisId)
+				{
+					case ID_AXIS_Z:
+					{
+						configSetup.maxSpd_Return_Axis_Z = newValue;
+						break;
+					}
+					case ID_AXIS_X:
+					{
+						configSetup.maxSpd_Return_Axis_X = newValue;
+						break;
+					}
+					case ID_AXIS_B:
+					{
+						configSetup.maxSpd_Return_Axis_B = newValue;
+						break;
+					}
+				}
+				
 				EEPROM.put(eePromAddress_Setup, configSetup);
 	#ifdef DEBUG
 				Serial.print(maxSpd_Char);
-				Serial.println(configSetup.maxSpd_Return_Axis);
+				Serial.println(configSetup.maxSpd_Return_Axis_Z);
 	#endif // DEBUG
 				break;
 			}
 			case 235: // ë - Return: Axis Accel
 			{
-				configSetup.accel_Return_Axis = (int)GetSerialFloat(serialId);
+				int returnAxisId = GetSerialIntegerOnly();
+				switch (returnAxisId)
+				{
+				case ID_AXIS_Z:
+				{
+					configSetup.accel_Return_Axis_Z = (int)GetSerialFloat(serialId);
+					break;
+				}
+				case ID_AXIS_X:
+				{
+					configSetup.accel_Return_Axis_X = (int)GetSerialFloat(serialId);
+					break;
+				}
+				case ID_AXIS_B:
+				{
+					configSetup.accel_Return_Axis_B = (int)GetSerialFloat(serialId);
+					break;
+				}
+				}
+
+
+
+
 				EEPROM.put(eePromAddress_Setup, configSetup);
 	#ifdef DEBUG
 				Serial.print(accel_Char);
-				Serial.println(configSetup.accel_Return_Axis);
+				Serial.println(configSetup.accel_Return_Axis_Z);
 	#endif // DEBUG
 				break;
 			}
