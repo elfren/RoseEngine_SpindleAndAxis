@@ -12,7 +12,6 @@
 #include "SD.h"
 #include "SPI.h"
 #include "TeensyStep.h" //  https://github.com/luni64/TeensyStep
-#include "AccelStepper.h"
 #include "IniFile.h" // https://github.com/stevemarple/IniFile
 //#include <MemoryFree.h>
 
@@ -44,8 +43,12 @@ void setup()
 	Serial.begin(115200);
 	MilliDelay(15);
 	uint32_t serialBaud = Serial.baud();
-	Serial.print("Baud:");
-	Serial.println(serialBaud);
+
+#ifdef DEBUG
+	SerialPrint("Baud:");
+	SerialPrintln(serialBaud);
+#endif // DEBUG
+
 
 	// Initialize Nextion LCD for 115200 baud and enable Serial1,2,or3.
 	// Note: Nextion requires 3 0xFF bytes to signal end of transmission
@@ -101,6 +104,8 @@ void setup()
 		Serial.print("3-serialId: ");
 		Serial.println(serialId);
 	}
+
+
 	Serial.print("serialId: ");
 	Serial.println(serialId);
 
@@ -249,24 +254,24 @@ void loop()
 	const char * nextionQuoteEnd = "\x22\xFF\xFF\xFF";
 	const char * nextionEnd = "\xFF\xFF\xFF";
 
-	if (Serial1.available() > 0)
-	{
-		serialId = 1;
-		Serial.print("1.serialId: ");
-	}
-	else if (Serial2.available() > 0)
-	{
-		serialId = 2;
-		//Serial.print("2.serialId: ");
-	}
-	else if (Serial3.available() > 0)
-	{
-		serialId = 3;
-		Serial.print("3.serialId: ");
-	}
+	//if (Serial1.available() > 0)
+	//{
+	//	serialId = 1;
+	//	Serial.print("1.serialId: ");
+	//}
+	//else if (Serial2.available() > 0)
+	//{
+	//	serialId = 2;
+	//	//Serial.print("2.serialId: ");
+	//}
+	//else if (Serial3.available() > 0)
+	//{
+	//	serialId = 3;
+	//	Serial.print("3.serialId: ");
+	//}
 
-	//Serial.print("serialId: ");
-	//Serial.println(serialId);
+	SerialPrint("serialId: ");
+	SerialPrintln(serialId);
 
 	// All Nextion incoming data packets are terminated with one 0xFF byte
 	//if (serialId < 9)
@@ -781,9 +786,10 @@ void loop()
 			case 78: // N - GetFileListFromSD
 			{
 				currentFileIndex = GetSerialInteger();
-				
+#ifdef DEBUG				
 				Serial.print("GetFileListFromSD: ");
 				Serial.println(currentFileIndex);
+#endif // DEBUG
 				GetFileListFromSD(currentFileIndex);
 
 				break;
@@ -1257,13 +1263,13 @@ void loop()
 			case 100: // d - pageOne Clockwise
 			{
 				RunOneStepper(DIR_CW);
-				Serial.println("End case 100 ");
+
 				break;
 			}
 			case 101: // e - pageOne CounterClockwise
 			{
 				RunOneStepper(DIR_CCW);
-				Serial.println("End case 101 ");
+	
 				break;
 			}
 			case 102: // f - Set pageOne Speed Percentage
@@ -1791,11 +1797,10 @@ void loop()
 			case 126: // ~ - Test EEPROM settings Config screen
 			{
 				pageCallerId = GetSerialIntegerOnly();
+#ifdef DEBUG
 				Serial.print("PageCallerId:");
 				Serial.println(pageCallerId);
-
-				//Serial.print("Call TestEEPROMConfig:");
-				Serial.println(pageCallerId);
+#endif // DEBUG
 				TestEEPROMConfig(pageCallerId);
 				break;
 			}
@@ -2304,12 +2309,12 @@ void loop()
 							case ID_AXIS_B:
 							{
 								configMain.accel_Axis_B = GetSerialFloat(serialId);
-
+#ifdef DEBUG
 								Serial.print("axisId:");
 								Serial.println(configMain.axisId);
 								Serial.print("....................accel_Axis_B:");
 								Serial.println(configMain.accel_Axis_B);
-
+#endif // DEBUG
 								break;
 							}
 						}
@@ -2583,10 +2588,9 @@ void loop()
 			{
 				configSetup.radialOrLinear_Axis_B = GetSerialInteger();
 				// Radial = 1, Linear = 0
-				//bRadialLinear >= 1 ? (configSetup.radialOrLinear_Axis_B = true) : (configSetup.radialOrLinear_Axis_B = false);
+
 				EEPROM.put(eePromAddress_Setup, configSetup);
 #ifdef DEBUG
-				//Serial.print(polarity_Char);
 				Serial.println(configSetup.radialOrLinear_Axis_B);
 #endif // DEBUG
 				break;
@@ -3059,16 +3063,16 @@ void loop()
 			}
 			case 234: // ê - Return: Axis MaxSpd
 			{
-				Serial.print("returnAxisId: ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,");
-				//Serial.println(returnAxisId);
+
 				int returnAxisId = GetSerialIntegerOnly();
-				Serial.print("GetSerialIntegerOnly: ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,");
+
 				int newValue = (int)GetSerialFloat(serialId);
+#ifdef DEBUG
 				Serial.print("returnAxisId: ");
 				Serial.println(returnAxisId);
-				Serial.print("newValue: ");
+				Serial.print("Axis MaxSpd: ");
 				Serial.println(newValue);
-
+#endif // DEBUG
 				switch (returnAxisId)
 				{
 					case ID_AXIS_Z:
@@ -3141,7 +3145,9 @@ void loop()
 				{
 					case 1:
 					{
+#ifdef DEBUG
 						Serial.println ("vis bt0,1");
+#endif // DEBUG
 						SerialPrint("vis bt0,1");
 						SerialPrint(nextionEnd);
 					}
