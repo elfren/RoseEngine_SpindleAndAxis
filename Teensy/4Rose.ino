@@ -125,14 +125,17 @@ void setup()
 	EEPROM.get(eePromAddress_Rec, configRec);
 	EEPROM.get(eePromAddress_Grk, configGreekKey);
 
-	// Config as well as all other EEProm settings must be run from Nextion whenever Teensy is updated.  
+	// Config as well as all other EEProm settings should be run from Nextion whenever Teensy is updated.  
 	// EEProm may contain invalid settings otherwise.
 
 	pinMode(PIN_SPINDLE_ENABLE, OUTPUT);
 	pinMode(PIN_AXIS_Z_ENABLE, OUTPUT);
 	pinMode(PIN_AXIS_X_ENABLE, OUTPUT);
-
 	pinMode(PIN_AXIS_B_ENABLE, OUTPUT);
+
+	SetEnable(ID_SPINDLE, false);
+	SetEnable(ID_AXIS_Z, false);
+	SetEnable(ID_AXIS_X, false);
 	SetEnable(ID_AXIS_B, false);
 
 	// Initialize Limit switches
@@ -254,24 +257,24 @@ void loop()
 	const char * nextionQuoteEnd = "\x22\xFF\xFF\xFF";
 	const char * nextionEnd = "\xFF\xFF\xFF";
 
-	//if (Serial1.available() > 0)
-	//{
-	//	serialId = 1;
-	//	Serial.print("1.serialId: ");
-	//}
-	//else if (Serial2.available() > 0)
-	//{
-	//	serialId = 2;
-	//	//Serial.print("2.serialId: ");
-	//}
-	//else if (Serial3.available() > 0)
-	//{
-	//	serialId = 3;
-	//	Serial.print("3.serialId: ");
-	//}
+	if (Serial1.available() > 0)
+	{
+		serialId = 1;
+		Serial.print("1.serialId: ");
+	}
+	else if (Serial2.available() > 0)
+	{
+		serialId = 2;
+		//Serial.print("2.serialId: ");
+	}
+	else if (Serial3.available() > 0)
+	{
+		serialId = 3;
+		Serial.print("3.serialId: ");
+	}
 
-	SerialPrint("serialId: ");
-	SerialPrintln(serialId);
+	//SerialPrint("serialId: ");
+	//SerialPrintln(serialId);
 
 	// All Nextion incoming data packets are terminated with one 0xFF byte
 	//if (serialId < 9)
@@ -327,7 +330,7 @@ void loop()
 			}
 			case 46: // . - Greek Key: Pattern count(pattern repeats)
 			{
-				configGreekKey.countPattern = GetSerialInteger();
+				configGreekKey.patternCount_Pattern = GetSerialInteger();
 				EEPROM.put(eePromAddress_Grk, configGreekKey);
 				break;
 			}
@@ -590,7 +593,7 @@ void loop()
 					reverseDirection = DIR_CW;
 				}
 
-				GreekKeyFromFile(reverseDirection);
+				GreekKey_FromFile(reverseDirection);
 
 				break;
 			}
@@ -775,10 +778,10 @@ void loop()
 			}
 			case 77: // M - Greek Key File: Pattern Count
 			{
-				configGreekKey.countPatternFile = (int)GetSerialFloat(serialId);//  GetSerialInteger();
+				configGreekKey.patternCount_File = (int)GetSerialFloat(serialId);//  GetSerialInteger();
 	#ifdef DEBUG
 				Serial.print(patternCount_Char);
-				Serial.println(configGreekKey.countPatternFile);
+				Serial.println(configGreekKey.patternCount_File);
 	#endif // DEBUG
 				EEPROM.put(eePromAddress_Grk, configGreekKey);
 				break;
@@ -1124,11 +1127,11 @@ void loop()
 			}
 			case 85: //U - Greek Key File: Axis Segment Length
 			{
-				configGreekKey.segmentLengthForFile = GetSerialFloat(serialId);
+				configGreekKey.segmentLength_File = GetSerialFloat(serialId);
 				EEPROM.put(eePromAddress_Grk, configGreekKey);
 	#ifdef DEBUG
 				Serial.print(segmentLength_Char);
-				Serial.println(configGreekKey.segmentLengthForFile);
+				Serial.println(configGreekKey.segmentLength_File);
 	#endif // DEBUG
 				break;
 			}
@@ -1469,8 +1472,12 @@ void loop()
 			}
 			case 111: // o - Axis Speed Percentage
 			{
-
-
+#ifdef DEBUG
+				
+				Serial.println("Enter case 111: >>>>>>>>>>>>>>>>>>>>>>>>>>");
+				Serial.print("pageCallerId: ");
+				Serial.println(pageCallerId);
+#endif // DEBUG
 				switch (pageCallerId)
 				{
 					case PAGE_MAIN:
@@ -2751,21 +2758,21 @@ void loop()
 			}
 			case 204: // Ë - Rec: Axial Amplitude
 			{
-				configRec.amplitude_Axial = GetSerialFloat(serialId);
+				configRec.amplitude_Axial_Spindle = GetSerialFloat(serialId);
 				EEPROM.put(eePromAddress_Rec, configRec);
 	#ifdef DEBUG
 				Serial.print(amplitude_Char);
-				Serial.println(configRec.amplitude_Axial);
+				Serial.println(configRec.amplitude_Axial_Spindle);
 	#endif // DEBUG
 				break;
 			}
 			case 205: // Í - Rec: Axial Distance
 			{
-				configRec.distance_Axial = GetSerialFloat(serialId);
+				configRec.distance_Axial_Axis = GetSerialFloat(serialId);
 				EEPROM.put(eePromAddress_Rec, configRec);
 	#ifdef DEBUG
 				Serial.print(distance_Char);
-				Serial.println(configRec.distance_Axial);
+				Serial.println(configRec.distance_Axial_Axis);
 	#endif // DEBUG
 				break;
 			}
@@ -2813,21 +2820,21 @@ void loop()
 			}
 			case 213: // Õ - Rec: radial Degrees
 			{
-				configRec.degrees_Radial = GetSerialFloat(serialId);
+				configRec.degrees_Radial_Spindle = GetSerialFloat(serialId);
 				EEPROM.put(eePromAddress_Rec, configRec);
 	#ifdef DEBUG
 				Serial.print(degrees_Char);
-				Serial.println(configRec.degrees_Radial);
+				Serial.println(configRec.degrees_Radial_Spindle);
 	#endif // DEBUG
 				break;
 			}
 			case 214: // Ö - Rec: radial Amplitude Axis
 			{
-				configRec.amplitude_Radial = GetSerialFloat(serialId);
+				configRec.amplitude_Radial_Axis = GetSerialFloat(serialId);
 				EEPROM.put(eePromAddress_Rec, configRec);
 	#ifdef DEBUG
 				Serial.print(amplitude_Char);
-				Serial.println(configRec.amplitude_Radial);
+				Serial.println(configRec.amplitude_Radial_Axis);
 	#endif // DEBUG
 				break;
 			}
@@ -3026,11 +3033,11 @@ void loop()
 			}
 			case 230: // å - Greek Key File: Pattern Count/360
 			{
-				configGreekKey.countPatternFile360 = GetSerialFloat(serialId);
+				configGreekKey.countPatternPer360_File = GetSerialFloat(serialId);
 				EEPROM.put(eePromAddress_Grk, configGreekKey);
 	#ifdef DEBUG
 				Serial.print(patternCount_Char);
-				Serial.println(configGreekKey.countPatternFile360);
+				Serial.println(configGreekKey.countPatternPer360_File);
 	#endif // DEBUG
 				break;
 			}
@@ -3294,22 +3301,22 @@ void loop()
 			}
 			case 251: // û - Greek Key Leg Segment Length
 			{
-				configGreekKey.segmentLengthPattern = GetSerialFloat(serialId);
+				configGreekKey.segmentLength_Pattern = GetSerialFloat(serialId);
 				EEPROM.put(eePromAddress_Grk, configGreekKey);
 	#ifdef DEBUG
 				Serial.print(segmentLength_Char);
-				Serial.println(configGreekKey.segmentLengthPattern);
+				Serial.println(configGreekKey.segmentLength_Pattern);
 	#endif // DEBUG
 
 				break;
 			}
 			case 252: // ü - Greek Key Count/360
 			{
-				configGreekKey.countPattern360 = GetSerialFloat(serialId);
+				configGreekKey.countPatternPer360_Pattern = GetSerialFloat(serialId);
 				EEPROM.put(eePromAddress_Grk, configGreekKey);
 	#ifdef DEBUG
 				Serial.print(patternCount_Char);
-				Serial.println(configGreekKey.countPattern360);
+				Serial.println(configGreekKey.countPatternPer360_Pattern);
 	#endif // DEBUG
 				break;
 			}

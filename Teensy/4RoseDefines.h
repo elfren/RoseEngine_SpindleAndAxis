@@ -198,16 +198,16 @@ struct configPageRec // page 5,6,13,14
 	int32_t waves_Radial;
 	//float distance_AxialZ;
 	//float distance_AxialX;
-	float distance_Axial;
+	float distance_Axial_Axis;
 	//float amplitude_AxialZ;
 	//float amplitude_AxialX;
-	float amplitude_Axial;
+	float amplitude_Axial_Spindle;
 	//float amplitude_RadialZ;
 	//float amplitude_RadialX;
-	float amplitude_Radial;
+	float amplitude_Radial_Axis;
 	//float degrees_RadialZ;
 	//float degrees_RadialX;
-	float degrees_Radial;
+	float degrees_Radial_Spindle;
 	uint32_t axisId;
 	uint32_t radial_axial;
 };
@@ -268,17 +268,17 @@ struct configPageGreekKey
 
 	// pageGrk settings
 	uint32_t patternId;
-	float countPattern360;
-	int32_t countPattern;
+	float countPatternPer360_Pattern;
+	int32_t patternCount_Pattern;
 	int32_t radialOrAxial_Pattern;
-	float segmentLengthPattern;
+	float segmentLength_Pattern;
 
 	// pageGrkFile settings
-	int32_t countPatternFile;
-	float countPatternFile360;
+	int32_t patternCount_File;
+	float countPatternPer360_File;
 	int32_t segmentOrActual;
 	int32_t radialOrAxial_File;
-	float segmentLengthForFile;
+	float segmentLength_File;
 
 	// Stepper settings
 	int32_t maxSpd_Spindle;
@@ -438,4 +438,11 @@ int iniFileType = INI_4AXES;
 //
 
 // End Global Variables
+//==================================================================
+
+//==================================================================
+// Prototypes
+//==================================================================
+void SerialPrint(String text, int decimalPlaces = 0);
+void SerialPrint(float number, int decimalPlaces = 0);
 //==================================================================
