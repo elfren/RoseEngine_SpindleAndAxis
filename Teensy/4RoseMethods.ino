@@ -513,7 +513,7 @@ float DistanceToSteps_RadialB(float linearDistance)
 	Serial.println(configSetup.gearRatio_AxisB);
 	Serial.print("circumference: ");
 	Serial.println(circumference);
-	Serial.print("distance: ");
+	Serial.print("linearDistance: ");
 	Serial.println(linearDistance);
 	Serial.print("angle: ");
 	Serial.println(angle);
@@ -525,7 +525,11 @@ float DistanceToSteps_RadialB(float linearDistance)
 
 float DistanceToSteps_LinearB(float distance)
 {
+
 	float retVal = (configMove.distance_MoveB / (configSetup.distancePerRev_AxisB) * (configSetup.steps360_Axis_B * configSetup.microsteps_Axis_B));
+	Serial.print("DistanceToSteps_LinearB: ");
+	Serial.println(retVal);
+	
 	return retVal;
 }
 
@@ -624,6 +628,8 @@ void MoveAxis(int axisId, int directionAxis)
 
 	const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
 	const char* nextionEnd = "\xFF\xFF\xFF";
+	Serial.println("AxisId: =============================================");
+	Serial.println(axisId);
 	switch (axisId)
 	{
 		case ID_AXIS_Z:
@@ -639,7 +645,8 @@ void MoveAxis(int axisId, int directionAxis)
 				.setTargetRel(stepsToMove * directionAxis);
 
 #ifdef DEBUG
-			
+			Serial.println("AxisId: =============================================");
+			Serial.println(axisId);
 			Serial.print(distancePer360_Char);
 			Serial.println(configSetup.distancePerRev_AxisZ);
 			Serial.print(stepsPer360_Char);
@@ -709,7 +716,7 @@ void MoveAxis(int axisId, int directionAxis)
 
 		case ID_AXIS_B:
 		{
-			if (configSetup.radialOrLinear_Axis_B)
+			if (configSetup.radialOrLinear_Axis_B==RADIAL_B)
 			{
 				stepsToMove = DistanceToSteps_RadialB(configMove.distance_MoveB);
 			}
@@ -1364,14 +1371,14 @@ void RunTwoSteppers_All(
 	bool stepper_Axis_Go = false;
 	bool stepper_Spindle_Go = false;
 
-	const char * initialCaller_Char = "Initial Caller:";
+	const char * initialCaller_Char = "Initial Caller: ";
 	const char * spindle_Char = "Spindle-";
-	const char * maxSpd_Char = "MaxSpeed:";
-	const char * accel_Char = "Accel:";
-	const char * targetPosition_Char = "Target Position:";
-	const char * stop_Char = "Stop";
+	const char * maxSpd_Char = "MaxSpeed: ";
+	const char * accel_Char = "Accel: ";
+	const char * targetPosition_Char = "Target Position: ";
+	const char * stop_Char = "Stop: ";
 	const char * stopped_Char = "Stopped";
-	const char * go_Char = "Go";
+	const char * go_Char = "Go: ";
 	const char * axis_Char = "Axis-";
 
 #ifdef DEBUG
@@ -1492,6 +1499,13 @@ void RunTwoSteppers_All(
 				break;
 			}
 		}
+
+#ifdef DEBUG
+		Serial.print(axis_Char);
+		Serial.print(go_Char);
+		Serial.println(stepper_Axis_Go);
+
+#endif // DEBUG
 	}
 
 	if (stepper_Spindle_Go)
@@ -1502,6 +1516,11 @@ void RunTwoSteppers_All(
 		rotateControllerSpindle.overrideSpeed(0);
 		MilliDelay(10);
 		rotateControllerSpindle.overrideSpeed(currentSpeedPercentSpindle);
+#ifdef DEBUG
+		Serial.print(spindle_Char);
+		Serial.print(go_Char);
+		Serial.println(stepper_Spindle_Go);
+#endif // DEBUG
 	}
 
 	while (stepper_Axis_Go || stepper_Spindle_Go)
@@ -1531,14 +1550,7 @@ void RunTwoSteppers_All(
 					SetEnable(ID_SPINDLE, false);
 					stepper_Spindle_Go = false;
 
-	#ifdef DEBUG
-					Serial.print(axis_Char);
-					Serial.print(go_Char);
-					Serial.println(stepper_Axis_Go);
-					Serial.print(spindle_Char);
-					Serial.print(go_Char);
-					Serial.println(stepper_Spindle_Go);
-	#endif // DEBUG
+
 					break;
 				}
 				case 90: // Z - Z Axis CW
@@ -1781,15 +1793,6 @@ void RunTwoSteppers_All(
 					break;
 				}
 			}
-
-#ifdef DEBUG
-			Serial.print(axis_Char);
-			Serial.print(go_Char);
-			Serial.println(stepper_Axis_Go);
-			Serial.print(spindle_Char);
-			Serial.print(go_Char);
-			Serial.println(stepper_Spindle_Go);
-#endif // DEBUG
 		}
 
 		if (stepper_Axis_Go)
@@ -1928,10 +1931,10 @@ void IndexSpindle(int directionSpindle)
 #ifdef DEBUG
 			Serial.print(index1_Char);
 			Serial.print(size_Char);
-			Serial.println(configIndex_1.size);
+			Serial.println(configIndex_1.sizeInSteps);
 #endif // DEBUG
 
-			stepsToMove = (int)round(configIndex_1.size);
+			stepsToMove = (int)round(configIndex_1.sizeInSteps);
 			break;
 		}
 		case 2:
@@ -1940,10 +1943,10 @@ void IndexSpindle(int directionSpindle)
 
 			Serial.print(index2_Char);
 			Serial.print(size_Char);
-			Serial.println(configIndex_2.size);
+			Serial.println(configIndex_2.sizeInSteps);
 #endif // DEBUG
 
-			stepsToMove = (int)round(configIndex_2.size);
+			stepsToMove = (int)round(configIndex_2.sizeInSteps);
 			break;
 		}
 		case 3:
@@ -1951,9 +1954,9 @@ void IndexSpindle(int directionSpindle)
 #ifdef DEBUG
 			Serial.print(index3_Char);
 			Serial.print(size_Char);
-			Serial.println(configIndex_3.size);
+			Serial.println(configIndex_3.sizeInSteps);
 #endif // DEBUG
-			stepsToMove = (int)round(configIndex_3.size);
+			stepsToMove = (int)round(configIndex_3.sizeInSteps);
 			break;
 		}
 	}
@@ -2012,7 +2015,6 @@ void IndexSpindle(int directionSpindle)
 	degrees_Spindle = StepsToDegrees_Spindle(returnSteps_Spindle);
 
 	SerialPrint(pageBE_t1_Char);
-
 	SerialWrite(0x22);
 	SerialPrint(degrees_Spindle);
 	SerialPrint(nextionQuoteEnd);
@@ -5069,6 +5071,8 @@ void GreekKey_FromFile(int direction)
 	const char* pageBE_t1 = "pageBE.t1.txt="; // Spindle End
 	const char* pageBE_t4 = "pageBE.t3.txt="; // Axis Begin
 	const char* pageBE_t2 = "pageBE.t1.txt="; // Axis End
+	const char* pageGrkFile_t15 = "pageGrkFile.t15.txt="; // Segments
+	const char* pageGrkFile_t21 = "pageGrkFile.t21.txt="; // Direction
 
 #ifdef DEBUG
 	Serial.print(">>>>>>>>>>>>>>>>>>>>segmentOrActual:");
@@ -5245,6 +5249,11 @@ void GreekKey_FromFile(int direction)
 
 			// Get data
 			segmentMultiplier = GetGreekKeyDataFromSD(i);
+
+			SerialPrint(pageGrkFile_t15);
+			SerialWrite(0x22);
+			SerialPrint(segmentMultiplier);
+			SerialPrint(nextionQuoteEnd);
 	
 	#ifdef DEBUG
 			Serial.print("segmentMultiplier:");
@@ -5290,10 +5299,15 @@ void GreekKey_FromFile(int direction)
 			{
 				case 68: // D  - Radial: Spindle Down CW   Axial: Axis Right CW
 				{
+
 					switch (configGreekKey.radialOrAxial_File)
 					{
 						case RADIAL: // Spindle Down CW
 						{
+							SerialPrint(pageGrkFile_t21);
+							SerialWrite(0x22);
+							SerialPrint("Down");
+							SerialPrint(nextionQuoteEnd);
 							if (configGreekKey.segmentOrActual == 2) // 2: Segment 
 							{
 								stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, segmentMultiplier, DIR_CW);
@@ -5307,6 +5321,10 @@ void GreekKey_FromFile(int direction)
 						}
 						case AXIAL: // Axis Right CW
 						{
+							SerialPrint(pageGrkFile_t21);
+							SerialWrite(0x22);
+							SerialPrint("Right");
+							SerialPrint(nextionQuoteEnd);
 							if (configGreekKey.segmentOrActual == 2) // 2: Segment  
 							{
 								stopAll = GreekKey_Move_Axis(shortSegmentStepsAxis, segmentMultiplier, DIR_CW, true);
@@ -5370,6 +5388,10 @@ void GreekKey_FromFile(int direction)
 				}
 				case 72: // H  - Angular Move. Line must also contain V
 				{
+					SerialPrint(pageGrkFile_t21);
+					SerialWrite(0x22);
+					SerialPrint("Angle");
+					SerialPrint(nextionQuoteEnd);
 					switch (configGreekKey.radialOrAxial_File)
 					{
 						case RADIAL: // 
@@ -5515,6 +5537,10 @@ void GreekKey_FromFile(int direction)
 				}
 				case 73: // I - Move alternate axis in (Doesn't change for Radial or Axial)
 				{
+					SerialPrint(pageGrkFile_t21);
+					SerialWrite(0x22);
+					SerialPrint("In");
+					SerialPrint(nextionQuoteEnd);
 					if (configGreekKey.segmentOrActual == 2) // 2: Segment  
 					{
 						switch (configGreekKey.axisId)
@@ -5598,6 +5624,10 @@ void GreekKey_FromFile(int direction)
 					{
 						case RADIAL: // Axis Left CCW
 						{
+							SerialPrint(pageGrkFile_t21);
+							SerialWrite(0x22);
+							SerialPrint("Left");
+							SerialPrint(nextionQuoteEnd);
 							if (configGreekKey.segmentOrActual == 2) // 2: Segment  
 							{
 								Serial.print("Z----shortSegmentStepsAxis--------------------------------------------------");
@@ -5643,6 +5673,10 @@ void GreekKey_FromFile(int direction)
 						}
 						case AXIAL: // Spindle Up CCW
 						{
+							SerialPrint(pageGrkFile_t21);
+							SerialWrite(0x22);
+							SerialPrint("Up");
+							SerialPrint(nextionQuoteEnd);
 							if (configGreekKey.segmentOrActual == 2) // 2: Segment 
 							{
 								stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, segmentMultiplier, DIR_CCW);
@@ -5672,6 +5706,10 @@ void GreekKey_FromFile(int direction)
 				}
 				case 79: // O - Move alternate axis out (Doesn't change for Radial or Axial)
 				{
+					SerialPrint(pageGrkFile_t21);
+					SerialWrite(0x22);
+					SerialPrint("Out");
+					SerialPrint(nextionQuoteEnd);
 					if (configGreekKey.segmentOrActual == 2) // 2: Segment  
 					{
 						switch (configGreekKey.axisId)
@@ -5735,10 +5773,15 @@ void GreekKey_FromFile(int direction)
 				}
 				case 82: // R - Move axis right CW
 				{ 
+
 					switch (configGreekKey.radialOrAxial_File)
 					{
 						case RADIAL: // Axis Right CW
 						{
+							SerialPrint(pageGrkFile_t21);
+							SerialWrite(0x22);
+							SerialPrint("Right");
+							SerialPrint(nextionQuoteEnd);
 							if (configGreekKey.segmentOrActual == 2) // 2: Segment  
 							{
 								stopAll = GreekKey_Move_Axis(shortSegmentStepsAxis, segmentMultiplier, DIR_CW, true);
@@ -5783,6 +5826,10 @@ void GreekKey_FromFile(int direction)
 						}
 						case AXIAL: // Spindle Down CW
 						{
+							SerialPrint(pageGrkFile_t21);
+							SerialWrite(0x22);
+							SerialPrint("Down");
+							SerialPrint(nextionQuoteEnd);
 							if (configGreekKey.segmentOrActual == 2) // 2: Segment 
 							{
 								stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, segmentMultiplier, DIR_CW);
@@ -5812,10 +5859,15 @@ void GreekKey_FromFile(int direction)
 				}
 				case 85: // U - Spindle up CCW
 				{
+
 					switch (configGreekKey.radialOrAxial_File)
 					{
 						case RADIAL: // Spindle Up CCW
 						{
+							SerialPrint(pageGrkFile_t21);
+							SerialWrite(0x22);
+							SerialPrint("Up");
+							SerialPrint(nextionQuoteEnd);
 							if (configGreekKey.segmentOrActual == 2) // 2: Segment 
 							{
 								stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, segmentMultiplier, DIR_CCW);
@@ -5830,6 +5882,10 @@ void GreekKey_FromFile(int direction)
 						}
 						case AXIAL: // Axis Left CCW
 						{
+							SerialPrint(pageGrkFile_t21);
+							SerialWrite(0x22);
+							SerialPrint("Left");
+							SerialPrint(nextionQuoteEnd);
 							if (configGreekKey.segmentOrActual == 2) // 2: Segment  
 							{
 								stopAll = GreekKey_Move_Axis(shortSegmentStepsAxis, segmentMultiplier, DIR_CCW, true);
@@ -6014,30 +6070,50 @@ void SerialPrint(String text, int decimalPlaces = 0)
 
 void SerialPrint(float number, int decimalPlaces = 0)
 {
-
+	int trim = PrintFloat(number);
 	switch (serialId)
 	{
 	case 0:
 	{
-		Serial.print(number,decimalPlaces);
+		Serial.print(number, trim);
 		break;
 	}
 	case 1:
 	{
-		Serial1.print(number, decimalPlaces);
+		Serial1.print(number, trim);
 		break;
 	}
 	case 2:
 	{
-		Serial2.print(number, decimalPlaces);
+		Serial2.print(number, trim);
 		break;
 	}
 	case 3:
 	{
-		Serial3.print(number, decimalPlaces);
+		Serial3.print(number, trim);
 		break;
 	}
 	}
+}
+
+int PrintFloat(float floatValue) {
+	int decimalPlaces;
+	float tempValue = floatValue;
+
+	for (decimalPlaces = 0; decimalPlaces < 6; decimalPlaces++) 
+	{
+
+		if (tempValue == (long)tempValue)
+		{ 
+			break;
+		}
+		tempValue *= 10.0;  // Shift left one decimal digit
+	}
+	Serial.print("decimalPlaces:");
+	Serial.println(decimalPlaces);
+	Serial.print("PrintFloat: ");
+	Serial.println(floatValue, decimalPlaces);
+	return decimalPlaces;
 }
 /// <summary>
 /// Serial Write
@@ -8520,7 +8596,7 @@ void TestEEPROMSetup()
 
 	SerialPrint(pageX_t62);
 	SerialWrite(0x22);
-	SerialPrint(eePromPageSetup.distancePerRev_AxisX, 4);
+	SerialPrint(eePromPageSetup.distancePerRev_AxisX, 5);
 	SerialPrint(nextionQuoteEnd);
 
 	SerialPrint(pageX_t63);
@@ -8676,6 +8752,1143 @@ void TestEEPROM_Returns()
 
 }
 
+void TestAllTeensyEEPROMValues()
+{
+	const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
+	const char* nextionEnd = "\xFF\xFF\xFF";
+	switch (pageCallerId)
+	{
+		case PAGE_MAIN:
+		{
+
+			SerialPrint("pageEEPROM.t5.txt=");
+			SerialWrite(0x22);
+			SerialPrint(configMain.maxSpd_Spindle);
+			SerialPrint(nextionQuoteEnd);
+
+			SerialPrint("pageEEPROM.t8.txt=");
+			SerialWrite(0x22);
+			SerialPrint(configMain.accel_Spindle);
+			SerialPrint(nextionQuoteEnd);
+
+			SerialPrint("pageEEPROM.t11.txt=");
+			SerialWrite(0x22);
+			SerialPrint(configMain.speedPercent_Spindle);
+			SerialPrint(nextionQuoteEnd);
+
+			switch (configMain.axisId)
+			{
+				case ID_AXIS_Z:
+				{
+					SerialPrint("pageEEPROM.t2.txt=");
+					SerialWrite(0x22);
+					SerialPrint("Z");
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t14.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configMain.maxSpd_Axis_Z);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t17.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configMain.accel_Axis_Z);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t20.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configMain.speedPercent_Axis_Z);
+					SerialPrint(nextionQuoteEnd);
+					break;
+				}
+				case ID_AXIS_X: // X Axis
+				{
+					SerialPrint("pageEEPROM.t2.txt=");
+					SerialWrite(0x22);
+					SerialPrint("X");
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t14.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configMain.maxSpd_Axis_X);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t17.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configMain.accel_Axis_X);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t20.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configMain.speedPercent_Axis_X);
+					SerialPrint(nextionQuoteEnd);
+
+					break;
+				}
+				case ID_AXIS_B: // B Axis
+				{
+					SerialPrint("pageEEPROM.t2.txt=");
+					SerialWrite(0x22);
+					SerialPrint("B");
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t14.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configMain.maxSpd_Axis_B);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t17.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configMain.accel_Axis_B);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t20.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configMain.speedPercent_Axis_B);
+					SerialPrint(nextionQuoteEnd);
+					break;
+				}
+			}
+			break;
+		}
+		case PAGE_ONE:
+		{
+			switch (configOne.axisId)
+			{
+				case ID_AXIS_Z:
+				{
+					SerialPrint("pageEEPROM.t2.txt=");
+					SerialWrite(0x22);
+					SerialPrint("Z");
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t14.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configOne.maxSpd_Axis_Z);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t17.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configOne.accel_Axis_Z);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t20.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configOne.speedPercent_Axis_Z);
+					SerialPrint(nextionQuoteEnd);
+					break;
+				}
+				case ID_AXIS_X: // X Axis
+				{
+					SerialPrint("pageEEPROM.t2.txt=");
+					SerialWrite(0x22);
+					SerialPrint("X");
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t14.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configOne.maxSpd_Axis_X);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t17.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configOne.accel_Axis_X);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t20.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configOne.speedPercent_Axis_X);
+					SerialPrint(nextionQuoteEnd);
+
+					break;
+				}
+				case ID_AXIS_B: // B Axis
+				{
+					SerialPrint("pageEEPROM.t2.txt=");
+					SerialWrite(0x22);
+					SerialPrint("B");
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t14.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configOne.maxSpd_Axis_B);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t17.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configOne.accel_Axis_B);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t20.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configOne.speedPercent_Axis_B);
+					SerialPrint(nextionQuoteEnd);
+					break;
+				}
+				case ID_SPINDLE: // Spindle
+				{
+					SerialPrint("pageEEPROM.t2.txt=");
+					SerialWrite(0x22);
+					SerialPrint("Spindle");
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t5.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configOne.maxSpd_Spindle);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t8.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configOne.accel_Spindle);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t11.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configOne.speedPercent_Spindle);
+					SerialPrint(nextionQuoteEnd);
+					break;
+				}
+			}
+			break;
+		}
+		case PAGE_INDEX:
+		{
+			SerialPrint("pageEEPROM.t5.txt=");
+			SerialWrite(0x22);
+			SerialPrint(configIndex_Main.maxSpd);
+			SerialPrint(nextionQuoteEnd);
+
+			SerialPrint("pageEEPROM.t8.txt=");
+			SerialWrite(0x22);
+			SerialPrint(configIndex_Main.accel);
+			SerialPrint(nextionQuoteEnd);
+
+			SerialPrint("pageEEPROM.t11.txt=");
+			SerialWrite(0x22);
+			SerialPrint(configIndex_Main.speedPercent);
+			SerialPrint(nextionQuoteEnd);
+
+			switch (configIndex_Main.indexId)
+			{
+				case ID_INDEX_1:
+				{
+					SerialPrint("pageEEPROM.t2.txt=");
+					SerialWrite(0x22);
+					SerialPrint("1");
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t23.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configIndex_1.sizeInUnits);
+					SerialPrint(nextionQuoteEnd);
+
+					switch (configIndex_1.fileOrFixed)
+					{
+						case 0:
+						case 48:
+						{
+							SerialPrint("pageEEPROM.t26.txt=");
+							SerialWrite(0x22);
+							SerialPrint("Fixed");
+							SerialPrint(nextionQuoteEnd);
+							break;
+						}
+						case 1:
+						case 49:
+						{
+							SerialPrint("pageEEPROM.t26.txt=");
+							SerialWrite(0x22);
+							SerialPrint("File");
+							SerialPrint(nextionQuoteEnd);
+							break;
+						}
+					}
+					break;
+				}
+				case ID_INDEX_2: 
+				{
+					SerialPrint("pageEEPROM.t2.txt=");
+					SerialWrite(0x22);
+					SerialPrint("2");
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t23.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configIndex_2.sizeInUnits);
+					SerialPrint(nextionQuoteEnd);
+
+					switch (configIndex_2.fileOrFixed)
+					{
+						case 0:
+						case 48:
+						{
+							SerialPrint("pageEEPROM.t26.txt=");
+							SerialWrite(0x22);
+							SerialPrint("Fixed");
+							SerialPrint(nextionQuoteEnd);
+							break;
+						}
+						case 1:
+						case 49:
+						{
+							SerialPrint("pageEEPROM.t26.txt=");
+							SerialWrite(0x22);
+							SerialPrint("File");
+							SerialPrint(nextionQuoteEnd);
+							break;
+						}
+					}
+					break;
+				}
+				case ID_INDEX_3: // B Axis
+				{
+					SerialPrint("pageEEPROM.t2.txt=");
+					SerialWrite(0x22);
+					SerialPrint("3");
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t23.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configIndex_3.sizeInUnits);
+					SerialPrint(nextionQuoteEnd);
+
+					switch (configIndex_3.fileOrFixed)
+					{
+						case 0:
+						case 48:
+						{
+							SerialPrint("pageEEPROM.t26.txt=");
+							SerialWrite(0x22);
+							SerialPrint("Fixed");
+							SerialPrint(nextionQuoteEnd);
+							break;
+						}
+						case 1:
+						case 49:
+						{
+							SerialPrint("pageEEPROM.t26.txt=");
+							SerialWrite(0x22);
+							SerialPrint("File");
+							SerialPrint(nextionQuoteEnd);
+							break;
+						}
+					}
+					break;
+				}
+			}
+
+			break;
+		}
+
+		case PAGE_MOVE:
+		{
+			switch (configMove.axisId)
+			{
+			case ID_AXIS_Z:
+				{
+					SerialPrint("pageEEPROM.t2.txt=");
+					SerialWrite(0x22);
+					SerialPrint("Z");
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t14.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configMove.maxSpd_Axis_Z);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t17.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configMove.accel_Axis_Z);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t20.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configMove.speedPercent_Axis_Z);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t23.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configMove.distance_MoveZ);
+					SerialPrint(nextionQuoteEnd);
+					break;
+				}
+				case ID_AXIS_X: // X Axis
+				{
+					SerialPrint("pageEEPROM.t2.txt=");
+					SerialWrite(0x22);
+					SerialPrint("X");
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t14.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configMove.maxSpd_Axis_X);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t17.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configMove.accel_Axis_X);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t20.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configMove.speedPercent_Axis_X);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t23.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configMove.distance_MoveX);
+					SerialPrint(nextionQuoteEnd);
+
+					break;
+				}
+				case ID_AXIS_B: // B Axis
+				{
+					SerialPrint("pageEEPROM.t2.txt=");
+					SerialWrite(0x22);
+					SerialPrint("B");
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t14.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configMove.maxSpd_Axis_B);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t17.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configMove.accel_Axis_B);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t20.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configMove.speedPercent_Axis_B);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t23.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configMove.distance_MoveB);
+					SerialPrint(nextionQuoteEnd);
+					break;
+				}
+			}
+			break;
+		}
+
+		case PAGE_SYNC:
+		{
+			SerialPrint("pageEEPROM.t5.txt=");
+			SerialWrite(0x22);
+			SerialPrint(configSync.maxSpd_Spindle);
+			SerialPrint(nextionQuoteEnd);
+
+			SerialPrint("pageEEPROM.t8.txt=");
+			SerialWrite(0x22);
+			SerialPrint(configSync.accel_Spindle);
+			SerialPrint(nextionQuoteEnd);
+
+			SerialPrint("pageEEPROM.t11.txt=");
+			SerialWrite(0x22);
+			SerialPrint(configSync.speedPercent_Spindle);
+			SerialPrint(nextionQuoteEnd);
+
+			Serial.print("configSync.helixType: ");
+			Serial.println(configSync.helixType);
+			switch (configSync.helixType)
+			{
+				case 0: //Left
+				case 48:
+				{
+					SerialPrint("pageEEPROM.t23.txt=");
+					SerialWrite(0x22);
+					SerialPrint("Left");
+					SerialPrint(nextionQuoteEnd);
+
+					break;
+				}
+				case 1: //Right
+				case 49:
+				{
+					SerialPrint("pageEEPROM.t23.txt=");
+					SerialWrite(0x22);
+					SerialPrint("Right");
+					SerialPrint(nextionQuoteEnd);
+					break;
+				}
+
+			}
+
+			SerialPrint("pageEEPROM.t26.txt=");
+			SerialWrite(0x22);
+			SerialPrint(configSync.revolutions_Spindle);
+			SerialPrint(nextionQuoteEnd);
+
+			SerialPrint("pageEEPROM.t29.txt=");
+			SerialWrite(0x22);
+			SerialPrint(configSync.distance);
+			SerialPrint(nextionQuoteEnd);
+			switch (configSync.axisId)
+			{
+			case ID_AXIS_Z:
+			{
+				SerialPrint("pageEEPROM.t2.txt=");
+				SerialWrite(0x22);
+				SerialPrint("Z");
+				SerialPrint(nextionQuoteEnd);
+
+				SerialPrint("pageEEPROM.t14.txt=");
+				SerialWrite(0x22);
+				SerialPrint(configSync.maxSpd_Axis_Z);
+				SerialPrint(nextionQuoteEnd);
+
+				SerialPrint("pageEEPROM.t17.txt=");
+				SerialWrite(0x22);
+				SerialPrint(configSync.accel_Axis_Z);
+				SerialPrint(nextionQuoteEnd);
+
+				SerialPrint("pageEEPROM.t20.txt=");
+				SerialWrite(0x22);
+				SerialPrint(configSync.speedPercent_Axis_Z);
+				SerialPrint(nextionQuoteEnd);
+				break;
+			}
+			case ID_AXIS_X: // X Axis
+			{
+				SerialPrint("pageEEPROM.t2.txt=");
+				SerialWrite(0x22);
+				SerialPrint("X");
+				SerialPrint(nextionQuoteEnd);
+
+				SerialPrint("pageEEPROM.t14.txt=");
+				SerialWrite(0x22);
+				SerialPrint(configSync.maxSpd_Axis_X);
+				SerialPrint(nextionQuoteEnd);
+
+				SerialPrint("pageEEPROM.t17.txt=");
+				SerialWrite(0x22);
+				SerialPrint(configSync.accel_Axis_X);
+				SerialPrint(nextionQuoteEnd);
+
+				SerialPrint("pageEEPROM.t20.txt=");
+				SerialWrite(0x22);
+				SerialPrint(configSync.speedPercent_Axis_X);
+				SerialPrint(nextionQuoteEnd);
+
+				break;
+			}
+			case ID_AXIS_B: // B Axis
+			{
+				SerialPrint("pageEEPROM.t2.txt=");
+				SerialWrite(0x22);
+				SerialPrint("B");
+				SerialPrint(nextionQuoteEnd);
+
+				SerialPrint("pageEEPROM.t14.txt=");
+				SerialWrite(0x22);
+				SerialPrint(configSync.maxSpd_Axis_B);
+				SerialPrint(nextionQuoteEnd);
+
+				SerialPrint("pageEEPROM.t17.txt=");
+				SerialWrite(0x22);
+				SerialPrint(configSync.accel_Axis_B);
+				SerialPrint(nextionQuoteEnd);
+
+				SerialPrint("pageEEPROM.t20.txt=");
+				SerialWrite(0x22);
+				SerialPrint(configSync.speedPercent_Axis_B);
+				SerialPrint(nextionQuoteEnd);
+				break;
+			}
+			}
+
+			break;
+		}
+		case PAGE_REC:
+		{
+			SerialPrint("pageEEPROM.t5.txt=");
+			SerialWrite(0x22);
+			SerialPrint(configRec.maxSpd_Spindle);
+			SerialPrint(nextionQuoteEnd);
+
+			SerialPrint("pageEEPROM.t8.txt=");
+			SerialWrite(0x22);
+			SerialPrint(configRec.accel_Spindle);
+			SerialPrint(nextionQuoteEnd);
+
+			SerialPrint("pageEEPROM.t11.txt=");
+			SerialWrite(0x22);
+			SerialPrint(configRec.speedPercent_Spindle);
+			SerialPrint(nextionQuoteEnd);
+
+			switch (configRec.radial_axial)
+			{
+				case RADIAL: //Radial
+				{
+					SerialPrint("pageEEPROM.t23.txt=");
+					SerialWrite(0x22);
+					SerialPrint("Radial");
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t26.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configRec.waves_Radial);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t29.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configRec.degrees_Radial_Spindle);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t32.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configRec.amplitude_Radial_Axis);
+					SerialPrint(nextionQuoteEnd);
+					break;
+				}
+				case AXIAL: //Axial
+				{
+					SerialPrint("pageEEPROM.t23.txt=");
+					SerialWrite(0x22);
+					SerialPrint("Axial");
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t26.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configRec.waves_Axial);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t29.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configRec.amplitude_Axial_Spindle);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t32.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configRec.distance_Axial_Axis);
+					SerialPrint(nextionQuoteEnd);
+					break;
+				}
+
+			}
+			switch (configRec.axisId)
+			{
+				case ID_AXIS_Z:
+				{
+					SerialPrint("pageEEPROM.t2.txt=");
+					SerialWrite(0x22);
+					SerialPrint("Z");
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t14.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configRec.maxSpd_Axis_Z);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t17.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configRec.accel_Axis_Z);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t20.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configRec.speedPercent_Axis_Z);
+					SerialPrint(nextionQuoteEnd);
+					break;
+				}
+				case ID_AXIS_X: // X Axis
+				{
+					SerialPrint("pageEEPROM.t2.txt=");
+					SerialWrite(0x22);
+					SerialPrint("X");
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t14.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configRec.maxSpd_Axis_X);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t17.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configRec.accel_Axis_X);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t20.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configRec.speedPercent_Axis_X);
+					SerialPrint(nextionQuoteEnd);
+
+					break;
+				}
+				case ID_AXIS_B: // B Axis
+				{
+					SerialPrint("pageEEPROM.t2.txt=");
+					SerialWrite(0x22);
+					SerialPrint("B");
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t14.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configRec.maxSpd_Axis_B);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t17.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configRec.accel_Axis_B);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t20.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configRec.speedPercent_Axis_B);
+					SerialPrint(nextionQuoteEnd);
+					break;
+				}
+			}
+
+			break;
+		}
+		case PAGE_GRK:
+		{
+
+
+			SerialPrint("pageEEPROM.t5.txt=");
+			SerialWrite(0x22);
+			SerialPrint(configGreekKey.maxSpd_Spindle);
+			SerialPrint(nextionQuoteEnd);
+
+			SerialPrint("pageEEPROM.t8.txt=");
+			SerialWrite(0x22);
+			SerialPrint(configGreekKey.accel_Spindle);
+			SerialPrint(nextionQuoteEnd);
+
+			SerialPrint("pageEEPROM.t11.txt=");
+			SerialWrite(0x22);
+			SerialPrint(configGreekKey.speedPercent_Spindle);
+			SerialPrint(nextionQuoteEnd);
+			SerialPrint("pageEEPROM.t23.txt=");
+			SerialWrite(0x22);
+			SerialPrint(configGreekKey.patternCount_Pattern);
+			SerialPrint(nextionQuoteEnd);
+			SerialPrint("pageEEPROM.t26.txt=");
+			SerialWrite(0x22);
+			SerialPrint(configGreekKey.countPatternPer360_Pattern);
+			SerialPrint(nextionQuoteEnd);
+			SerialPrint("pageEEPROM.t29.txt=");
+			SerialWrite(0x22);
+			SerialPrint(configGreekKey.segmentLength_Pattern);
+			SerialPrint(nextionQuoteEnd);
+
+			switch (configGreekKey.radialOrAxial_Pattern)
+			{
+				case RADIAL:
+				{
+					SerialPrint("pageEEPROM.t32.txt=");
+					SerialWrite(0x22);
+					SerialPrint("Radial");
+					SerialPrint(nextionQuoteEnd);
+					break;
+				}
+				case AXIAL:
+				{
+					SerialPrint("pageEEPROM.t32.txt=");
+					SerialWrite(0x22);
+					SerialPrint("Axial");
+					SerialPrint(nextionQuoteEnd);
+					break;
+				}
+			}
+
+			switch (configGreekKey.patternId)
+			{
+				case 2: // 4a
+				{
+					SerialPrint("pageEEPROM.t35.txt=");
+					SerialWrite(0x22);
+					SerialPrint("4a");
+					SerialPrint(nextionQuoteEnd);
+					break;
+				}
+				case 3: // 4b
+				{
+					SerialPrint("pageEEPROM.t35.txt=");
+					SerialWrite(0x22);
+					SerialPrint("4b");
+					SerialPrint(nextionQuoteEnd);
+					break;
+				}
+				case 4: // 2a
+				{
+					SerialPrint("pageEEPROM.t35.txt=");
+					SerialWrite(0x22);
+					SerialPrint("2a");
+					SerialPrint(nextionQuoteEnd);
+					break;
+				}
+				case 5: // 2b
+				{
+					SerialPrint("pageEEPROM.t35.txt=");
+					SerialWrite(0x22);
+					SerialPrint("2b");
+					SerialPrint(nextionQuoteEnd);
+					break;
+				}
+				case 6: // 3a
+				{
+					SerialPrint("pageEEPROM.t35.txt=");
+					SerialWrite(0x22);
+					SerialPrint("3a");
+					SerialPrint(nextionQuoteEnd);
+					break;
+				}
+				case 7: // 3b
+				{
+					SerialPrint("pageEEPROM.t35.txt=");
+					SerialWrite(0x22);
+					SerialPrint("3b");
+					SerialPrint(nextionQuoteEnd);
+					break;
+				}
+			}
+
+			switch (configGreekKey.axisId)
+			{
+				case ID_AXIS_Z:
+				{
+					SerialPrint("pageEEPROM.t2.txt=");
+					SerialWrite(0x22);
+					SerialPrint("Z");
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t14.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configGreekKey.maxSpd_Axis_Z);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t17.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configGreekKey.accel_Axis_Z);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t20.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configGreekKey.speedPercent_Axis_Z);
+					SerialPrint(nextionQuoteEnd);
+					break;
+				}
+				case ID_AXIS_X: // X Axis
+				{
+					SerialPrint("pageEEPROM.t2.txt=");
+					SerialWrite(0x22);
+					SerialPrint("X");
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t14.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configGreekKey.maxSpd_Axis_X);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t17.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configGreekKey.accel_Axis_X);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t20.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configGreekKey.speedPercent_Axis_X);
+					SerialPrint(nextionQuoteEnd);
+
+					break;
+				}
+				case ID_AXIS_B: // B Axis
+				{
+					SerialPrint("pageEEPROM.t2.txt=");
+					SerialWrite(0x22);
+					SerialPrint("B");
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t14.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configGreekKey.maxSpd_Axis_B);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t17.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configGreekKey.accel_Axis_B);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t20.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configGreekKey.speedPercent_Axis_B);
+					SerialPrint(nextionQuoteEnd);
+					break;
+				}
+			}
+			break;
+
+		}
+		case PAGE_GRKFILE:
+		{
+			SerialPrint("pageEEPROM.t5.txt=");
+			SerialWrite(0x22);
+			SerialPrint(configGreekKey.maxSpd_Spindle);
+			SerialPrint(nextionQuoteEnd);
+
+			SerialPrint("pageEEPROM.t8.txt=");
+			SerialWrite(0x22);
+			SerialPrint(configGreekKey.accel_Spindle);
+			SerialPrint(nextionQuoteEnd);
+
+			SerialPrint("pageEEPROM.t11.txt=");
+			SerialWrite(0x22);
+			SerialPrint(configGreekKey.speedPercent_Spindle);
+			SerialPrint(nextionQuoteEnd);
+			SerialPrint("pageEEPROM.t23.txt=");
+			SerialWrite(0x22);
+			SerialPrint(configGreekKey.patternCount_File);
+			SerialPrint(nextionQuoteEnd);
+			SerialPrint("pageEEPROM.t26.txt=");
+			SerialWrite(0x22);
+			SerialPrint(configGreekKey.countPatternPer360_File);
+			SerialPrint(nextionQuoteEnd);
+			SerialPrint("pageEEPROM.t29.txt=");
+			SerialWrite(0x22);
+			SerialPrint(configGreekKey.segmentLength_File);
+			SerialPrint(nextionQuoteEnd);
+
+			switch (configGreekKey.radialOrAxial_File)
+			{
+				case RADIAL:
+				{
+					SerialPrint("pageEEPROM.t32.txt=");
+					SerialWrite(0x22);
+					SerialPrint("Radial");
+					SerialPrint(nextionQuoteEnd);
+					break;
+				}
+				case AXIAL:
+				{
+					SerialPrint("pageEEPROM.t32.txt=");
+					SerialWrite(0x22);
+					SerialPrint("Axial");
+					SerialPrint(nextionQuoteEnd);
+					break;
+				}
+			}
+
+			switch (configGreekKey.segmentOrActual)
+			{
+				case 2:
+				{
+					SerialPrint("pageEEPROM.t35.txt=");
+					SerialWrite(0x22);
+					SerialPrint("Segments");
+					SerialPrint(nextionQuoteEnd);
+					break;
+				}
+				case 3:
+				{
+					SerialPrint("pageEEPROM.t35.txt=");
+					SerialWrite(0x22);
+					SerialPrint("Actual");
+					SerialPrint(nextionQuoteEnd);
+					break;
+				}
+			}
+
+			switch (configGreekKey.axisId)
+			{
+				case ID_AXIS_Z:
+				{
+					SerialPrint("pageEEPROM.t2.txt=");
+					SerialWrite(0x22);
+					SerialPrint("Z");
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t14.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configGreekKey.maxSpd_Axis_Z);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t17.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configGreekKey.accel_Axis_Z);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t20.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configGreekKey.speedPercent_Axis_Z);
+					SerialPrint(nextionQuoteEnd);
+					break;
+				}
+				case ID_AXIS_X: // X Axis
+				{
+					SerialPrint("pageEEPROM.t2.txt=");
+					SerialWrite(0x22);
+					SerialPrint("X");
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t14.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configGreekKey.maxSpd_Axis_X);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t17.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configGreekKey.accel_Axis_X);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t20.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configGreekKey.speedPercent_Axis_X);
+					SerialPrint(nextionQuoteEnd);
+
+					break;
+				}
+				case ID_AXIS_B: // B Axis
+				{
+					SerialPrint("pageEEPROM.t2.txt=");
+					SerialWrite(0x22);
+					SerialPrint("B");
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t14.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configGreekKey.maxSpd_Axis_B);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t17.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configGreekKey.accel_Axis_B);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t20.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configGreekKey.speedPercent_Axis_B);
+					SerialPrint(nextionQuoteEnd);
+					break;
+				}
+			}
+			break;
+		}
+		case PAGE_GEO:
+		{
+			SerialPrint("pageEEPROM.t5.txt=");
+			SerialWrite(0x22);
+			SerialPrint(configRose.maxSpd_Spindle);
+			SerialPrint(nextionQuoteEnd);
+
+			SerialPrint("pageEEPROM.t8.txt=");
+			SerialWrite(0x22);
+			SerialPrint(configRose.accel_Spindle);
+			SerialPrint(nextionQuoteEnd);
+
+			SerialPrint("pageEEPROM.t11.txt=");
+			SerialWrite(0x22);
+			SerialPrint(configRose.speedPercent_Spindle);
+			SerialPrint(nextionQuoteEnd);
+
+			SerialPrint("pageEEPROM.t23.txt=");
+			SerialWrite(0x22);
+			SerialPrint(configRose.n);
+			SerialPrint(nextionQuoteEnd);
+
+			SerialPrint("pageEEPROM.t26.txt=");
+			SerialWrite(0x22);
+			SerialPrint(configRose.d);
+			SerialPrint(nextionQuoteEnd);
+
+			switch (configRose.axisId)
+			{
+				case ID_AXIS_Z:
+				{
+
+					SerialPrint("pageEEPROM.t2.txt=");
+					SerialWrite(0x22);
+					SerialPrint("Z");
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t14.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configRose.maxSpd_Axis_Z);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t17.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configRose.accel_Axis_Z);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t20.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configRose.speedPercent_Axis_Z);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t29.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configRose.amplitude_Radial_Z);
+					SerialPrint(nextionQuoteEnd);
+					break;
+				}
+				case ID_AXIS_X: // X Axis
+				{
+					SerialPrint("pageEEPROM.t2.txt=");
+					SerialWrite(0x22);
+					SerialPrint("X");
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t14.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configRose.maxSpd_Axis_X);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t17.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configRose.accel_Axis_X);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t20.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configRose.speedPercent_Axis_X);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t29.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configRose.amplitude_Radial_X);
+					SerialPrint(nextionQuoteEnd);
+
+					break;
+				}
+				case ID_AXIS_B: // B Axis
+				{
+					SerialPrint("pageEEPROM.t2.txt=");
+					SerialWrite(0x22);
+					SerialPrint("B");
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t14.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configRose.maxSpd_Axis_B);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t17.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configRose.accel_Axis_B);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t20.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configRose.speedPercent_Axis_B);
+					SerialPrint(nextionQuoteEnd);
+
+					SerialPrint("pageEEPROM.t29.txt=");
+					SerialWrite(0x22);
+					SerialPrint(configRose.amplitude_Radial_B);
+					SerialPrint(nextionQuoteEnd);
+					break;
+				}
+			}
+
+			break;
+		}
+	}
+}
+
 void LoadSettings()
 {
 	const char* nextionEnd = "\xFF\xFF\xFF";
@@ -8769,7 +9982,7 @@ void LoadSettings_PageIndex()
 	iniValue = "Size_1";
 	eePromAddress_Nextion = 352;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
-	configIndex_1.size = returnVal;
+	configIndex_1.sizeInSteps = returnVal;
 
 	// Index 2
 	iniValue = "DivisionsOrDegrees_1";
@@ -8785,7 +9998,7 @@ void LoadSettings_PageIndex()
 	iniValue = "Size_2";
 	eePromAddress_Nextion = 360;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
-	configIndex_2.size = returnVal;
+	configIndex_2.sizeInSteps = returnVal;
 
 	// Index 3
 	iniValue = "DivisionsOrDegrees_3";
@@ -8801,7 +10014,7 @@ void LoadSettings_PageIndex()
 	iniValue = "Size_3";
 	eePromAddress_Nextion = 580;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
-	configIndex_3.size = returnVal;
+	configIndex_3.sizeInSteps = returnVal;
 
 
 	EEPROM.put(eePromAddress_Ind_Main, configIndex_Main);

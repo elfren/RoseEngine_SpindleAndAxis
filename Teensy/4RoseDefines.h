@@ -307,7 +307,9 @@ struct configIndex
 {
 	uint32_t degreeOrDivision; // Type
 	uint32_t fileOrFixed; // Source
-	int32_t size;
+	int32_t sizeInSteps;
+	double sizeInUnits;
+
 };
 
 /////////////////////////////////////////////////////////////////////////

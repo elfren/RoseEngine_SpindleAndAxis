@@ -125,6 +125,25 @@ void setup()
 	EEPROM.get(eePromAddress_Rec, configRec);
 	EEPROM.get(eePromAddress_Grk, configGreekKey);
 
+#ifdef DEBUG
+	Serial.print("configMain.axisId: ");
+	Serial.println(configMain.axisId);
+	Serial.print("configOne.axisId: ");
+	Serial.println(configOne.axisId);
+	Serial.print("configIndex_Main.indexId: ");
+	Serial.println(configIndex_Main.indexId);
+	Serial.print("configMove.axisId: ");
+	Serial.println(configMove.axisId);
+	Serial.print("configSync.axisId: ");
+	Serial.println(configSync.axisId);
+	Serial.print("configRec.axisId: ");
+	Serial.println(configRec.axisId);
+	Serial.print("configGreekKey.axisId: ");
+	Serial.println(configGreekKey.axisId);
+	Serial.print("configRose.axisId: ");
+	Serial.println(configRose.axisId);
+#endif // DEBUG
+
 	// Config as well as all other EEProm settings should be run from Nextion whenever Teensy is updated.  
 	// EEProm may contain invalid settings otherwise.
 
@@ -835,7 +854,7 @@ void loop()
 							}
 
 							newIndexSize = GetIndexDataFromSD(lineNumber);
-							configIndex_1.size = (configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (newIndexSize / 360);
+							configIndex_1.sizeInSteps = (configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (newIndexSize / 360);
 	#ifdef DEBUG
 							Serial.print(lineNumber_Char);
 							Serial.println(lineNumber);
@@ -843,17 +862,17 @@ void loop()
 							Serial.println(newIndexSize);
 							Serial.println(index1_Char);
 							Serial.print(indexSizeChar);
-							Serial.println(configIndex_1.size);
+							Serial.println(configIndex_1.sizeInSteps);
 							Serial.println("");
 	#endif // DEBUG
 							SerialPrint(pageIndex_t7_Char); // Nextion may not get the first packet
 							SerialWrite(0x22);
-							SerialPrint(newIndexSize);
+							SerialPrint(newIndexSize,4);
 							SerialPrint(nextionQuoteEnd);
 
 							SerialPrint(pageIndex_t7_Char);
 							SerialWrite(0x22);
-							SerialPrint(newIndexSize);
+							SerialPrint(newIndexSize,4);
 							SerialPrint(nextionQuoteEnd);
 						}
 
@@ -875,7 +894,7 @@ void loop()
 							}
 
 							newIndexSize = GetIndexDataFromSD(lineNumber);
-							configIndex_2.size = (configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (newIndexSize / 360);
+							configIndex_2.sizeInSteps = (configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (newIndexSize / 360);
 	#ifdef DEBUG
 
 							Serial.print(lineNumber_Char);
@@ -884,16 +903,16 @@ void loop()
 							Serial.println(newIndexSize);
 							Serial.print(index2_Char);
 							Serial.print(indexSizeChar);
-							Serial.println(configIndex_2.size);
+							Serial.println(configIndex_2.sizeInSteps);
 	#endif // DEBUG
 							SerialPrint(pageIndex_t7_Char);
 							SerialWrite(0x22);
-							SerialPrint(newIndexSize);
+							SerialPrint(newIndexSize, 4);
 							SerialPrint(nextionQuoteEnd);
 
 							SerialPrint(pageIndex_t7_Char);
 							SerialWrite(0x22);
-							SerialPrint(newIndexSize);
+							SerialPrint(newIndexSize, 4);
 							SerialPrint(nextionQuoteEnd);
 						}
 
@@ -916,7 +935,7 @@ void loop()
 								lineNumber = 0;
 							}
 							newIndexSize = GetIndexDataFromSD(lineNumber);
-							configIndex_3.size = (configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (newIndexSize / 360);
+							configIndex_3.sizeInSteps = (configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (newIndexSize / 360);
 	#ifdef DEBUG
 
 							Serial.print(lineNumber_Char);
@@ -925,16 +944,16 @@ void loop()
 							Serial.println(newIndexSize);
 							Serial.print(index3_Char);
 							Serial.print(indexSizeChar);
-							Serial.println(configIndex_3.size);
+							Serial.println(configIndex_3.sizeInSteps);
 	#endif // DEBUG
 							SerialPrint(pageIndex_t7_Char); // Nextion may not get the first packet
 							SerialWrite(0x22);
-							SerialPrint(newIndexSize);
+							SerialPrint(newIndexSize, 4);
 							SerialPrint(nextionQuoteEnd);
 
 							SerialPrint(pageIndex_t7_Char);
 							SerialWrite(0x22);
-							SerialPrint(newIndexSize);
+							SerialPrint(newIndexSize, 4);
 							SerialPrint(nextionQuoteEnd);
 						}
 
@@ -990,7 +1009,7 @@ void loop()
 							}
 
 							newIndexSize = GetIndexDataFromSD(lineNumber);
-							configIndex_1.size = (configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (newIndexSize / 360);
+							configIndex_1.sizeInSteps = (configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (newIndexSize / 360);
 		#ifdef DEBUG
 							Serial.print(lineNumber_Char);
 							Serial.println(lineNumber);
@@ -998,17 +1017,17 @@ void loop()
 							Serial.println(newIndexSize);
 							Serial.print(index1_Char);
 							Serial.print(indexSizeChar);
-							Serial.println(configIndex_1.size);
+							Serial.println(configIndex_1.sizeInSteps);
 							Serial.println("");
 		#endif // DEBUG
 							SerialPrint(pageIndex_t7_Char); // Nextion may not get the first packet
 							SerialWrite(0x22);
-							SerialPrint(newIndexSize);
+							SerialPrint(newIndexSize, 4);
 							SerialPrint(nextionQuoteEnd);
 
 							SerialPrint(pageIndex_t7_Char);
 							SerialWrite(0x22);
-							SerialPrint(newIndexSize);
+							SerialPrint(newIndexSize, 4);
 							SerialPrint(nextionQuoteEnd);
 						}
 
@@ -1025,7 +1044,7 @@ void loop()
 							}
 
 							newIndexSize = GetIndexDataFromSD(lineNumber);
-							configIndex_2.size = (configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (newIndexSize / 360);
+							configIndex_2.sizeInSteps = (configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (newIndexSize / 360);
 #ifdef DEBUG
 							Serial.println("");
 							Serial.print(lineNumber_Char);
@@ -1034,17 +1053,17 @@ void loop()
 							Serial.println(newIndexSize);
 							Serial.print(index2_Char);
 							Serial.print(indexSizeChar);
-							Serial.println(configIndex_2.size);
+							Serial.println(configIndex_2.sizeInSteps);
 							Serial.println("");
 #endif // DEBUG
 							SerialPrint(pageIndex_t7_Char);
 							SerialWrite(0x22);
-							SerialPrint(newIndexSize);
+							SerialPrint(newIndexSize, 4);
 							SerialPrint(nextionQuoteEnd);
 
 							SerialPrint(pageIndex_t7_Char);
 							SerialWrite(0x22);
-							SerialPrint(newIndexSize);
+							SerialPrint(newIndexSize, 4);
 							SerialPrint(nextionQuoteEnd);
 						}
 						break;
@@ -1059,7 +1078,7 @@ void loop()
 								lineNumber = 0;
 							}
 							newIndexSize = GetIndexDataFromSD(lineNumber);
-							configIndex_3.size = (configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (newIndexSize / 360);
+							configIndex_3.sizeInSteps = (configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (newIndexSize / 360);
 		#ifdef DEBUG
 							Serial.print(lineNumber_Char);
 							Serial.println(lineNumber);
@@ -1067,17 +1086,17 @@ void loop()
 							Serial.println(newIndexSize);
 							Serial.print(index3_Char);
 							Serial.print(indexSizeChar);
-							Serial.println(configIndex_3.size);
+							Serial.println(configIndex_3.sizeInSteps);
 							Serial.println("");
 		#endif // DEBUG
 							SerialPrint(pageIndex_t7_Char); // Nextion may not get the first packet
 							SerialWrite(0x22);
-							SerialPrint(newIndexSize);
+							SerialPrint(newIndexSize, 4);
 							SerialPrint(nextionQuoteEnd);
 
 							SerialPrint(pageIndex_t7_Char);
 							SerialWrite(0x22);
-							SerialPrint(newIndexSize);
+							SerialPrint(newIndexSize, 4);
 							SerialPrint(nextionQuoteEnd);
 						}
 
@@ -1387,8 +1406,13 @@ void loop()
 
 				EEPROM.put(eePromAddress_Mov, configMove);
 #ifdef DEBUG
-				Serial.print(axisId_Char);
+				Serial.print("configMove.axisId: ");
 				Serial.println(configMove.axisId);
+				configPageMov eepageMove;
+				EEPROM.get(eePromAddress_Mov, eepageMove);
+				Serial.print("eepageMove.axisId: ");
+				Serial.println(eepageMove.axisId);
+
 #endif // DEBUG
 				break;
 			}
@@ -1791,14 +1815,31 @@ void loop()
 	#endif // DEBUG
 				break;
 			}
-			case 124: // | - Not Used
+			case 124: // | - Show all Teensy EEPROM values
 			{
-
+				TestAllTeensyEEPROMValues();
 				break;
 			}
-			case 125: // } - Not used
+			case 125: // } - Show Axis Id
 			{
-	
+
+				Serial.print("configMain.axisId: ");
+				Serial.println(configMain.axisId);
+				Serial.print("configOne.axisId: ");
+				Serial.println(configOne.axisId);
+				Serial.print("configIndex_Main.indexId: ");
+				Serial.println(configIndex_Main.indexId);
+				Serial.print("configMove.axisId: ");
+				Serial.println(configMove.axisId);
+				Serial.print("configSync.axisId: ");
+				Serial.println(configSync.axisId);
+				Serial.print("configRec.axisId: ");
+				Serial.println(configRec.axisId);
+				Serial.print("configGreekKey.axisId: ");
+				Serial.println(configGreekKey.axisId);
+				Serial.print("configRose.axisId: ");
+				Serial.println(configRose.axisId);
+
 				break;
 			}
 			case 126: // ~ - Test EEPROM settings Config screen
@@ -2075,7 +2116,7 @@ void loop()
 #endif // DEBUG
 				break;
 			}
-			case 182: // ¶ - Greek Key: Pattern Type  (2 through 5)
+			case 182: // ¶ - Greek Key: Pattern Type  (2 through 7)
 			{
 				int pattern = GetSerialInteger();// 
 
@@ -2506,58 +2547,64 @@ void loop()
 				{
 					case 1:
 					{
+						configIndex_1.sizeInUnits = newIndexSize;
+
 						// Default: Divisions
 						if (configIndex_1.degreeOrDivision == BY_DEGREES) // Degrees
 						{
-							configIndex_1.size = stepsPerRevolution * (newIndexSize / 360);
+							configIndex_1.sizeInSteps = stepsPerRevolution * (newIndexSize / 360);
 						}
 						else
 						{
-							configIndex_1.size = stepsPerRevolution / (newIndexSize);
+							configIndex_1.sizeInSteps = stepsPerRevolution / (newIndexSize);
 						}
 		#ifdef DEBUG
 						Serial.print(index1_Char);
 						Serial.print(indexSizeChar);
-						Serial.println(configIndex_1.size);
+						Serial.println(configIndex_1.sizeInSteps);
 		#endif // DEBUG
 						EEPROM.put(eePromAddress_Ind_1, configIndex_1);
 						break;
 					}
 					case 2:
 					{
+						configIndex_2.sizeInUnits = newIndexSize;
+
 						// Default: Divisions
 						if (configIndex_2.degreeOrDivision == BY_DEGREES) // Degrees
 						{
-							configIndex_2.size = stepsPerRevolution * (newIndexSize / 360);
+							configIndex_2.sizeInSteps = stepsPerRevolution * (newIndexSize / 360);
 						}
 						else
 						{
-							configIndex_2.size = stepsPerRevolution / (newIndexSize);
+							configIndex_2.sizeInSteps = stepsPerRevolution / (newIndexSize);
 						}
 		#ifdef DEBUG
 						Serial.print(index2_Char);
 						Serial.print(indexSizeChar);
-						Serial.println(configIndex_2.size);
+						Serial.println(configIndex_2.sizeInSteps);
 		#endif // DEBUG
 						EEPROM.put(eePromAddress_Ind_2, configIndex_2);
 						break;
 					}
 					case 3:
 					{
+						configIndex_3.sizeInUnits = newIndexSize;
+
 						// Default: Divisions
 						if (configIndex_3.degreeOrDivision == BY_DEGREES) // Degrees
 						{
-							configIndex_3.size = stepsPerRevolution * (newIndexSize / 360);
+							configIndex_3.sizeInSteps = stepsPerRevolution * (newIndexSize / 360);
 						}
 						else
 						{
-							configIndex_3.size = stepsPerRevolution / (newIndexSize);
+							configIndex_3.sizeInSteps = stepsPerRevolution / (newIndexSize);
 						}
 
 		#ifdef DEBUG
 						Serial.print(index3_Char);
 						Serial.print(indexSizeChar);
-						Serial.println(configIndex_3.size);
+						Serial.println(configIndex_3.sizeInSteps);
 		#endif // DEBUG
 						EEPROM.put(eePromAddress_Ind_3, configIndex_3);
 						break;
@@ -2594,10 +2641,11 @@ void loop()
 			case 195: // Á - Setup: B: Radial or Lineal
 			{
 				configSetup.radialOrLinear_Axis_B = GetSerialInteger();
-				// Radial = 1, Linear = 0
+				// Radial = 0, Linear = 1
 
 				EEPROM.put(eePromAddress_Setup, configSetup);
 #ifdef DEBUG
+				Serial.print("radialOrLinear_Axis_B: ");
 				Serial.println(configSetup.radialOrLinear_Axis_B);
 #endif // DEBUG
 				break;
