@@ -742,7 +742,7 @@ void MoveAxis(int axisId, int directionAxis)
 			Serial.print(microsteps_Char);
 			Serial.println(configSetup.microsteps_Axis_B);
 			Serial.print(distance_Char);
-			Serial.println(configMove.distance_MoveB);
+			Serial.println(configMove.distance_MoveB,4);
 
 			Serial.print(steps_Char);
 			Serial.println(stepsToMove);
@@ -2054,6 +2054,8 @@ void Sync(int directionSpindle, int directionAxis)
 	int dirPin = 0;
 	int32_t maxSpeed = 0;
 	int32_t accel = 0;
+	long axisSteps = 0;
+
 	switch (configSync.axisId)
 	{
 		case ID_AXIS_Z:
@@ -2062,6 +2064,7 @@ void Sync(int directionSpindle, int directionAxis)
 			dirPin = PIN_AXIS_Z_DIR;
 			maxSpeed = configSync.maxSpd_Axis_Z * configSync.speedPercent_Axis_Z * .01;
 			accel = configSync.accel_Axis_Z;
+			axisSteps = DistanceToSteps_Axis(configSync.distance, configSync.axisId) * directionAxis;
 			break;
 		}
 		case ID_AXIS_X:
@@ -2070,6 +2073,7 @@ void Sync(int directionSpindle, int directionAxis)
 			dirPin = PIN_AXIS_X_DIR;
 			maxSpeed = configSync.maxSpd_Axis_X * configSync.speedPercent_Axis_X * .01;
 			accel = configSync.accel_Axis_X;
+			axisSteps = DistanceToSteps_Axis(configSync.distance, configSync.axisId) * directionAxis;
 			break;
 		}
 		case ID_AXIS_B:
@@ -2078,6 +2082,19 @@ void Sync(int directionSpindle, int directionAxis)
 			dirPin = PIN_AXIS_B_DIR;
 			maxSpeed = configSync.maxSpd_Axis_B * configSync.speedPercent_Axis_B * .01;
 			accel = configSync.accel_Axis_B;
+			switch (configSetup.radialOrLinear_Axis_B)
+			{
+				case RADIAL_B:
+				{
+					axisSteps = DistanceToSteps_RadialB(configSync.distance)* directionAxis;
+					break;
+				}
+				case LINEAR_B:
+				{
+					axisSteps = DistanceToSteps_LinearB(configSync.distance) * directionAxis;
+					break;
+				}
+			}
 			
 			break;
 		}
@@ -2094,10 +2111,6 @@ void Sync(int directionSpindle, int directionAxis)
 		.setTargetRel(targetSteps_Spindle);
 	stepper_Spindle.setPosition(0);
 
-
-	//int32_t axisStepsZ = (((configSync.distance) / configSetup.distancePerRev_AxisZ) * (configSetup.microsteps_Axis_Z * configSetup.steps360_Axis_Z)) * directionAxis;
-
-	long axisSteps = DistanceToSteps_Axis(configSync.distance, configSync.axisId) * directionAxis;
 	stepper_Axis
 		.setMaxSpeed(maxSpeed)
 		.setAcceleration(accel)
@@ -4282,6 +4295,8 @@ bool GreekKey_Move_Axis(float segmentSteps, float multiplier, int direction, boo
 	int actualSpeed = 0;
 	int currentAxis = configGreekKey.axisId;
 
+	// When updatePosition is false, the cutter is moved in or out of the workpiece and the distance
+	// is not accumulated.
 	if (!updatePosition)
 	{
 		switch (configGreekKey.axisId)
@@ -4289,14 +4304,23 @@ bool GreekKey_Move_Axis(float segmentSteps, float multiplier, int direction, boo
 			case ID_AXIS_Z:
 			{
 				currentAxis = ID_AXIS_X;
+				Serial.print("X-CurrentAxis:  ");
+				Serial.println(currentAxis);
+				break;
 			}
 			case ID_AXIS_X:
 			{
 				currentAxis = ID_AXIS_Z;
+				Serial.print("Z-CurrentAxis:  ");
+				Serial.println(currentAxis);
+				break;
 			}
 			case ID_AXIS_B: // Assumes the toolpath is on the outside of the workpiece generally moving in Z axis
 			{
 				currentAxis = ID_AXIS_X;
+				Serial.print("X-CurrentAxis:  ");
+				Serial.println(currentAxis);
+				break;
 			}
 		}
 	}
@@ -4309,6 +4333,8 @@ bool GreekKey_Move_Axis(float segmentSteps, float multiplier, int direction, boo
 	Serial.println(multiplier);
 	Serial.print("Move_Axis:newDirection ");
 	Serial.println(newDirection);
+	Serial.print("Move_Axis:updatePosition ");
+	Serial.println(updatePosition);
 #endif // DEBUG
 
 
