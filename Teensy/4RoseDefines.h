@@ -397,7 +397,7 @@ float degrees_Spindle = 0;
 float distance_Axis = 0;
 
 // Accuracy interval 
-constexpr unsigned recalcPeriod = 25'000; //?s  period for calculation of new target points. Straight lines between those points. 
+constexpr unsigned recalcPeriod = 35'000; //?s  period for calculation of new target points. Straight lines between those points. 
 constexpr float dtRose = recalcPeriod / 1E6;  //seconds  1E6 = 1,000,000 
 
 constexpr unsigned PID_Interval = 10; // ms  

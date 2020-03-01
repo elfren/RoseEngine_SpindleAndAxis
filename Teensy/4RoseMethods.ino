@@ -490,7 +490,17 @@ float StepsToDistance_Axis(float steps, int axisId)
 		}
 		case ID_AXIS_B: // Rotary axis
 		{
-			retVal = (steps / (configSetup.steps360_Axis_B * configSetup.microsteps_Axis_B * configSetup.gearRatio_AxisB)) * 360;
+			switch (configSetup.radialOrLinear_Axis_B)
+			{
+				case RADIAL_B:
+				{
+					retVal = (steps / (configSetup.steps360_Axis_B * configSetup.microsteps_Axis_B * configSetup.gearRatio_AxisB)) * 360;
+				}
+				case LINEAR_B:
+				{
+					retVal = (steps * configSetup.distancePerRev_AxisB) / (configSetup.steps360_Axis_B * configSetup.microsteps_Axis_B);
+				}
+			}
 			break;
 		}
 	}
@@ -1337,7 +1347,7 @@ endLoop:
 }
 
  ///<summary>
-/// RunTwoSteppers_All
+/// Main_TwoSteppers
 /// </summary>
 /// <comment>
 /// Allow switching axis while spindle is running
@@ -1345,15 +1355,16 @@ endLoop:
 /// <param name="direction_Axis">Axis rotation</param>
 /// <param name="direction_Spindle">Spindle rotation</param>
 /// <param name="initialCaller">Spindle or Axis</param>
-void RunTwoSteppers_All(
+void Main_TwoSteppers(
 	int direction_Axis,
 	int direction_Spindle,
 	int initialCaller
 )
 {
-	RotateControl rotateControllerSpindle;
-	RotateControl rotateControllerAxis;
+	RotateControl rotateController_MainSpindle;
+	RotateControl rotateController_MainAxis;
 	Stepper stepper_Spindle(PIN_SPINDLE_STEP, PIN_SPINDLE_DIR);
+	
 	int limitPin_Max = configSetup.limit_Max_Z;
 	int limitPin_Min = configSetup.limit_Min_Z;
 
@@ -1362,6 +1373,8 @@ void RunTwoSteppers_All(
 	int accel_Spindle = 0;
 
 	float speedPercentAxis = 0;
+	int32_t maxSpeed_Axis = 0;
+	int32_t accel_Axis = 0;
 	float speedPercentSpindle = 0;
 	float currentSpeedPercentSpindle = 0;
 	int32_t targetPosition_Axis = 2000000000;
@@ -1397,53 +1410,62 @@ void RunTwoSteppers_All(
 	Stepper stepper_Z(PIN_AXIS_Z_STEP, PIN_AXIS_Z_DIR);
 	Stepper stepper_X(PIN_AXIS_X_STEP, PIN_AXIS_X_DIR);
 	Stepper stepper_B(PIN_AXIS_B_STEP, PIN_AXIS_B_DIR);
+
 	switch (configMain.axisId)
 	{
 		case ID_AXIS_Z:
 		{
 			speedPercentAxis = configMain.speedPercent_Axis_Z;
-			speedPercentSpindle = configMain.speedPercent_Spindle;
-
 			limitPin_Max = configSetup.limit_Max_Z;
 			limitPin_Min = configSetup.limit_Min_Z;
+			maxSpeed_Axis = configMain.maxSpd_Axis_Z * direction_Axis;
+			accel_Axis = configMain.accel_Axis_Z;
 			stepper_Z.setPosition(0);
 			stepper_Z
-				.setMaxSpeed(configMain.maxSpd_Axis_Z * direction_Axis)
-				.setAcceleration(configMain.accel_Axis_Z)
-				.setTargetAbs(targetPosition_Axis);
+				.setMaxSpeed(maxSpeed_Axis)
+				.setAcceleration(accel_Axis)
+				.setTargetRel(0);
+			MilliDelay(5);
+			stepper_Z.setTargetRel(targetPosition_Axis);
 			break;
 		}
 		case ID_AXIS_X:
 		{
-			speedPercentAxis = configMain.speedPercent_Axis_X;
-			speedPercentSpindle = configMain.speedPercent_Spindle;
 
+			speedPercentAxis = configMain.speedPercent_Axis_X;
 			limitPin_Max = configSetup.limit_Max_X;
 			limitPin_Min = configSetup.limit_Min_X;
+			maxSpeed_Axis = configMain.maxSpd_Axis_X * direction_Axis;
+			accel_Axis = configMain.accel_Axis_X;
 			stepper_X.setPosition(0);
 			stepper_X
-				.setMaxSpeed(configMain.maxSpd_Axis_X * direction_Axis)
-				.setAcceleration(configMain.accel_Axis_X)
-				.setTargetAbs(targetPosition_Axis);
+				.setMaxSpeed(maxSpeed_Axis)
+				.setAcceleration(accel_Axis)
+				.setTargetRel(0);
+
+			MilliDelay(5);
+			stepper_X.setTargetRel(targetPosition_Axis);
 			break;
 		}
 		case ID_AXIS_B:
 		{
 			speedPercentAxis = configMain.speedPercent_Axis_B;
-			speedPercentSpindle = configMain.speedPercent_Spindle;
-
 			limitPin_Max = configSetup.limit_Max_B;
 			limitPin_Min = configSetup.limit_Min_B;
+			maxSpeed_Axis = configMain.maxSpd_Axis_B * direction_Axis;
+			accel_Axis = configMain.accel_Axis_B;
 			stepper_B.setPosition(0);
 			stepper_B
-				.setMaxSpeed(configMain.maxSpd_Axis_B * direction_Axis)
-				.setAcceleration(configMain.accel_Axis_B)
-				.setTargetAbs(targetPosition_Axis);
-			
+				.setMaxSpeed(maxSpeed_Axis)
+				.setAcceleration(accel_Axis)
+				.setTargetRel(0);
+			MilliDelay(5);
+			stepper_B.setTargetRel(targetPosition_Axis);
 			break;
 		}
 	}
 
+	speedPercentSpindle = configMain.speedPercent_Spindle;
 	maxSpd_Spindle = configMain.maxSpd_Spindle;
 	accel_Spindle = configMain.accel_Spindle;
 	currentSpeedPercentSpindle = speedPercentSpindle * .01;
@@ -1474,28 +1496,30 @@ void RunTwoSteppers_All(
 			case ID_AXIS_Z:
 			{
 				SetEnable(ID_AXIS_Z, true);
-				rotateControllerAxis.rotateAsync(stepper_Z);
-				rotateControllerAxis.overrideSpeed(0);
+				rotateController_MainAxis.rotateAsync(stepper_Z);
+				rotateController_MainAxis.overrideSpeed(0);
 				MilliDelay(10);
-				rotateControllerAxis.overrideSpeed(configMain.speedPercent_Axis_Z * .01);
+				rotateController_MainAxis.overrideSpeed(configMain.speedPercent_Axis_Z * .01);
 				break;
 			}
 			case ID_AXIS_X:
 			{
 				SetEnable(ID_AXIS_X, true);
-				rotateControllerAxis.rotateAsync(stepper_X);
-				rotateControllerAxis.overrideSpeed(0);
+				rotateController_MainAxis.overrideSpeed(0);
+				rotateController_MainAxis.overrideAcceleration(0);
+				rotateController_MainAxis.rotateAsync(stepper_X);
+
 				MilliDelay(10);
-				rotateControllerAxis.overrideSpeed(configMain.speedPercent_Axis_X * .01);
+				rotateController_MainAxis.overrideSpeed(configMain.speedPercent_Axis_X * .01);
 				break;
 			}
 			case ID_AXIS_B:
 			{
 				SetEnable(ID_AXIS_B, true);
-				rotateControllerAxis.rotateAsync(stepper_B);
-				rotateControllerAxis.overrideSpeed(0);
+				rotateController_MainAxis.rotateAsync(stepper_B);
+				rotateController_MainAxis.overrideSpeed(0);
 				MilliDelay(10);
-				rotateControllerAxis.overrideSpeed(configMain.speedPercent_Axis_B * .01);
+				rotateController_MainAxis.overrideSpeed(configMain.speedPercent_Axis_B * .01);
 				break;
 			}
 		}
@@ -1512,10 +1536,10 @@ void RunTwoSteppers_All(
 	{
 		SetEnable(ID_SPINDLE, true);
 		MilliDelay(5);
-		rotateControllerSpindle.rotateAsync(stepper_Spindle);
-		rotateControllerSpindle.overrideSpeed(0);
+		rotateController_MainSpindle.rotateAsync(stepper_Spindle);
+		rotateController_MainSpindle.overrideSpeed(0);
 		MilliDelay(10);
-		rotateControllerSpindle.overrideSpeed(currentSpeedPercentSpindle);
+		rotateController_MainSpindle.overrideSpeed(currentSpeedPercentSpindle);
 #ifdef DEBUG
 		Serial.print(spindle_Char);
 		Serial.print(go_Char);
@@ -1538,9 +1562,9 @@ void RunTwoSteppers_All(
 					Serial.print(spindle_Char);
 					Serial.print(stop_Char);
 	#endif // DEBUG
-					rotateControllerSpindle.overrideSpeed(0);
+					rotateController_MainSpindle.overrideSpeed(0);
 					MilliDelay(5);
-					rotateControllerSpindle.stop();
+					rotateController_MainSpindle.stop();
 
 	#ifdef DEBUG
 					Serial.print(spindle_Char);
@@ -1555,7 +1579,7 @@ void RunTwoSteppers_All(
 				}
 				case 90: // Z - Z Axis CW
 				{
-					if (!rotateControllerAxis.isRunning())
+					if (!rotateController_MainAxis.isRunning())
 					{
 						stepper_Axis_Go = true;
 						direction_Axis = DIR_CW;
@@ -1566,16 +1590,16 @@ void RunTwoSteppers_All(
 							.setTargetAbs(targetPosition_Axis);
 
 						SetEnable(ID_AXIS_Z, true);
-						rotateControllerAxis.rotateAsync(stepper_Z);
-						rotateControllerAxis.overrideSpeed(0);
+						rotateController_MainAxis.rotateAsync(stepper_Z);
+						rotateController_MainAxis.overrideSpeed(0);
 						MilliDelay(5);
-						rotateControllerAxis.overrideSpeed(speedPercentAxis);
+						rotateController_MainAxis.overrideSpeed(speedPercentAxis);
 					}
 					break;
 				}
 				case 91: // [ - Z Axis CCW
 				{
-					if (!rotateControllerAxis.isRunning())
+					if (!rotateController_MainAxis.isRunning())
 					{
 						stepper_Axis_Go = true;
 						direction_Axis = DIR_CCW;
@@ -1586,18 +1610,18 @@ void RunTwoSteppers_All(
 							.setTargetAbs(targetPosition_Axis);
 
 						SetEnable(ID_AXIS_Z, true);
-						rotateControllerAxis.rotateAsync(stepper_Z);
-						rotateControllerAxis.overrideSpeed(0);
+						rotateController_MainAxis.rotateAsync(stepper_Z);
+						rotateController_MainAxis.overrideSpeed(0);
 						MilliDelay(5);
-						rotateControllerAxis.overrideSpeed(speedPercentAxis);
+						rotateController_MainAxis.overrideSpeed(speedPercentAxis);
 					}
 					break;
 				}
 				case 99: // c - Axis stop
 				{
-					rotateControllerAxis.overrideSpeed(0);
+					rotateController_MainAxis.overrideSpeed(0);
 					MilliDelay(5);
-					rotateControllerAxis.stop();
+					rotateController_MainAxis.stop();
 					switch (configMain.axisId)
 					{
 					case ID_AXIS_Z:
@@ -1625,7 +1649,7 @@ void RunTwoSteppers_All(
 				}
 				case 107: // k -  Z spindle CW
 				{
-					if (!rotateControllerSpindle.isRunning())
+					if (!rotateController_MainSpindle.isRunning())
 					{
 						direction_Spindle = DIR_CW;
 						targetPosition_Spindle = 2000000000;
@@ -1636,10 +1660,10 @@ void RunTwoSteppers_All(
 						stepper_Spindle_Go = true;
 
 						SetEnable(ID_SPINDLE, true);
-						rotateControllerSpindle.rotateAsync(stepper_Spindle);
-						rotateControllerSpindle.overrideSpeed(0);
+						rotateController_MainSpindle.rotateAsync(stepper_Spindle);
+						rotateController_MainSpindle.overrideSpeed(0);
 						MilliDelay(5);
-						rotateControllerSpindle.overrideSpeed(speedPercentSpindle);
+						rotateController_MainSpindle.overrideSpeed(speedPercentSpindle);
 					}
 
 					break;
@@ -1647,7 +1671,7 @@ void RunTwoSteppers_All(
 
 				case 108: // l - Z spindle CCW
 				{
-					if (!rotateControllerSpindle.isRunning())
+					if (!rotateController_MainSpindle.isRunning())
 					{
 						direction_Spindle = DIR_CCW;
 						targetPosition_Spindle = 2000000000;
@@ -1658,10 +1682,10 @@ void RunTwoSteppers_All(
 						stepper_Spindle_Go = true;
 
 						SetEnable(ID_SPINDLE, true);
-						rotateControllerSpindle.rotateAsync(stepper_Spindle);
-						rotateControllerSpindle.overrideSpeed(0);
+						rotateController_MainSpindle.rotateAsync(stepper_Spindle);
+						rotateController_MainSpindle.overrideSpeed(0);
 						MilliDelay(5);
-						rotateControllerSpindle.overrideSpeed(speedPercentSpindle);
+						rotateController_MainSpindle.overrideSpeed(speedPercentSpindle);
 					}
 					break;
 				}
@@ -1670,7 +1694,7 @@ void RunTwoSteppers_All(
 					configMain.speedPercent_Spindle = (int)GetSerialFloat(serialId);
 					speedPercentSpindle = (float)(configMain.speedPercent_Spindle * .01);
 					EEPROM.put(eePromAddress_Main, configMain);
-					rotateControllerSpindle.overrideSpeed(speedPercentSpindle);
+					rotateController_MainSpindle.overrideSpeed(speedPercentSpindle);
 					break;
 				}
 				case 111: // Axis Speed
@@ -1699,12 +1723,12 @@ void RunTwoSteppers_All(
 					}
 					EEPROM.put(eePromAddress_Main, configMain);
 
-					rotateControllerAxis.overrideSpeed(speedPercentAxis);
+					rotateController_MainAxis.overrideSpeed(speedPercentAxis);
 					break;
 				}
 				case 165: // ¥ - X Axis CCW
 				{
-					if (!rotateControllerAxis.isRunning())
+					if (!rotateController_MainAxis.isRunning())
 					{
 						stepper_Axis_Go = true;
 						direction_Axis = DIR_CCW;
@@ -1715,17 +1739,17 @@ void RunTwoSteppers_All(
 							.setTargetAbs(targetPosition_Axis);
 
 						SetEnable(ID_AXIS_X, true);
-						rotateControllerAxis.rotateAsync(stepper_X);
-						rotateControllerAxis.overrideSpeed(0);
+						rotateController_MainAxis.rotateAsync(stepper_X);
+						rotateController_MainAxis.overrideSpeed(0);
 						MilliDelay(5);
-						rotateControllerAxis.overrideSpeed(speedPercentAxis);
+						rotateController_MainAxis.overrideSpeed(speedPercentAxis);
 					}
 					break;
 				}
 				case 166: // ¦ - X Axis CW
 				{
 					
-					if (!rotateControllerAxis.isRunning())
+					if (!rotateController_MainAxis.isRunning())
 					{
 						stepper_Axis_Go = true;
 						direction_Axis = DIR_CW;
@@ -1736,17 +1760,17 @@ void RunTwoSteppers_All(
 							.setTargetAbs(targetPosition_Axis);
 
 						SetEnable(ID_AXIS_X, true);
-						rotateControllerAxis.rotateAsync(stepper_X);
-						rotateControllerAxis.overrideSpeed(0);
+						rotateController_MainAxis.rotateAsync(stepper_X);
+						rotateController_MainAxis.overrideSpeed(0);
 						MilliDelay(5);
-						rotateControllerAxis.overrideSpeed(speedPercentAxis); 
+						rotateController_MainAxis.overrideSpeed(speedPercentAxis); 
 					}
 
 					break;
 				}
 				case 171: // « - Sp-B Axis CCW
 				{
-					if (!rotateControllerAxis.isRunning())
+					if (!rotateController_MainAxis.isRunning())
 					{
 						stepper_Axis_Go = true;
 						direction_Axis = DIR_CCW;
@@ -1758,16 +1782,16 @@ void RunTwoSteppers_All(
 							.setTargetAbs(targetPosition_Axis);
 
 						SetEnable(ID_AXIS_B, true);
-						rotateControllerAxis.rotateAsync(stepper_B);
-						rotateControllerAxis.overrideSpeed(0);
+						rotateController_MainAxis.rotateAsync(stepper_B);
+						rotateController_MainAxis.overrideSpeed(0);
 						MilliDelay(5);
-						rotateControllerAxis.overrideSpeed(speedPercentAxis);
+						rotateController_MainAxis.overrideSpeed(speedPercentAxis);
 					}
 					break;
 				}
 				case 172: // ¬ - B Axis CW
 				{
-					if (!rotateControllerAxis.isRunning())
+					if (!rotateController_MainAxis.isRunning())
 					{
 						stepper_Axis_Go = true;
 						direction_Axis = DIR_CW;
@@ -1778,10 +1802,10 @@ void RunTwoSteppers_All(
 							.setTargetAbs(targetPosition_Axis);
 
 						SetEnable(ID_AXIS_B, true);
-						rotateControllerAxis.rotateAsync(stepper_B);
-						rotateControllerAxis.overrideSpeed(0);
+						rotateController_MainAxis.rotateAsync(stepper_B);
+						rotateController_MainAxis.overrideSpeed(0);
 						MilliDelay(5);
-						rotateControllerAxis.overrideSpeed(speedPercentAxis);
+						rotateController_MainAxis.overrideSpeed(speedPercentAxis);
 					}
 					break;
 				}
@@ -1799,8 +1823,8 @@ void RunTwoSteppers_All(
 		{
 			if (digitalRead(limitPin_Max) == LOW)
 			{
-				rotateControllerAxis.overrideSpeed(0);
-				rotateControllerAxis.stop();
+				rotateController_MainAxis.overrideSpeed(0);
+				rotateController_MainAxis.stop();
 				stepper_Axis_Go = false;
 			}
 		}
@@ -1808,8 +1832,8 @@ void RunTwoSteppers_All(
 		{
 			if (digitalRead(limitPin_Min) == LOW)
 			{
-				rotateControllerAxis.overrideSpeed(0);
-				rotateControllerAxis.stop();
+				rotateController_MainAxis.overrideSpeed(0);
+				rotateController_MainAxis.stop();
 				stepper_Axis_Go = false;
 			}
 		}
@@ -4239,11 +4263,19 @@ void GreekKeyPattern_End()
 		case ID_AXIS_Z: // Z Axis
 		{
 			distance_Axis = StepsToDistance_Axis(endPosition_Axis, ID_AXIS_Z);
+			SetEnable(ID_AXIS_Z, false);
 			break;
 		}
 		case ID_AXIS_X: // X Axis
 		{
 			distance_Axis = StepsToDistance_Axis(endPosition_Axis, ID_AXIS_X);
+			SetEnable(ID_AXIS_X, false);
+			break;
+		}
+		case ID_AXIS_B: // B Axis
+		{
+			distance_Axis = StepsToDistance_Axis(endPosition_Axis, ID_AXIS_B);
+			SetEnable(ID_AXIS_B, false);
 			break;
 		}
 	}
@@ -4259,17 +4291,6 @@ void GreekKeyPattern_End()
 #endif // DEBUG
 
 	SetEnable(ID_SPINDLE, false);
-	switch (configGreekKey.axisId)
-	{
-		case ID_AXIS_Z: // Z Axis
-		{
-			SetEnable(ID_AXIS_X, false);
-		}
-		case ID_AXIS_X: // X Axis
-		{
-			SetEnable(ID_AXIS_X, false);
-		}
-	}
 }
 
 /// <summary>
@@ -6135,10 +6156,10 @@ int PrintFloat(float floatValue) {
 		}
 		tempValue *= 10.0;  // Shift left one decimal digit
 	}
-	Serial.print("decimalPlaces:");
-	Serial.println(decimalPlaces);
-	Serial.print("PrintFloat: ");
-	Serial.println(floatValue, decimalPlaces);
+	//Serial.print("decimalPlaces:");
+	//Serial.println(decimalPlaces);
+	//Serial.print("PrintFloat: ");
+	//Serial.println(floatValue, decimalPlaces);
 	return decimalPlaces;
 }
 /// <summary>
@@ -7208,14 +7229,14 @@ void ReturnToStartPosition(int axisId)
 }
 
 // ================================================================================= 
-// RosePatternSpindle Methods
+// Rose Patterns
 // ================================================================================= 
 // Adapted from code written by Lutz Niggl: https://github.com/luni64/TeensyStep
 
-float slideFunc_Spindle_Z(float spindleAngleZ)
+float slideFunc_Axis(float spindleAngle)
 {
-	float phi = fmodf(spindleAngleZ * kRatio, TWO_PI);
-	float retVal = spindleStepsAmplitude * cosf(phi);
+	float phi = fmodf(spindleAngle * kRatio, TWO_PI);
+	float retVal = slideStepsAmplitude * cosf(phi);
 	return retVal;
 }
 
@@ -7226,18 +7247,227 @@ float slideFunc_Spindle_Z(float spindleAngleZ)
 // It calculates 
 //  1) a new target value for the slide depending on the spindle angle
 //  2) the new speed for the spindle so that it will reach the target until it is called again
-void tickSpindleZ(RotateControl &rotateController)
+void tick()
 {
-	float spindleAngleZ = stepperAxis_Z.getPosition();// *(TWO_PI / spindleStepsPerRev); //convert steps to angle
-	float slidePositionZ = stepperSpindle.getPosition();
-	float slideTargetZ = slideFunc_Spindle_Z(spindleAngleZ);
+	float spindleAngle = stepperSpindle.getPosition() * (TWO_PI / spindleStepsPerRev); //convert steps to angle
+	float slidePosition = 0;
+	switch (configRose.axisId)
+	{
+		case ID_AXIS_Z:
+		{
+			slidePosition = stepperAxis_Z.getPosition();
+			break;
+		}
+		case ID_AXIS_X:
+		{
+			slidePosition = stepperAxis_X.getPosition();
+			break;
+		}
+		case ID_AXIS_B:
+		{
+			slidePosition = stepperAxis_B.getPosition();
+			break;
+		}
+	}
 
-	float newSpeedZ = (slideTargetZ - slidePositionZ) / dtRose; // speed to reach target in given delta t (neglecting acceleration)
-	float speedFacZ = newSpeedZ / newMaxSpd_RoseSpindle;              // transform in relative factor (-1.0 .. 1.0)
+	float phi = fmodf(spindleAngle * kRatio, TWO_PI);
+	float slideTarget = slideStepsAmplitude * cosf(phi);
 
-	rotateController.overrideSpeed(speedFacZ);             // set new speed
+	float newSpeed = (slideTarget - slidePosition) / dtRose; // speed to reach target in given delta t (neglecting acceleration)
+	float speedFac = newSpeed / newMaxSpd_RoseAxis;              // transform in relative factor (-1.0 .. 1.0)
+
+	controllerAxis.overrideSpeed(speedFac);             // set new speed
 }
 
+void RoseRadial(int direction)
+{
+	//const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
+	bool runPattern = true;
+	IntervalTimer tickTimer;
+	RotateControl controllerRoseSpindle;
+
+	kRatio = (float)configRose.n / configRose.d;
+
+	spindleStepsPerRev = configSetup.gearRatio_Spindle * configSetup.microsteps_Spindle * configSetup.steps360_Spindle;
+	newMaxSpd_RoseSpindle = configRose.maxSpd_Spindle * configRose.speedPercent_Spindle * .01 * direction;
+	stepperSpindle
+		.setMaxSpeed(newMaxSpd_RoseSpindle)
+		.setAcceleration(configRose.accel_Spindle)
+		.setPosition(0);
+
+	SetEnable(ID_SPINDLE, true);
+
+	initialPosition_Axis = static_cast<int>(slideFunc_Axis(0));
+
+	switch (configRose.axisId)
+	{
+		case ID_AXIS_Z:
+		{
+			slideStepsAmplitude = ((configRose.amplitude_Radial_Z / (configSetup.distancePerRev_AxisZ)) * configSetup.steps360_Axis_Z * configSetup.microsteps_Axis_Z) / 2;  // Amplitude is normally measured from the middle to the top
+			newMaxSpd_RoseAxis = configRose.maxSpd_Axis_Z * configRose.speedPercent_Axis_Z * .01 * direction;
+			stepperAxis_Z
+				.setMaxSpeed(newMaxSpd_RoseAxis)
+				.setAcceleration(configRose.accel_Axis_Z)
+				.setPosition(initialPosition_Axis); // set start position of counter
+			SetEnable(ID_AXIS_Z, true);
+			controllerAxis.rotateAsync(stepperAxis_Z);
+			break;
+		}
+		case ID_AXIS_X:
+		{
+			slideStepsAmplitude = ((configRose.amplitude_Radial_X / (configSetup.distancePerRev_AxisX)) * configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X) / 2;  // Amplitude is normally measured from the middle to the top
+			newMaxSpd_RoseAxis = configRose.maxSpd_Axis_X * configRose.speedPercent_Axis_X * .01 * direction;
+			stepperAxis_X
+				.setMaxSpeed(newMaxSpd_RoseAxis)
+				.setAcceleration(configRose.accel_Axis_X)
+				.setPosition(initialPosition_Axis); // set start position of counter	
+			SetEnable(ID_AXIS_X, true);
+			controllerAxis.rotateAsync(stepperAxis_X);
+			break;
+		}
+		case ID_AXIS_B:
+		{
+			//slideStepsAmplitude = ((configRose.amplitude_Radial_B / (configSetup.distancePerRev_AxisB)) * configSetup.steps360_Axis_B * configSetup.microsteps_Axis_B) / 2;  // Amplitude is normally measured from the middle to the top
+			switch (configSetup.radialOrLinear_Axis_B)
+			{
+				case RADIAL_B:
+				{
+					slideStepsAmplitude = DistanceToSteps_RadialB(configRose.amplitude_Radial_B) / 2;
+					break;
+				}
+				case LINEAR_B:
+				{
+					slideStepsAmplitude = DistanceToSteps_LinearB(configRose.amplitude_Radial_B) / 2;
+					break;
+				}
+			}
+
+			newMaxSpd_RoseAxis = configRose.maxSpd_Axis_B * configRose.speedPercent_Axis_B * .01 * direction;
+			stepperAxis_B
+				.setMaxSpeed(newMaxSpd_RoseAxis)
+				.setAcceleration(configRose.accel_Axis_B)
+				.setPosition(initialPosition_Axis); // set start position of counter
+			SetEnable(ID_AXIS_B, true);
+			controllerAxis.rotateAsync(stepperAxis_B);
+			break;
+		}
+	}
+
+	controllerRoseSpindle.rotateAsync(stepperSpindle); // let the spindle run with constant speed
+
+	tick();
+
+	// use a timer to periodically calculate new targets for the slide
+	tickTimer.priority(priorityLevel); // lowest priority, potentially long caclulations need to be interruptable by TeensyStep
+	tickTimer.begin(tick, recalcPeriod);
+
+	//while (controllerRoseSpindle.isRunning())
+	while (runPattern)
+	{
+		// print current values of spindle angle [rad] and slide position [steps]
+		//float phiZ = endPosition_Spindle * (TWO_PI / spindleStepsPerRev);
+		//Serial.printf("%f\t%d\n", phiZ, endPosition_Axis);
+
+		// Check for Cancel code  
+		if (SerialAvailable() >= 0)
+		{
+			incomingByte = SerialRead(serialId);
+			switch (incomingByte)
+			{
+				case 67:
+				case 99:
+				{
+					controllerAxis.stopAsync();
+					controllerRoseSpindle.stopAsync();
+					runPattern = false;
+					break;
+				}
+			}
+		}
+
+		MilliDelay(100);
+	} // End while
+
+	tickTimer.end();
+	endPosition_Spindle = stepperSpindle.getPosition();
+	returnSteps_Spindle = endPosition_Spindle;
+	stepperSpindle.setPosition(0);
+	SetEnable(ID_SPINDLE, false);
+
+	switch (configRose.axisId)
+	{
+		case ID_AXIS_Z:
+		{
+			endPosition_Axis = stepperAxis_Z.getPosition();
+			stepperAxis_Z.setPosition(0);
+			stepperAxis_Z.setTargetRel(0);
+			stepperAxis_Z.setAcceleration(100);
+			stepperAxis_Z.setMaxSpeed(100);
+			SetEnable(ID_AXIS_Z, false);
+			break;
+		}
+		case ID_AXIS_X:
+		{
+			endPosition_Axis = stepperAxis_X.getPosition();
+			stepperAxis_X.setPosition(0);
+			stepperAxis_X.setTargetRel(0);
+			stepperAxis_X.setAcceleration(100);
+			stepperAxis_X.setMaxSpeed(100);
+			SetEnable(ID_AXIS_X, false);
+			break;
+		}
+		case ID_AXIS_B:
+		{
+			endPosition_Axis = stepperAxis_B.getPosition();
+			stepperAxis_B.setPosition(0);
+			stepperAxis_B.setTargetRel(0);
+			stepperAxis_B.setAcceleration(100);
+			stepperAxis_B.setMaxSpeed(100);
+			SetEnable(ID_AXIS_B, false);
+			break;
+		}
+	}
+
+	returnSteps_Axis = endPosition_Axis - initialPosition_Axis;
+
+#ifdef DEBUG
+	Serial.print("Spindle:");
+	Serial.println(endPosition_Spindle);
+	Serial.print("returnSteps_Spindle:");
+	Serial.println(returnSteps_Spindle);
+	Serial.print("Axis:");
+	Serial.println(endPosition_Axis);
+	Serial.print("returnSteps_Axis: ");
+	Serial.println(returnSteps_Axis);
+#endif // DEBUG
+	
+}
+
+//float slideFunc_Spindle_Z(float spindleAngleZ)
+//{
+//	float phi = fmodf(spindleAngleZ * kRatio, TWO_PI);
+//	float retVal = spindleStepsAmplitude * cosf(phi);
+//	return retVal;
+//}
+//
+////------------------------------------------------------------------------------------
+//// tick()
+////
+//// This function is called periodically with period recalcPeriod. 
+//// It calculates 
+////  1) a new target value for the slide depending on the spindle angle
+////  2) the new speed for the spindle so that it will reach the target until it is called again
+//void tickSpindleZ(RotateControl &rotateController)
+//{
+//	float spindleAngleZ = stepperAxis_Z.getPosition();// *(TWO_PI / spindleStepsPerRev); //convert steps to angle
+//	float slidePositionZ = stepperSpindle.getPosition();
+//	float slideTargetZ = slideFunc_Spindle_Z(spindleAngleZ);
+//
+//	float newSpeedZ = (slideTargetZ - slidePositionZ) / dtRose; // speed to reach target in given delta t (neglecting acceleration)
+//	float speedFacZ = newSpeedZ / newMaxSpd_RoseSpindle;              // transform in relative factor (-1.0 .. 1.0)
+//
+//	rotateController.overrideSpeed(speedFacZ);             // set new speed
+//}
 //// ToDo: Not Functional
 //void RosePattern_Axial_Z(int direction)
 //{
@@ -7352,676 +7582,7 @@ void tickSpindleZ(RotateControl &rotateController)
 //	SetEnable(ID_AXIS_Z, false);
 //}
 //
-// ================================================================================= 
-// RosePatternZ Methods
-// ================================================================================= 
 
-float slideFunc_Axis_Z(float spindleAngleZ)
-{
-	float phi = fmodf(spindleAngleZ * kRatio, TWO_PI);
-	float retVal = slideStepsAmplitude * cosf(phi);
-	return retVal;
-}
-
-//------------------------------------------------------------------------------------
-// tick()
-//
-// This function is called periodically with period recalcPeriod. 
-// It calculates 
-//  1) a new target value for the slide depending on the spindle angle
-//  2) the new speed for the spindle so that it will reach the target until it is called again
-void tickZ()
-{
-	float spindleAngleZ = stepperSpindle.getPosition() * (TWO_PI / spindleStepsPerRev); //convert steps to angle
-	float slidePositionZ = stepperAxis_Z.getPosition();
-
-	float phi = fmodf(spindleAngleZ * kRatio, TWO_PI);
-	float slideTargetZ = slideStepsAmplitude * cosf(phi);
-
-	float newSpeedZ = (slideTargetZ - slidePositionZ) / dtRose; // speed to reach target in given delta t (neglecting acceleration)
-	float speedFacZ = newSpeedZ / newMaxSpd_RoseAxis;              // transform in relative factor (-1.0 .. 1.0)
-
-	rotateController1.overrideSpeed(speedFacZ);             // set new speed
-}
-
-void RoseRadial_Z_Org(int direction)
-{
-	const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
-
-	IntervalTimer tickTimerZ;
-	RotateControl controllerRoseSpindle;
-
-	bool runPattern = true;
-
-	kRatio = (float)configRose.n / configRose.d;
-	spindleStepsPerRev = configSetup.gearRatio_Spindle * configSetup.microsteps_Spindle * configSetup.steps360_Spindle;
-	slideStepsAmplitude = ((configRose.amplitude_Radial_Z / (configSetup.distancePerRev_AxisZ)) * configSetup.steps360_Axis_Z * configSetup.microsteps_Axis_Z)/2;  // Amplitude is normally measured from the middle to the top
-
-	newMaxSpd_RoseSpindle = configRose.maxSpd_Spindle * configRose.speedPercent_Spindle * .01 * direction;
-	stepperSpindle
-		.setMaxSpeed(newMaxSpd_RoseSpindle)
-		.setAcceleration(configRose.accel_Spindle)
-		.setPosition(0);
-
-	initialPosition_Axis = static_cast<int>(slideFunc_Axis_Z(0));
-	newMaxSpd_RoseAxis = configRose.maxSpd_Axis_Z * configRose.speedPercent_Axis_Z * .01 * direction;
-	stepperAxis_Z
-		.setMaxSpeed(newMaxSpd_RoseAxis)
-		.setAcceleration(configRose.accel_Axis_Z)
-		.setPosition(initialPosition_Axis); // set start position of counter
-	
-#ifdef DEBUG
-	int beginPosition = stepperAxis_Z.getPosition();
-	Serial.print("BeginPosition: ");
-	Serial.println(beginPosition);
-	Serial.println("---------------------------");
-	Serial.print("SpindleMaxSpd:");
-	Serial.println(configRose.maxSpd_Spindle);
-	Serial.print("SpindleSpeedPercent:");
-	Serial.println(configRose.speedPercent_Spindle);
-
-	Serial.println("========================");
-	Serial.print("microsteps_Spindle:");
-	Serial.println(configSetup.microsteps_Spindle);
-	Serial.print("steps360_Spindle:");
-	Serial.println(configSetup.steps360_Spindle);
-	Serial.print("gearRatio_Spindle:");
-	Serial.println(configSetup.gearRatio_Spindle);
-	Serial.print("spindleStepsPerRev:");
-	Serial.println(spindleStepsPerRev);
-	Serial.println("========================");
-	Serial.print("AxisMaxSpd:");
-	Serial.println(configRose.maxSpd_Axis_Z);
-	Serial.print("AxisSpeedPercent:");
-	Serial.println(configRose.amplitude_Radial_Z);
-	Serial.print("AxisAccel:");
-	Serial.println(configRose.accel_Axis_Z);
-	Serial.println("+++++++++++++++++++++++++++");
-	Serial.print("newMaxSpd_RoseAxis:");
-	Serial.println(newMaxSpd_RoseAxis);
-	Serial.print("amplitude_Axis_Z:");
-	Serial.println(configRose.amplitude_Radial_Z);
-	Serial.println("+++++++++++++++++++++++++++");
-	Serial.print("initialPosition_Axis:");
-	Serial.println(initialPosition_Axis);
-	Serial.println("+++++++++++++++++++++++++++");
-
-#endif // DEBUG
-
-
-	// Enable steppers
-	SetEnable(ID_SPINDLE, true);
-	SetEnable(ID_AXIS_Z, true);
-
-	rotateController1.rotateAsync(stepperAxis_Z);
-	controllerRoseSpindle.rotateAsync(stepperSpindle); // let the spindle run with constant speed
-
-	tickZ();
-
-	// use a timer to periodically calculate new targets for the slide
-	tickTimerZ.priority(priorityLevel); // lowest priority, potentially long caclulations need to be interruptable by TeensyStep
-	tickTimerZ.begin(tickZ, recalcPeriod);
-
-	while (runPattern)
-	{
-#ifdef SHOW_POSITION 
-		endPosition_Axis = stepperAxis_Z.getPosition();
-		endPosition_Spindle = stepperSpindle.getPosition();
-
-		// print current values of spindle angle [rad] and slide position [steps]
-		//float phiZ = endPosition_Spindle * (TWO_PI / spindleStepsPerRev);
-		//Serial.printf("%f\t%d\n", phiZ, endPosition_Axis);
-		degrees_Spindle = StepsToDegrees_Spindle(endPosition_Spindle);
-		distance_Axis = StepsToDistance_Axis(endPosition_Axis, ID_AXIS_Z);
-		SerialPrint("pageBE.t1.txt=");
-		SerialWrite(0x22);
-		SerialPrint(degrees_Spindle);
-		SerialPrint(nextionQuoteEnd);
-		SerialPrint("pageBE.t2.txt=");
-		SerialWrite(0x22);
-		SerialPrint(distance_Axis);
-		SerialPrint(nextionQuoteEnd);
-
-#endif // Show Position
-		//MilliDelay(5);
-		// Check for Cancel code  
-		if (SerialAvailable() >= 0)
-		{
-			incomingByte = SerialRead(serialId);
-			switch (incomingByte)
-			{
-				case 67:
-				case 99:
-				{
-					runPattern = false;
-					controllerRoseSpindle.overrideSpeed(0);
-					rotateController1.overrideSpeed(0);
-					rotateController1.stopAsync();
-					controllerRoseSpindle.stopAsync();
-				
-					break;
-				}
-			}
-		}
-		MilliDelay(5);
-	} // End while
-
-	endPosition_Spindle = stepperSpindle.getPosition();
-	endPosition_Axis = stepperAxis_Z.getPosition();
-	returnSteps_Axis = endPosition_Axis - initialPosition_Axis;
-	returnSteps_Spindle = endPosition_Spindle;
-
-#ifdef DEBUG
-	Serial.print("Spindle:");
-	Serial.println(endPosition_Spindle);
-	Serial.print("returnSteps_Spindle:");
-	Serial.println(returnSteps_Spindle);
-	Serial.print("Axis:");
-	Serial.println(endPosition_Axis);
-	Serial.print("returnSteps_Axis: ");
-	Serial.println(returnSteps_Axis);
-#endif // DEBUG
-
-	stepperSpindle.setPosition(0);
-	stepperAxis_Z.setPosition(0);
-
-	SetEnable(ID_SPINDLE, false); 
-	SetEnable(ID_AXIS_Z, false);
-}
-
-void RoseRadial_Z(int direction)
-{
-	const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
-
-	IntervalTimer tickTimerZ;
-	RotateControl controllerRoseSpindle;
-	//RotateControl rotateController1;
-	bool runPattern = true;
-
-	kRatio = (float)configRose.n / configRose.d;
-	spindleStepsPerRev = configSetup.gearRatio_Spindle * configSetup.microsteps_Spindle * configSetup.steps360_Spindle;
-	slideStepsAmplitude = ((configRose.amplitude_Radial_Z / (configSetup.distancePerRev_AxisZ)) * configSetup.steps360_Axis_Z * configSetup.microsteps_Axis_Z) / 2;  // Amplitude is normally measured from the middle to the top
-
-	newMaxSpd_RoseSpindle = configRose.maxSpd_Spindle * configRose.speedPercent_Spindle * .01 * direction;
-	stepperSpindle
-		.setMaxSpeed(newMaxSpd_RoseSpindle)
-		.setAcceleration(configRose.accel_Spindle)
-		.setPosition(0);
-
-	initialPosition_Axis = static_cast<int>(slideFunc_Axis_Z(0));
-	newMaxSpd_RoseAxis = configRose.maxSpd_Axis_Z * configRose.speedPercent_Axis_Z * .01 * direction;
-	stepperAxis_Z
-		.setMaxSpeed(newMaxSpd_RoseAxis)
-		.setAcceleration(configRose.accel_Axis_Z)
-		.setPosition(initialPosition_Axis); // set start position of counter
-
-#ifdef DEBUG
-	int beginPosition = stepperAxis_Z.getPosition();
-	Serial.print("BeginPosition: ");
-	Serial.println(beginPosition);
-	Serial.println("---------------------------");
-	Serial.print("SpindleMaxSpd:");
-	Serial.println(configRose.maxSpd_Spindle);
-	Serial.print("SpindleSpeedPercent:");
-	Serial.println(configRose.speedPercent_Spindle);
-
-	Serial.println("========================");
-	Serial.print("microsteps_Spindle:");
-	Serial.println(configSetup.microsteps_Spindle);
-	Serial.print("steps360_Spindle:");
-	Serial.println(configSetup.steps360_Spindle);
-	Serial.print("gearRatio_Spindle:");
-	Serial.println(configSetup.gearRatio_Spindle);
-	Serial.print("spindleStepsPerRev:");
-	Serial.println(spindleStepsPerRev);
-	Serial.println("========================");
-	Serial.print("AxisMaxSpd:");
-	Serial.println(configRose.maxSpd_Axis_Z);
-	Serial.print("AxisSpeedPercent:");
-	Serial.println(configRose.amplitude_Radial_Z);
-	Serial.print("AxisAccel:");
-	Serial.println(configRose.accel_Axis_Z);
-	Serial.println("+++++++++++++++++++++++++++");
-	Serial.print("newMaxSpd_RoseAxis:");
-	Serial.println(newMaxSpd_RoseAxis);
-	Serial.print("amplitude_Axis_Z:");
-	Serial.println(configRose.amplitude_Radial_Z);
-	Serial.println("+++++++++++++++++++++++++++");
-	Serial.print("initialPosition_Axis:");
-	Serial.println(initialPosition_Axis);
-	Serial.println("+++++++++++++++++++++++++++");
-
-#endif // DEBUG
-
-	// Enable steppers
-	SetEnable(ID_SPINDLE, true);
-	SetEnable(ID_AXIS_Z, true);
-
-	rotateController1.rotateAsync(stepperAxis_Z);
-	controllerRoseSpindle.rotateAsync(stepperSpindle); // let the spindle run with constant speed
-
-	tickZ();
-
-	// use a timer to periodically calculate new targets for the slide
-	tickTimerZ.priority(priorityLevel); // lowest priority, potentially long caclulations need to be interruptable by TeensyStep
-	tickTimerZ.begin(tickZ, recalcPeriod);
-
-	while (runPattern)
-	{
-#ifdef SHOW_POSITION 
-		endPosition_Axis = stepperAxis_Z.getPosition();
-		endPosition_Spindle = stepperSpindle.getPosition();
-
-		// print current values of spindle angle [rad] and slide position [steps]
-		//float phiZ = endPosition_Spindle * (TWO_PI / spindleStepsPerRev);
-		//Serial.printf("%f\t%d\n", phiZ, endPosition_Axis);
-		degrees_Spindle = StepsToDegrees_Spindle(endPosition_Spindle);
-		distance_Axis = StepsToDistance_Axis(endPosition_Axis, ID_AXIS_Z);
-		SerialPrint("pageBE.t1.txt=");
-		SerialWrite(0x22);
-		SerialPrint(degrees_Spindle);
-		SerialPrint(nextionQuoteEnd);
-		SerialPrint("pageBE.t2.txt=");
-		SerialWrite(0x22);
-		SerialPrint(distance_Axis);
-		SerialPrint(nextionQuoteEnd);
-
-#endif // Show Position
-		//MilliDelay(5);
-		// Check for Cancel code  
-		if (SerialAvailable() >= 0)
-		{
-			incomingByte = SerialRead(serialId);
-			switch (incomingByte)
-			{
-			case 67:
-			case 99:
-			{
-				runPattern = false;
-				controllerRoseSpindle.overrideSpeed(0);
-				rotateController1.overrideSpeed(0);
-				rotateController1.stopAsync();
-				controllerRoseSpindle.stopAsync();
-
-				break;
-			}
-			}
-		}
-		MilliDelay(5);
-	} // End while
-
-	endPosition_Spindle = stepperSpindle.getPosition();
-	endPosition_Axis = stepperAxis_Z.getPosition();
-	returnSteps_Axis = endPosition_Axis - initialPosition_Axis;
-	returnSteps_Spindle = endPosition_Spindle;
-
-#ifdef DEBUG
-	Serial.print("Spindle:");
-	Serial.println(endPosition_Spindle);
-	Serial.print("returnSteps_Spindle:");
-	Serial.println(returnSteps_Spindle);
-	Serial.print("Axis:");
-	Serial.println(endPosition_Axis);
-	Serial.print("returnSteps_Axis: ");
-	Serial.println(returnSteps_Axis);
-#endif // DEBUG
-
-	stepperSpindle.setPosition(0);
-	stepperAxis_Z.setPosition(0);
-
-	SetEnable(ID_SPINDLE, false);
-	SetEnable(ID_AXIS_Z, false);
-}
-// ================================================================================= 
-// RosePatternX Methods
-// ================================================================================= 
-
-float slideFunc_Axis_X(float spindleAngleX)
-{
-	float phi = fmodf(spindleAngleX * kRatio, TWO_PI);
-	float retVal = slideStepsAmplitude * cosf(phi);
-
-	//Serial.print("kRatio");
-	//Serial.println(kRatio);
-	//Serial.print("TWO_PI");
-	//Serial.println(TWO_PI);
-	//Serial.print("phi");
-	//Serial.println(phi);
-	//Serial.print("slideStepsAmplitude");
-	//Serial.println(slideStepsAmplitude);
-	return retVal;
-}
-
-////------------------------------------------------------------------------------------
-//// tick()
-////
-//// This function is called periodically with period recalcPeriod. 
-//// It calculates 
-////  1) a new target value for the slide depending on the spindle angle
-////  2) the new speed for the spindle so that it will reach the target until it is called again
-//
-void tickX()
-{
-	float spindleAngleX = stepperSpindle.getPosition() * (TWO_PI / spindleStepsPerRev); //convert steps to angle
-	float slidePositionX = stepperAxis_X.getPosition();
-	float slideTargetX = slideFunc_Axis_X(spindleAngleX);
-
-	float newSpeedX = (slideTargetX - slidePositionX) / dtRose; // speed to reach target in given delta t (neglecting acceleration)
-	float speedFacX = newSpeedX / newMaxSpd_RoseAxis;              // transform in relative factor (-1.0 .. 1.0)
-
-	rotateController1.overrideSpeed(speedFacX);             // set new speed
-}
-void RoseRadial_X(int direction)
-{
-	IntervalTimer tickTimerX;
-	RotateControl controllerRose_Spindle;
-	bool runPatternX = true;
-
-	kRatio = (float)configRose.n / configRose.d;
-	spindleStepsPerRev = configSetup.gearRatio_Spindle * configSetup.microsteps_Spindle * configSetup.steps360_Spindle;
-	slideStepsAmplitude = ((configRose.amplitude_Radial_X / (configSetup.distancePerRev_AxisX)) * configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X)/2;
-	stepperAxis_X.setPosition(0);
-
-	newMaxSpd_RoseSpindle = configRose.maxSpd_Spindle * configRose.speedPercent_Spindle * .01 * direction;
-	stepperSpindle
-		.setMaxSpeed(newMaxSpd_RoseSpindle)
-		.setAcceleration(configRose.accel_Spindle)
-		.setPosition(0);
-
-	newMaxSpd_RoseAxis = configRose.maxSpd_Axis_X * configRose.speedPercent_Axis_X * .01 * direction;
-	initialPosition_Axis = static_cast<int>(slideFunc_Axis_X(0));
-#ifdef DEBUG
-	int beginPosition = stepperAxis_X.getPosition();
-	Serial.print("BeginPosition: ");
-	Serial.println(beginPosition);
-	Serial.println("---------------------------");
-	Serial.print("SpindleMaxSpd:");
-	Serial.println(configRose.maxSpd_Spindle);
-	Serial.print("SpindleSpeedPercent:");
-	Serial.println(configRose.speedPercent_Spindle);
-
-	Serial.println("========================");
-	Serial.print("microsteps_Spindle:");
-	Serial.println(configSetup.microsteps_Spindle);
-	Serial.print("steps360_Spindle:");
-	Serial.println(configSetup.steps360_Spindle);
-	Serial.print("gearRatio_Spindle:");
-	Serial.println(configSetup.gearRatio_Spindle);
-	Serial.print("spindleStepsPerRev:");
-	Serial.println(spindleStepsPerRev);
-	Serial.println("========================");
-	Serial.print("AxisMaxSpd:");
-	Serial.println(configRose.maxSpd_Axis_X);
-	Serial.print("AxisSpeedPercent:");
-	Serial.println(configRose.speedPercent_Axis_X);
-	Serial.print("AxisAccel:");
-	Serial.println(configRose.accel_Axis_X);
-	Serial.println("+++++++++++++++++++++++++++");
-	Serial.print("newMaxSpd_RoseAxis:");
-	Serial.println(newMaxSpd_RoseAxis);
-	Serial.print("amplitude_Axis_X:");
-	Serial.println(configRose.amplitude_Radial_X);
-	Serial.print("distancePerRev_AxisX:");
-	Serial.println(configSetup.distancePerRev_AxisX);
-	Serial.print("steps360_Axis_X:");
-	Serial.println(configSetup.steps360_Axis_X);
-	Serial.print("microsteps_Axis_X:");
-	Serial.println(configSetup.microsteps_Axis_X);
-	Serial.println("+++++++++++++++++++++++++++");
-	Serial.print("slideStepsAmplitude:");
-	Serial.println(slideStepsAmplitude);
-	Serial.print("initialPosition_Axis:");
-	Serial.println(initialPosition_Axis);
-	Serial.println("+++++++++++++++++++++++++++");
-
-#endif // DEBUG
-
-	stepperAxis_X
-		.setMaxSpeed(newMaxSpd_RoseAxis)
-		.setAcceleration(configRose.accel_Axis_X)
-		//.setPosition(0); // set start position of counter
-		.setPosition(initialPosition_Axis); // set start position of counter
-
-	// Enable steppers
-	SetEnable(ID_SPINDLE, true);
-	SetEnable(ID_AXIS_X, true);
-
-	rotateController1.rotateAsync(stepperAxis_X);
-	controllerRose_Spindle.rotateAsync(stepperSpindle); // let the spindle run with constant speed
-
-	tickX();
-
-	// use a timer to periodically calculate new targets for the slide
-	tickTimerX.priority(priorityLevel); // lowest priority, potentially long caclulations need to be interruptable by TeensyStep
-	tickTimerX.begin(tickX, recalcPeriod);
-
-	while (runPatternX)
-	{
-		//digitalWriteFast(LED_BUILTIN, !digitalReadFast(LED_BUILTIN));
-//#ifdef SHOW_POSITION 
-//		endPosition_Axis = stepperAxis_X.getPosition();
-//		endPosition_Spindle = stepperSpindle.getPosition();
-//
-//		degrees_Spindle = StepsToDegrees_Spindle(endPosition_Spindle);
-//		distance_Axis = StepsToDistance_Axis(endPosition_Axis, ID_AXIS_X);
-//		SerialPrint("pageBE.t1.txt=");
-//		SerialWrite(0x22);
-//		SerialPrint(degrees_Spindle);
-//		SerialWrite(0x22);
-//		SerialWrite(0xff);
-//		SerialWrite(0xff);
-//		SerialWrite(0xff);
-//		MilliDelay(10);
-//		SerialPrint("pageBE.t2.txt=");
-//		SerialWrite(0x22);
-//		SerialPrint(distance_Axis);
-//		SerialWrite(0x22);
-//		SerialWrite(0xff);
-//		SerialWrite(0xff);
-//		SerialWrite(0xff);
-//#endif // Show Position
-
-		// Check for Cancel code  
-		if (SerialAvailable() >= 0)
-		{
-			incomingByte = SerialRead(serialId);
-			switch (incomingByte)
-			{
-				case 67:
-				case 99:
-				{
-					runPatternX = false;
-					controllerRose_Spindle.overrideSpeed(0);
-					rotateController1.overrideSpeed(0);
-					controllerRose_Spindle.stopAsync();
-					rotateController1.stopAsync(); 
-					SetEnable(ID_AXIS_X, false);
-					break;
-				}
-			}
-		}
-
-		MilliDelay(5);
-	}
-
-	endPosition_Spindle = stepperSpindle.getPosition();
-	endPosition_Axis = stepperAxis_X.getPosition();
-	returnSteps_Axis = endPosition_Axis - initialPosition_Axis;
-	returnSteps_Spindle = endPosition_Spindle;
-	delay(1000);
-	stepperSpindle.setPosition(0);
-	stepperAxis_X.setPosition(0);
-#ifdef DEBUG
-
-	Serial.print("...returnSteps_Axis:");
-	Serial.println(returnSteps_Axis);
-
-	Serial.print("Spindle:");
-	Serial.println(endPosition_Spindle);
-	Serial.print("Axis:");
-	Serial.println(endPosition_Axis);
-#endif // DEBUG
-
-	SetEnable(ID_SPINDLE, false);
-	SetEnable(ID_AXIS_X, false);
-}
-
-
-// ================================================================================= 
-// RosePatternB Methods
-// ================================================================================= 
-
-float slideFunc_Axis_B(float spindleAngleB)
-{
-	float phi = fmodf(spindleAngleB * kRatio, TWO_PI);
-	float retVal = slideStepsAmplitude * cosf(phi);
-	return retVal;
-}
-
-////------------------------------------------------------------------------------------
-//// tick()
-////
-//// This function is called periodically with period recalcPeriod. 
-//// It calculates 
-////  1) a new target value for the slide depending on the spindle angle
-////  2) the new speed for the spindle so that it will reach the target until it is called again
-//
-void tickB()
-{
-	float spindleAngleB = stepperSpindle.getPosition() * (TWO_PI / spindleStepsPerRev); //convert steps to angle
-	float slidePositionB = stepperAxis_B.getPosition();
-	float slideTargetB = slideFunc_Axis_B(spindleAngleB);
-
-	float newSpeedB = (slideTargetB - slidePositionB) / dtRose; // speed to reach target in given delta t (neglecting acceleration)
-	float speedFacB = newSpeedB / newMaxSpd_RoseAxis;              // transform in relative factor (-1.0 .. 1.0)
-
-	rotateController1.overrideSpeed(speedFacB);             // set new speed
-}
-void RoseRadial_B(int direction)
-{
-	IntervalTimer tickTimerB;
-	RotateControl controllerRose_Spindle;
-	bool runPatternB = true;
-
-	kRatio = (float)configRose.n / configRose.d;
-	spindleStepsPerRev = configSetup.gearRatio_Spindle * configSetup.microsteps_Spindle * configSetup.steps360_Spindle;
-	
-	switch (configSetup.radialOrLinear_Axis_B)
-	{
-		case RADIAL_B:
-		{
-			slideStepsAmplitude = DistanceToSteps_RadialB(configRose.amplitude_Radial_B) / 2;
-			break;
-		}
-		case LINEAR_B:
-		{
-			slideStepsAmplitude = DistanceToSteps_LinearB(configRose.amplitude_Radial_B) / 2;
-			break;
-		}
-	}
-	
-	stepperAxis_B.setPosition(0);
-
-	newMaxSpd_RoseSpindle = configRose.maxSpd_Spindle * configRose.speedPercent_Spindle * .01 * direction;
-	stepperSpindle
-		.setMaxSpeed(newMaxSpd_RoseSpindle)
-		.setAcceleration(configRose.accel_Spindle)
-		.setPosition(0);
-
-	newMaxSpd_RoseAxis = configRose.maxSpd_Axis_B * configRose.speedPercent_Axis_B * .01 * direction;
-	initialPosition_Axis = static_cast<int>(slideFunc_Axis_B(0));
-#ifdef DEBUG
-	Serial.print("...initialPosition_Axis:");
-	Serial.println(initialPosition_Axis);
-#endif // DEBUG
-
-	stepperAxis_B
-		.setMaxSpeed(newMaxSpd_RoseAxis)
-		.setAcceleration(configRose.accel_Axis_B)
-		.setPosition(initialPosition_Axis); // set start position of counter
-
-	// Enable steppers
-	SetEnable(ID_SPINDLE, true);
-	SetEnable(ID_AXIS_B, true);
-
-	rotateController1.rotateAsync(stepperAxis_B);
-	controllerRose_Spindle.rotateAsync(stepperSpindle); // let the spindle run with constant speed
-
-	tickB();
-
-	// use a timer to periodically calculate new targets for the slide
-	tickTimerB.priority(priorityLevel); // lowest priority, potentially long caclulations need to be interruptable by TeensyStep
-	tickTimerB.begin(tickB, recalcPeriod);
-
-	while (runPatternB)
-	{
-		//digitalWriteFast(LED_BUILTIN, !digitalReadFast(LED_BUILTIN));
-//#ifdef SHOW_POSITION 
-//		endPosition_Axis = stepperAxis_X.getPosition();
-//		endPosition_Spindle = stepperSpindle.getPosition();
-//
-//		degrees_Spindle = StepsToDegrees_Spindle(endPosition_Spindle);
-//		distance_Axis = StepsToDistance_Axis(endPosition_Axis, ID_AXIS_X);
-//		SerialPrint("pageBE.t1.txt=");
-//		SerialWrite(0x22);
-//		SerialPrint(degrees_Spindle);
-//		SerialWrite(0x22);
-//		SerialWrite(0xff);
-//		SerialWrite(0xff);
-//		SerialWrite(0xff);
-//		MilliDelay(10);
-//		SerialPrint("pageBE.t2.txt=");
-//		SerialWrite(0x22);
-//		SerialPrint(distance_Axis);
-//		SerialWrite(0x22);
-//		SerialWrite(0xff);
-//		SerialWrite(0xff);
-//		SerialWrite(0xff);
-//#endif // Show Position
-
-		// Check for Cancel code  
-		if (SerialAvailable() >= 0)
-		{
-			incomingByte = SerialRead(serialId);
-			switch (incomingByte)
-			{
-			case 67:
-			case 99:
-			{
-				runPatternB = false;
-				controllerRose_Spindle.overrideSpeed(0);
-				rotateController1.overrideSpeed(0);
-				controllerRose_Spindle.stopAsync();
-				rotateController1.stopAsync();
-				SetEnable(ID_AXIS_B, false);
-				break;
-			}
-			}
-		}
-
-		MilliDelay(5);
-	}
-
-	endPosition_Spindle = stepperSpindle.getPosition();
-	endPosition_Axis = stepperAxis_B.getPosition();
-	returnSteps_Axis = endPosition_Axis - initialPosition_Axis;
-	returnSteps_Spindle = endPosition_Spindle;
-	stepperSpindle.setPosition(0);
-	stepperAxis_B.setPosition(0);
-#ifdef DEBUG
-
-	Serial.print("...returnSteps_Axis:");
-	Serial.println(returnSteps_Axis);
-
-	Serial.print("Spindle:");
-	Serial.println(endPosition_Spindle);
-	Serial.print("Axis:");
-	Serial.println(endPosition_Axis);
-#endif // DEBUG
-
-	SetEnable(ID_SPINDLE, false);
-	SetEnable(ID_AXIS_B, false);
-}
 // ========================================================
  //Test EEPROM
  //========================================================
@@ -8781,7 +8342,7 @@ void TestEEPROM_Returns()
 void TestAllTeensyEEPROMValues()
 {
 	const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
-	const char* nextionEnd = "\xFF\xFF\xFF";
+	//const char* nextionEnd = "\xFF\xFF\xFF";
 	switch (pageCallerId)
 	{
 		case PAGE_MAIN:
