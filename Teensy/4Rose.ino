@@ -24,8 +24,10 @@ Stepper stepperAxis_Z(PIN_AXIS_Z_STEP, PIN_AXIS_Z_DIR);
 Stepper stepperAxis_X(PIN_AXIS_X_STEP, PIN_AXIS_X_DIR);
 Stepper stepperAxis_B(PIN_AXIS_B_STEP, PIN_AXIS_B_DIR);
 
+Stepper stepperAxis_MainX(PIN_AXIS_X_STEP, PIN_AXIS_X_DIR);
+
 // TeensyStep controllers
-RotateControl rotateController1;
+RotateControl controllerAxis;
 
 /// <summary>
 /// Setup
@@ -1182,14 +1184,12 @@ void loop()
 			}
 			case 90:  // Z - Main Axis Clockwise
 			{
-				RunTwoSteppers_All(DIR_CW, DIR_CW, ID_AXIS_Z);
-				//RunTwoSteppers_Sp_Axis(DIR_CW, DIR_CW, ID_AXIS_Z);
+				Main_TwoSteppers(DIR_CW, DIR_CW, ID_AXIS_Z);
 				break;
 			}
 			case 91:  // [ - Z Axis Counterclockwise
 			{
-				RunTwoSteppers_All(DIR_CCW, DIR_CCW, ID_AXIS_Z);
-				//RunTwoSteppers_Sp_Axis(DIR_CCW, DIR_CCW, ID_AXIS_Z);
+				Main_TwoSteppers(DIR_CCW, DIR_CCW, ID_AXIS_Z);
 				break;
 			}
 			case 92: // \ - *** Don't Use***
@@ -1358,25 +1358,25 @@ void loop()
 				Serial.print(axisId_Char);
 				Serial.println(configRose.axisId);
 	#endif // DEBUG
-
-				switch (configRose.axisId)
-				{
-					case ID_AXIS_Z: // Z axis
-					{
-						RoseRadial_Z(DIR_CCW);
-						break;
-					}
-					case ID_AXIS_X: // X axis
-					{
-						RoseRadial_X(DIR_CCW);
-						break;
-					}
-					case ID_AXIS_B: // B axis
-					{
-						RoseRadial_B(DIR_CCW);
-						break;
-					}
-				}
+				RoseRadial(DIR_CCW);
+				//switch (configRose.axisId)
+				//{
+				//	case ID_AXIS_Z: // Z axis
+				//	{
+				//		RoseRadial_Z(DIR_CCW);
+				//		break;
+				//	}
+				//	case ID_AXIS_X: // X axis
+				//	{
+				//		RoseRadial_X(DIR_CCW);
+				//		break;
+				//	}
+				//	case ID_AXIS_B: // B axis
+				//	{
+				//		RoseRadial_B(DIR_CCW);
+				//		break;
+				//	}
+				//}
 
 				break;
 			}
@@ -1386,13 +1386,13 @@ void loop()
 			}
 			case 107: // k - Main: Spindle Clockwise
 			{
-				RunTwoSteppers_All(DIR_CW, DIR_CW, ID_SPINDLE);
+				Main_TwoSteppers(DIR_CW, DIR_CW, ID_SPINDLE);
 				//RunTwoSteppers_Sp_Axis(DIR_CW, DIR_CW, ID_SPINDLE);
 				break;
 			}
 			case 108: // l - Main: Spindle counter clockwise
 			{
-				RunTwoSteppers_All(DIR_CCW, DIR_CCW, ID_SPINDLE);
+				Main_TwoSteppers(DIR_CCW, DIR_CCW, ID_SPINDLE);
 				//RunTwoSteppers_Sp_Axis(DIR_CCW, DIR_CCW, ID_SPINDLE);
 				break;
 			}
@@ -1492,7 +1492,7 @@ void loop()
 				}
 
 
-
+				break;
 			}
 			case 111: // o - Axis Speed Percentage
 			{
@@ -1712,7 +1712,6 @@ void loop()
 						break;
 					}
 				}
-
 
 				break;
 			}
@@ -2010,13 +2009,13 @@ void loop()
 			}
 			case 165: // ¥ - Main: X Axis CCW
 			{
-				RunTwoSteppers_All(DIR_CCW, DIR_CCW, ID_AXIS_X);
+				Main_TwoSteppers(DIR_CCW, DIR_CCW, ID_AXIS_X);
 				//RunTwoSteppers_Sp_Axis(DIR_CCW, DIR_CCW, ID_AXIS_X);
 				break;
 			}
 			case 166: // ¦ - Main: X Axis CW
 			{
-				RunTwoSteppers_All(DIR_CW, DIR_CW, ID_AXIS_X);
+				Main_TwoSteppers(DIR_CW, DIR_CW, ID_AXIS_X);
 				//RunTwoSteppers_Sp_Axis(DIR_CW, DIR_CW, ID_AXIS_X);
 
 				break;
@@ -2041,12 +2040,12 @@ void loop()
 			}
 			case 171: // « - Main: B Axis CCW
 			{
-				RunTwoSteppers_All(DIR_CCW, DIR_CCW, ID_AXIS_B);
+				Main_TwoSteppers(DIR_CCW, DIR_CCW, ID_AXIS_B);
 				break;
 			}
 			case 172: // ¬ - Main: B Axis CW
 			{
-				RunTwoSteppers_All(DIR_CW, DIR_CW, ID_AXIS_B);
+				Main_TwoSteppers(DIR_CW, DIR_CW, ID_AXIS_B);
 				break;
 			}
 			case 173: // Don't use 
@@ -2767,25 +2766,25 @@ void loop()
 				Serial.print(axisId_Char);
 				Serial.println(configRose.axisId);
 	#endif // DEBUG
-
-				switch (configRose.axisId)
-				{
-					case ID_AXIS_Z: // Z axis
-					{
-						RoseRadial_Z(DIR_CW);
-						break;
-					}
-					case ID_AXIS_X: // X axis
-					{
-						RoseRadial_X(DIR_CW);
-						break;
-					}
-					case ID_AXIS_B: // B axis
-					{
-						RoseRadial_B(DIR_CW);
-						break;
-					}
-				}
+				RoseRadial(DIR_CW);
+				//switch (configRose.axisId)
+				//{
+				//	case ID_AXIS_Z: // Z axis
+				//	{
+				//		RoseRadial_Z(DIR_CW);
+				//		break;
+				//	}
+				//	case ID_AXIS_X: // X axis
+				//	{
+				//		RoseRadial_X(DIR_CW);
+				//		break;
+				//	}
+				//	case ID_AXIS_B: // B axis
+				//	{
+				//		RoseRadial_B(DIR_CW);
+				//		break;
+				//	}
+				//}
 
 				break;
 			}
@@ -3394,7 +3393,7 @@ void loop()
 
 
 		//Serial.println("2.End Switch");
-		////MilliDelay(200);
+		MilliDelay(100);
 		//Serial.println("3.End Switch");
 	}
 
