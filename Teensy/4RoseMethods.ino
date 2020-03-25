@@ -6,6 +6,15 @@
 // ================================================================================= 
 // Utility Methods
 // ================================================================================= 
+
+/// <summary>
+/// MilliDelay
+/// </summary>
+/// <comment>
+/// Uses elapsedMillis to pause program.  Allows interupts.
+/// </comment>
+/// <param name="interval">Milliseconds</param>
+/// <returns>void</returns>
 void MilliDelay(unsigned long interval)
 {
 	elapsedMillis timeout;
@@ -14,7 +23,14 @@ void MilliDelay(unsigned long interval)
 	}
 }
 
-
+/// <summary>
+/// structSizeCalc
+/// </summary>
+/// <comment>
+/// Calculate struct sizes.  Used to calculate EEProm addresses.
+/// </comment>
+/// <param name="interval">Milliseconds</param>
+/// <returns>void</returns>
 void structSizeCalc()
 {
 	const char * configIndex_Char = "configIndex:";
@@ -62,6 +78,7 @@ void structSizeCalc()
 
 }
 
+
 //int freeMemory()
 //{
 //	char top;
@@ -74,6 +91,14 @@ void structSizeCalc()
 //#endif  // __arm__
 //}
 
+/// <summary>
+/// BeginSD
+/// </summary>
+/// <comment>
+/// Initiate microSD
+/// </comment>
+/// <param name=""></param>
+/// <returns>void</returns>
 void BeginSD()
 {
 	// Note: Each failed check requires 2 seconds.  Recommend using CS 10 for SPI card reader.
@@ -128,6 +153,15 @@ void BeginSD()
 #endif // DEBUG
 }
 
+/// <summary>
+/// SetEnable
+/// </summary>
+/// <comment>
+/// Toggle stepper motor enable on and off
+/// </comment>
+/// <param name="axisId">Axis Id</param>
+/// <param name="enabled">true to enable, false to disable</param>
+/// <returns>void</returns>
 void SetEnable(int axisId, bool enabled)
 {
 	switch (axisId)
@@ -429,6 +463,16 @@ double xGetFloatFromCharArray(char in[], int decimalFound, int endFound)
 	return inputNumber;
 }
 
+/// <summary>
+/// GetFloatFromCharArray
+/// </summary>
+/// <comment>
+/// Convert Char array to float
+/// </comment>
+/// <param name="in">char array</param>
+/// <param name="decimalFound">Index of decimal</param>
+/// <param name="decimalFound">Index of end char</param>
+/// <returns>double</returns>
 double GetFloatFromCharArray(char in[], int decimalFound, int endFound)
 {
 	double retVal = 0;
@@ -443,6 +487,7 @@ double GetFloatFromCharArray(char in[], int decimalFound, int endFound)
 #endif //DEBUG
 	return retVal;
 }
+
 /// <summary>
 /// StepsToDegrees_Spindle
 /// </summary>
@@ -457,6 +502,15 @@ float StepsToDegrees_Spindle(float steps)
 	return retVal;
 }
 
+/// <summary>
+/// RevolutionsToSteps_Spindle
+/// </summary>
+/// <comment>
+/// Convert spindle revolutions to steps
+/// </comment>
+/// <param name="revolutions">revolutions</param>
+/// <param name="direction">Direction of revolutions</param>
+/// <returns>float</returns>
 float RevolutionsToSteps_Spindle(float revolutions, int direction)
 {
 	float retVal = revolutions * configSetup.gearRatio_Spindle * configSetup.microsteps_Spindle * configSetup.steps360_Spindle * direction;
@@ -507,7 +561,14 @@ float StepsToDistance_Axis(float steps, int axisId)
 	return retVal;
 }
 
-
+/// <summary>
+/// DistanceToSteps_RadialB
+/// </summary>
+/// <comment>
+/// Convert distance to steps for axis B in radial mode.
+/// </comment>
+/// <param name="linearDistance">Distance</param>
+/// <returns>float</returns>
 float DistanceToSteps_RadialB(float linearDistance)
 {
 	float retVal = 0;
@@ -533,6 +594,14 @@ float DistanceToSteps_RadialB(float linearDistance)
 	return retVal;
 }
 
+/// <summary>
+/// DistanceToSteps_LinearB
+/// </summary>
+/// <comment>
+/// Convert distance to steps for axis B in linear mode.
+/// </comment>
+/// <param name="distance">Distance</param>
+/// <returns>float</returns>
 float DistanceToSteps_LinearB(float distance)
 {
 
@@ -543,6 +612,15 @@ float DistanceToSteps_LinearB(float distance)
 	return retVal;
 }
 
+/// <summary>
+/// DistanceToSteps_Axis
+/// </summary>
+/// <comment>
+/// Convert distance to steps for axis.
+/// </comment>
+/// <param name="distance">Distance</param>
+/// <param name="axisId">Axis Id</param>
+/// <returns>float</returns>
 float DistanceToSteps_Axis(float distance, int axisId)
 {
 	float retVal = 0;
@@ -583,6 +661,15 @@ float DistanceToSteps_Axis(float distance, int axisId)
 	return retVal;
 }
 
+/// <summary>
+/// AngularMaxSpeed
+/// </summary>
+/// <comment>
+/// Calculate max speeds for Greek Key angular moves.
+/// </comment>
+/// <param name="spindleMaxSpeed">Spindle Max Speed</param>
+/// <param name="axisMaxSpeed">Axis Max Speed</param>
+/// <returns>void</returns>
 void AngularMaxSpeed(long spindleMaxSpeed, long axisMaxSpeed)
 {
 
@@ -602,6 +689,7 @@ void AngularMaxSpeed(long spindleMaxSpeed, long axisMaxSpeed)
 	angularSpindleLegLength = round(spindleMaxSpeed * spindleMultiplier);
 
 }
+
 /// <summary>
 /// Move axis
 /// </summary>
@@ -1343,6 +1431,8 @@ endLoop:
 
 //	Serial.println("1.Exit RunOneStepper.");
 //#endif // DEBUG
+
+	// ToDo: Verify steppers are disabled
 	return;
 }
 
@@ -1624,21 +1714,21 @@ void Main_TwoSteppers(
 					rotateController_MainAxis.stop();
 					switch (configMain.axisId)
 					{
-					case ID_AXIS_Z:
-					{
-						SetEnable(ID_AXIS_Z, false);
-						break;
-					}
-					case ID_AXIS_X:
-					{
-						SetEnable(ID_AXIS_X, false);
-						break;
-					}
-					case ID_AXIS_B:
-					{
-						SetEnable(ID_AXIS_B, false);
-						break;
-					}
+						case ID_AXIS_Z:
+						{
+							SetEnable(ID_AXIS_Z, false);
+							break;
+						}
+						case ID_AXIS_X:
+						{
+							SetEnable(ID_AXIS_X, false);
+							break;
+						}
+						case ID_AXIS_B:
+						{
+							SetEnable(ID_AXIS_B, false);
+							break;
+						}
 					}
 
 					stepper_Axis_Go = false;
@@ -2720,7 +2810,9 @@ endLoop:
 	returnSteps_Axis = endPosition_Axis;
 	returnSteps_Spindle = endPosition_Spindle;
 	SetEnable(ID_SPINDLE, false);
+	SetEnable(ID_AXIS_Z, false);
 	SetEnable(ID_AXIS_X, false);
+	SetEnable(ID_AXIS_B, false);
 }
 
 /// <summary>
@@ -4166,7 +4258,13 @@ EndLoop:
 	return;
 }
 
-
+/// <summary>
+/// GreekKeyPattern_Initial
+/// </summary>
+/// <comment>
+/// </comment>
+/// <param name="segmentCount">Segment count</param>
+/// <returns></returns>
 void GreekKeyPattern_Initial(int segmentCount)
 {
 	Serial.println("Enter GreekKeyPattern_Initial");
@@ -4241,6 +4339,13 @@ void GreekKeyPattern_Initial(int segmentCount)
 #endif // DEBUG
 }
 
+/// <summary>
+/// GreekKeyPattern_End
+/// </summary>
+/// <comment>
+/// </comment>
+/// <param name=""></param>
+/// <returns></returns>
 void GreekKeyPattern_End()
 {
 	const char* nextionEnd = "\xFF\xFF\xFF";
@@ -6071,13 +6176,18 @@ EndLoops:
 	SetEnable(ID_AXIS_X, false); 
 }
 
+/// <summary>
+/// GreekKey_Pause
+/// </summary>
+/// <comment>
+/// Pauses Greek Key based on setting in a Greek Key file
+/// </comment>
+/// <param name="timeout">Pause in seconds</param>
+/// <returns></returns>
 void GreekKey_Pause(unsigned long timeout)
 {
-
 	MilliDelay(timeout*1000);
 }
-
-
 
 /// <summary>
 /// Serial Print
@@ -6115,6 +6225,14 @@ void SerialPrint(String text, int decimalPlaces = 0)
 	}
 }
 
+/// <summary>
+/// Serial Print
+/// </summary>
+/// <comment>
+/// Prints data to USB and Bluetooth serial ports.  Only one will be active.
+/// </comment>
+/// <param name="number">Float to send</param>
+/// <returns></returns>
 void SerialPrint(float number, int decimalPlaces = 0)
 {
 	int trim = PrintFloat(number);
@@ -6143,6 +6261,14 @@ void SerialPrint(float number, int decimalPlaces = 0)
 	}
 }
 
+/// <summary>
+/// PrintFloat
+/// </summary>
+/// <comment>
+/// Gets decimal place of a float
+/// </comment>
+/// <param name="floatValue">Float</param>
+/// <returns>Decimal places</returns>
 int PrintFloat(float floatValue) {
 	int decimalPlaces;
 	float tempValue = floatValue;
@@ -6162,6 +6288,7 @@ int PrintFloat(float floatValue) {
 	//Serial.println(floatValue, decimalPlaces);
 	return decimalPlaces;
 }
+
 /// <summary>
 /// Serial Write
 /// </summary>
@@ -6407,7 +6534,14 @@ double GetIndexDataFromSD(int lineNumber)
 	return atof(newSizeChar);
 }
 
-//(File dir, int numTabs)
+/// <summary>
+/// GetFileListFromSD
+/// </summary>
+/// <comment>
+/// Gets file list from microSD card
+/// </comment>
+/// <param name="fileIndex">Index of file</param>
+/// <returns></returns>
 void GetFileListFromSD(int fileIndex)
 {
 	File dir;
@@ -7233,6 +7367,14 @@ void ReturnToStartPosition(int axisId)
 // ================================================================================= 
 // Adapted from code written by Lutz Niggl: https://github.com/luni64/TeensyStep
 
+/// <summary>
+/// slideFunc_Axis
+/// </summary>
+/// <comment>
+/// Calculate axis positon relative to spindle
+/// </comment>
+/// <param name="spindleAngle">Spindle Angle</param>
+/// <returns>float</returns>
 float slideFunc_Axis(float spindleAngle)
 {
 	float phi = fmodf(spindleAngle * kRatio, TWO_PI);
@@ -7279,6 +7421,14 @@ void tick()
 	controllerAxis.overrideSpeed(speedFac);             // set new speed
 }
 
+/// <summary>
+/// RoseRadial
+/// </summary>
+/// <comment>
+/// Do radial rose pattern
+/// </comment>
+/// <param name="direction">Direction of pattern</param>
+/// <returns></returns>
 void RoseRadial(int direction)
 {
 	//const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
@@ -8223,6 +8373,12 @@ void TestEEPROMSetup()
 	SerialPrint(nextionEnd);
 }
 
+/// <summary>
+/// Write current Limits screen eeprom values to Nextion
+/// </summary>
+/// <comment>
+/// </comment>
+/// <returns></returns>
 void TestEEPROM_Limits()
 {
 	const char* pageLimits_t0 = "pageLimits.t0.txt=";
@@ -8275,6 +8431,12 @@ void TestEEPROM_Limits()
 	SerialPrint(nextionEnd);
 }
 
+/// <summary>
+/// Write current Returns screen eeprom values to Nextion
+/// </summary>
+/// <comment>
+/// </comment>
+/// <returns></returns>
 void TestEEPROM_Returns()
 {
 	const char * pageReturns_t0 = "pageReturns.t0.txt=";
@@ -8339,6 +8501,12 @@ void TestEEPROM_Returns()
 
 }
 
+/// <summary>
+/// Write current page eeprom values to Nextion
+/// </summary>
+/// <comment>
+/// </comment>
+/// <returns></returns>
 void TestAllTeensyEEPROMValues()
 {
 	const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
@@ -9476,6 +9644,13 @@ void TestAllTeensyEEPROMValues()
 	}
 }
 
+/// <summary>
+/// LoadSettings
+/// </summary>
+/// <comment>
+/// Load ini file settings
+/// </comment>
+/// <returns></returns>
 void LoadSettings()
 {
 	const char* nextionEnd = "\xFF\xFF\xFF";
@@ -9508,7 +9683,7 @@ void LoadSettings()
 		ini.close();
 	}
 
-	LoadSettings_PageSetup();
+	LoadSettings_PagePreferences();
 	LoadSettings_PageReturns();
 	LoadSettings_PageLimits();
 	LoadSettings_PageMain();
@@ -9531,6 +9706,13 @@ void LoadSettings()
 	SerialPrint(nextionEnd);
 }
 
+/// <summary>
+/// LoadSettings_PageIndex
+/// </summary>
+/// <comment>
+/// Load ini file settings for Index page
+/// </comment>
+/// <returns></returns>
 void LoadSettings_PageIndex()
 {
 	// Index Main
@@ -9610,6 +9792,13 @@ void LoadSettings_PageIndex()
 	EEPROM.put(eePromAddress_Ind_3, configIndex_3);
 }
 
+/// <summary>
+/// LoadSettings_PageGeo
+/// </summary>
+/// <comment>
+/// Load ini file settings for Geo page
+/// </comment>
+/// <returns></returns>
 void LoadSettings_PageGeo()
 {
 
@@ -9730,6 +9919,13 @@ void LoadSettings_PageGeo()
 	EEPROM.put(eePromAddress_Rose, configRose);
 }
 
+/// <summary>
+/// LoadSettings_PageMove
+/// </summary>
+/// <comment>
+/// Load ini file settings for Move page
+/// </comment>
+/// <returns></returns>
 void LoadSettings_PageMove()
 {
 	const char* iniKey = "Mov";
@@ -9803,6 +9999,13 @@ void LoadSettings_PageMove()
 	EEPROM.put(eePromAddress_Mov, configMove);
 }
 
+/// <summary>
+/// LoadSettings_PageGrk
+/// </summary>
+/// <comment>
+/// Load ini file settings for Grk page
+/// </comment>
+/// <returns></returns>
 void LoadSettings_PageGrk()
 {
 	// Greek Key Main
@@ -9931,6 +10134,13 @@ void LoadSettings_PageGrk()
 
 }
 
+/// <summary>
+/// LoadSettings_PageRec
+/// </summary>
+/// <comment>
+/// Load ini file settings for Rec page
+/// </comment>
+/// <returns></returns>
 void LoadSettings_PageRec()
 {
 	const char* iniKey = "Rec";
@@ -10042,6 +10252,13 @@ void LoadSettings_PageRec()
 	EEPROM.put(eePromAddress_Rec, configRec);
 }
 
+/// <summary>
+/// LoadSettings_PageOne
+/// </summary>
+/// <comment>
+/// Load ini file settings for One page
+/// </comment>
+/// <returns></returns>
 void LoadSettings_PageOne()
 {
 	const char* iniKey = "One";
@@ -10113,6 +10330,13 @@ void LoadSettings_PageOne()
 	EEPROM.put(eePromAddress_One, configOne);
 }
 
+/// <summary>
+/// LoadSettings_PageMain
+/// </summary>
+/// <comment>
+/// Load ini file settings for Main page
+/// </comment>
+/// <returns></returns>
 void LoadSettings_PageMain()
 {
 	const char* iniKey = "Main";
@@ -10184,6 +10408,13 @@ void LoadSettings_PageMain()
 	EEPROM.put(eePromAddress_Main, configMain);
 }
 
+/// <summary>
+/// LoadSettings_PageSync
+/// </summary>
+/// <comment>
+/// Load ini file settings for Sync page
+/// </comment>
+/// <returns></returns>
 void LoadSettings_PageSync()
 {
 	const char* iniKey = "Sync";
@@ -10270,7 +10501,14 @@ void LoadSettings_PageSync()
 	EEPROM.put(eePromAddress_Sync, configSync);
 }
 
-void LoadSettings_PageSetup()
+/// <summary>
+/// LoadSettings_PagePreferences
+/// </summary>
+/// <comment>
+/// Load ini file settings for Preferences pages
+/// </comment>
+/// <returns></returns>
+void LoadSettings_PagePreferences()
 {
 	// pageSpindle
 	const char* iniKey = "Setup";
@@ -10374,6 +10612,13 @@ void LoadSettings_PageSetup()
 	EEPROM.put(eePromAddress_Setup, configSetup);
 }
 
+/// <summary>
+/// LoadSettings_PageLimits
+/// </summary>
+/// <comment>
+/// Load ini file settings for Limits page
+/// </comment>
+/// <returns></returns>
 void LoadSettings_PageLimits()
 {
 
@@ -10412,9 +10657,15 @@ void LoadSettings_PageLimits()
 	EEPROM.put(eePromAddress_Setup, configSetup);
 }
 
+/// <summary>
+/// LoadSettings_PageReturns
+/// </summary>
+/// <comment>
+/// Load ini file settings for Returns page
+/// </comment>
+/// <returns></returns>
 void LoadSettings_PageReturns()
 {
-
 	// Return settings
 	const char* iniKey = "Returns";
 	const char* iniValue = "MaxSpeed_Spindle";
@@ -10459,6 +10710,17 @@ void LoadSettings_PageReturns()
 	EEPROM.put(eePromAddress_Setup, configSetup);
 }
 
+/// <summary>
+/// GetIniValue
+/// </summary>
+/// <comment>
+/// Get value from ini file
+/// </comment>
+/// <param name="iniKey">Key name</param>
+/// <param name="iniValue">Value name</param>
+/// <param name="eePromNextion">Nextion EEProm address</param>
+/// <param name="asString">True:Get value as string. False: Value as number</param>
+/// <returns>float</returns>
 float GetIniValue(const char* iniKey, const char* iniValue, int eePromNextion, bool asString)
 {
 	const char* nextionEnd = "\xFF\xFF\xFF";
