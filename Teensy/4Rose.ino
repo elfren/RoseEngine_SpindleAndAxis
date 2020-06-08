@@ -238,13 +238,18 @@ void loop()
 	const char * indexId_Char = "Index ID:";
 	const char * z_LimitMin_Char = "Limit Min Z";
 	const char * z_LimitMax_Char = "Limit Max Z";
+	const char * z_Home_Char = "Home Z";
 	const char * x_LimitMin_Char = "Limit Min X";
 	const char * x_LimitMax_Char = "Limit Max X";
+	const char * x_Home_Char = "Home X";
 	const char * b_LimitMin_Char = "Limit Min B";
 	const char * b_LimitMax_Char = "Limit Max B";
+	const char * b_Home_Char = "Home B";
 	const char * index1_Char = "Index1";
 	const char * index2_Char = "Index2";
 	const char * index3_Char = "Index3";
+	const char * index4_Char = "Index4";
+	const char * index5_Char = "Index5";
 	const char * newIndexSize_Char = "New Index Size:";
 	const char * indexSizeChar = " Size:";
 	const char * degreeDivision_Char = " Degree or Division:";
@@ -702,6 +707,30 @@ void loop()
 						EEPROM.put(eePromAddress_Ind_3, configIndex_3);
 						break;
 					}
+					case 4:
+					{
+						// Set degreeOrDivision
+						configIndex_4.degreeOrDivision = GetSerialIntegerOnly();
+#ifdef DEBUG
+						Serial.print(index4_Char);
+						Serial.print(degreeDivision_Char);
+						Serial.println(configIndex_4.degreeOrDivision);
+#endif // DEBUG
+						EEPROM.put(eePromAddress_Ind_4, configIndex_4);
+						break;
+					}
+					case 5:
+					{
+						// Set degreeOrDivision
+						configIndex_5.degreeOrDivision = GetSerialIntegerOnly();
+#ifdef DEBUG
+						Serial.print(index5_Char);
+						Serial.print(degreeDivision_Char);
+						Serial.println(configIndex_5.degreeOrDivision);
+#endif // DEBUG
+						EEPROM.put(eePromAddress_Ind_5, configIndex_5);
+						break;
+					}
 				}
 
 				break;
@@ -961,6 +990,88 @@ void loop()
 
 						break;
 					}
+					case 4:
+					{
+#ifdef DEBUG
+						Serial.print(index4_Char);
+						Serial.print(fileOrFixed_Char);
+						Serial.println(configIndex_4.fileOrFixed);
+#endif // DEBUG
+
+
+						if (configIndex_4.fileOrFixed == FILE_SD)
+						{
+							int lineNumber = GetSerialInteger();
+							if (lineNumber == 255)
+							{
+								lineNumber = 0;
+							}
+							newIndexSize = GetIndexDataFromSD(lineNumber);
+							configIndex_4.sizeInSteps = (configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (newIndexSize / 360);
+#ifdef DEBUG
+
+							Serial.print(lineNumber_Char);
+							Serial.println(lineNumber);
+							Serial.print(newIndexSize_Char);
+							Serial.println(newIndexSize);
+							Serial.print(index4_Char);
+							Serial.print(indexSizeChar);
+							Serial.println(configIndex_4.sizeInSteps);
+#endif // DEBUG
+							SerialPrint(pageIndex_t7_Char); // Nextion may not get the first packet
+							SerialWrite(0x22);
+							SerialPrint(newIndexSize, 4);
+							SerialPrint(nextionQuoteEnd);
+
+							SerialPrint(pageIndex_t7_Char);
+							SerialWrite(0x22);
+							SerialPrint(newIndexSize, 4);
+							SerialPrint(nextionQuoteEnd);
+						}
+
+						break;
+					}
+					case 5:
+					{
+#ifdef DEBUG
+						Serial.print(index5_Char);
+						Serial.print(fileOrFixed_Char);
+						Serial.println(configIndex_5.fileOrFixed);
+#endif // DEBUG
+
+
+						if (configIndex_5.fileOrFixed == FILE_SD)
+						{
+							int lineNumber = GetSerialInteger();
+							if (lineNumber == 255)
+							{
+								lineNumber = 0;
+							}
+							newIndexSize = GetIndexDataFromSD(lineNumber);
+							configIndex_5.sizeInSteps = (configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (newIndexSize / 360);
+#ifdef DEBUG
+
+							Serial.print(lineNumber_Char);
+							Serial.println(lineNumber);
+							Serial.print(newIndexSize_Char);
+							Serial.println(newIndexSize);
+							Serial.print(index5_Char);
+							Serial.print(indexSizeChar);
+							Serial.println(configIndex_5.sizeInSteps);
+#endif // DEBUG
+							SerialPrint(pageIndex_t7_Char); // Nextion may not get the first packet
+							SerialWrite(0x22);
+							SerialPrint(newIndexSize, 4);
+							SerialPrint(nextionQuoteEnd);
+
+							SerialPrint(pageIndex_t7_Char);
+							SerialWrite(0x22);
+							SerialPrint(newIndexSize, 4);
+							SerialPrint(nextionQuoteEnd);
+						}
+
+						break;
+					}
 				}
 
 				if (!badFilename)
@@ -1091,6 +1202,74 @@ void loop()
 							Serial.println(configIndex_3.sizeInSteps);
 							Serial.println("");
 		#endif // DEBUG
+							SerialPrint(pageIndex_t7_Char); // Nextion may not get the first packet
+							SerialWrite(0x22);
+							SerialPrint(newIndexSize, 4);
+							SerialPrint(nextionQuoteEnd);
+
+							SerialPrint(pageIndex_t7_Char);
+							SerialWrite(0x22);
+							SerialPrint(newIndexSize, 4);
+							SerialPrint(nextionQuoteEnd);
+						}
+
+						break;
+					}
+					case 4:
+					{
+						if (configIndex_4.fileOrFixed == FILE_SD)
+						{
+							int lineNumber = GetSerialInteger();
+							if (lineNumber == 255)
+							{
+								lineNumber = 0;
+							}
+							newIndexSize = GetIndexDataFromSD(lineNumber);
+							configIndex_4.sizeInSteps = (configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (newIndexSize / 360);
+#ifdef DEBUG
+							Serial.print(lineNumber_Char);
+							Serial.println(lineNumber);
+							Serial.print(newIndexSize_Char);
+							Serial.println(newIndexSize);
+							Serial.print(index3_Char);
+							Serial.print(indexSizeChar);
+							Serial.println(configIndex_4.sizeInSteps);
+							Serial.println("");
+#endif // DEBUG
+							SerialPrint(pageIndex_t7_Char); // Nextion may not get the first packet
+							SerialWrite(0x22);
+							SerialPrint(newIndexSize, 4);
+							SerialPrint(nextionQuoteEnd);
+
+							SerialPrint(pageIndex_t7_Char);
+							SerialWrite(0x22);
+							SerialPrint(newIndexSize, 4);
+							SerialPrint(nextionQuoteEnd);
+						}
+
+						break;
+					}
+					case 5:
+					{
+						if (configIndex_5.fileOrFixed == FILE_SD)
+						{
+							int lineNumber = GetSerialInteger();
+							if (lineNumber == 255)
+							{
+								lineNumber = 0;
+							}
+							newIndexSize = GetIndexDataFromSD(lineNumber);
+							configIndex_5.sizeInSteps = (configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (newIndexSize / 360);
+#ifdef DEBUG
+							Serial.print(lineNumber_Char);
+							Serial.println(lineNumber);
+							Serial.print(newIndexSize_Char);
+							Serial.println(newIndexSize);
+							Serial.print(index3_Char);
+							Serial.print(indexSizeChar);
+							Serial.println(configIndex_5.sizeInSteps);
+							Serial.println("");
+#endif // DEBUG
 							SerialPrint(pageIndex_t7_Char); // Nextion may not get the first packet
 							SerialWrite(0x22);
 							SerialPrint(newIndexSize, 4);
@@ -1341,14 +1520,24 @@ void loop()
 
 				break;
 			}
-			case 103: // g - Not Used
+			case 103: // g - Home Z
 			{
-
+				configSetup.home_Z = (int)GetSerialFloat(serialId);
+				EEPROM.put(eePromAddress_Setup, configSetup);
+#ifdef DEBUG
+				Serial.print(z_Home_Char);
+				Serial.println(configSetup.home_Z);
+#endif // DEBUG
 				break;
 			}
-			case 104: // h - Not Used
+			case 104: // h - Home X
 			{
-				
+				configSetup.home_X = (int)GetSerialFloat(serialId);
+				EEPROM.put(eePromAddress_Setup, configSetup);
+#ifdef DEBUG
+				Serial.print(x_Home_Char);
+				Serial.println(configSetup.home_X);
+#endif // DEBUG
 				break;
 			}
 			case 105: // i - Rose pattern CCW
@@ -1380,8 +1569,14 @@ void loop()
 
 				break;
 			}
-			case 106: // j - Not Used
+			case 106: // j - Home B
 			{
+				configSetup.home_B = (int)GetSerialFloat(serialId);
+				EEPROM.put(eePromAddress_Setup, configSetup);
+#ifdef DEBUG
+				Serial.print(b_Home_Char);
+				Serial.println(configSetup.home_B);
+#endif // DEBUG
 				break;
 			}
 			case 107: // k - Main: Spindle Clockwise
@@ -1547,7 +1742,8 @@ void loop()
 					{
 						switch (configMove.axisId)
 						{
-							case ID_AXIS_Z:
+							case ID_MOVE_AXIS_Z1:
+							case ID_MOVE_AXIS_Z2:
 							{
 								configMove.speedPercent_Axis_Z = (int)GetSerialFloat(serialId);
 								EEPROM.put(eePromAddress_Mov, configMove);
@@ -1557,7 +1753,8 @@ void loop()
 #endif // DEBUG
 								break;
 							}
-							case ID_AXIS_X:
+							case ID_MOVE_AXIS_X1:
+							case ID_MOVE_AXIS_X2:
 							{
 								configMove.speedPercent_Axis_X = (int)GetSerialFloat(serialId);
 								EEPROM.put(eePromAddress_Mov, configMove);
@@ -1567,7 +1764,8 @@ void loop()
 #endif // DEBUG
 								break;
 							}
-							case ID_AXIS_B:
+							case ID_MOVE_AXIS_B1:
+							case ID_MOVE_AXIS_B2:
 							{
 								configMove.speedPercent_Axis_B = (int)GetSerialFloat(serialId);
 								EEPROM.put(eePromAddress_Mov, configMove);
@@ -2091,25 +2289,45 @@ void loop()
 				float newDistance = GetSerialFloat(serialId);
 				switch (configMove.axisId)
 				{
-					case ID_AXIS_Z:
+					case ID_MOVE_AXIS_Z1:
 					{
-						configMove.distance_MoveZ = newDistance;
+						configMove.distance_MoveZ1 = newDistance;
 						break;
 					}
-					case ID_AXIS_X:
+					case ID_MOVE_AXIS_Z2:
 					{
-						configMove.distance_MoveX = newDistance;
+						configMove.distance_MoveZ2 = newDistance;
 						break;
 					}
-					case ID_AXIS_B:
+					case ID_MOVE_AXIS_X1:
 					{
-						configMove.distance_MoveB = newDistance;
+						configMove.distance_MoveX1 = newDistance;
+						break;
+					}
+					case ID_MOVE_AXIS_X2:
+					{
+						configMove.distance_MoveX2 = newDistance;
+						Serial.print("AxisId: ");
+						Serial.println(configMove.axisId);
+						Serial.print("distance_MoveX2: ");
+						Serial.println(configMove.distance_MoveX2);
+						break;
+					}
+					case ID_MOVE_AXIS_B1:
+					{
+						configMove.distance_MoveB1 = newDistance;
+						break;
+					}
+					case ID_MOVE_AXIS_B2:
+					{
+						configMove.distance_MoveB2 = newDistance;
 						break;
 					}
 				}
 
 				EEPROM.put(eePromAddress_Mov, configMove);
 #ifdef DEBUG
+
 				Serial.print("newDistance: ");
 				Serial.println(newDistance);
 #endif // DEBUG
@@ -2126,49 +2344,13 @@ void loop()
 			}
 			case 183: // · - Move:  CCW
 			{
-				// Run
-				switch (configMove.axisId)
-				{
-					case ID_AXIS_Z:
-					{
-						MoveAxis(ID_AXIS_Z, DIR_CCW);
-						break;
-					}
-					case ID_AXIS_X:
-					{
-						MoveAxis(ID_AXIS_X, DIR_CCW);
-						break;
-					}
-					case ID_AXIS_B:
-					{
-						MoveAxis(ID_AXIS_B, DIR_CCW);
-						break;
-					}
-				}
 
+				MoveAxis(configMove.axisId, DIR_CCW);
 				break;
 			}
 			case 184: // ¸ - Move: CW
 			{
-				// Run
-				switch (configMove.axisId)
-				{
-					case ID_AXIS_Z:
-					{
-						MoveAxis(ID_AXIS_Z, DIR_CW);
-						break;
-					}
-					case ID_AXIS_X:
-					{
-						MoveAxis(ID_AXIS_X, DIR_CW);
-						break;
-					}
-					case ID_AXIS_B:
-					{
-						MoveAxis(ID_AXIS_B, DIR_CW);
-						break;
-					}
-				}
+				MoveAxis(configMove.axisId, DIR_CW);
 				break;
 			}
 			case 185: // ¹ - Axis Max speed
@@ -2229,17 +2411,20 @@ void loop()
 					{
 						switch (configMove.axisId)
 						{
-							case ID_AXIS_Z:
+							case ID_MOVE_AXIS_Z1:
+							case ID_MOVE_AXIS_Z2:
 							{
 								configMove.maxSpd_Axis_Z = GetSerialFloat(serialId);
 								break;
 							}
-							case ID_AXIS_X:
+							case ID_MOVE_AXIS_X1:
+							case ID_MOVE_AXIS_X2:
 							{
 								configMove.maxSpd_Axis_X = GetSerialFloat(serialId);
 								break;
 							}
-							case ID_AXIS_B:
+							case ID_MOVE_AXIS_B1:
+							case ID_MOVE_AXIS_B2:
 							{
 								configMove.maxSpd_Axis_B = GetSerialFloat(serialId);
 								break;
@@ -2399,17 +2584,20 @@ void loop()
 					{
 						switch (configMove.axisId)
 						{
-							case ID_AXIS_Z:
+							case ID_MOVE_AXIS_Z1:
+							case ID_MOVE_AXIS_Z2:
 							{
 								configMove.accel_Axis_Z = GetSerialFloat(serialId);
 								break;
 							}
-							case ID_AXIS_X:
+							case ID_MOVE_AXIS_X1:
+							case ID_MOVE_AXIS_X2:
 							{
 								configMove.accel_Axis_X = GetSerialFloat(serialId);
 								break;
 							}
-							case ID_AXIS_B:
+							case ID_MOVE_AXIS_B1:
+							case ID_MOVE_AXIS_B2:
 							{
 								configMove.accel_Axis_B = GetSerialFloat(serialId);
 								break;
@@ -2608,6 +2796,50 @@ void loop()
 						EEPROM.put(eePromAddress_Ind_3, configIndex_3);
 						break;
 					}
+					case 4:
+					{
+						configIndex_4.sizeInUnits = newIndexSize;
+
+						// Default: Divisions
+						if (configIndex_4.degreeOrDivision == BY_DEGREES) // Degrees
+						{
+							configIndex_4.sizeInSteps = stepsPerRevolution * (newIndexSize / 360);
+						}
+						else
+						{
+							configIndex_4.sizeInSteps = stepsPerRevolution / (newIndexSize);
+						}
+
+#ifdef DEBUG
+						Serial.print(index4_Char);
+						Serial.print(indexSizeChar);
+						Serial.println(configIndex_4.sizeInSteps);
+#endif // DEBUG
+						EEPROM.put(eePromAddress_Ind_4, configIndex_4);
+						break;
+					}
+					case 5:
+					{
+						configIndex_5.sizeInUnits = newIndexSize;
+
+						// Default: Divisions
+						if (configIndex_5.degreeOrDivision == BY_DEGREES) // Degrees
+						{
+							configIndex_5.sizeInSteps = stepsPerRevolution * (newIndexSize / 360);
+						}
+						else
+						{
+							configIndex_5.sizeInSteps = stepsPerRevolution / (newIndexSize);
+						}
+
+#ifdef DEBUG
+						Serial.print(index5_Char);
+						Serial.print(indexSizeChar);
+						Serial.println(configIndex_5.sizeInSteps);
+#endif // DEBUG
+						EEPROM.put(eePromAddress_Ind_5, configIndex_5);
+						break;
+					}
 				}
 
 				break;
@@ -2686,7 +2918,7 @@ void loop()
 						}
 						EEPROM.put(eePromAddress_Ind_2, configIndex_2);
 		#ifdef DEBUG
-						Serial.print(index1_Char);
+						Serial.print(index2_Char);
 						Serial.print(fileOrFixed_Char);
 						Serial.println(configIndex_2.fileOrFixed);
 		#endif // DEBUG
@@ -2705,10 +2937,48 @@ void loop()
 						}
 						EEPROM.put(eePromAddress_Ind_3, configIndex_3);
 		#ifdef DEBUG
-						Serial.print(index1_Char);
+						Serial.print(index3_Char);
 						Serial.print(fileOrFixed_Char);
 						Serial.println(configIndex_3.fileOrFixed);
 		#endif // DEBUG
+						break;
+					}
+					case 4:
+					{
+						configIndex_4.fileOrFixed = newSource;
+						if (configIndex_4.fileOrFixed == 49)
+						{
+							configIndex_4.fileOrFixed = 1;
+						}
+						else if (configIndex_4.fileOrFixed == 48)
+						{
+							configIndex_4.fileOrFixed = 0;
+						}
+						EEPROM.put(eePromAddress_Ind_4, configIndex_4);
+#ifdef DEBUG
+						Serial.print(index4_Char);
+						Serial.print(fileOrFixed_Char);
+						Serial.println(configIndex_4.fileOrFixed);
+#endif // DEBUG
+						break;
+					}
+					case 5:
+					{
+						configIndex_5.fileOrFixed = newSource;
+						if (configIndex_5.fileOrFixed == 49)
+						{
+							configIndex_5.fileOrFixed = 1;
+						}
+						else if (configIndex_5.fileOrFixed == 48)
+						{
+							configIndex_5.fileOrFixed = 0;
+						}
+						EEPROM.put(eePromAddress_Ind_5, configIndex_5);
+#ifdef DEBUG
+						Serial.print(index5_Char);
+						Serial.print(fileOrFixed_Char);
+						Serial.println(configIndex_5.fileOrFixed);
+#endif // DEBUG
 						break;
 					}
 				}

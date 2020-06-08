@@ -37,6 +37,15 @@
 /////////////////////////////////////////////////////////////////////////
 // Constants
 /////////////////////////////////////////////////////////////////////////
+
+// Move page
+#define ID_MOVE_AXIS_Z1 0
+#define ID_MOVE_AXIS_Z2 1
+#define ID_MOVE_AXIS_X1 2
+#define ID_MOVE_AXIS_X2 3
+#define ID_MOVE_AXIS_B1 4
+#define ID_MOVE_AXIS_B2 5
+
 // SPI
 #define PIN_SPI_CS_10 10  // Primary pin for SPI
 #define PIN_SPI_CS_9 9
@@ -47,6 +56,8 @@
 #define ID_INDEX_1 1
 #define ID_INDEX_2 2
 #define ID_INDEX_3 3
+#define ID_INDEX_4 4
+#define ID_INDEX_5 5
 
 #define DIR_CCW -1
 #define DIR_CW 1
@@ -102,9 +113,12 @@ struct configPageMov
 	int32_t maxSpd_Axis_B;
 	uint32_t accel_Axis_B;
 	int32_t speedPercent_Axis_B;
-	float distance_MoveZ;
-	float distance_MoveX;
-	float distance_MoveB;
+	float distance_MoveZ1;
+	float distance_MoveX1;
+	float distance_MoveB1;
+	float distance_MoveZ2;
+	float distance_MoveX2;
+	float distance_MoveB2;
 };
 
 struct configPageSync
@@ -163,6 +177,9 @@ struct configPageSetup
 	bool polarity_Axis_Z;
 	bool polarity_Axis_X;
 	bool polarity_Axis_B;
+	uint32_t home_Z;
+	uint32_t home_X;
+	uint32_t home_B;
 };
 
 // Config Structs
@@ -324,6 +341,8 @@ configPageIndex configIndex_Main;
 configIndex configIndex_1;
 configIndex configIndex_2;
 configIndex configIndex_3;
+configIndex configIndex_4;
+configIndex configIndex_5;
 configPageMov configMove;
 configPageRose configRose;
 configPageGreekKey configGreekKey;
@@ -344,13 +363,15 @@ unsigned int eePromAddress_Grk = 1000;  // EEProm address for Greek Key Main
 //unsigned int eePromAddress_Grk_B = 1300; //  EEProm address for Greek Key B
 unsigned int eePromAddress_Ind_Main = 1400;  // EEProm address for Index_Main
 unsigned int eePromAddress_Ind_1 = 1500;  // EEProm address for Index_1
-unsigned int eePromAddress_Ind_2 = 1600;  // EEProm address for Index_2
-unsigned int eePromAddress_Ind_3 = 1700;  // EEProm address for Index_3 
+unsigned int eePromAddress_Ind_2 = 1550;  // EEProm address for Index_2
+unsigned int eePromAddress_Ind_3 = 1600;  // EEProm address for Index_3 
+unsigned int eePromAddress_Ind_4 = 1650;  // EEProm address for Index_3 
+unsigned int eePromAddress_Ind_5 = 1700;  // EEProm address for Index_3 
 
-unsigned int eePromAddress_Filename_Ind = 1800; // EEProm address for Index2 filename
-unsigned int eePromAddress_Filename_Length_Ind = 1900; // EEProm address for length of Index2 filename
-unsigned int eePromAddress_Filename_Grk = 2000; // EEProm address for Index2 filename
-unsigned int eePromAddress_Filename_Length_Grk = 2100; // EEProm address for length of Index2 filename
+unsigned int eePromAddress_Filename_Ind = 1800; // EEProm address for filename
+unsigned int eePromAddress_Filename_Length_Ind = 1900; // EEProm address for length of filename
+unsigned int eePromAddress_Filename_Grk = 2000; // EEProm address for filename
+unsigned int eePromAddress_Filename_Length_Grk = 2100; // EEProm address for length of filename
 
 //==================================================================
 // Global Variables
