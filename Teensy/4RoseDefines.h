@@ -180,6 +180,8 @@ struct configPageSetup
 	uint32_t home_Z;
 	uint32_t home_X;
 	uint32_t home_B;
+	uint32_t pulseWidth_Spindle;
+	uint32_t speedUpdatePeriod_Spindle;
 };
 
 // Config Structs

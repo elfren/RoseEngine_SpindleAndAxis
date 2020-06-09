@@ -1234,9 +1234,10 @@ void MoveAxis(int axisId, int directionAxis)
 /// </comment>
 /// <param name="direction">Counterclockwise: -1, Clockwise: 1</param>
 /// <returns></returns>
-void RunOneStepper(int direction) // pageOne
+void OneRunStepper(int direction) // pageOne
 {
 	RotateControl rotateController;
+
 	//v011
 	const char * pageOne_bt10_bco1_Char = "pageOne.bt10.bco1=55715";
 	const char* pageMain_vaSpEnabled_val_Char = "pageMain.vaSpEnabled.val=1";
@@ -2145,7 +2146,7 @@ void Main_TwoSteppers(
 /// <returns></returns>
 void IndexSpindle(int directionSpindle)
 {
-	StepControl stepController;
+	StepControl stepController(configSetup.pulseWidth_Spindle, configSetup.speedUpdatePeriod_Spindle);
 	Stepper stepper_Spindle(PIN_SPINDLE_STEP, PIN_SPINDLE_DIR);
 	
 	const char * index1_Char = "Index 1-";
@@ -2228,6 +2229,17 @@ void IndexSpindle(int directionSpindle)
 #ifdef DEBUG
 	Serial.print(direction_Char);
 	Serial.println(directionSpindle);
+	Serial.print("Microsteps: ");
+	Serial.println(configSetup.microsteps_Spindle);
+	Serial.print("GearRatio: ");
+	Serial.println(configSetup.gearRatio_Spindle);
+	Serial.print("Steps/360: ");
+	Serial.println(configSetup.steps360_Spindle);
+	Serial.print("PulseWidth: ");
+	Serial.println(configSetup.pulseWidth_Spindle);
+	Serial.print("SpeedUpdatePeriod: ");
+	Serial.println(configSetup.speedUpdatePeriod_Spindle);
+
 	Serial.print(stepsToMove_Char);
 	Serial.println(stepsToMove);
 #endif // DEBUG
@@ -8411,6 +8423,8 @@ void TestEEPROMSetup()
 	const char* pageSpindle_t43 = "pageSpindle.t43.txt=";
 	const char* pageSpindle_t44 = "pageSpindle.t44.txt=";
 	const char* pageSpindle_t45 = "pageSpindle.t45.txt=";
+	const char* pageSpindle_t8 = "pageSpindle.t8.txt=";
+	const char* pageSpindle_t12 = "pageSpindle.t12.txt=";
 	const char* pageZ_t46 = "pageZ.t46.txt=";
 	const char* pageZ_t47 = "pageZ.t47.txt=";
 	const char* pageZ_t48 = "pageZ.t48.txt=";
@@ -8452,6 +8466,16 @@ void TestEEPROMSetup()
 	SerialPrint(pageSpindle_t45);
 	SerialWrite(0x22);
 	SerialPrint(eePromPageSetup.polarity_Spindle ? lowChar : highChar);
+	SerialPrint(nextionQuoteEnd);
+
+	SerialPrint(pageSpindle_t8);
+	SerialWrite(0x22);
+	SerialPrint(eePromPageSetup.pulseWidth_Spindle);
+	SerialPrint(nextionQuoteEnd);
+
+	SerialPrint(pageSpindle_t12);
+	SerialWrite(0x22);
+	SerialPrint(eePromPageSetup.speedUpdatePeriod_Spindle);
 	SerialPrint(nextionQuoteEnd);
 
 	SerialPrint(pageZ_t46);
@@ -10890,6 +10914,16 @@ void LoadSettings_PagePreferences()
 	eePromAddress_Nextion = 248;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	returnVal >= 1 ? (configSetup.polarity_Spindle = true) : (configSetup.polarity_Spindle = false);
+
+	iniValue = "PulseWidth_Spindle";
+	eePromAddress_Nextion = 216;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configSetup.pulseWidth_Spindle = returnVal;
+
+	iniValue = "SpeedUpdatePeriod_Spindle";
+	eePromAddress_Nextion = 220;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configSetup.speedUpdatePeriod_Spindle = returnVal;
 
 	// Page Z Axis
 	iniValue = "StepsPer360_Z";

@@ -1463,13 +1463,13 @@ void loop()
 			}
 			case 100: // d - pageOne Clockwise
 			{
-				RunOneStepper(DIR_CW);
+				OneRunStepper(DIR_CW);
 
 				break;
 			}
 			case 101: // e - pageOne CounterClockwise
 			{
-				RunOneStepper(DIR_CCW);
+				OneRunStepper(DIR_CCW);
 	
 				break;
 			}
@@ -1920,8 +1920,10 @@ void loop()
 
 				break;
 			}
-			case 113: // q - Not Used
+			case 113: // q - Setup: Spindle PulseWidth
 			{
+				configSetup.pulseWidth_Spindle = (int)GetSerialFloat(serialId);
+				EEPROM.put(eePromAddress_Setup, configSetup);
 				break;
 			}
 			case 114: // r - Setup: Spindle FullSteps
@@ -1954,9 +1956,10 @@ void loop()
 #endif // DEBUG
 				break;
 			}
-			case 117: // u - Not used
+			case 117: // u - Setup: Spindle speedUpdatePeriod
 			{
-		
+				configSetup.speedUpdatePeriod_Spindle = (int)GetSerialFloat(serialId);
+				EEPROM.put(eePromAddress_Setup, configSetup);
 				break;
 			}
 			case 118: // v - B axis microsteps
