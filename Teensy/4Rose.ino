@@ -15,6 +15,7 @@
 #include "IniFile.h" // https://github.com/stevemarple/IniFile
 //#include <MemoryFree.h>
 
+
 //==================================================================
 // Pin assignments:  See 4RoseDefines.h
 //==================================================================
@@ -28,6 +29,7 @@ Stepper stepperAxis_MainX(PIN_AXIS_X_STEP, PIN_AXIS_X_DIR);
 
 // TeensyStep controllers
 RotateControl controllerAxis;
+
 
 /// <summary>
 /// Setup
@@ -1077,6 +1079,7 @@ void loop()
 				if (!badFilename)
 				{
 					IndexSpindle(DIR_CCW);
+
 				}
 				else
 				{
@@ -1288,6 +1291,7 @@ void loop()
 				if (!badFilename)
 				{
 					IndexSpindle(DIR_CW);
+
 				}
 				else
 				{
@@ -2290,6 +2294,8 @@ void loop()
 			case 181: // µ - Move: Distance (Text)
 			{
 				float newDistance = GetSerialFloat(serialId);
+				Serial.print("newDistance: ");
+				Serial.println(newDistance);
 				switch (configMove.axisId)
 				{
 					case ID_MOVE_AXIS_Z1:
@@ -2300,6 +2306,10 @@ void loop()
 					case ID_MOVE_AXIS_Z2:
 					{
 						configMove.distance_MoveZ2 = newDistance;
+						Serial.print("AxisId: ");
+						Serial.println(configMove.axisId);
+						Serial.print("distance_MoveZ2: ");
+						Serial.println(configMove.distance_MoveZ2);
 						break;
 					}
 					case ID_MOVE_AXIS_X1:

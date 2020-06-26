@@ -2146,7 +2146,8 @@ void Main_TwoSteppers(
 /// <returns></returns>
 void IndexSpindle(int directionSpindle)
 {
-	StepControl stepController(configSetup.pulseWidth_Spindle, configSetup.speedUpdatePeriod_Spindle);
+	StepControl stepController;
+	//StepControl stepController(configSetup.pulseWidth_Spindle, configSetup.speedUpdatePeriod_Spindle);
 	Stepper stepper_Spindle(PIN_SPINDLE_STEP, PIN_SPINDLE_DIR);
 	
 	const char * index1_Char = "Index 1-";
@@ -2249,6 +2250,8 @@ void IndexSpindle(int directionSpindle)
 		.setMaxSpeed(configIndex_Main.maxSpd)
 		.setAcceleration(configIndex_Main.accel)
 		.setTargetRel(stepsToMove * directionSpindle);
+		
+		
 
 	SetEnable(ID_SPINDLE, true);
 	stepController.moveAsync(stepper_Spindle);
@@ -9111,7 +9114,7 @@ void TestAllTeensyEEPROMValues()
 				{
 					SerialPrint("pageEEPROM.t2.txt=");
 					SerialWrite(0x22);
-					SerialPrint("Z");
+					SerialPrint("Z1");
 					SerialPrint(nextionQuoteEnd);
 
 					SerialPrint("pageEEPROM.t14.txt=");
@@ -9139,7 +9142,7 @@ void TestAllTeensyEEPROMValues()
 				{
 					SerialPrint("pageEEPROM.t2.txt=");
 					SerialWrite(0x22);
-					SerialPrint("Z");
+					SerialPrint("Z2");
 					SerialPrint(nextionQuoteEnd);
 
 					SerialPrint("pageEEPROM.t14.txt=");
@@ -9167,7 +9170,7 @@ void TestAllTeensyEEPROMValues()
 				{
 					SerialPrint("pageEEPROM.t2.txt=");
 					SerialWrite(0x22);
-					SerialPrint("X");
+					SerialPrint("X1");
 					SerialPrint(nextionQuoteEnd);
 
 					SerialPrint("pageEEPROM.t14.txt=");
@@ -9196,7 +9199,7 @@ void TestAllTeensyEEPROMValues()
 				{
 					SerialPrint("pageEEPROM.t2.txt=");
 					SerialWrite(0x22);
-					SerialPrint("X");
+					SerialPrint("X2");
 					SerialPrint(nextionQuoteEnd);
 
 					SerialPrint("pageEEPROM.t14.txt=");
@@ -9225,7 +9228,7 @@ void TestAllTeensyEEPROMValues()
 				{
 					SerialPrint("pageEEPROM.t2.txt=");
 					SerialWrite(0x22);
-					SerialPrint("B");
+					SerialPrint("B1");
 					SerialPrint(nextionQuoteEnd);
 
 					SerialPrint("pageEEPROM.t14.txt=");
@@ -9253,7 +9256,7 @@ void TestAllTeensyEEPROMValues()
 				{
 					SerialPrint("pageEEPROM.t2.txt=");
 					SerialWrite(0x22);
-					SerialPrint("B");
+					SerialPrint("B2");
 					SerialPrint(nextionQuoteEnd);
 
 					SerialPrint("pageEEPROM.t14.txt=");
@@ -10333,10 +10336,15 @@ void LoadSettings_PageMove()
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configMove.speedPercent_Axis_Z = (int)returnVal;
 
-	iniValue = "Distance_Z";
+	iniValue = "Distance_Z1";
 	eePromAddress_Nextion = 168;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
 	configMove.distance_MoveZ1 = returnVal;
+
+	iniValue = "Distance_Z2";
+	eePromAddress_Nextion = 396;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configMove.distance_MoveZ2 = returnVal;
 
 	// X axis
 	iniValue = "MaxSpeed_X";
@@ -10354,10 +10362,15 @@ void LoadSettings_PageMove()
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configMove.speedPercent_Axis_X = (int)returnVal;
 
-	iniValue = "Distance_X";
+	iniValue = "Distance_X1";
 	eePromAddress_Nextion = 340;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
 	configMove.distance_MoveX1 = returnVal;
+
+	iniValue = "Distance_X2";
+	eePromAddress_Nextion = 316;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configMove.distance_MoveX2 = returnVal;
 
 	// B axis
 	iniValue = "MaxSpeed_B";
@@ -10375,10 +10388,16 @@ void LoadSettings_PageMove()
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configMove.speedPercent_Axis_B = (int)returnVal;
 
-	iniValue = "Distance_B";
+	iniValue = "Distance_B1";
 	eePromAddress_Nextion = 332;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
 	configMove.distance_MoveB1 = returnVal;
+	EEPROM.put(eePromAddress_Mov, configMove);
+
+	iniValue = "Distance_B2";
+	eePromAddress_Nextion = 500;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configMove.distance_MoveB2 = returnVal;
 	EEPROM.put(eePromAddress_Mov, configMove);
 }
 
@@ -10893,11 +10912,16 @@ void LoadSettings_PageSync()
 /// <returns></returns>
 void LoadSettings_PagePreferences()
 {
-	// pageSpindle
 	const char* iniKey = "Setup";
-	const char* iniValue = "Microsteps_Spindle";
-	int eePromAddress_Nextion = 212;
+	// Show Vendor Splashscreen
+	const char* iniValue = "BoardType";
+	int eePromAddress_Nextion = 180;
 	float returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+
+	// pageSpindle
+	iniValue = "Microsteps_Spindle";
+	eePromAddress_Nextion = 212;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configSetup.microsteps_Spindle = (int)returnVal;
 
 	iniValue = "StepsPer360_Spindle";
