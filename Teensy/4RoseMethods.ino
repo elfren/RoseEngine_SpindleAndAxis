@@ -2044,6 +2044,15 @@ void Main_TwoSteppers(
 			{
 				rotateController_MainAxis.overrideSpeed(0);
 				rotateController_MainAxis.stop();
+				if (configSetup.limit_StopSpindle)
+				{
+					// Stop the spindle
+					rotateController_MainSpindle.overrideSpeed(0);
+					MilliDelay(5);
+					rotateController_MainSpindle.stop();
+					SetEnable(ID_SPINDLE, false);
+					stepper_Spindle_Go = false;
+				}
 				stepper_Axis_Go = false;
 			}
 		}
@@ -2054,6 +2063,16 @@ void Main_TwoSteppers(
 				rotateController_MainAxis.overrideSpeed(0);
 				rotateController_MainAxis.stop();
 				stepper_Axis_Go = false;
+
+				if (configSetup.limit_StopSpindle)
+				{
+					// Stop the spindle
+					rotateController_MainSpindle.overrideSpeed(0);
+					MilliDelay(5);
+					rotateController_MainSpindle.stop();
+					SetEnable(ID_SPINDLE, false);
+					stepper_Spindle_Go = false;
+				}
 			}
 		}
 
@@ -5390,6 +5409,7 @@ void GreekKey_FromFile(int direction)
 	const char* pageBE_t2 = "pageBE.t1.txt="; // Axis End
 	const char* pageGrkFile_t15 = "pageGrkFile.t15.txt="; // Segments
 	const char* pageGrkFile_t21 = "pageGrkFile.t21.txt="; // Direction
+	const char* pageGrkFile_t22 = "pageGrkFile.t22.txt="; // Line Number
 
 #ifdef DEBUG
 	Serial.print(">>>>>>>>>>>>>>>>>>>>segmentOrActual:");
@@ -5459,9 +5479,11 @@ void GreekKey_FromFile(int direction)
 	EndSegmentCount:
 		fileLineCount = lineCounter;
 		
-		int stepsPerRevolution_Spindle = (int)(floor(configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle));
+		//int stepsPerRevolution_Spindle = (int)(floor(configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle));
+		int stepsPerRevolution_Spindle = (int)(round(configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle));
 		float patternDivisor = ((float)configGreekKey.countPatternPer360_File * (float)spindleSegmentCount);
-		spindleShortLegSteps = (int)((floor(stepsPerRevolution_Spindle)) / (patternDivisor));
+		//spindleShortLegSteps = (int)((floor(stepsPerRevolution_Spindle)) / (patternDivisor));
+		spindleShortLegSteps = (int)((round(stepsPerRevolution_Spindle)) / (patternDivisor));
 #ifdef DEBUG
 		Serial.print("lineCounter:");
 		Serial.println(lineCounter);
@@ -5473,17 +5495,17 @@ void GreekKey_FromFile(int direction)
 	}
 
 	// Calculate axis steps
-	shortSegmentStepsAxisZ = round((configGreekKey.segmentLength_File / configSetup.distancePerRev_AxisZ) * (configSetup.steps360_Axis_Z * configSetup.microsteps_Axis_Z));
-	shortSegmentStepsAxisX = round((configGreekKey.segmentLength_File / configSetup.distancePerRev_AxisX) * (configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X));
+	shortSegmentStepsAxisZ = (int)(round((configGreekKey.segmentLength_File / configSetup.distancePerRev_AxisZ) * (configSetup.steps360_Axis_Z * configSetup.microsteps_Axis_Z)));
+	shortSegmentStepsAxisX = (int)(round((configGreekKey.segmentLength_File / configSetup.distancePerRev_AxisX) * (configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X)));
 	switch (configSetup.radialOrLinear_Axis_B)
 	{
 		case RADIAL_B:
 		{
-			shortSegmentStepsAxisB = round(DistanceToSteps_RadialB(configGreekKey.segmentLength_File));
+			shortSegmentStepsAxisB = (int)(round(DistanceToSteps_RadialB(configGreekKey.segmentLength_File)));
 		}
 		case LINEAR_B:
 		{
-			shortSegmentStepsAxisB = round(DistanceToSteps_LinearB(configGreekKey.segmentLength_File));
+			shortSegmentStepsAxisB = (int)(round(DistanceToSteps_LinearB(configGreekKey.segmentLength_File)));
 		}
 	}
 	
@@ -5554,18 +5576,32 @@ void GreekKey_FromFile(int direction)
 
 
 
-	for (int i = 1; i <= configGreekKey.patternCount_File; i++)
+	for (int j = 1; j <= configGreekKey.patternCount_File; j++)
 	{ 
 		exitInnerForLoop = false;
+
+
 		// Inner loop
 		for (int i = 0; i <= fileLineCount; i++)
 		{
+
 			// Reset hVal and vVal
 			angularAxisLegLength = 0;
 			angularSpindleLegLength = 0;
 
 			// Get data
 			segmentMultiplier = GetGreekKeyDataFromSD(i);
+
+			SerialPrint(pageGrkFile_t22);
+			SerialWrite(0x22);
+			SerialPrint(i);
+			SerialPrint(nextionQuoteEnd);
+
+			SerialPrint(pageGrkFile_t21);
+			SerialWrite(0x22);
+			SerialPrint(currentCommand);
+			SerialPrint(nextionQuoteEnd);
+
 
 			SerialPrint(pageGrkFile_t15);
 			SerialWrite(0x22);
@@ -5621,10 +5657,10 @@ void GreekKey_FromFile(int direction)
 					{
 						case RADIAL: // Spindle Down CW
 						{
-							SerialPrint(pageGrkFile_t21);
-							SerialWrite(0x22);
-							SerialPrint("Down");
-							SerialPrint(nextionQuoteEnd);
+							//SerialPrint(pageGrkFile_t21);
+							//SerialWrite(0x22);
+							//SerialPrint("Down");
+							//SerialPrint(nextionQuoteEnd);
 							if (configGreekKey.segmentOrActual == 2) // 2: Segment 
 							{
 								stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, segmentMultiplier, DIR_CW);
@@ -5638,10 +5674,10 @@ void GreekKey_FromFile(int direction)
 						}
 						case AXIAL: // Axis Right CW
 						{
-							SerialPrint(pageGrkFile_t21);
-							SerialWrite(0x22);
-							SerialPrint("Right");
-							SerialPrint(nextionQuoteEnd);
+							//SerialPrint(pageGrkFile_t21);
+							//SerialWrite(0x22);
+							//SerialPrint("Right");
+							//SerialPrint(nextionQuoteEnd);
 							if (configGreekKey.segmentOrActual == 2) // 2: Segment  
 							{
 								stopAll = GreekKey_Move_Axis(shortSegmentStepsAxis, segmentMultiplier, DIR_CW, true);
@@ -5705,10 +5741,10 @@ void GreekKey_FromFile(int direction)
 				}
 				case 72: // H  - Angular Move. Line must also contain V
 				{
-					SerialPrint(pageGrkFile_t21);
-					SerialWrite(0x22);
-					SerialPrint("Angle");
-					SerialPrint(nextionQuoteEnd);
+					//SerialPrint(pageGrkFile_t21);
+					//SerialWrite(0x22);
+					//SerialPrint("Angle");
+					//SerialPrint(nextionQuoteEnd);
 					switch (configGreekKey.radialOrAxial_File)
 					{
 						case RADIAL: // 
@@ -5740,12 +5776,12 @@ void GreekKey_FromFile(int direction)
 								{
 									case ID_AXIS_Z: // Z Axis
 									{
-										axisSteps = round((angularAxisLegLength / configSetup.distancePerRev_AxisZ) * (configSetup.steps360_Axis_Z * configSetup.microsteps_Axis_Z));
+										axisSteps = (int)(round((angularAxisLegLength / configSetup.distancePerRev_AxisZ) * (configSetup.steps360_Axis_Z * configSetup.microsteps_Axis_Z)));
 										break;
 									}
 									case ID_AXIS_X: // X Axis
 									{
-										axisSteps = round((angularAxisLegLength / configSetup.distancePerRev_AxisX) * (configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X));
+										axisSteps = (int)(round((angularAxisLegLength / configSetup.distancePerRev_AxisX) * (configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X)));
 										break;
 									}
 									case ID_AXIS_B: // B Axis
@@ -5754,12 +5790,12 @@ void GreekKey_FromFile(int direction)
 										{
 											case RADIAL_B:
 											{
-												axisSteps = DistanceToSteps_RadialB(angularAxisLegLength);
+												axisSteps = (int)(DistanceToSteps_RadialB(angularAxisLegLength));
 												break;
 											}
 											case LINEAR_B:
 											{
-												axisSteps = DistanceToSteps_LinearB(angularAxisLegLength);
+												axisSteps = (int)(DistanceToSteps_LinearB(angularAxisLegLength));
 												break;
 											}
 										}
@@ -5854,10 +5890,10 @@ void GreekKey_FromFile(int direction)
 				}
 				case 73: // I - Move alternate axis in (Doesn't change for Radial or Axial)
 				{
-					SerialPrint(pageGrkFile_t21);
-					SerialWrite(0x22);
-					SerialPrint("In");
-					SerialPrint(nextionQuoteEnd);
+					//SerialPrint(pageGrkFile_t21);
+					//SerialWrite(0x22);
+					//SerialPrint("In");
+					//SerialPrint(nextionQuoteEnd);
 					if (configGreekKey.segmentOrActual == 2) // 2: Segment  
 					{
 						switch (configGreekKey.axisId)
@@ -5941,10 +5977,10 @@ void GreekKey_FromFile(int direction)
 					{
 						case RADIAL: // Axis Left CCW
 						{
-							SerialPrint(pageGrkFile_t21);
-							SerialWrite(0x22);
-							SerialPrint("Left");
-							SerialPrint(nextionQuoteEnd);
+							//SerialPrint(pageGrkFile_t21);
+							//SerialWrite(0x22);
+							//SerialPrint("Left");
+							//SerialPrint(nextionQuoteEnd);
 							if (configGreekKey.segmentOrActual == 2) // 2: Segment  
 							{
 								Serial.print("Z----shortSegmentStepsAxis--------------------------------------------------");
@@ -5990,10 +6026,10 @@ void GreekKey_FromFile(int direction)
 						}
 						case AXIAL: // Spindle Up CCW
 						{
-							SerialPrint(pageGrkFile_t21);
-							SerialWrite(0x22);
-							SerialPrint("Up");
-							SerialPrint(nextionQuoteEnd);
+							//SerialPrint(pageGrkFile_t21);
+							//SerialWrite(0x22);
+							//SerialPrint("Up");
+							//SerialPrint(nextionQuoteEnd);
 							if (configGreekKey.segmentOrActual == 2) // 2: Segment 
 							{
 								stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, segmentMultiplier, DIR_CCW);
@@ -6023,10 +6059,10 @@ void GreekKey_FromFile(int direction)
 				}
 				case 79: // O - Move alternate axis out (Doesn't change for Radial or Axial)
 				{
-					SerialPrint(pageGrkFile_t21);
-					SerialWrite(0x22);
-					SerialPrint("Out");
-					SerialPrint(nextionQuoteEnd);
+					//SerialPrint(pageGrkFile_t21);
+					//SerialWrite(0x22);
+					//SerialPrint("Out");
+					//SerialPrint(nextionQuoteEnd);
 					if (configGreekKey.segmentOrActual == 2) // 2: Segment  
 					{
 						switch (configGreekKey.axisId)
@@ -6095,10 +6131,10 @@ void GreekKey_FromFile(int direction)
 					{
 						case RADIAL: // Axis Right CW
 						{
-							SerialPrint(pageGrkFile_t21);
-							SerialWrite(0x22);
-							SerialPrint("Right");
-							SerialPrint(nextionQuoteEnd);
+							//SerialPrint(pageGrkFile_t21);
+							//SerialWrite(0x22);
+							//SerialPrint("Right");
+							//SerialPrint(nextionQuoteEnd);
 							if (configGreekKey.segmentOrActual == 2) // 2: Segment  
 							{
 								stopAll = GreekKey_Move_Axis(shortSegmentStepsAxis, segmentMultiplier, DIR_CW, true);
@@ -6143,10 +6179,10 @@ void GreekKey_FromFile(int direction)
 						}
 						case AXIAL: // Spindle Down CW
 						{
-							SerialPrint(pageGrkFile_t21);
-							SerialWrite(0x22);
-							SerialPrint("Down");
-							SerialPrint(nextionQuoteEnd);
+							//SerialPrint(pageGrkFile_t21);
+							//SerialWrite(0x22);
+							//SerialPrint("Down");
+							//SerialPrint(nextionQuoteEnd);
 							if (configGreekKey.segmentOrActual == 2) // 2: Segment 
 							{
 								stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, segmentMultiplier, DIR_CW);
@@ -6181,10 +6217,10 @@ void GreekKey_FromFile(int direction)
 					{
 						case RADIAL: // Spindle Up CCW
 						{
-							SerialPrint(pageGrkFile_t21);
-							SerialWrite(0x22);
-							SerialPrint("Up");
-							SerialPrint(nextionQuoteEnd);
+							//SerialPrint(pageGrkFile_t21);
+							//SerialWrite(0x22);
+							//SerialPrint("Up");
+							//SerialPrint(nextionQuoteEnd);
 							if (configGreekKey.segmentOrActual == 2) // 2: Segment 
 							{
 								stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, segmentMultiplier, DIR_CCW);
@@ -6199,10 +6235,10 @@ void GreekKey_FromFile(int direction)
 						}
 						case AXIAL: // Axis Left CCW
 						{
-							SerialPrint(pageGrkFile_t21);
-							SerialWrite(0x22);
-							SerialPrint("Left");
-							SerialPrint(nextionQuoteEnd);
+							//SerialPrint(pageGrkFile_t21);
+							//SerialWrite(0x22);
+							//SerialPrint("Left");
+							//SerialPrint(nextionQuoteEnd);
 							if (configGreekKey.segmentOrActual == 2) // 2: Segment  
 							{
 								stopAll = GreekKey_Move_Axis(shortSegmentStepsAxis, segmentMultiplier, DIR_CCW, true);
@@ -6984,10 +7020,11 @@ double GetGreekKeyDataFromSD(int lineNumber)
 	// Parse the output
 		moveType = newSizeString[0];
 		nStr = newSizeString.substring(1);
-
+		currentCommand = newSizeString;
 #ifdef DEBUG
 	Serial.print("1.moveType:");
 	Serial.println(moveType);
+	Serial.println(currentCommand);
 #endif
 
 	if (moveType == 59) // ;
@@ -8571,6 +8608,8 @@ void TestEEPROM_Limits()
 	const char* pageLimits_t6 = "pageLimits.t6.txt=";
 	const char* pageLimits_t7 = "pageLimits.t7.txt=";
 	const char* pageLimits_t8 = "pageLimits.t8.txt=";
+	const char* pageLimits_c1_0 = "pageLimits.c1.val=0";
+	const char* pageLimits_c1_1 = "pageLimits.c1.val=1";
 
 	const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
 	const char* nextionEnd = "\xFF\xFF\xFF";
@@ -8622,6 +8661,19 @@ void TestEEPROM_Limits()
 	SerialWrite(0x22);
 	SerialPrint(configSetup.home_B);
 	SerialPrint(nextionQuoteEnd);
+
+	Serial.print("StopSpindle: ");
+	Serial.println(configSetup.limit_StopSpindle);
+	if(configSetup.limit_StopSpindle)
+	{ 
+		SerialPrint(pageLimits_c1_1);
+	}
+	else
+	{
+		SerialPrint(pageLimits_c1_0);
+	}
+
+	SerialPrint(nextionEnd);
 
 	// Update Nextion
 	SerialPrint("pageLimits.bt1.bco=23964");
@@ -11083,6 +11135,11 @@ void LoadSettings_PageLimits()
 
 	iniValue = "Home_X";
 	eePromAddress_Nextion = 176;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configSetup.home_X = (int)returnVal;
+
+	iniValue = "StopSpindle";
+	eePromAddress_Nextion = 184;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configSetup.home_X = (int)returnVal;
 

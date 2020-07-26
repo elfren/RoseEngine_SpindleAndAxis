@@ -183,6 +183,7 @@ struct configPageSetup
 	uint32_t home_B;
 	uint32_t pulseWidth_Spindle;
 	uint32_t speedUpdatePeriod_Spindle;
+	uint32_t limit_StopSpindle;
 };
 
 // Config Structs
@@ -438,6 +439,7 @@ String axisAndDirection;
 String axisAndDirectionA;
 
 int currentLineNumber = 0;
+String currentCommand = "";
 bool exitGreekKey = false;
 String comment;
 int spindleShortLegSteps = 0;

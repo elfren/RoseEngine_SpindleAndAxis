@@ -1316,7 +1316,8 @@ void loop()
 			}
 			case 83: // S - Not Used
 			{
-				
+				configSetup.limit_StopSpindle = GetSerialInteger();
+				EEPROM.put(eePromAddress_Setup, configSetup);
 				break;
 			}
 			case 84: // T - Rose: n
