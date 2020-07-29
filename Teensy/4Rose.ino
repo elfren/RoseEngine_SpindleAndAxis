@@ -2,7 +2,7 @@
 /* *****************************************************************
 * 4Rose main entry
 * Author: Edward French
-* Version: 14 - xxxxxxx
+* Version: 16 - xxxxxxx
 ******************************************************************/
 
 #include "math.h"
@@ -311,8 +311,8 @@ void loop()
 		incomingByte = SerialRead(serialId);
 
 //#ifdef DEBUG
-//		Serial.print("serialId: ");
-//		Serial.println(serialId);
+		Serial.print("serialId: ");
+		Serial.println(serialId);
 //		Serial.print("incomingByte: ");
 //		Serial.println(incomingByte);
 //		Serial.println("MilliDelay");

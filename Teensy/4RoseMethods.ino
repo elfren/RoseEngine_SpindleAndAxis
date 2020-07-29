@@ -164,6 +164,12 @@ void BeginSD()
 /// <returns>void</returns>
 void SetEnable(int axisId, bool enabled)
 {
+	Serial.println(enabled);
+	if (!enabled) // Workaround for DM542T external driver
+	{
+		//Serial.println("Enable Delay False");
+		MilliDelay(enableTimeout);
+	}
 	switch (axisId)
 	{
 		case ID_SPINDLE:
@@ -173,7 +179,7 @@ void SetEnable(int axisId, bool enabled)
 				digitalWrite(PIN_SPINDLE_ENABLE, configSetup.polarity_Spindle ? (LOW) : (HIGH)); // Enable 
 			}
 			else
-			{
+			{				
 				digitalWrite(PIN_SPINDLE_ENABLE, configSetup.polarity_Spindle ? (HIGH) : (LOW)); // Disable 
 			}
 			break;
@@ -214,6 +220,12 @@ void SetEnable(int axisId, bool enabled)
 			}
 			break;
 		}
+	}
+
+	if (enabled)// Workaround for DM542T external driver
+	{
+		//Serial.println("Enable Delay True");
+		MilliDelay(enableTimeout);
 	}
 }
 
@@ -2265,15 +2277,17 @@ void IndexSpindle(int directionSpindle)
 #endif // DEBUG
 
 	// Set speed and acceleration
-	stepper_Spindle
-		.setMaxSpeed(configIndex_Main.maxSpd)
-		.setAcceleration(configIndex_Main.accel)
-		.setTargetRel(stepsToMove * directionSpindle);
+	
+	stepper_Spindle.setMaxSpeed(configIndex_Main.maxSpd);
+	stepper_Spindle.setAcceleration(configIndex_Main.accel);
+	stepper_Spindle.setTargetRel(stepsToMove * directionSpindle);
 		
 		
+	//stepper_Spindle.setTargetRel(256000);
 
 	SetEnable(ID_SPINDLE, true);
-	stepController.moveAsync(stepper_Spindle);
+	//stepController.moveAsync(stepper_Spindle);
+	stepController.move(stepper_Spindle);
 	while (stepController.isRunning())
 	{
 		MilliDelay(5);
@@ -2295,6 +2309,8 @@ void IndexSpindle(int directionSpindle)
 		}
 		MilliDelay(10);
 	}
+
+
 	// Update Index flag on Nextion. 
 	//SerialPrint(pageIndex_bt3_pco_Char);
 	//SerialPrint(nextionEnd);

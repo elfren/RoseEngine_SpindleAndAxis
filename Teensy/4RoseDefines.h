@@ -384,6 +384,7 @@ int pageCallerId = 20;
 int serialId = 9; // Initialize with unused serial id.  Serial: 0 (Usb cable to PC), Serial1: 1, Serial2: 2, Serial3: 3
 byte incomingByte = 0;	// store incoming Serial data
 
+int enableTimeout = 200; // Workaround for DM542T external driver
 float distanceTotal_MoveZ = 0;
 float distanceTotal_MoveX = 0;
 
