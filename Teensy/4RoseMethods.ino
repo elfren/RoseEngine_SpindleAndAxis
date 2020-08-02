@@ -4830,6 +4830,10 @@ bool GreekKey_Move_Axis(float segmentSteps, float multiplier, int direction, boo
 			retVal = true;
 			break;
 		}
+		else
+		{
+			//Serial.println("StopGreekKey() is false:");
+		}
 		MilliDelay(5);
 	}
 
@@ -5483,9 +5487,11 @@ void GreekKey_FromFile(int direction)
 	int spindleSegmentCount = 0;
 	int spindleSteps = 0;
 
+	int selectedAxis = 0;
 	// Reset end positions
 	endPosition_Spindle = 0;
 	endPosition_Axis = 0;
+
 
 	// String variables
 	const char* pageBE_t3 = "pageBE.t3.txt="; // Spindle Begin
@@ -6353,6 +6359,24 @@ void GreekKey_FromFile(int direction)
 
 					break;
 				}
+				case 84: // T - Spindle
+				{
+					// Negative steps move CCW
+					if (configGreekKey.segmentOrActual == 2) // 2: Segment 
+					{
+						stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, segmentMultiplier, DIR_CW);
+					}
+					else  //3: Actual
+					{
+						spindleSteps = round((configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (segmentMultiplier / 360));
+						stopAll = GreekKey_Move_Spindle(spindleSteps, 1, DIR_CW);
+					}
+					if (stopAll)
+					{
+						goto EndLoops;
+					}
+					break;
+				}
 				case 85: // U - Spindle up CCW
 				{
 
@@ -6447,7 +6471,96 @@ void GreekKey_FromFile(int direction)
 	
 					break;
 				}
-	
+				case 88: // X - X axis
+				{
+					selectedAxis = configGreekKey.axisId;
+					configGreekKey.axisId = ID_AXIS_X;
+					if (configGreekKey.segmentOrActual == 2) // 2: Segment  
+					{
+						stopAll = GreekKey_Move_Axis(shortSegmentStepsAxisX, segmentMultiplier, DIR_CW, true);
+					}
+					else  //3: Actual
+					{
+						if (configSetup.xAltX == 0)
+						{
+							axisSteps = round((segmentMultiplier / configSetup.distancePerRev_AxisX) * (configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X));
+						}
+						else
+						{
+							axisSteps = round((segmentMultiplier / configSetup.distancePerRev_AxisXAlt) * (configSetup.steps360_Axis_XAlt * configSetup.microsteps_Axis_XAlt));
+						}
+
+						// Negative axisSteps will move CCW
+						stopAll = GreekKey_Move_Axis(axisSteps, 1, DIR_CW, true);
+					}
+
+					configGreekKey.axisId = selectedAxis;
+					if (stopAll)
+					{
+						goto EndLoops;
+					}
+					break;
+				}
+				case 90: // Z - Z axis
+				{
+					selectedAxis = configGreekKey.axisId;
+					configGreekKey.axisId = ID_AXIS_Z;
+					if (configGreekKey.segmentOrActual == 2) // 2: Segment  
+					{
+						stopAll = GreekKey_Move_Axis(shortSegmentStepsAxisZ, segmentMultiplier, DIR_CW, true);
+					}
+					else  //3: Actual
+					{
+
+						axisSteps = round((segmentMultiplier / configSetup.distancePerRev_AxisZ) * (configSetup.steps360_Axis_Z * configSetup.microsteps_Axis_Z));
+						// Negative axisSteps will move CCW
+						stopAll = GreekKey_Move_Axis(axisSteps, 1, DIR_CW, true);
+					}
+
+					configGreekKey.axisId = selectedAxis;
+					if (stopAll)
+					{
+						goto EndLoops;
+					}
+
+					break;
+				}
+
+				case 66: // B - B axis
+				{
+					selectedAxis = configGreekKey.axisId;
+					configGreekKey.axisId = ID_AXIS_B;
+					if (configGreekKey.segmentOrActual == 2) // 2: Segment  
+					{
+						stopAll = GreekKey_Move_Axis(shortSegmentStepsAxisB, segmentMultiplier, DIR_CW, true);
+					}
+					else  //3: Actual
+					{
+						switch (configSetup.radialOrLinear_Axis_B)
+						{
+							case RADIAL_B:
+							{
+								axisSteps = DistanceToSteps_RadialB(segmentMultiplier);
+								break;
+							}
+							case LINEAR_B:
+							{
+								axisSteps = DistanceToSteps_LinearB(segmentMultiplier);
+								break;
+							}
+						}
+
+						// Negative axisSteps will move CCW
+						stopAll = GreekKey_Move_Axis(axisSteps, 1, DIR_CW, true);
+					}
+
+					configGreekKey.axisId = selectedAxis;
+					if (stopAll)
+					{
+						goto EndLoops;
+					}
+					break;
+				}
 			} // End Switch(moveType)
 
 			stopAll = StopGreekKey();
