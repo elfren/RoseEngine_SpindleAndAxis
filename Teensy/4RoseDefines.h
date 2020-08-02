@@ -184,6 +184,12 @@ struct configPageSetup
 	uint32_t pulseWidth_Spindle;
 	uint32_t speedUpdatePeriod_Spindle;
 	uint32_t limit_StopSpindle;
+
+	uint32_t xAltX;
+	uint32_t microsteps_Axis_XAlt;
+	uint32_t steps360_Axis_XAlt;
+	float distancePerRev_AxisXAlt;
+	bool polarity_Axis_XAlt;
 };
 
 // Config Structs

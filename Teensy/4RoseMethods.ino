@@ -283,7 +283,7 @@ double GetSerialFloatA(Stream& port)
 		//in[i] = port.read();
 		inputChar = port.read();
 		Serial.println("");
-		Serial.print("InputChar:---------------------------------------");
+		Serial.print("InputChar:---------------------------------------: ");
 		Serial.print(inputChar);
 		Serial.print("  ");
 		Serial.println(int(inputChar));
@@ -551,7 +551,14 @@ float StepsToDistance_Axis(float steps, int axisId)
 		}
 		case ID_AXIS_X:
 		{
-			retVal = (steps * configSetup.distancePerRev_AxisX) / (configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X);
+			if(configSetup.xAltX==0)
+			{ 
+				retVal = (steps * configSetup.distancePerRev_AxisX) / (configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X);
+			}
+			else
+			{
+				retVal = (steps * configSetup.distancePerRev_AxisXAlt) / (configSetup.steps360_Axis_XAlt * configSetup.microsteps_Axis_XAlt);
+			}
 			break;
 		}
 		case ID_AXIS_B: // Rotary axis
@@ -646,8 +653,14 @@ float DistanceToSteps_Axis(float distance, int axisId)
 		}
 		case ID_AXIS_X:
 		{
-			retVal = (distance / configSetup.distancePerRev_AxisX) * (configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X);
-			
+			if (configSetup.xAltX == 0)
+			{
+				retVal = (distance / configSetup.distancePerRev_AxisX) * (configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X);
+			}
+			else
+			{
+				retVal = (distance / configSetup.distancePerRev_AxisXAlt) * (configSetup.steps360_Axis_XAlt * configSetup.microsteps_Axis_XAlt);
+			}
 			break;
 		}
 		case ID_AXIS_B:
@@ -828,7 +841,48 @@ void MoveAxis(int axisId, int directionAxis)
 
 		case ID_MOVE_AXIS_X1:
 		{
-			stepsToMove = (configMove.distance_MoveX1 / (configSetup.distancePerRev_AxisX) * (configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X));
+			Serial.print("xAltX: ");
+			Serial.println(configSetup.xAltX);
+			if (configSetup.xAltX == 0)
+			{
+				stepsToMove = (configMove.distance_MoveX1 / (configSetup.distancePerRev_AxisX) * (configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X));
+#ifdef DEBUG
+				Serial.print(distancePer360_Char);
+				Serial.println(configSetup.distancePerRev_AxisX);
+				Serial.print(stepsPer360_Char);
+				Serial.println(configSetup.steps360_Axis_X);
+				Serial.print(microsteps_Char);
+				Serial.println(configSetup.microsteps_Axis_X);
+				Serial.print(distance_Char);
+				Serial.println(configMove.distance_MoveX1);
+
+				Serial.print(steps_Char);
+				Serial.println(stepsToMove);
+
+				Serial.print(maxSpd_Char);
+				Serial.println(configMove.maxSpd_Axis_X);
+				Serial.print(speedPercent_Char);
+				Serial.println(configMove.speedPercent_Axis_X);
+				Serial.print(accel_Char);
+				Serial.println(configMove.accel_Axis_X);
+#endif // DEBUG
+			}
+			else
+			{
+				stepsToMove = (configMove.distance_MoveX1 / (configSetup.distancePerRev_AxisXAlt) * (configSetup.steps360_Axis_XAlt * configSetup.microsteps_Axis_XAlt));
+#ifdef DEBUG
+				Serial.println("Alt X-----------------: ");
+				Serial.print(distancePer360_Char);
+				Serial.println(configSetup.distancePerRev_AxisXAlt);
+				Serial.print(stepsPer360_Char);
+				Serial.println(configSetup.steps360_Axis_XAlt);
+				Serial.print(microsteps_Char);
+				Serial.println(configSetup.microsteps_Axis_XAlt);
+				Serial.print(distance_Char);
+				Serial.println(configMove.distance_MoveX1);
+
+#endif // DEBUG
+			}
 			stepper_X.setPosition(0);
 
 			// Set speed and acceleration
@@ -867,7 +921,14 @@ void MoveAxis(int axisId, int directionAxis)
 		}
 		case ID_MOVE_AXIS_X2:
 		{
-			stepsToMove = (configMove.distance_MoveX2 / (configSetup.distancePerRev_AxisX) * (configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X));
+			if (configSetup.xAltX == 0)
+			{
+				stepsToMove = (configMove.distance_MoveX2 / (configSetup.distancePerRev_AxisX) * (configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X));
+			}
+			else
+			{
+				stepsToMove = (configMove.distance_MoveX2 / (configSetup.distancePerRev_AxisXAlt) * (configSetup.steps360_Axis_XAlt * configSetup.microsteps_Axis_XAlt));
+			}
 			stepper_X.setPosition(0);
 
 			// Set speed and acceleration
@@ -4496,8 +4557,16 @@ void GreekKeyPattern_Initial(int segmentCount)
 		}
 		case ID_AXIS_X: // X Axis
 		{
-			distance_Axis = configGreekKey.segmentLength_Pattern / configSetup.distancePerRev_AxisX;
-			axisShortLegSteps = (int)round(distance_Axis * configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X);
+			if (configSetup.xAltX == 0)
+			{
+				distance_Axis = configGreekKey.segmentLength_Pattern / configSetup.distancePerRev_AxisX;
+				axisShortLegSteps = (int)round(distance_Axis * configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X);
+			}
+			else
+			{
+				distance_Axis = configGreekKey.segmentLength_Pattern / configSetup.distancePerRev_AxisXAlt;
+				axisShortLegSteps = (int)round(distance_Axis * configSetup.steps360_Axis_XAlt * configSetup.microsteps_Axis_XAlt);
+			}
 			break;
 		}
 		case ID_AXIS_B: // B Axis
@@ -5512,7 +5581,16 @@ void GreekKey_FromFile(int direction)
 
 	// Calculate axis steps
 	shortSegmentStepsAxisZ = (int)(round((configGreekKey.segmentLength_File / configSetup.distancePerRev_AxisZ) * (configSetup.steps360_Axis_Z * configSetup.microsteps_Axis_Z)));
-	shortSegmentStepsAxisX = (int)(round((configGreekKey.segmentLength_File / configSetup.distancePerRev_AxisX) * (configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X)));
+	
+	if (configSetup.xAltX == 0)
+	{
+		shortSegmentStepsAxisX = (int)(round((configGreekKey.segmentLength_File / configSetup.distancePerRev_AxisX) * (configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X)));
+	}
+	else
+	{
+		shortSegmentStepsAxisX = (int)(round((configGreekKey.segmentLength_File / configSetup.distancePerRev_AxisXAlt) * (configSetup.steps360_Axis_XAlt * configSetup.microsteps_Axis_XAlt)));
+	}
+
 	switch (configSetup.radialOrLinear_Axis_B)
 	{
 		case RADIAL_B:
@@ -5709,7 +5787,14 @@ void GreekKey_FromFile(int direction)
 									}
 									case ID_AXIS_X: // X Axis
 									{
-										axisSteps = round((segmentMultiplier / configSetup.distancePerRev_AxisX) * (configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X));
+										if (configSetup.xAltX == 0)
+										{
+											axisSteps = round((segmentMultiplier / configSetup.distancePerRev_AxisX) * (configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X));
+										}
+										else
+										{
+											axisSteps = round((segmentMultiplier / configSetup.distancePerRev_AxisXAlt) * (configSetup.steps360_Axis_XAlt * configSetup.microsteps_Axis_XAlt));
+										}
 										break;
 									}
 									case ID_AXIS_B: // B Axis
@@ -5797,7 +5882,14 @@ void GreekKey_FromFile(int direction)
 									}
 									case ID_AXIS_X: // X Axis
 									{
-										axisSteps = (int)(round((angularAxisLegLength / configSetup.distancePerRev_AxisX) * (configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X)));
+										if (configSetup.xAltX == 0)
+										{
+											axisSteps = (int)(round((angularAxisLegLength / configSetup.distancePerRev_AxisX) * (configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X)));
+										}
+										else
+										{
+											axisSteps = (int)(round((angularAxisLegLength / configSetup.distancePerRev_AxisXAlt) * (configSetup.steps360_Axis_XAlt * configSetup.microsteps_Axis_XAlt)));
+										}
 										break;
 									}
 									case ID_AXIS_B: // B Axis
@@ -5860,7 +5952,14 @@ void GreekKey_FromFile(int direction)
 									}
 									case ID_AXIS_X: // X Axis
 									{
-										axisSteps = round((angularSpindleLegLength / configSetup.distancePerRev_AxisX) * (configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X));
+										if (configSetup.xAltX == 0)
+										{
+											axisSteps = round((angularSpindleLegLength / configSetup.distancePerRev_AxisX) * (configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X));
+										}
+										else
+										{
+											axisSteps = round((angularSpindleLegLength / configSetup.distancePerRev_AxisXAlt) * (configSetup.steps360_Axis_XAlt * configSetup.microsteps_Axis_XAlt));
+										}
 										break;
 									}
 									case ID_AXIS_B: // B Axis
@@ -5940,7 +6039,14 @@ void GreekKey_FromFile(int direction)
 						{
 							case ID_AXIS_Z: // Z Axis is primary
 							{
-								axisSteps = round((segmentMultiplier / configSetup.distancePerRev_AxisX) * (configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X));
+								if (configSetup.xAltX == 0)
+								{
+									axisSteps = round((segmentMultiplier / configSetup.distancePerRev_AxisX) * (configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X));
+								}
+								else
+								{
+									axisSteps = round((segmentMultiplier / configSetup.distancePerRev_AxisXAlt) * (configSetup.steps360_Axis_XAlt * configSetup.microsteps_Axis_XAlt));
+								}
 								break;
 							}
 							case ID_AXIS_X: // X Axis is primary
@@ -6014,7 +6120,14 @@ void GreekKey_FromFile(int direction)
 									}
 									case ID_AXIS_X: // X Axis
 									{
-										axisSteps = round((segmentMultiplier / configSetup.distancePerRev_AxisX) * (configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X));
+										if (configSetup.xAltX == 0)
+										{
+											axisSteps = round((segmentMultiplier / configSetup.distancePerRev_AxisX) * (configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X));
+										}
+										else
+										{
+											axisSteps = round((segmentMultiplier / configSetup.distancePerRev_AxisXAlt) * (configSetup.steps360_Axis_XAlt * configSetup.microsteps_Axis_XAlt));
+										}
 										break;
 									}
 									case ID_AXIS_B: // B Axis
@@ -6105,7 +6218,14 @@ void GreekKey_FromFile(int direction)
 							case ID_AXIS_Z: // Z Axis is primary
 							case ID_AXIS_B:
 							{
-								axisSteps = round((segmentMultiplier / configSetup.distancePerRev_AxisX) * (configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X));
+								if (configSetup.xAltX == 0)
+								{
+									axisSteps = round((segmentMultiplier / configSetup.distancePerRev_AxisX) * (configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X));
+								}
+								else
+								{
+									axisSteps = round((segmentMultiplier / configSetup.distancePerRev_AxisXAlt) * (configSetup.steps360_Axis_XAlt * configSetup.microsteps_Axis_XAlt));
+								}
 								break;
 							}
 							case ID_AXIS_X: // X Axis is primary
@@ -6166,7 +6286,14 @@ void GreekKey_FromFile(int direction)
 									}
 									case ID_AXIS_X: // X Axis
 									{
-										axisSteps = round((segmentMultiplier / configSetup.distancePerRev_AxisX) * (configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X));
+										if (configSetup.xAltX == 0)
+										{
+											axisSteps = round((segmentMultiplier / configSetup.distancePerRev_AxisX) * (configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X));
+										}
+										else
+										{
+											axisSteps = round((segmentMultiplier / configSetup.distancePerRev_AxisXAlt) * (configSetup.steps360_Axis_XAlt * configSetup.microsteps_Axis_XAlt));
+										}
 										break;
 									}
 									case ID_AXIS_B: // B Axis
@@ -6270,7 +6397,14 @@ void GreekKey_FromFile(int direction)
 									}
 									case ID_AXIS_X: // X Axis
 									{
-										axisSteps = round((segmentMultiplier / configSetup.distancePerRev_AxisX) * (configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X));
+										if (configSetup.xAltX == 0)
+										{
+											axisSteps = round((segmentMultiplier / configSetup.distancePerRev_AxisX) * (configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X));
+										}
+										else
+										{
+											axisSteps = round((segmentMultiplier / configSetup.distancePerRev_AxisXAlt) * (configSetup.steps360_Axis_XAlt * configSetup.microsteps_Axis_XAlt));
+										}
 										break;
 									}
 									case ID_AXIS_B: // B Axis
@@ -7683,7 +7817,14 @@ void RoseRadial(int direction)
 		}
 		case ID_AXIS_X:
 		{
-			slideStepsAmplitude = ((configRose.amplitude_Radial_X / (configSetup.distancePerRev_AxisX)) * configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X) / 2;  // Amplitude is normally measured from the middle to the top
+			if (configSetup.xAltX == 0)
+			{
+				slideStepsAmplitude = ((configRose.amplitude_Radial_X / (configSetup.distancePerRev_AxisX)) * configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X) / 2;  // Amplitude is normally measured from the middle to the top
+			}
+			else
+			{
+				slideStepsAmplitude = ((configRose.amplitude_Radial_X / (configSetup.distancePerRev_AxisXAlt)) * configSetup.steps360_Axis_XAlt * configSetup.microsteps_Axis_XAlt) / 2;  // Amplitude is normally measured from the middle to the top
+			}
 			newMaxSpd_RoseAxis = configRose.maxSpd_Axis_X * configRose.speedPercent_Axis_X * .01 * direction;
 			stepperAxis_X
 				.setMaxSpeed(newMaxSpd_RoseAxis)
@@ -8494,6 +8635,10 @@ void TestEEPROMSetup()
 	const char* pageX_t61 = "pageX.t61.txt=";
 	const char* pageX_t62 = "pageX.t62.txt=";
 	const char* pageX_t63 = "pageX.t63.txt=";
+	const char* pageAlternateX_t60 = "pageAlternateX.t60.txt=";
+	const char* pageAlternateX_t61 = "pageAlternateX.t61.txt=";
+	const char* pageAlternateX_t62 = "pageAlternateX.t62.txt=";
+	const char* pageAlternateX_t63 = "pageAlternateX.t63.txt=";
 
 	const char* lowChar = "Low";
 	const char* highChar = "High";
@@ -8554,6 +8699,7 @@ void TestEEPROMSetup()
 	SerialPrint(eePromPageSetup.polarity_Axis_Z ? lowChar : highChar);
 	SerialPrint(nextionQuoteEnd);
 
+	// Page X
 	SerialPrint(pageX_t60);
 	SerialWrite(0x22);
 	SerialPrint(eePromPageSetup.microsteps_Axis_X);
@@ -8573,6 +8719,28 @@ void TestEEPROMSetup()
 	SerialWrite(0x22);
 	SerialPrint(eePromPageSetup.polarity_Axis_X ? lowChar : highChar);
 	SerialPrint(nextionQuoteEnd);
+
+	// Page AlternateX
+	SerialPrint(pageAlternateX_t60);
+	SerialWrite(0x22);
+	SerialPrint(eePromPageSetup.microsteps_Axis_XAlt);
+	SerialPrint(nextionQuoteEnd);
+
+	SerialPrint(pageAlternateX_t61);
+	SerialWrite(0x22);
+	SerialPrint(eePromPageSetup.steps360_Axis_XAlt);
+	SerialPrint(nextionQuoteEnd);
+
+	SerialPrint(pageAlternateX_t62);
+	SerialWrite(0x22);
+	SerialPrint(eePromPageSetup.distancePerRev_AxisXAlt, 5);
+	SerialPrint(nextionQuoteEnd);
+
+	SerialPrint(pageAlternateX_t63);
+	SerialWrite(0x22);
+	SerialPrint(eePromPageSetup.polarity_Axis_XAlt ? lowChar : highChar);
+	SerialPrint(nextionQuoteEnd);
+
 
 	SerialPrint(pageB_t56);
 	SerialWrite(0x22);
@@ -11058,6 +11226,27 @@ void LoadSettings_PagePreferences()
 	eePromAddress_Nextion = 256;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	returnVal >= 1 ? (configSetup.polarity_Axis_X = true) : (configSetup.polarity_Axis_X = false);
+
+	// Page Alternate X Axis
+	iniValue = "StepsPer360_AltX";
+	eePromAddress_Nextion = 204;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configSetup.steps360_Axis_XAlt = (int)returnVal;
+
+	iniValue = "Microsteps_AltX";
+	eePromAddress_Nextion = 196;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configSetup.microsteps_Axis_XAlt = (int)returnVal;
+
+	iniValue = "DistancePer360_AltX";
+	eePromAddress_Nextion = 216;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configSetup.distancePerRev_AxisXAlt = returnVal;
+
+	iniValue = "Polarity_AltX";
+	eePromAddress_Nextion = 916;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	returnVal >= 1 ? (configSetup.polarity_Axis_XAlt = true) : (configSetup.polarity_Axis_XAlt = false);
 
 	// B Axis
 	iniValue = "StepsPer360_B";

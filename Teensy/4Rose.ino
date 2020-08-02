@@ -849,9 +849,14 @@ void loop()
 
 				break;
 			}
-			case 79: // O - Not Used
+			case 79: // O - Setup: Alt X Distance per revolution (Text)
 			{
-
+				configSetup.distancePerRev_AxisXAlt = GetSerialFloat(serialId);
+				EEPROM.put(eePromAddress_Setup, configSetup);
+#ifdef DEBUG
+				Serial.print(distance_Char);
+				Serial.println(configSetup.distancePerRev_AxisXAlt);
+#endif // DEBUG
 				break;
 			}
 			case 80: // P - Greek Key Source: Pattern or file
@@ -3513,29 +3518,39 @@ void loop()
 				EEPROM.put(eePromAddress_Rec, configRec);
 				break;
 			}
-			case 239: // ï - Not used
+			case 239: // ï - Setup: Alt X microsteps
 			{
-
+				configSetup.microsteps_Axis_XAlt = (int)GetSerialFloat(serialId);
+				EEPROM.put(eePromAddress_Setup, configSetup);
 				break;
 			}
-			case 240: // ð - Not used
+			case 240: // ð - Setup: Alt X Full Steps
 			{
-
+				configSetup.steps360_Axis_XAlt = (int)GetSerialFloat(serialId);
+				EEPROM.put(eePromAddress_Setup, configSetup);
+#ifdef DEBUG
+				Serial.print(steps360_Char);
+				Serial.println(configSetup.steps360_Axis_XAlt);
+#endif // DEBUG
 				break;
 			}
-			case 241: // ñ - Not used
+			case 241: // ñ - Not Used
 			{
-
 				break;
 			}
-			case 242: // ò - Not used
+			case 242: // ò - Polarity (Enable) Alt X axis
 			{
+				int polarityAltX = GetSerialInteger();
 
+				// true (1): LOW  false (0): HIGH
+				polarityAltX >= 1 ? (configSetup.polarity_Axis_XAlt = true) : (configSetup.polarity_Axis_XAlt = false);
+				EEPROM.put(eePromAddress_Setup, configSetup);
 				break;
 			}
-			case 243: // ó - Not used
+			case 243: // ó - X or Alt X axis
 			{
-
+				configSetup.xAltX = GetSerialInteger(); 
+				EEPROM.put(eePromAddress_Setup, configSetup);
 				break;
 			}
 			case 244: // ô - Not used
