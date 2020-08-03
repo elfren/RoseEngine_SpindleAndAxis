@@ -1127,8 +1127,7 @@ void MoveAxis(int axisId, int directionAxis)
 			incomingByte = SerialRead(serialId);
 			switch (incomingByte)
 			{
-				case 67:
-				case 99: // - c
+				case 83: // - S
 				{
 					stepController.stop();
 					break;
@@ -1458,7 +1457,7 @@ void OneRunStepper(int direction) // pageOne
 			incomingByte = SerialRead(serialId);
 			switch (incomingByte)
 			{
-				case 67: // - C
+			    case 83: // - S
 				{
 //#ifdef DEBUG
 //					Serial.println("call overrideSpeed:");
@@ -1848,7 +1847,7 @@ void Main_TwoSteppers(
 
 			switch (incomingByte)
 			{
-				case 67: // C - Spindle Stop
+				case 83: // - S
 				{
 	#ifdef DEBUG
 					Serial.print(spindle_Char);
@@ -2360,8 +2359,7 @@ void IndexSpindle(int directionSpindle)
 
 			switch (incomingByte)
 			{
-				case 67:
-				case 99: // - c
+				case 83: // - S
 				{
 					stepController.stop();
 					break;
@@ -2610,8 +2608,7 @@ void Sync(int directionSpindle, int directionAxis)
 			incomingByte = SerialRead(serialId);
 			switch (incomingByte)
 			{
-			case 67:
-			case 99: // - c
+			case 83: // - S
 			{
 				stepController.stopAsync();
 				break;
@@ -3015,8 +3012,7 @@ void Reciprocate(int wavDir)
 				incomingByte = SerialRead(serialId);
 				switch (incomingByte)
 				{
-					case 67:
-					case 99: // - c
+					case 83: // - S
 					{
 #ifdef DEBUG
 			Serial.println("STOP++++++++++++++++++++++");
@@ -3090,8 +3086,7 @@ bool StopGreekKey()
 		incomingByte = SerialRead(serialId);
 		switch (incomingByte)
 		{
-			case 67: 
-			case 99: // - c
+			case 83: // - S
 			{
 				retVal = true;
 				SetEnable(ID_SPINDLE, false);
@@ -5166,8 +5161,7 @@ bool GreekKey_Move_Spindle(float segmentSteps, float multiplier, int direction)
 			incomingByte = SerialRead(serialId);
 			switch (incomingByte)
 			{
-				case 67:
-				case 99: // - c
+				case 83: // - S
 				{
 					stepControllerSpindle.stop();
 
@@ -5750,6 +5744,24 @@ void GreekKey_FromFile(int direction)
 
 			switch (moveType)
 			{
+				case 67: // C -Spindle
+				{
+					// Negative steps move CCW
+					if (configGreekKey.segmentOrActual == 2) // 2: Segment 
+					{
+						stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, segmentMultiplier, DIR_CW);
+					}
+					else  //3: Actual
+					{
+						spindleSteps = round((configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (segmentMultiplier / 360));
+						stopAll = GreekKey_Move_Spindle(spindleSteps, 1, DIR_CW);
+					}
+					if (stopAll)
+					{
+						goto EndLoops;
+					}
+					break;
+				}
 				case 68: // D  - Radial: Spindle Down CW   Axial: Axis Right CW
 				{
 
@@ -6359,24 +6371,7 @@ void GreekKey_FromFile(int direction)
 
 					break;
 				}
-				case 84: // T - Spindle
-				{
-					// Negative steps move CCW
-					if (configGreekKey.segmentOrActual == 2) // 2: Segment 
-					{
-						stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, segmentMultiplier, DIR_CW);
-					}
-					else  //3: Actual
-					{
-						spindleSteps = round((configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (segmentMultiplier / 360));
-						stopAll = GreekKey_Move_Spindle(spindleSteps, 1, DIR_CW);
-					}
-					if (stopAll)
-					{
-						goto EndLoops;
-					}
-					break;
-				}
+
 				case 85: // U - Spindle up CCW
 				{
 
@@ -7474,8 +7469,7 @@ void ReturnToStartPosition(int axisId)
 			incomingByte = SerialRead(serialId);
 			switch (incomingByte)
 			{
-				case 67:
-				case 99: // - c
+				case 83: // - S
 				{
 					stepController.stop();
 
@@ -7996,8 +7990,7 @@ void RoseRadial(int direction)
 			incomingByte = SerialRead(serialId);
 			switch (incomingByte)
 			{
-				case 67:
-				case 99:
+				case 83: // - S
 				{
 					controllerAxis.stopAsync();
 					controllerRoseSpindle.stopAsync();
@@ -8179,8 +8172,7 @@ void RoseRadial(int direction)
 //			incomingByte = SerialRead(serialId);
 //			switch (incomingByte)
 //			{
-//			case 67:
-//			case 99:
+//			case 83: // - S
 //			{
 //				runPattern = false;
 //				controllerRose.overrideSpeed(0);

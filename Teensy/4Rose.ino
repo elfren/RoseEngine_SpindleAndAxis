@@ -658,9 +658,7 @@ void loop()
 
 				break;
 			}
-			// C: -> Cancel Stop Main/Sp2 Spindle
-			// Implemented in Run methods
-			case 67: // C - 
+			case 67: // C - Used to rotate spindle in Greek Key 
 			{
 			   break;
 			}
@@ -1319,10 +1317,9 @@ void loop()
 				}
 				break;
 			}
-			case 83: // S - Not Used
+			case 83: // S - Stop Steppers - Implemented in individual methods
 			{
-				configSetup.limit_StopSpindle = GetSerialInteger();
-				EEPROM.put(eePromAddress_Setup, configSetup);
+
 				break;
 			}
 			case 84: // T - Rose: n
@@ -1345,8 +1342,10 @@ void loop()
 	#endif // DEBUG
 				break;
 			}
-			case 86: // V - Not Used
+			case 86: // V - Stop spindle when limit switch triggered
 			{
+				configSetup.limit_StopSpindle = GetSerialInteger();
+				EEPROM.put(eePromAddress_Setup, configSetup);
 				break;
 			}
 			case 87: // W - Rec: Radial or Axial
@@ -1465,10 +1464,9 @@ void loop()
 				TestEEPROMSetup();
 				break;
 			}
-			case 99: // c - Axis Stop
+			case 99: // c - Cancel/Stop Axis  
 			{
 				// Implemented in individual methods
-
 				break;
 			}
 			case 100: // d - pageOne Clockwise
