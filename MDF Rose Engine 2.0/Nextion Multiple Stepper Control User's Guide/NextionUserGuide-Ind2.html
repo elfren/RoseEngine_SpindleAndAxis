@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html>
+
+<!-- ################################################### -->
+<!-- Style Sheet for MathJax                                                                 -->
+<script src='https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
+
+<!-- ################################################### -->
+<!-- Style Sheet for Horizontal Rule - Style 0                                       -->
+ <style>
+    hr.style0 {
+        border: 0;
+        height: 1px;
+        background-image: linear-gradient(to right,
+                rgba(184,134,11, 2),
+                rgba(184,134,11, 2),
+                rgba(184,134,11, 2));
+    }
+</style>
+
+<!-- ################################################### -->
+<!-- Style Sheet for Horizontal Rule - Style 1                                       -->
+ <style>
+    hr.style1 {
+        border: 0;
+        height: 3px;
+        background-image: linear-gradient(to right,
+            rgba(0, 0, 0, 0),
+                rgba(184,134,11, 2),
+            rgba(0, 0, 0, 0));
+    }
+</style>
+
+<!-- ################################################### -->
+<!-- Style Sheet for Horizontal Rule - Style 2                                       -->
+ <style>
+    hr.style2 {
+        border: 0;
+        height: 6px;
+        background-image: linear-gradient(to right,
+            rgba(0, 0, 0, 0),
+                rgba(184,134,11, 2),
+            rgba(0, 0, 0, 0));
+    }
+</style>
+
+<!-- ################################################### -->
+<!-- Style Sheet for indented paragraphs                                             -->
+<style>
+    .indented { padding-left: 33pt; padding-right: 33pt; }
+</style>
+
+<!-- ################################################### -->
+<!-- <body background="Images/Background.png"> -->
+	<font face="Arial">
+
+<!-- ################################################### -->
+<!-- Style Sheet for header image max size                                         -->
+<!-- ################################################### -->
+<style>
+    img.Image { max-width: 500px;}
+</style>
+
+<!-- ################################################### -->
+<!-- Style Sheet for split screen                                                            -->
+<!-- ################################################### -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+    body {
+        font-family: Arial;
+    }
+
+.split1 {
+  height: calc(100% - 130px);
+  min-width: 450px;
+  max-width: 450px;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  overflow-x: hidden;
+  padding-top: 20px;
+}
+
+.split2 {
+  height: calc(100% - 130px);
+  width: calc(100% - 490px);
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  overflow-x: hidden;
+  padding-top: 20px;
+}
+
+.left {
+  left: 0;
+  background-color: #111;
+}
+
+.right {
+  right: 0;
+  background-color: blue;
+}
+
+.centered {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.centered img {
+  width: 150px;
+  border-radius: 50%;
+}
+</style>
+
+<!-- ################################################### -->
+<!-- Style Sheet for footer                                                                     -->
+<!-- ################################################### -->
+<style>
+.footer {
+   position: fixed;
+   left: 0;
+   bottom: 0;
+   width: 100%;
+   background-color: #E6E6E6;
+   text-align: center;
+}
+</style>
+
+<!-- ################################################### -->
+<!-- Header                                                                                           -->
+<!-- ################################################### -->
+
+<head bgcolor=#E6E6E6>
+    <title>MDF Rose Engine 2.0</title>
+    <link rel="shortcut icon" type="image/ico" href="favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="Images/favicon.png">
+
+    <font face="Arial">
+    <div class="header">
+        <center>
+                <a href="NextionUserGuide.html"><font color="DarkBlue" size="6"><b>
+                Nextion Multiple Stepper Control User's Guide</a>
+                </b></font>
+        </center>
+        <hr class="style0">
+    </div>
+</head>
+
+<!-- ################################################### -->
+<!-- Body - Right Side of the Screen                                                     -->
+<!-- ################################################### -->
+
+<body bgcolor=#E6E6E6>
+    <div style="margin: 60px 5px 5px 5px; padding: 5px; border: 1px solid black; text-align: left; background-color:#E6E6E6" class="split1 right" >
+                <table align="Center" border="0">
+         	        <tr height="35px">
+                	    <td align="Center" bgcolor="#4C877A" width="50px">
+            	            <a href="NextionUserGuide-Main.html" style="color: White"><b>Main</b></a>
+                	    </td>
+                	    <td align="Center" bgcolor="#4C877A" width="45px">
+                    	    <a href="NextionUserGuide-One.html" style="color: White"><b>One</b></a>
+                	    </td>
+        	            <td align="Center" bgcolor="#58FA58" width="45px">
+            	            <b>Ind</b>
+        	            </td>
+                	    <td align="Center" bgcolor="#4C877A" width="45px">
+                    	    <a href="NextionUserGuide-Mov.html" style="color: White"><b>Mov</b></a>
+                	    </td>
+                	    <td align="Center" bgcolor="#4C877A" width="45px">
+                    	    <a href="NextionUserGuide-Sync.html" style="color: White"><b>Sync</b></a>
+                	    </td>
+        	            <td align="Center" bgcolor="#4C877A" width="45px">
+        	                <a href="NextionUserGuide-Rec.html" style="color: White"><b> Rec</b></a>
+        	            </td>
+                	    <td align="Center" bgcolor="#4C877A" width="45px">
+                	        <a href="NextionUserGuide-Grk.html" style="color: White"><b>Grk</b></a>
+                	    </td>
+                	    <td align="Center" bgcolor="#4C877A" width="45px">
+                	        <a href="NextionUserGuide-Geo.html" style="color: White"><b>Geo</b></a>
+                	    </td>
+        	            <td align="Center" bgcolor="#173B0B" width="40px">
+        	            </td>
+        	            <td align="Center" bgcolor="#4C877A" width="40px">
+        	                <a href="NextionUserGuide-Config-Spindle.html" style="color: White"><b>. . .</b></a>
+        	            </td>
+        	        </tr>
+                </table>
+
+                <img src="Images/Nextion-Index-2.jpg" width="100%" class="Image" alt="HTML Map" border="0" usemap="#html">
+                <map name = "html">
+                    <area shape = "circle" coords = "119,59,20" href = "NextionUserGuide-Ind.html" target = "_self" />
+                    <area shape = "circle" coords = "384,90,20" href = "NextionUserGuide-Ind2.html" target = "_self" />
+
+                     <area shape = "rect" coords = "283,47,422,69" href = "NextionUserGuide-Ind3.html" target = "_self" />
+
+                     <area shape = "rect" coords = "54,4,132,31" href = "NextionUserGuide-Config.html" target = "_self" />
+                </map>
+
+
+                <br>
+                <p><hr>
+                <p><table>
+                    <tr valign="Top">
+                        <td>
+                            <img src="Images/ButtonIndex-CCW.png" width="50px">
+                        </td>
+                        <td>
+                            Used to index the spindle in a counter clockwise direction.  On a traditional lathe, this is considered forward.
+                        </td>
+                    </tr>
+                    <tr><td colspan=999><hr></td></tr>
+                    <tr valign="Top">
+                        <td>
+                            <img src="Images/ButtonIndex-Stop.png" width="50px">
+                        </td>
+                        <td>
+                            Used to stop the motion of the stepper motor.
+                        </td>
+                    </tr>
+                    <tr><td colspan=999><hr></td></tr>
+                    <tr valign="Top">
+                        <td>
+                            <img src="Images/ButtonIndex-Return.png" width="50px">
+                        </td>
+                        <td>
+                            Used to return the spindle to the start point of the previous operation.
+                        </td>
+                    </tr>
+                    <tr><td colspan=999><hr></td></tr>
+                    <tr valign="Top">
+                        <td>
+                            <img src="Images/ButtonIndex-CW.png" width="50px">
+                        </td>
+                        <td>
+                            Used to index the spindle in a clockwise direction.  On a traditional lathe, this is considered forward.
+                        </td>
+                    </tr>
+                    <tr><td colspan=999><hr></td></tr>
+                    <tr valign="Top">
+                        <td>
+                            <a href = "NextionUserGuide-Config.html" target = "_self" />
+                            <img src="Images/ButtonConfig-Green.png" width="50px">
+                            </a>
+                        </td>
+                        <td>
+                            <div style="float: right; width: 150px; margin: 5px 5px 5px 5px; padding: 5px; border: 1px solid black; text-align: left; background-color:#289474">
+                                <font color="White" size="2">Touch <b>Config</b> on the screen image above to see the details for this screen.</font>
+                            </div>
+                            
+                            This is used to display or edit the configuration settings for the MaxSpeed and the Acceleration for the respective stepper motors.
+                        </td>
+                    </tr>
+                </table>
+
+    </div>
+
+<!-- ################################################### -->
+<!-- Body - Left Side of the Screen                                                       -->
+<!-- ################################################### -->
+
+    <div style="float: left; margin: 60px 5px 5px 5px; padding: 5px; border: 0px solid black; text-align: left; background-color:#E6E6E6" class="split2 left" >
+        <table align="Center" border="0">
+            <tr height="60px">
+                <td align="Center" bgcolor="#289474" width="300px">
+                    <font color="White" size="4"><b>Index Screen</b>
+                    <br>Degree Option</font>
+        	    </td>
+            </tr>
+        </table>
+
+        <p><b>Purpose:</b>  This screen allows indexing the spindle for use in index work or other uses.
+
+        <p>On this screen, the indexes are in <b>Degrees</b>.
+
+        <p><b>1</b> <img src="Images/CircleUnChecked.png" width="20px" height="20px">, <b>2</b> <img src="Images/CircleUnChecked.png" width="20px" height="20px">, <b>3</b> <img src="Images/CircleUnChecked.png" width="20px" height="20px">, <b>4</b> <img src="Images/CircleUnChecked.png" width="20px" height="20px">, and <b>5</b> <img src="Images/CircleChecked.png" width="20px" height="20px"> may each represent separate files, however the value of <b>1</b> <img src="Images/CircleUnChecked.png" width="20px" height="20px"> is used by the <b>CW</b> and <b>CCW</b> indexing movements on the
+            <ul>
+                <li><a href="NextionUserGuide-Sync.html">Synchronization Screen</a> and the</li>
+                    <li><a href="NextionUserGuide-Rec.html">Reciprocation - Axis Screen</a></li>
+            </ul>
+
+        in either <b>Divisions</b> or <b>Degrees</b>, depending upon which is toggled.
+
+    <table width="100%">
+        <col width="125px">
+        <col width="*">
+
+<!-- ################################################### -->
+<!-- Controls   -->
+
+        <tr>
+            <td colspan=999>
+                <hr class="style2">
+            </td>
+        </tr>
+
+        <tr valign="top">
+            <td>
+                <b>Deg</b>
+                <img src="Images/CircleChecked.png" width="20px" height="20px">
+            </td>
+            <td>
+                Sets the divisions to degrees.
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan=999>
+                &nbsp;
+            </td>
+        </tr>
+
+        <tr valign="top">
+            <td>
+                <b>Div</b>
+                <img src="Images/CircleUnChecked.png" width="20px" height="20px">
+            </td>
+            <td>
+                <div style="float: right; width: 200px; margin: 5px 5px 5px 5px; padding: 5px; border: 1px solid black; text-align: left; background-color:#4C877A">
+                    <font color="White" size="2">Touch <b>Div</b> on the screen image to see the instructions for that approach.</font>
+                </div>
+                
+                Used to set the indexing to divisions of a circle.
+            </td>
+        </tr>
+                
+        <tr>
+            <td colspan=999>
+                <hr class="style1">
+            </td>
+        </tr>
+
+        <tr valign="top">
+            <td>
+                <b>File</b>
+                <img src="Images/CircleChecked.png" width="20px" height="20px">
+            </td>
+            <td>
+                <div style="float: right; width: 200px; margin: 5px 5px 5px 5px; padding: 5px; border: 1px solid black; text-align: left; background-color:#4C877A">
+                    <font color="White" size="2">Touch the <b>Filename</b> field (shown as "INDEX_02") to see the details for using a file for indexing.</font>
+                </div>
+                
+                Used to set the indexing to information to be fed from a user-created file.
+            </td>
+        </tr>
+                
+        <tr>
+            <td colspan=999>
+                &nbsp;
+            </td>
+        </tr>
+
+        <tr valign="top">
+            <td>
+                <b>Fixed</b>
+                <img src="Images/CircleUnChecked.png" width="20px" height="20px">
+            </td>
+            <td>
+                Sets the increments based on the <b>Divisions</b> setting.
+            </td>
+        </tr>
+                
+<!-- ################################################### -->
+<!-- Variables   -->
+
+        <tr>
+            <td colspan=999>
+                <hr class="style2">
+                <center><b><font color="DarkBlue" size="5">Variables</font></b></center>
+            </td>
+        </tr>
+
+        <tr valign="top">
+            <td>
+                <span style="background-color: #FFEE9C"><b>
+                &nbsp; Degrees &nbsp;
+                </b></span>
+            </td>
+            <td>
+                The number of degrees to index.
+            </td>
+        </tr>
+
+<!-- ################################################### -->
+<!-- Status   -->
+
+        <tr>
+            <td colspan=999>
+                <hr class="style2">
+                <center><b><font color="DarkBlue" size="5">Status Information</font></b></center>
+            </td>
+        </tr>
+
+        <tr valign="top">
+            <td>
+                <span style="background-color: #FFEE9C"><b>
+               &nbsp; Index &nbsp;
+                </b></span>
+            </td>
+            <td>
+                This is the number of times the axis has been indexed.  It is decremented each time the spindle is moved counter clockwise, and incremented when moved clockwise.
+                
+                <br><br>Tapping on this does enable the user to reset the index; however that does not affect the position of the spindle.
+            </td>
+        </tr>
+                
+
+    </table>
+
+    <hr class="style2">
+    <p><font color="DarkBlue" size="4"><b><a name="LimitSwitches">Limit Switches</a></font></b>
+    <p>Limit switches cannot be used with this function.  They can only be used from the <a href="NextionUserGuide-Main.html">Main Screen</a> or <a href="NextionUserGuide-One.html">One Screen</a>.
+
+</div>
+
+<!-- ################################################### -->
+<!-- Footer                                                                                             -->
+<!-- ################################################### -->
+<div class="footer">
+    <hr class="style0">
+    <font size="3">
+    <table width="100%">
+        <col width="75%">
+        <col width="25%">
+
+        <tr valign="top">
+            <td align="left">
+                Questions or comments?  Contact us at
+                <br><a href="mailto:ColvinTools@Gmail.com?Subject=General" target="_new">ColvinTools@Gmail.com</a>
+            </td>
+            <td align="right">
+                <a href="../index-Disclaimers.html">Disclaimers</a>
+            </td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>

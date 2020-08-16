@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html>
+
+<!-- ################################################### -->
+<!-- Style Sheet for MathJax                                                                 -->
+<script src='https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
+
+<!-- ################################################### -->
+<!-- Style Sheet for Horizontal Rule - Style 0                                       -->
+ <style>
+    hr.style0 {
+        border: 0;
+        height: 1px;
+        background-image: linear-gradient(to right,
+                rgba(184,134,11, 2),
+                rgba(184,134,11, 2),
+                rgba(184,134,11, 2));
+    }
+</style>
+
+<!-- ################################################### -->
+<!-- Style Sheet for Horizontal Rule - Style 1                                       -->
+ <style>
+    hr.style1 {
+        border: 0;
+        height: 3px;
+        background-image: linear-gradient(to right,
+            rgba(0, 0, 0, 0),
+                rgba(184,134,11, 2),
+            rgba(0, 0, 0, 0));
+    }
+</style>
+
+<!-- ################################################### -->
+<!-- Style Sheet for Horizontal Rule - Style 2                                       -->
+ <style>
+    hr.style2 {
+        border: 0;
+        height: 6px;
+        background-image: linear-gradient(to right,
+            rgba(0, 0, 0, 0),
+                rgba(184,134,11, 2),
+            rgba(0, 0, 0, 0));
+    }
+</style>
+
+<!-- ################################################### -->
+<!-- Style Sheet for indented paragraphs                                             -->
+<style>
+    .indented { padding-left: 33pt; padding-right: 33pt; }
+</style>
+
+<!-- ################################################### -->
+<!-- <body background="Images/Background.png"> -->
+	<font face="Arial">
+
+<!-- ################################################### -->
+<!-- Style Sheet for header image max size                                         -->
+<!-- ################################################### -->
+<style>
+    img.Image { max-width: 500px;}
+</style>
+
+<!-- ################################################### -->
+<!-- Style Sheet for split screen                                                            -->
+<!-- ################################################### -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+    body {
+        font-family: Arial;
+    }
+
+.split1 {
+  height: calc(100% - 130px);
+  min-width: 450px;
+  max-width: 450px;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  overflow-x: hidden;
+  padding-top: 20px;
+}
+
+.split2 {
+  height: calc(100% - 130px);
+  width: calc(100% - 490px);
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  overflow-x: hidden;
+  padding-top: 20px;
+}
+
+.left {
+  left: 0;
+  background-color: #111;
+}
+
+.right {
+  right: 0;
+  background-color: blue;
+}
+
+.centered {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.centered img {
+  width: 150px;
+  border-radius: 50%;
+}
+</style>
+
+<!-- ################################################### -->
+<!-- Style Sheet for footer                                                                     -->
+<!-- ################################################### -->
+<style>
+.footer {
+   position: fixed;
+   left: 0;
+   bottom: 0;
+   width: 100%;
+   background-color: #E6E6E6;
+   text-align: center;
+}
+</style>
+
+<!-- ################################################### -->
+<!-- Header                                                                                           -->
+<!-- ################################################### -->
+
+<head bgcolor=#E6E6E6>
+    <title>MDF Rose Engine 2.0</title>
+    <link rel="shortcut icon" type="image/ico" href="favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="Images/favicon.png">
+
+    <font face="Arial">
+    <div class="header">
+        <center>
+                <a href="NextionUserGuide.html"><font color="DarkBlue" size="6"><b>
+                Nextion Multiple Stepper Control User's Guide</a>
+                </b></font>
+        </center>
+        <hr class="style0">
+    </div>
+</head>
+
+<!-- ################################################### -->
+<!-- Body - Right Side of the Screen                                                     -->
+<!-- ################################################### -->
+
+<body bgcolor=#E6E6E6>
+    <div style="margin: 60px 5px 5px 5px; padding: 5px; border: 1px solid black; text-align: left; background-color:#E6E6E6" class="split1 right" >
+                <table align="Center" border="0">
+         	        <tr height="35px">
+                	    <td align="Center" bgcolor="#4C877A" width="50px">
+            	            <a href="NextionUserGuide-Main.html" style="color: White"><b>Main</b></a>
+                	    </td>
+                	    <td align="Center" bgcolor="#4C877A" width="45px">
+                    	    <a href="NextionUserGuide-One.html" style="color: White"><b>One</b></a>
+                	    </td>
+                	    <td align="Center" bgcolor="#4C877A" width="45px">
+                	        <a href="NextionUserGuide-Ind.html" style="color: White"><b>Ind</b></a>
+        	            </td>
+                	    <td align="Center" bgcolor="#4C877A" width="45px">
+                    	    <a href="NextionUserGuide-Mov.html" style="color: White"><b>Mov</b></a>
+                	    </td>
+                	    <td align="Center" bgcolor="#4C877A" width="45px">
+                    	    <a href="NextionUserGuide-Sync.html" style="color: White"><b>Sync</b></a>
+                	    </td>
+        	            <td align="Center" bgcolor="#4C877A" width="45px">
+        	                <a href="NextionUserGuide-Rec.html" style="color: White"><b> Rec</b></a>
+        	            </td>
+                	    <td align="Center" bgcolor="#58FA58" width="45px">
+            	            <b>Grk</b>
+                	    </td>
+                	    <td align="Center" bgcolor="#4C877A" width="45px">
+                	        <a href="NextionUserGuide-Geo.html" style="color: White"><b>Geo</b></a>
+                	    </td>
+        	            <td align="Center" bgcolor="#173B0B" width="40px">
+        	            </td>
+        	            <td align="Center" bgcolor="#4C877A" width="40px">
+        	                <a href="NextionUserGuide-Config-Spindle.html" style="color: White"><b>. . .</b></a>
+        	            </td>
+        	        </tr>
+                </table>
+
+                <img src="Images/Nextion-GreekKey-22-15.png" width="100%" class="Image" alt="HTML Map" border="0" usemap="#html">
+                <map name = "html">
+                     <area shape = "rect" coords = "279,2,305,28" href = "NextionUserGuide-Grk.html" target = "_self" />
+                     <area shape = "rect" coords = "54,4,132,31" href = "NextionUserGuide-Config.html" target = "_self" />
+                </map>
+
+
+                <br>
+                <p><hr>
+                <p><table>
+                    <tr valign="Top">
+                        <td>
+                            <img src="Images/ButtonGreekKey-In.png" width="50px">
+                        </td>
+                        <td>
+                            Used to initiate movement in the indicated direction on the identified axis.  Movement continues until <b>Stop</b> is pushed.
+                        </td>
+                    </tr>
+                    <tr><td colspan=999><hr></td></tr>
+                    <tr valign="Top">
+                        <td>
+                            <img src="Images/ButtonIndex-Stop.png" width="50px">
+                        </td>
+                        <td>
+                            Used to stop the motion of the stepper motor.
+                        </td>
+                    </tr>
+                    <tr><td colspan=999><hr></td></tr>
+                    <tr valign="Top">
+                        <td>
+                            <img src="Images/ButtonIndex-Return.png" width="50px">
+                        </td>
+                        <td>
+                            Used to return the spindle or the selected axis to the start point of the previous operation.
+                        </td>
+                    </tr>
+                    <tr><td colspan=999><hr></td></tr>
+                    <tr valign="Top">
+                        <td>
+                            <img src="Images/ButtonGreekKey-Out.png" width="50px">
+                        </td>
+                        <td>
+                            Used to initiate movement in the indicated direction on the identified axis.  Movement continues until <b>Stop</b> is pushed.
+                        </td>
+                    </tr>
+                    <tr><td colspan=999><hr></td></tr>
+                    <tr valign="Top">
+                        <td>
+                            <a href = "NextionUserGuide-Config.html" target = "_self" />
+                            <img src="Images/ButtonConfig-Green.png" width="50px">
+                            </a>
+                        </td>
+                        <td>
+                            <div style="float: right; width: 150px; margin: 5px 5px 5px 5px; padding: 5px; border: 1px solid black; text-align: left; background-color:#289474">
+                                <font color="White" size="2">Touch <b>Config</b> on the screen image above to see the details for this screen.</font>
+                            </div>
+                            
+                            This is used to display or edit the configuration settings for the MaxSpeed and the Acceleration for the respective stepper motors.
+                        </td>
+                    </tr>
+                </table>
+    </div>
+
+<!-- ################################################### -->
+<!-- Body - Left Side of the Screen                                                       -->
+<!-- ################################################### -->
+
+    <div style="float: left; margin: 60px 5px 5px 5px; padding: 5px; border: 0px solid black; text-align: left; background-color:#E6E6E6" class="split2 left" >
+                <table align="Center" border="0">
+        	        <tr height="35px">
+                	    <td align="Center" bgcolor="#289474" width="300px">
+                	        <font color="White" size="4"><b>Greek Key File Screen</b></font>
+                	    </td>
+        	        </tr>
+                </table>
+
+    <p><b>Purpose:</b>  This screen allows the user to create <a href="https://en.wikipedia.org/wiki/Meander_(art)" target="_new">Greek Key or Meander patterns</a> by reading values from a file.
+
+    <table width="100%">
+        <col width="125px">
+        <col width="*">
+
+<!-- ################################################### -->
+<!-- Controls   -->
+
+        <tr>
+            <td colspan=999>
+                <hr class="style2">
+            </td>
+        </tr>
+
+        <tr valign="top">
+            <td>
+                <img src="Images/SquareChecked.png" width="20px" height="20px"> <b>File</b>
+            </td>
+            <td>
+                Used to create a Greek Key by reading values from a file.
+
+                <p>Selecting the
+                
+                <span style="background-color: #FFEE9C"><b>
+                &nbsp; Filename &nbsp;
+                </b></span>
+                
+                 text box will open a dropdown list of files located on the microSD card.   Use the Up and Down arrows to traverse the file list. While the dropdown list is active, all other controls on the page are disabled. The dropdown list can be closed either by selecting a file, or by touching the Filename text box.
+
+                <p>The file format is ASCII text (numbers, letters, and decimal only) with each number on a new line, saved to the microSD card using a separate computer. Because the SD Card library only supports the <a href="https://en.wikipedia.org/wiki/8.3_filename" target="_new">8.3 or Short File Name convention</a>, the file name must be a maximum 8 characters + a period + three-character extension (thus the 8.3); the name is not case sensitive.  It's not necessary to have the extension, but the limit for the name is 8 characters when no extension is used.  Multiple files can be loaded onto the microSD card for use on one or more work pieces as desired.
+
+                <p><a href="#FileFormat">File Format</a> information is below.
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan=999>
+                &nbsp;
+            </td>
+        </tr>
+
+        <tr valign="top">
+            <td>
+                <img src="Images/SquareUnChecked.png" width="20px" height="20px"> <b>Pattern</b>
+            </td>
+            <td>
+                <div style="float: right; width: 200px; margin: 5px 5px 5px 5px; padding: 5px; border: 1px solid black; text-align: left; background-color:#4C877A">
+                    <font color="White" size="2">Touch <b>Pattern</b> on the screen image to the right to see the details for this option.</font>
+                </div>
+            
+                Used to create a Greek Key using one of the built-in patterns (click on that to see this option).
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan=999>
+                <hr class="style1">
+            </td>
+        </tr>
+
+        <tr valign="top">
+            <td>
+                <b>Axial</b>
+                <img src="Images/CircleUnChecked.png" width="20px" height="20px">
+            </td>
+            <td>
+                Used to create a pattern axially
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan=999>
+                &nbsp;
+            </td>
+        </tr>
+
+        <tr valign="top">
+            <td>
+                <b>Radial</b>
+                <img src="Images/CircleChecked.png" width="20px" height="20px">
+            </td>
+            <td>
+                Used to create  a pattern radially (circumferentially)
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan=999>
+                <hr class="style1">
+            </td>
+        </tr>
+
+        <tr valign="top">
+            <td>
+                <b>Actual</b>
+                <img src="Images/CircleUnChecked.png" width="20px" height="20px">
+            </td>
+            <td>
+                When selected, values in the file are used as the length of the move.  Floating point numbers are valid.
+                <br><br>
+            </td>
+        </tr>
+                
+        <tr>
+            <td colspan=999>
+                &nbsp;
+            </td>
+        </tr>
+
+        <tr valign="top">
+            <td>
+                <b>Segments</b>
+                <img src="Images/CircleChecked.png" width="20px" height="20px">
+            </td>
+            <td>
+                When selected, values in the file are interpreted as a multiplier of the "Length" for the Z, X, and B axes and as a multiplier of the calculated segment size for the spindle.  Floating point numbers are valid.
+            </td>
+        </tr>
+
+<!-- ################################################### -->
+<!-- Variables   -->
+
+        <tr>
+            <td colspan=999>
+                <hr class="style2">
+                <center><b><font color="DarkBlue" size="5">Variables</font></b></center>
+            </td>
+        </tr>
+
+        <tr valign="top">
+            <td>
+                <span style="background-color: #FFEE9C"><b>
+                &nbsp; B Radius &nbsp;
+                </b></span>
+            </td>
+            <td>
+                <div style="float: right; width: 250px; margin: 5px 5px 5px 5px; padding: 5px; border: 1px solid black; text-align: left; background-color:white">
+                    <img src="Images/Axes.png" width="100%" class="Image">
+                </div>
+            
+                This is used when using a <a href="https://www.otbok.info/OT%20-%20LnT-Term-SphericalSlide.html" target="_new">Spherical Slide</a>, and is a rotation about the Y axis.
+
+                <br><br>This is a measure from the axis of rotation to the tip of the cutter.
+                
+                <br><br>The number entered has no specific units of measure, but is used to calculate the circumference of the circle representing the movement around the Y axis.  That value gets used to set the movement according to the file's specified amount of movement.
+                
+                <br><br><I>This was introduced in v16.  If your system is a prior version, it will not display this option.</I>
+            </td>
+        </tr>
+                
+        <tr>
+            <td colspan=999>
+                &nbsp;
+            </td>
+        </tr>
+
+        <tr valign="top">
+            <td>
+                <span style="background-color: #FFEE9C"><b>
+                &nbsp; Count &nbsp;
+                </b></span>
+            </td>
+            <td>
+                This determines the actual number of patterns to create.  Setting it less than the <b>Patterns/360</b> value will leave a space at the end of the pattern.  Setting it larger will recut the same pattern.  This is useful when you want to cut a pattern deeper.
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan=999>
+                &nbsp;
+            </td>
+        </tr>
+
+        <tr valign="top">
+            <td>
+                <span style="background-color: #FFEE9C"><b>
+                &nbsp; Length &nbsp;
+                </b></span>
+            </td>
+            <td>
+                This specifies the length of the shortest Z or X axis segment. Each pattern will have segments which are a multiple of the shortest segment.
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan=999>
+                &nbsp;
+            </td>
+        </tr>
+
+        <tr valign="top">
+            <td>
+                <span style="background-color: #FFEE9C"><b>
+                &nbsp; Patterns / 360 &nbsp;
+                </b></span>
+            </td>
+            <td>
+                This specifies how many individual patterns will fit in 360 degree rotation of the spindle.  This controls the length of the shortest spindle segment.
+                <br><br>
+            </td>
+        </tr>
+
+<!-- ################################################### -->
+<!-- Status   -->
+
+        <tr>
+            <td colspan=999>
+                <hr class="style2">
+                <center><b><font color="DarkBlue" size="5">Status Information</font></b></center>
+            </td>
+        </tr>
+
+        <tr valign="top">
+            <td>
+                <span style="background-color: #D6D5DA"><b>
+               &nbsp; Command &nbsp;
+                </b></span>
+            </td>
+            <td>
+                This is the command from the file which is currently executing.  This information, along with the next two items, are very useful when running a new design.  It helps the user to monitor the progress as it happens.  If something does not work as desired, then this shows you where the process is at that time so that it is easer know where to change the file as necessary.
+            </td>
+        </tr>
+                
+        <tr>
+            <td colspan=999>
+                &nbsp;
+            </td>
+        </tr>
+
+        <tr valign="top">
+            <td>
+                <span style="background-color: #D6D5DA"><b>
+                &nbsp; Line # &nbsp;
+                </b></span>
+            </td>
+            <td>
+                This is the line # from the file which is currently executing.
+            </td>
+        </tr>
+                
+        <tr>
+            <td colspan=999>
+                &nbsp;
+            </td>
+        </tr>
+
+        <tr valign="top">
+            <td>
+                <span style="background-color: #D6D5DA"><b>
+                &nbsp; Segment &nbsp;
+                </b></span>
+            </td>
+            <td>
+                This is the segment from the file which is currently executing.
+            </td>
+        </tr>
+                
+<!-- ################################################### -->
+<!-- Stepper Motor Controls   -->
+
+        <tr>
+            <td colspan=999>
+                <hr class="style2">
+                <center><b><font color="DarkBlue" size="5">Stepper Motor Controls</font></b></center>
+            </td>
+        </tr>
+
+        <tr valign="top">
+            <td>
+                <b>Speed</b>
+            </td>
+            <td>
+                The controls on the left and right side of the screen are for controlling the respective stepper motor's speed and acceleration.
+                        
+                <p>The slider is a red bar that can be moved up to increase the speed, or down to decrease it.  The percentage shown in the bar (96% on the left, 81% on the right) shows the percentage of the Max Speed at which the stepper motor is set to run.
+
+                <p>There is a slider for the stepper motor on each axis, and they operate independently.
+                
+                <p>The top number (1508 on the left and 5666 on the right) is the max speed for the respective axis' stepper motor.  This is measured in pulses / second.  The MDF Rose Engine 2.0 are set to 6,400 pulses / revolution, so 1508 would equate to
+
+\[
+\begin{align}
+MaxSpindleRPM & = \frac{1,508 \, \frac{\mathrm{pulses}}{\mathrm{sec}} \times \, 60 \, \frac{\mathrm{sec}}{\mathrm{min}}} {6,400 \, \frac{\mathrm{pulses}}{\mathrm{rev}} \times \, 9 \, \frac{\mathrm{motor \, revs}}{\mathrm{spindle \, revs}}} \\
+ & = 1.6 \, \mathrm{RPM}
+\end{align}
+\]
+
+                <p>Thusly, at 96%,the spindle's speed is
+\[
+\begin{align}
+SpindleRPM & = MaxSpindleRPM \times \, 0.96 \\
+ & = 1.5 \, \mathrm{RPM}
+\end{align}
+\]
+
+                <p>To change the Max Speed, touch the number, and you will be presented with the <a href="NextionUserGuide-NumberPad.html">Number Pad Screen</a>.
+
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan=999>
+                &nbsp;
+            </td>
+        </tr>
+
+        <tr valign="top">
+            <td>
+                <b>Acceleration</b>
+            </td>
+            <td>
+                The bottom number (1009 on the left; 7408 on the right) is the acceleration for the stepper motor.
+
+                <p>To change this value, touch the number, and you will be presented with the <a href="NextionUserGuide-NumberPad.html">Number Pad Screen</a>.
+
+            </td>
+        </tr>
+    </table>
+
+    <table width="100%">
+         <tr><td>
+
+<!-- ################################################### -->
+<!-- File Formatting   -->
+
+            <hr class="style2">
+
+            <a name="FileFormat"><font color="DarkBlue" size="5"><b>File Formatting</b></font></a>
+
+                <ol>
+                    <li>The file must be plain text (ASCII).</li>
+
+                    <br>
+                    <li>Each line in the file must begin with an axis identifier letter and end with the length of the move, except for the Comment and End lines.</li>
+
+                    <br>
+                    <li>Identifiers:</li>
+                        <ul>
+                            <br>
+                            <li>; Comment: Begins with a semi-colon, ";", and may have up to 25 characters.  There is no limit on the number of comment lines in a file. Each comment line must have a least one additional character.</li>
+
+                            <br>
+                            <li>E End: Begins with a capital "E".  All files <b><u><font color="red">must</font></u></b> have this as the last line in the file.</li>
+
+                            <br>
+                            <li>S(Plus count of  vertical segments in the pattern). Required for all radial patterns.</li>
+
+                            <br>
+                            <li>A(Plus count of horizontal segments in the pattern). Required for all axial patterns.</li>
+
+                            <br>
+                            <li>L(Plus multiplier or actual length) Specifies a move to the left in a pattern.</li>
+
+                            <br>
+                            <li>R(Plus multiplier or actual length) Specifies a move to the right in a pattern.</li>
+
+                            <br>
+                            <li>U(Plus multiplier or actual length) Specifies a move up in a pattern.</li>
+
+                            <br>
+                            <li>H(Plus multiplier or actual length)V(Plus multiplier or actual length) Specifies a coordinated move with the spindle and the active axis. H is a horizontal move with the axis and V is vertical move with the spindle.  Each move is a leg of a right triangle.</li>
+
+                            <br>
+                            <li>D(Plus multiplier or actual length) Specifies a move down in a pattern.</li>
+
+                            <br>
+                            <li>P(Plus multiplier) Pause in seconds.</li>
+
+                            <br>
+                            <li>O(Plus multiplier or actual length) Moves the cutter away from the workpiece.</li>
+
+                            <br>
+                            <li>I(Plus multiplier or actual length) Moves the cutter into the workpiece.</li>
+                </ol>
+
+            <hr class="style1">
+
+            <div style="float: right; width: 350px; margin: 5px 5px 5px 5px; padding: 5px; border: 0px solid black; text-align: left; background-color:#E6E6E6">
+                <img src="Images/Nextion-GreekKey-3.png" width="100%">
+            </div>
+
+            <div style="float: left; width: 150px; margin: 5px 5px 5px 5px; padding: 5px; border: 0px solid black; text-align: left; background-color:#E6E6E6">
+                <table width="100%" border=1 bgcolor="lightgrey">
+                    <tr><td>
+                        ; Pattern 2a
+                        <br>S3
+                        <br>A2
+                        <br>R2
+                        <br>D2
+                        <br>L1
+                        <br>U1
+                        <br>L1
+                        <br>D2
+                        <br>E
+                    </td></tr>
+                </table>
+            </div>
+
+            <p>The example file on the left ...
+            <p>... produces the movements seen to the right.
+        </td></tr>
+         <tr><td>
+
+<!-- ################################################### -->
+<!-- File Formatting   -->
+
+            <hr class="style2">
+            
+            <p><font color="DarkBlue" size="4"><b><a name="LimitSwitches">Limit Switches</a></font></b>
+
+            <p>Limit switches cannot be used with this function.  They can only be used from the <a href="NextionUserGuide-Main.html">Main Screen</a> or <a href="NextionUserGuide-One.html">One Screen</a>.
+        </td></tr>
+    </table>
+
+</div>
+
+<!-- ################################################### -->
+<!-- Footer                                                                                             -->
+<!-- ################################################### -->
+<div class="footer">
+    <hr class="style0">
+    <font size="3">
+    <table width="100%">
+        <col width="75%">
+        <col width="25%">
+
+        <tr valign="top">
+            <td align="left">
+                Questions or comments?  Contact us at
+                <br><a href="mailto:ColvinTools@Gmail.com?Subject=General" target="_new">ColvinTools@Gmail.com</a>
+            </td>
+            <td align="right">
+                <a href="../index-Disclaimers.html">Disclaimers</a>
+            </td>
+        </tr>
+    </table>
+</div>
+
+</body>
+</html>
