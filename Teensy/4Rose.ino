@@ -30,6 +30,7 @@ Stepper stepperAxis_MainX(PIN_AXIS_X_STEP, PIN_AXIS_X_DIR);
 // TeensyStep controllers
 RotateControl controllerAxis;
 
+//RotateControl rotateController1;
 
 /// <summary>
 /// Setup

@@ -429,12 +429,12 @@ float degrees_Spindle = 0;
 float distance_Axis = 0;
 
 // Accuracy interval 
-constexpr unsigned recalcPeriod = 35'000; //?s  period for calculation of new target points. Straight lines between those points. 
+constexpr unsigned recalcPeriod = 25'000; //?s  period for calculation of new target points. Straight lines between those points. 
 constexpr float dtRose = recalcPeriod / 1E6;  //seconds  1E6 = 1,000,000 
 
 constexpr unsigned PID_Interval = 10; // ms  
 constexpr float P = 0.01;             // (P)roportional constant of the regulator needs to be adjusted (depends on speed and acceleration setting)
-constexpr unsigned priorityLevel = 64; //128
+constexpr unsigned priorityLevel = 128;// 255;//64; //// 
 
 /////////////////////////////////////////////////////////////////////////
 // Greek Key
@@ -480,4 +480,19 @@ int iniFileType = INI_4AXES;
 //==================================================================
 void SerialPrint(String text, int decimalPlaces = 0);
 void SerialPrint(float number, int decimalPlaces = 0);
+//==================================================================
+
+//==================================================================
+// DRV8825 microstep settings
+//==================================================================
+
+	//MODE0 	MODE1 	MODE2 	Microstep Resolution
+	//Low 	Low 	Low 	Full step
+	//High 	Low 	Low 	Half step
+	//Low 	High 	Low 	1 / 4 step
+	//High 	High 	Low 	1 / 8 step
+	//Low 	Low 	High 	1 / 16 step
+	//High 	Low 	High 	1 / 32 step
+	//Low 	High 	High 	1 / 32 step
+	//High 	High 	High 	1 / 32 step
 //==================================================================
