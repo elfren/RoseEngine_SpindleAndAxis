@@ -268,6 +268,8 @@ struct configPageRose // page 12
 	float amplitude_Radial_Z;
 	float amplitude_Radial_X;
 	float amplitude_Radial_B;
+
+	float spindleRevolutions;
 };
 
 struct configPageMainOne  // page 2 (pageOne) and page 0 (pageMain)

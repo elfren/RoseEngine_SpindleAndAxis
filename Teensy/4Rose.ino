@@ -2,7 +2,7 @@
 /* *****************************************************************
 * 4Rose main entry
 * Author: Edward French
-* Version: 16 - xxxxxxx
+* Version: 17 - 102720
 ******************************************************************/
 
 #include "math.h"
@@ -744,7 +744,7 @@ void loop()
 			}
 			case 71: // G - Not Used
 			{	
-	
+
 				break;
 			}
 			case 72: // H - Rose: AxisId
@@ -1454,10 +1454,14 @@ void loop()
 			{
 				break;
 			}
-			case 97: // a - Not Used
+			case 97: // a - Rose: Spindle revolutions
 			{
-
-
+				configRose.spindleRevolutions = GetSerialFloat(serialId);
+				EEPROM.put(eePromAddress_Rose, configRose);
+#ifdef DEBUG
+				Serial.print("Spindle Revolutions: ");
+				Serial.println(configRose.spindleRevolutions);
+#endif // DEBUG
 				break;
 			}
 			case 98: // b - Test EEPROM settings Setup screen
@@ -3639,9 +3643,16 @@ void loop()
 			
 				break;
 			}
-			case 250: // ù - Not Used
+			case 250: // ù - Rose: Spindle revolutions
 			{
-
+				float revs = GetSerialFloat(serialId);
+				configRose.spindleRevolutions = revs;
+				EEPROM.put(eePromAddress_Rose, configRose);
+#ifdef DEBUG
+				Serial.print("Spindle Revolutions-250: ");
+				Serial.println(configRose.spindleRevolutions);
+				Serial.println(revs);
+#endif // DEBUG
 				break;
 			}
 			case 251: // û - Greek Key Leg Segment Length
