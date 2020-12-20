@@ -8968,6 +8968,15 @@ void TestEEPROMSetup()
 	const char* pageB_t58 = "pageB.t58.txt=";
 	const char* pageB_t59 = "pageB.t59.txt=";
 	const char* pageB_t64 = "pageB.t64.txt=";
+
+	// Radial
+	const char* pageB_c0_0 = "pageB.c0.val=0";
+	const char* pageB_c0_1 = "pageB.c0.val=1";
+
+	// Linear
+	const char* pageB_c1_0 = "pageB.c1.val=0";
+	const char* pageB_c1_1 = "pageB.c1.val=1";
+
 	const char* pageX_t60 = "pageX.t60.txt=";
 	const char* pageX_t61 = "pageX.t61.txt=";
 	const char* pageX_t62 = "pageX.t62.txt=";
@@ -9098,6 +9107,30 @@ void TestEEPROMSetup()
 	SerialWrite(0x22);
 	SerialPrint(eePromPageSetup.polarity_Axis_B ? lowChar : highChar);
 	SerialPrint(nextionQuoteEnd);
+
+	Serial.print("AxisB-radialOrLinear: ");
+	Serial.println(eePromPageSetup.radialOrLinear_Axis_B);
+	// True=Linear, False = Radial
+	if (eePromPageSetup.radialOrLinear_Axis_B) 
+	{
+		SerialPrint(pageB_c0_0);
+		SerialPrint(nextionEnd);
+		SerialPrint(pageB_c1_1);
+		SerialPrint(nextionEnd);
+		Serial.print("C1_1: ");
+		Serial.println(pageB_c1_1);
+	}
+	else
+	{
+		SerialPrint(pageB_c0_1);
+		SerialPrint(nextionEnd);
+		SerialPrint(pageB_c1_0);
+		SerialPrint(nextionEnd);
+		Serial.print("C0_1: ");
+		Serial.println(pageB_c0_1);
+	}
+
+	
 
 	SerialPrint(pageB_t64);
 	SerialWrite(0x22);
