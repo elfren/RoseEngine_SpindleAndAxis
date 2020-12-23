@@ -37,6 +37,15 @@
 /////////////////////////////////////////////////////////////////////////
 // Constants
 /////////////////////////////////////////////////////////////////////////
+
+// Move page
+#define ID_MOVE_AXIS_Z1 0
+#define ID_MOVE_AXIS_Z2 1
+#define ID_MOVE_AXIS_X1 2
+#define ID_MOVE_AXIS_X2 3
+#define ID_MOVE_AXIS_B1 4
+#define ID_MOVE_AXIS_B2 5
+
 // SPI
 #define PIN_SPI_CS_10 10  // Primary pin for SPI
 #define PIN_SPI_CS_9 9
@@ -47,6 +56,8 @@
 #define ID_INDEX_1 1
 #define ID_INDEX_2 2
 #define ID_INDEX_3 3
+#define ID_INDEX_4 4
+#define ID_INDEX_5 5
 
 #define DIR_CCW -1
 #define DIR_CW 1
@@ -90,6 +101,7 @@
 /////////////////////////////////////////////////////////////////////////
 // Structs
 /////////////////////////////////////////////////////////////////////////
+
 struct configPageMov
 {
 	uint32_t axisId;
@@ -102,9 +114,12 @@ struct configPageMov
 	int32_t maxSpd_Axis_B;
 	uint32_t accel_Axis_B;
 	int32_t speedPercent_Axis_B;
-	float distance_MoveZ;
-	float distance_MoveX;
-	float distance_MoveB;
+	float distance_MoveZ1;
+	float distance_MoveX1;
+	float distance_MoveB1;
+	float distance_MoveZ2;
+	float distance_MoveX2;
+	float distance_MoveB2;
 };
 
 struct configPageSync
@@ -163,6 +178,18 @@ struct configPageSetup
 	bool polarity_Axis_Z;
 	bool polarity_Axis_X;
 	bool polarity_Axis_B;
+	uint32_t home_Z;
+	uint32_t home_X;
+	uint32_t home_B;
+	uint32_t pulseWidth_Spindle;
+	uint32_t speedUpdatePeriod_Spindle;
+	uint32_t limit_StopSpindle;
+
+	uint32_t xAltX;
+	uint32_t microsteps_Axis_XAlt;
+	uint32_t steps360_Axis_XAlt;
+	float distancePerRev_AxisXAlt;
+	bool polarity_Axis_XAlt;
 };
 
 // Config Structs
@@ -241,6 +268,8 @@ struct configPageRose // page 12
 	float amplitude_Radial_Z;
 	float amplitude_Radial_X;
 	float amplitude_Radial_B;
+
+	float spindleRevolutions;
 };
 
 struct configPageMainOne  // page 2 (pageOne) and page 0 (pageMain)
@@ -324,6 +353,8 @@ configPageIndex configIndex_Main;
 configIndex configIndex_1;
 configIndex configIndex_2;
 configIndex configIndex_3;
+configIndex configIndex_4;
+configIndex configIndex_5;
 configPageMov configMove;
 configPageRose configRose;
 configPageGreekKey configGreekKey;
@@ -344,13 +375,15 @@ unsigned int eePromAddress_Grk = 1000;  // EEProm address for Greek Key Main
 //unsigned int eePromAddress_Grk_B = 1300; //  EEProm address for Greek Key B
 unsigned int eePromAddress_Ind_Main = 1400;  // EEProm address for Index_Main
 unsigned int eePromAddress_Ind_1 = 1500;  // EEProm address for Index_1
-unsigned int eePromAddress_Ind_2 = 1600;  // EEProm address for Index_2
-unsigned int eePromAddress_Ind_3 = 1700;  // EEProm address for Index_3 
+unsigned int eePromAddress_Ind_2 = 1550;  // EEProm address for Index_2
+unsigned int eePromAddress_Ind_3 = 1600;  // EEProm address for Index_3 
+unsigned int eePromAddress_Ind_4 = 1650;  // EEProm address for Index_3 
+unsigned int eePromAddress_Ind_5 = 1700;  // EEProm address for Index_3 
 
-unsigned int eePromAddress_Filename_Ind = 1800; // EEProm address for Index2 filename
-unsigned int eePromAddress_Filename_Length_Ind = 1900; // EEProm address for length of Index2 filename
-unsigned int eePromAddress_Filename_Grk = 2000; // EEProm address for Index2 filename
-unsigned int eePromAddress_Filename_Length_Grk = 2100; // EEProm address for length of Index2 filename
+unsigned int eePromAddress_Filename_Ind = 1800; // EEProm address for filename
+unsigned int eePromAddress_Filename_Length_Ind = 1900; // EEProm address for length of filename
+unsigned int eePromAddress_Filename_Grk = 2000; // EEProm address for filename
+unsigned int eePromAddress_Filename_Length_Grk = 2100; // EEProm address for length of filename
 
 //==================================================================
 // Global Variables
@@ -359,6 +392,7 @@ int pageCallerId = 20;
 int serialId = 9; // Initialize with unused serial id.  Serial: 0 (Usb cable to PC), Serial1: 1, Serial2: 2, Serial3: 3
 byte incomingByte = 0;	// store incoming Serial data
 
+int enableTimeout = 200; // Workaround for DM542T external driver
 float distanceTotal_MoveZ = 0;
 float distanceTotal_MoveX = 0;
 
@@ -397,12 +431,12 @@ float degrees_Spindle = 0;
 float distance_Axis = 0;
 
 // Accuracy interval 
-constexpr unsigned recalcPeriod = 35'000; //?s  period for calculation of new target points. Straight lines between those points. 
+constexpr unsigned recalcPeriod = 25'000; //?s  period for calculation of new target points. Straight lines between those points. 
 constexpr float dtRose = recalcPeriod / 1E6;  //seconds  1E6 = 1,000,000 
 
 constexpr unsigned PID_Interval = 10; // ms  
 constexpr float P = 0.01;             // (P)roportional constant of the regulator needs to be adjusted (depends on speed and acceleration setting)
-constexpr unsigned priorityLevel = 64; //128
+constexpr unsigned priorityLevel = 128;// 255;//64; //// 
 
 /////////////////////////////////////////////////////////////////////////
 // Greek Key
@@ -414,6 +448,7 @@ String axisAndDirection;
 String axisAndDirectionA;
 
 int currentLineNumber = 0;
+String currentCommand = "";
 bool exitGreekKey = false;
 String comment;
 int spindleShortLegSteps = 0;
@@ -447,4 +482,19 @@ int iniFileType = INI_4AXES;
 //==================================================================
 void SerialPrint(String text, int decimalPlaces = 0);
 void SerialPrint(float number, int decimalPlaces = 0);
+//==================================================================
+
+//==================================================================
+// DRV8825 microstep settings
+//==================================================================
+
+	//MODE0 	MODE1 	MODE2 	Microstep Resolution
+	//Low 	Low 	Low 	Full step
+	//High 	Low 	Low 	Half step
+	//Low 	High 	Low 	1 / 4 step
+	//High 	High 	Low 	1 / 8 step
+	//Low 	Low 	High 	1 / 16 step
+	//High 	Low 	High 	1 / 32 step
+	//Low 	High 	High 	1 / 32 step
+	//High 	High 	High 	1 / 32 step
 //==================================================================
