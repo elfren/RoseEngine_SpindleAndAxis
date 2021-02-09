@@ -410,8 +410,8 @@ bool fileDataAvailable = false;
 String filename_Index2a;
 char * filename_Index2;
 
-int32_t returnSteps_Axis = 0;
 int32_t returnSteps_Spindle = 0;
+int32_t startPositionAbs_Axis = 0;
 
 /////////////////////////////////////////////////////////////////////////
 // Rose settings
@@ -424,7 +424,7 @@ volatile float slideStepsAmplitude;
 volatile float spindleStepsAmplitude;
 volatile float kRatio;
 
-float initialPosition_Axis = 0;
+//float initialPosition_Axis = 0;
 int32_t endPosition_Spindle = 0;
 int32_t endPosition_Axis = 0;
 float degrees_Spindle = 0;

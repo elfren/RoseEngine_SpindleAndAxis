@@ -2,7 +2,7 @@
 /* *****************************************************************
 * 4Rose main entry
 * Author: Edward French
-* Version: 17 - 102720
+* Version: 18 - 020221
 ******************************************************************/
 
 #include "math.h"
@@ -3479,7 +3479,6 @@ void loop()
 			}
 			case 236: //ì- Clear Stepper positions and set pageCallerId
 			{
-				returnSteps_Axis = 0;
 				returnSteps_Spindle = 0;
 				endPosition_Axis = 0;
 				endPosition_Spindle = 0;
