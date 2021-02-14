@@ -2,7 +2,7 @@
 /* *****************************************************************
 * 4Rose main entry
 * Author: Edward French
-* Version: 17 - 102720
+* Version: 19 - 021121
 ******************************************************************/
 
 #include "math.h"
@@ -30,7 +30,7 @@ Stepper stepperAxis_MainX(PIN_AXIS_X_STEP, PIN_AXIS_X_DIR);
 // TeensyStep controllers
 RotateControl controllerAxis;
 
-//RotateControl rotateController1;
+RotateControl controllerSpindle;
 
 /// <summary>
 /// Setup
@@ -583,6 +583,7 @@ void loop()
 					case PAGE_GRKFILE:
 					{
 						configGreekKey.accel_Spindle = (int)GetSerialFloat(serialId);
+						EEPROM.put(eePromAddress_Grk, configGreekKey);
 #ifdef DEBUG
 						Serial.print("accel_Spindle: ");
 						Serial.println(configGreekKey.accel_Spindle);
@@ -663,9 +664,10 @@ void loop()
 			{
 			   break;
 			}
-			case 68: // D - Not Used
+			case 68: // D - Rec Style: Triangle, Square, Sawtooth
 			{
-
+				configRec.style = GetSerialInteger();
+				EEPROM.put(eePromAddress_Rec, configRec);
 				break;
 			}
 			case 69: //E - Index by divisions or degrees
@@ -3038,8 +3040,28 @@ void loop()
 				Serial.println(configRec.axisId);
 				Serial.print(radialOrAxial_Char);
 				Serial.println(configRec.radial_axial);
+				Serial.print("Style:");
+				Serial.println(configRec.style);
 	#endif // DEBUG
-				Reciprocate(waveDir);
+				switch (configRec.style)
+				{
+					case 0: // Triangle
+					{
+						Reciprocate_Triangle(waveDir);
+						break;
+					}
+					case 1: // Sawtooth
+					{
+						Reciprocate_Sawtooth(waveDir);
+						break;
+					}
+					case 2: // Square
+					{
+						Reciprocate_Square(waveDir);
+						break;
+					}
+				}
+				
 
 				break;
 			}
@@ -3479,7 +3501,6 @@ void loop()
 			}
 			case 236: //ì- Clear Stepper positions and set pageCallerId
 			{
-				returnSteps_Axis = 0;
 				returnSteps_Spindle = 0;
 				endPosition_Axis = 0;
 				endPosition_Spindle = 0;

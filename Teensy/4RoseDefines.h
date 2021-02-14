@@ -217,26 +217,15 @@ struct configPageRec // page 5,6,13,14
 	uint32_t accel_Axis_Z;
 	uint32_t accel_Axis_X;
 	uint32_t accel_Axis_B;
-	//int32_t waves_AxialZ;
-	//int32_t waves_AxialX;
 	int32_t waves_Axial;
-	//int32_t waves_RadialZ;
-	//int32_t waves_RadialX;
 	int32_t waves_Radial;
-	//float distance_AxialZ;
-	//float distance_AxialX;
 	float distance_Axial_Axis;
-	//float amplitude_AxialZ;
-	//float amplitude_AxialX;
 	float amplitude_Axial_Spindle;
-	//float amplitude_RadialZ;
-	//float amplitude_RadialX;
 	float amplitude_Radial_Axis;
-	//float degrees_RadialZ;
-	//float degrees_RadialX;
 	float degrees_Radial_Spindle;
 	uint32_t axisId;
 	uint32_t radial_axial;
+	uint32_t style;
 };
 
 struct configPageRose // page 12
@@ -410,8 +399,8 @@ bool fileDataAvailable = false;
 String filename_Index2a;
 char * filename_Index2;
 
-int32_t returnSteps_Axis = 0;
 int32_t returnSteps_Spindle = 0;
+int32_t startPositionAbs_Axis = 0;
 
 /////////////////////////////////////////////////////////////////////////
 // Rose settings
@@ -424,7 +413,7 @@ volatile float slideStepsAmplitude;
 volatile float spindleStepsAmplitude;
 volatile float kRatio;
 
-float initialPosition_Axis = 0;
+//float initialPosition_Axis = 0;
 int32_t endPosition_Spindle = 0;
 int32_t endPosition_Axis = 0;
 float degrees_Spindle = 0;

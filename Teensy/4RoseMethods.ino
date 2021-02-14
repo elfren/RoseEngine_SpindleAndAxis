@@ -1319,8 +1319,7 @@ void MoveAxis(int axisId, int directionAxis)
 		}
 	}
 
-	returnSteps_Axis = endPosition_Axis;
-	endPosition_Axis = 0;
+	startPositionAbs_Axis = 0;
 }
 
 /// <summary>
@@ -1341,6 +1340,7 @@ void OneRunStepper(int direction) // pageOne
 	const char * nextionEnd = "\xFF\xFF\xFF";
 
 	// Reset end positions
+	startPositionAbs_Axis = 0;
 	endPosition_Spindle = 0;
 	endPosition_Axis = 0;
 
@@ -1567,7 +1567,7 @@ endLoop:
 	if (configOne.axisId == ID_SPINDLE)
 	{
 		endPosition_Spindle = stepper_One.getPosition();
-		returnSteps_Axis = 0;
+		endPosition_Axis = 0;
 		returnSteps_Spindle = endPosition_Spindle;
 
 #ifdef SHOW_POSITION 
@@ -1591,7 +1591,7 @@ endLoop:
 		// Set Axis end distance to 0
 		SerialPrint("pageBE.t2.txt=");
 		SerialWrite(0x22);
-		SerialPrint(returnSteps_Axis);
+		SerialPrint(endPosition_Axis);
 		SerialWrite(0x22);
 		SerialWrite(0xff);
 		SerialWrite(0xff);
@@ -1602,7 +1602,6 @@ endLoop:
 	else
 	{
 		endPosition_Axis = stepper_One.getPosition();
-		returnSteps_Axis = endPosition_Axis;
 		returnSteps_Spindle = 0;
 
 #ifdef SHOW_POSITION 
@@ -2187,19 +2186,19 @@ void Main_TwoSteppers(
 	{
 		case ID_AXIS_Z:
 		{
-			returnSteps_Axis = stepper_Z.getPosition();
+			endPosition_Axis = stepper_Z.getPosition();
 			stepper_Z.setPosition(0);
 			break;
 		}
 		case ID_AXIS_X:
 		{
-			returnSteps_Axis = stepper_X.getPosition();
+			endPosition_Axis = stepper_X.getPosition();
 			stepper_X.setPosition(0);
 			break;
 		}
 		case ID_AXIS_B:
 		{
-			returnSteps_Axis = stepper_B.getPosition();
+			endPosition_Axis = stepper_B.getPosition();
 			stepper_B.setPosition(0);
 			break;
 		}
@@ -2225,7 +2224,7 @@ void Main_TwoSteppers(
 	SerialWrite(0xff);
 	SerialWrite(0xff);
 	MilliDelay(5);
-	distance_Axis = StepsToDistance_Axis(returnSteps_Axis, configMain.axisId);
+	distance_Axis = StepsToDistance_Axis(endPosition_Axis, configMain.axisId);
 	SerialPrint("pageBE.t2.txt=");
 	SerialWrite(0x22);
 	SerialPrint(distance_Axis);
@@ -2245,7 +2244,7 @@ void Main_TwoSteppers(
 #endif // Show Position
 
 	stepper_Spindle.setPosition(0);
-
+	startPositionAbs_Axis = 0;
 	SetEnable(ID_SPINDLE, false);
 	SetEnable(ID_AXIS_Z, false);
 	SetEnable(ID_AXIS_X, false);
@@ -2406,7 +2405,6 @@ void IndexSpindle(int directionSpindle)
 	SerialPrint(pageIndex_bt1_val_Char);
 	SerialPrint(nextionEnd);
 
-	returnSteps_Axis = 0;
 	returnSteps_Spindle = stepper_Spindle.getPosition();
 #ifdef SHOW_POSITION 
 	degrees_Spindle = StepsToDegrees_Spindle(returnSteps_Spindle);
@@ -2452,6 +2450,7 @@ void Sync(int directionSpindle, int directionAxis)
 	int32_t maxSpeed = 0;
 	int32_t accel = 0;
 	long axisSteps = 0;
+	startPositionAbs_Axis = 0;
 
 	switch (configSync.axisId)
 	{
@@ -2743,8 +2742,6 @@ void Sync(int directionSpindle, int directionAxis)
 	}
 	}
 
-	returnSteps_Axis = endPosition_Axis;
-
 	stepper_Spindle.setPosition(0);
 	stepper_Axis.setPosition(0);
 
@@ -2764,7 +2761,7 @@ void Sync(int directionSpindle, int directionAxis)
 /// </comment>
 /// <param name="wavDir">In: -1, Out: 1</param>
 /// <returns></returns>
-void Reciprocate(int wavDir)
+void Reciprocate_Triangle(int wavDir)
 {
 	const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
 	const char* nextionEnd = "\xFF\xFF\xFF";
@@ -2774,6 +2771,7 @@ void Reciprocate(int wavDir)
 	int32_t accel = 0;
 	int32_t waves = 0;
 	int32_t speedPercent = 0;
+	startPositionAbs_Axis = 0;
 
 	switch (configRec.axisId)
 	{
@@ -2849,8 +2847,8 @@ void Reciprocate(int wavDir)
 			waves = configRec.waves_Radial;
 			float spindleDegrees = configRec.degrees_Radial_Spindle / (configRec.waves_Radial * 2);
 			spindleSteps = round((configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (spindleDegrees / 360) * wavDir);
-			axisSteps = (DistanceToSteps_Axis(configRec.amplitude_Radial_Axis, configRec.axisId) / 2) * wavDir;
-			returnSteps_Axis = DistanceToSteps_Axis(configRec.amplitude_Radial_Axis, configRec.axisId);
+			////axisSteps = (DistanceToSteps_Axis(configRec.amplitude_Radial_Axis, configRec.axisId) / 2) * wavDir;
+			axisSteps = (DistanceToSteps_Axis(configRec.amplitude_Radial_Axis, configRec.axisId) ) * wavDir;
 			break;
 		}
 		case AXIAL: // Axial
@@ -2858,7 +2856,6 @@ void Reciprocate(int wavDir)
 			waves = configRec.waves_Axial;
 			spindleSteps = (configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (configRec.amplitude_Axial_Spindle / 360) * wavDir;
 			axisSteps = (DistanceToSteps_Axis(configRec.distance_Axial_Axis, configRec.axisId) / (configRec.waves_Axial * 2))* wavDir;
-			returnSteps_Axis = DistanceToSteps_Axis(configRec.distance_Axial_Axis, configRec.axisId);
 			break;
 		}
 	}
@@ -2867,8 +2864,8 @@ void Reciprocate(int wavDir)
 	Serial.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
 	Serial.print("spindleSteps:");
 	Serial.println(spindleSteps);
-	Serial.print("returnSteps_Axis:");
-	Serial.println(returnSteps_Axis);
+	Serial.print("endPosition_Axis:");
+	Serial.println(endPosition_Axis);
 	Serial.print("axisSteps:");
 	Serial.println(axisSteps);
 	Serial.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
@@ -3088,7 +3085,783 @@ endLoop:
 	Serial.print("Axis:");
 	Serial.println(endPosition_Axis);
 #endif // DEBUG
-	returnSteps_Axis = endPosition_Axis;
+	returnSteps_Spindle = endPosition_Spindle;
+	SetEnable(ID_SPINDLE, false);
+	SetEnable(ID_AXIS_Z, false);
+	SetEnable(ID_AXIS_X, false);
+	SetEnable(ID_AXIS_B, false);
+}
+
+void Reciprocate_Sawtooth(int wavDir)
+{
+	const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
+	const char* nextionEnd = "\xFF\xFF\xFF";
+	int stepPin = 0;
+	int dirPin = 0;
+	int32_t maxSpeed = 0;
+	int32_t accel = 0;
+	int32_t waves = 0;
+	int32_t speedPercent = 0;
+	startPositionAbs_Axis = 0;
+
+	switch (configRec.axisId)
+	{
+	case ID_AXIS_Z:
+	{
+		stepPin = PIN_AXIS_Z_STEP;
+		dirPin = PIN_AXIS_Z_DIR;
+		maxSpeed = configRec.maxSpd_Axis_Z * configRec.speedPercent_Axis_Z * .01;
+		accel = configRec.accel_Axis_Z;
+		speedPercent = configRec.speedPercent_Axis_Z;
+#ifdef DEBUG
+		Serial.print("Z---AxisMaxSpd:");
+		Serial.println(configRec.maxSpd_Axis_Z);
+		Serial.print("Z---AxisSpeedPercent:");
+		Serial.println(configRec.speedPercent_Axis_Z);
+		Serial.print("Z---AxisAccel:");
+		Serial.println(configRec.accel_Axis_Z);
+#endif // DEBUG
+		break;
+	}
+	case ID_AXIS_X:
+	{
+		stepPin = PIN_AXIS_X_STEP;
+		dirPin = PIN_AXIS_X_DIR;
+		maxSpeed = configRec.maxSpd_Axis_X * configRec.speedPercent_Axis_X * .01;
+		accel = configRec.accel_Axis_X;
+		speedPercent = configRec.speedPercent_Axis_X;
+#ifdef DEBUG
+		Serial.print("X---AxisMaxSpd:");
+		Serial.println(configRec.maxSpd_Axis_X);
+		Serial.print("X---AxisSpeedPercent:");
+		Serial.println(configRec.speedPercent_Axis_X);
+		Serial.print("X---AxisAccel:");
+		Serial.println(configRec.accel_Axis_X);
+#endif // DEBUG
+		break;
+	}
+	case ID_AXIS_B:
+	{
+		stepPin = PIN_AXIS_B_STEP;
+		dirPin = PIN_AXIS_B_DIR;
+		maxSpeed = configRec.maxSpd_Axis_B * configRec.speedPercent_Axis_B * .01;
+		accel = configRec.accel_Axis_B;
+		speedPercent = configRec.speedPercent_Axis_B;
+#ifdef DEBUG
+		Serial.print("B---AxisMaxSpd:");
+		Serial.println(configRec.maxSpd_Axis_B);
+		Serial.print("B---AxisSpeedPercent:");
+		Serial.println(configRec.speedPercent_Axis_B);
+		Serial.print("B---AxisAccel:");
+		Serial.println(configRec.accel_Axis_B);
+#endif // DEBUG
+		break;
+	}
+	}
+
+	StepControl stepController;
+	Stepper stepper_Spindle(PIN_SPINDLE_STEP, PIN_SPINDLE_DIR);
+	Stepper stepper_Axis(stepPin, dirPin);
+
+	// Set speed and acceleration
+	stepper_Spindle
+		.setMaxSpeed(configRec.maxSpd_Spindle * configRec.speedPercent_Spindle * .01)
+		.setAcceleration(configRec.accel_Spindle);
+	stepper_Spindle.setPosition(0);
+
+	int32_t spindleSteps = 0;
+	int32_t axisSteps = 0;
+	switch (configRec.radial_axial)
+	{
+	case RADIAL: // Radial
+	{
+		waves = configRec.waves_Radial;
+		float spindleDegrees = configRec.degrees_Radial_Spindle / (configRec.waves_Radial * 2);
+		spindleSteps = round((configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (spindleDegrees / 360) * wavDir);
+		////axisSteps = (DistanceToSteps_Axis(configRec.amplitude_Radial_Axis, configRec.axisId) / 2) * wavDir;
+		axisSteps = (DistanceToSteps_Axis(configRec.amplitude_Radial_Axis, configRec.axisId)) * wavDir;
+		break;
+	}
+	case AXIAL: // Axial
+	{
+		waves = configRec.waves_Axial;
+		spindleSteps = (configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (configRec.amplitude_Axial_Spindle / 360) * wavDir;
+		axisSteps = (DistanceToSteps_Axis(configRec.distance_Axial_Axis, configRec.axisId) / (configRec.waves_Axial * 2)) * wavDir;
+		break;
+	}
+	}
+
+#ifdef DEBUG
+	Serial.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+	Serial.print("spindleSteps:");
+	Serial.println(spindleSteps);
+	Serial.print("endPosition_Axis:");
+	Serial.println(endPosition_Axis);
+	Serial.print("axisSteps:");
+	Serial.println(axisSteps);
+	Serial.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+#endif // DEBUG
+
+	stepper_Axis
+		.setMaxSpeed(maxSpeed)
+		.setAcceleration(accel);
+	stepper_Axis.setPosition(0);
+
+#ifdef DEBUG
+	Serial.print("SpindleMaxSpd:");
+	Serial.println(configRec.maxSpd_Spindle);
+	Serial.print("SpindleSpeedPercent:");
+	Serial.println(configRec.speedPercent_Spindle);
+	Serial.print("SpindleAccel:");
+	Serial.println(configRec.accel_Spindle);
+
+	Serial.print("microsteps_Spindle:");
+	Serial.println(configSetup.microsteps_Spindle);
+	Serial.print("steps360_Spindle:");
+	Serial.println(configSetup.steps360_Spindle);
+	Serial.print("gearRatio_Spindle:");
+	Serial.println(configSetup.gearRatio_Spindle);
+
+	switch (configRec.radial_axial)
+	{
+	case RADIAL: // Radial
+	{
+		Serial.print("degrees_Radial:");
+		Serial.println(configRec.degrees_Radial_Spindle);
+		Serial.print("amplitude_Radial (Distance):");
+		Serial.println(configRec.amplitude_Radial_Axis);
+
+		Serial.print("waves_Radial:");
+		Serial.println(configRec.waves_Radial);
+		break;
+	}
+	case AXIAL: // Axial
+	{
+		Serial.print("amplitude_Axial:");
+		Serial.println(configRec.amplitude_Axial_Spindle);
+		Serial.print("distance_Axial:");
+		Serial.println(configRec.distance_Axial_Axis);
+		Serial.print("waves_Axial:");
+		Serial.println(configRec.waves_Axial);
+		break;
+	}
+	}
+	//Serial.print("distancePerRev_AxisX:");
+	//Serial.println(configSetup.distancePerRev_AxisX);
+	//Serial.print("steps360_Axis_X:");
+	//Serial.println(configSetup.steps360_Axis_X);
+	//Serial.print("microsteps_Axis_X:");
+	//Serial.println(configSetup.microsteps_Axis_X);
+
+
+	Serial.print("spindleSteps:");
+	Serial.println(spindleSteps);
+	Serial.print("axisSteps:");
+	Serial.println(axisSteps);
+
+	Serial.print("AxisMaxSpd:");
+	Serial.println(maxSpeed);
+	Serial.print("AxisSpeedPercent:");
+	Serial.println(speedPercent);
+	Serial.print("AxisAccel:");
+	Serial.println(accel);
+#endif // DEBUG
+
+	SetEnable(ID_SPINDLE, true);
+
+	switch (configRec.axisId)
+	{
+	case ID_AXIS_Z:
+	{
+		SetEnable(ID_AXIS_Z, true);
+		break;
+	}
+	case ID_AXIS_X:
+	{
+		SetEnable(ID_AXIS_X, true);
+		break;
+	}
+	case ID_AXIS_B:
+	{
+		SetEnable(ID_AXIS_B, true);
+		Serial.println("B Enabled..........................");
+		break;
+	}
+	}
+	int32_t axisSteps_0 = 0;
+	int32_t spindleSteps_0 = 0;
+	int32_t i_mod_2 = 0;
+	for (int i = 1; i <= (waves * 2) + 2; i++)
+	{
+		i_mod_2 = i % 2;
+		Serial.print("i: ");
+		Serial.println(i);
+		Serial.print("i%2: ");
+		Serial.println(i % 2);
+
+		switch(i_mod_2)
+		{ 
+			case 0:
+			{
+				switch (configRec.radial_axial)
+				{
+					case RADIAL: // Radial
+					{
+						//stepper_Spindle.setTargetRel(spindleSteps);
+						stepper_Axis.setTargetRel(-axisSteps);
+						stepController.moveAsync(stepper_Axis);
+						MilliDelay(5);
+#ifdef DEBUG
+						Serial.print("Axis i: ");
+						Serial.println(i);
+						Serial.println(i_mod_2);
+						Serial.print("axisSteps:");
+						Serial.println(axisSteps);
+#endif // DEBUG
+						break;
+					}
+					case AXIAL:
+					{
+						stepper_Spindle.setTargetRel(-spindleSteps);
+						//stepper_Axis.setTargetRel(axisSteps);
+
+						stepController.moveAsync(stepper_Spindle);
+						MilliDelay(5);
+#ifdef DEBUG
+						Serial.println("");
+						Serial.print("spindleSteps:");
+						Serial.println(spindleSteps);
+#endif // DEBUG
+						break;
+					}
+
+				}
+				break;
+			}
+			default:
+			{
+				// Start pattern
+				switch (configRec.radial_axial)
+				{
+					case RADIAL: // Radial
+					{
+						stepper_Spindle.setTargetRel(spindleSteps);
+						stepper_Axis.setTargetRel(axisSteps);
+						break;
+					}
+					case AXIAL:
+					{
+						stepper_Spindle.setTargetRel(spindleSteps);
+						stepper_Axis.setTargetRel(axisSteps);
+						break;
+					}
+				}
+#ifdef DEBUG
+				Serial.println("");
+				Serial.print("spindleSteps:");
+				Serial.println(spindleSteps);
+				Serial.print("axisSteps:");
+				Serial.println(axisSteps);
+#endif // DEBUG
+				stepController.moveAsync(stepper_Spindle, stepper_Axis);
+				MilliDelay(5);
+				Serial.print("Spindle&Axis i: ");
+				Serial.println(i);
+				Serial.println(i_mod_2);
+				break;
+			}
+		}
+
+		while (stepController.isRunning())
+		{
+#ifdef DEBUG
+			//Serial.println("isRunning");
+			//delay(100);
+
+			//endPosition_Axis = stepper_X.getPosition();
+			//endPosition_Spindle = stepper_Spindle.getPosition();
+			//Serial.print("Spindle:");
+			//Serial.println(endPosition_Spindle);
+			//Serial.print("Axis:");
+			//Serial.println(endPosition_Axis);
+#endif // DEBUG
+#ifdef SHOW_POSITION 
+			// Track Positions not implemented while steppers are running
+			/*if (configGeneral.trackPositions == 1)
+			{
+				endPosition_Axis = stepper_X.getPosition();
+				endPosition_Spindle = stepper_Spindle.getPosition();
+				degrees_Spindle = StepsToDegrees_Spindle(endPosition_Spindle);
+				distance_Axis = StepsToDistance_Axis(endPosition_Axis, ID_AXIS_X);
+				SerialPrint("pageBE.t1.txt=");
+				SerialWrite(0x22);
+				SerialPrint(degrees_Spindle);
+				SerialWrite(0x22);
+				SerialWrite(0xff);
+				SerialWrite(0xff);
+				SerialWrite(0xff);
+				MilliDelay(10);
+				SerialPrint("pageBE.t2.txt=");
+				SerialWrite(0x22);
+				SerialPrint(distance_Axis);
+				SerialWrite(0x22);
+				SerialWrite(0xff);
+				SerialWrite(0xff);
+				SerialWrite(0xff);
+			}*/
+#endif //SHOW_POSITION
+
+			// Check for Cancel code  
+			if (SerialAvailable() > 0)
+			{
+				incomingByte = SerialRead(serialId);
+				switch (incomingByte)
+				{
+				case 83: // - S
+				{
+#ifdef DEBUG
+					Serial.println("STOP++++++++++++++++++++++");
+#endif // DEBUG
+					stepController.stop();
+					goto endLoop;
+					break;
+				}
+				default:
+				{
+					break;
+				}
+				}
+			}
+		}
+	}
+
+endLoop:
+
+	endPosition_Axis = stepper_Axis.getPosition();
+	endPosition_Spindle = stepper_Spindle.getPosition();
+#ifdef SHOW_POSITION 
+	degrees_Spindle = StepsToDegrees_Spindle(endPosition_Spindle);
+	distance_Axis = StepsToDistance_Axis(endPosition_Axis, ID_AXIS_X);
+	SerialPrint("pageBE.t1.txt=");
+	SerialWrite(0x22);
+	SerialPrint(degrees_Spindle);
+	SerialPrint(nextionQuoteEnd);
+	SerialPrint("pageBE.t2.txt=");
+	SerialWrite(0x22);
+	SerialPrint(distance_Axis);
+	SerialPrint(nextionQuoteEnd);
+#endif //SHOW_POSITION
+	// Update Nextion
+	SerialPrint("pageRec.va0.val=0");
+	SerialPrint(nextionEnd);
+	SerialPrint("pageRec.bt3.val=0");// The first one may be ignored by Nextion, so resend.
+	SerialPrint(nextionEnd);
+	SerialPrint("pageRec.bt2.val=0");
+	SerialPrint(nextionEnd);
+	SerialPrint("pageRec.bt1.val=0");
+	SerialPrint(nextionEnd);
+
+#ifdef DEBUG
+	endPosition_Axis = stepper_Axis.getPosition();
+	endPosition_Spindle = stepper_Spindle.getPosition();
+	Serial.print("Spindle:");
+	Serial.println(endPosition_Spindle);
+	Serial.print("Axis:");
+	Serial.println(endPosition_Axis);
+#endif // DEBUG
+	returnSteps_Spindle = endPosition_Spindle;
+	SetEnable(ID_SPINDLE, false);
+	SetEnable(ID_AXIS_Z, false);
+	SetEnable(ID_AXIS_X, false);
+	SetEnable(ID_AXIS_B, false);
+}
+
+void Reciprocate_Square(int wavDir)
+{
+	const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
+	const char* nextionEnd = "\xFF\xFF\xFF";
+	int stepPin = 0;
+	int dirPin = 0;
+	int32_t maxSpeed = 0;
+	int32_t accel = 0;
+	int32_t waves = 0;
+	int32_t speedPercent = 0;
+	startPositionAbs_Axis = 0;
+
+	switch (configRec.axisId)
+	{
+	case ID_AXIS_Z:
+	{
+		stepPin = PIN_AXIS_Z_STEP;
+		dirPin = PIN_AXIS_Z_DIR;
+		maxSpeed = configRec.maxSpd_Axis_Z * configRec.speedPercent_Axis_Z * .01;
+		accel = configRec.accel_Axis_Z;
+		speedPercent = configRec.speedPercent_Axis_Z;
+#ifdef DEBUG
+		Serial.print("Z---AxisMaxSpd:");
+		Serial.println(configRec.maxSpd_Axis_Z);
+		Serial.print("Z---AxisSpeedPercent:");
+		Serial.println(configRec.speedPercent_Axis_Z);
+		Serial.print("Z---AxisAccel:");
+		Serial.println(configRec.accel_Axis_Z);
+#endif // DEBUG
+		break;
+	}
+	case ID_AXIS_X:
+	{
+		stepPin = PIN_AXIS_X_STEP;
+		dirPin = PIN_AXIS_X_DIR;
+		maxSpeed = configRec.maxSpd_Axis_X * configRec.speedPercent_Axis_X * .01;
+		accel = configRec.accel_Axis_X;
+		speedPercent = configRec.speedPercent_Axis_X;
+#ifdef DEBUG
+		Serial.print("X---AxisMaxSpd:");
+		Serial.println(configRec.maxSpd_Axis_X);
+		Serial.print("X---AxisSpeedPercent:");
+		Serial.println(configRec.speedPercent_Axis_X);
+		Serial.print("X---AxisAccel:");
+		Serial.println(configRec.accel_Axis_X);
+#endif // DEBUG
+		break;
+	}
+	case ID_AXIS_B:
+	{
+		stepPin = PIN_AXIS_B_STEP;
+		dirPin = PIN_AXIS_B_DIR;
+		maxSpeed = configRec.maxSpd_Axis_B * configRec.speedPercent_Axis_B * .01;
+		accel = configRec.accel_Axis_B;
+		speedPercent = configRec.speedPercent_Axis_B;
+#ifdef DEBUG
+		Serial.print("B---AxisMaxSpd:");
+		Serial.println(configRec.maxSpd_Axis_B);
+		Serial.print("B---AxisSpeedPercent:");
+		Serial.println(configRec.speedPercent_Axis_B);
+		Serial.print("B---AxisAccel:");
+		Serial.println(configRec.accel_Axis_B);
+#endif // DEBUG
+		break;
+	}
+	}
+
+	StepControl stepController;
+	Stepper stepper_Spindle(PIN_SPINDLE_STEP, PIN_SPINDLE_DIR);
+	Stepper stepper_Axis(stepPin, dirPin);
+
+	// Set speed and acceleration
+	stepper_Spindle
+		.setMaxSpeed(configRec.maxSpd_Spindle * configRec.speedPercent_Spindle * .01)
+		.setAcceleration(configRec.accel_Spindle);
+	stepper_Spindle.setPosition(0);
+
+	int32_t spindleSteps = 0;
+	int32_t axisSteps = 0;
+	switch (configRec.radial_axial)
+	{
+	case RADIAL: // Radial
+	{
+		waves = configRec.waves_Radial;
+		float spindleDegrees = configRec.degrees_Radial_Spindle / (configRec.waves_Radial * 2);
+		spindleSteps = round((configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (spindleDegrees / 360) * wavDir);
+		////axisSteps = (DistanceToSteps_Axis(configRec.amplitude_Radial_Axis, configRec.axisId) / 2) * wavDir;
+		axisSteps = (DistanceToSteps_Axis(configRec.amplitude_Radial_Axis, configRec.axisId)) * wavDir;
+		break;
+	}
+	case AXIAL: // Axial
+	{
+		waves = configRec.waves_Axial;
+		spindleSteps = (configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (configRec.amplitude_Axial_Spindle / 360) * wavDir;
+		axisSteps = (DistanceToSteps_Axis(configRec.distance_Axial_Axis, configRec.axisId) / (configRec.waves_Axial * 2)) * wavDir;
+		break;
+	}
+	}
+
+#ifdef DEBUG
+	Serial.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+	Serial.print("spindleSteps:");
+	Serial.println(spindleSteps);
+	Serial.print("endPosition_Axis:");
+	Serial.println(endPosition_Axis);
+	Serial.print("axisSteps:");
+	Serial.println(axisSteps);
+	Serial.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+#endif // DEBUG
+
+	stepper_Axis
+		.setMaxSpeed(maxSpeed)
+		.setAcceleration(accel);
+	stepper_Axis.setPosition(0);
+
+#ifdef DEBUG
+	Serial.print("SpindleMaxSpd:");
+	Serial.println(configRec.maxSpd_Spindle);
+	Serial.print("SpindleSpeedPercent:");
+	Serial.println(configRec.speedPercent_Spindle);
+	Serial.print("SpindleAccel:");
+	Serial.println(configRec.accel_Spindle);
+
+	Serial.print("microsteps_Spindle:");
+	Serial.println(configSetup.microsteps_Spindle);
+	Serial.print("steps360_Spindle:");
+	Serial.println(configSetup.steps360_Spindle);
+	Serial.print("gearRatio_Spindle:");
+	Serial.println(configSetup.gearRatio_Spindle);
+
+	switch (configRec.radial_axial)
+	{
+	case RADIAL: // Radial
+	{
+		Serial.print("degrees_Radial:");
+		Serial.println(configRec.degrees_Radial_Spindle);
+		Serial.print("amplitude_Radial (Distance):");
+		Serial.println(configRec.amplitude_Radial_Axis);
+
+		Serial.print("waves_Radial:");
+		Serial.println(configRec.waves_Radial);
+		break;
+	}
+	case AXIAL: // Axial
+	{
+		Serial.print("amplitude_Axial:");
+		Serial.println(configRec.amplitude_Axial_Spindle);
+		Serial.print("distance_Axial:");
+		Serial.println(configRec.distance_Axial_Axis);
+		Serial.print("waves_Axial:");
+		Serial.println(configRec.waves_Axial);
+		break;
+	}
+	}
+	//Serial.print("distancePerRev_AxisX:");
+	//Serial.println(configSetup.distancePerRev_AxisX);
+	//Serial.print("steps360_Axis_X:");
+	//Serial.println(configSetup.steps360_Axis_X);
+	//Serial.print("microsteps_Axis_X:");
+	//Serial.println(configSetup.microsteps_Axis_X);
+
+
+	Serial.print("spindleSteps:");
+	Serial.println(spindleSteps);
+	Serial.print("axisSteps:");
+	Serial.println(axisSteps);
+
+	Serial.print("AxisMaxSpd:");
+	Serial.println(maxSpeed);
+	Serial.print("AxisSpeedPercent:");
+	Serial.println(speedPercent);
+	Serial.print("AxisAccel:");
+	Serial.println(accel);
+#endif // DEBUG
+
+	SetEnable(ID_SPINDLE, true);
+
+	switch (configRec.axisId)
+	{
+	case ID_AXIS_Z:
+	{
+		SetEnable(ID_AXIS_Z, true);
+		break;
+	}
+	case ID_AXIS_X:
+	{
+		SetEnable(ID_AXIS_X, true);
+		break;
+	}
+	case ID_AXIS_B:
+	{
+		SetEnable(ID_AXIS_B, true);
+		Serial.println("B Enabled..........................");
+		break;
+	}
+	}
+	int32_t axisSteps_0 = 0;
+	int32_t spindleSteps_0 = 0;
+	int32_t leg = 1;
+	for (int i = 4; i < ((waves + 4) * 2); i++)
+	{
+		leg = i % 4;
+		Serial.print("leg: ");
+		Serial.println(leg);
+		switch (leg)
+		{
+			case 0:
+			{
+				switch (configRec.radial_axial)
+				{
+					case RADIAL: // Radial
+					{
+						
+						stepper_Axis.setTargetRel(axisSteps);
+						stepController.moveAsync(stepper_Axis);
+						MilliDelay(5);
+						break;
+					}
+					case AXIAL:
+					{
+						stepper_Spindle.setTargetRel(spindleSteps);
+						//stepper_Axis.setTargetRel(axisSteps);
+
+						stepController.moveAsync(stepper_Spindle);
+						MilliDelay(5);
+						break;
+					}
+				}
+				break;
+			}
+			case 1:
+			case 3:
+			{
+				switch (configRec.radial_axial)
+				{
+					case RADIAL: // Radial
+					{
+						stepper_Spindle.setTargetRel(spindleSteps);
+						stepController.moveAsync(stepper_Spindle);
+						MilliDelay(5);
+						break;
+					}
+					case AXIAL:
+					{
+						stepper_Axis.setTargetRel(axisSteps);
+
+						stepController.moveAsync(stepper_Axis);
+						MilliDelay(5);
+						break;
+					}
+				}
+				break;
+			}
+			case 2:
+			{
+				switch (configRec.radial_axial)
+				{
+					case RADIAL: // Radial
+					{
+						stepper_Axis.setTargetRel(axisSteps * (-1));
+						stepController.moveAsync(stepper_Axis);
+						MilliDelay(5);
+						break;
+					}
+					case AXIAL:
+					{
+						stepper_Spindle.setTargetRel(spindleSteps * (-1));
+						stepController.moveAsync(stepper_Spindle);
+						MilliDelay(5);
+						break;
+					}
+				}
+				break;
+			}
+		}
+
+
+
+#ifdef DEBUG
+		//Serial.println("");
+		//Serial.print("spindleSteps:");
+		//Serial.println(spindleSteps);
+		//Serial.print("axisSteps:");
+		//Serial.println(axisSteps);
+#endif // DEBUG
+
+		////stepController.moveAsync(stepper_Spindle, stepper_Axis);
+		////MilliDelay(5);
+
+		while (stepController.isRunning())
+		{
+#ifdef DEBUG
+			//Serial.println("isRunning");
+			//delay(100);
+
+			//endPosition_Axis = stepper_X.getPosition();
+			//endPosition_Spindle = stepper_Spindle.getPosition();
+			//Serial.print("Spindle:");
+			//Serial.println(endPosition_Spindle);
+			//Serial.print("Axis:");
+			//Serial.println(endPosition_Axis);
+#endif // DEBUG
+#ifdef SHOW_POSITION 
+			// Track Positions not implemented while steppers are running
+			/*if (configGeneral.trackPositions == 1)
+			{
+				endPosition_Axis = stepper_X.getPosition();
+				endPosition_Spindle = stepper_Spindle.getPosition();
+				degrees_Spindle = StepsToDegrees_Spindle(endPosition_Spindle);
+				distance_Axis = StepsToDistance_Axis(endPosition_Axis, ID_AXIS_X);
+				SerialPrint("pageBE.t1.txt=");
+				SerialWrite(0x22);
+				SerialPrint(degrees_Spindle);
+				SerialWrite(0x22);
+				SerialWrite(0xff);
+				SerialWrite(0xff);
+				SerialWrite(0xff);
+				MilliDelay(10);
+				SerialPrint("pageBE.t2.txt=");
+				SerialWrite(0x22);
+				SerialPrint(distance_Axis);
+				SerialWrite(0x22);
+				SerialWrite(0xff);
+				SerialWrite(0xff);
+				SerialWrite(0xff);
+			}*/
+#endif //SHOW_POSITION
+
+			// Check for Cancel code  
+			if (SerialAvailable() > 0)
+			{
+				incomingByte = SerialRead(serialId);
+				switch (incomingByte)
+				{
+				case 83: // - S
+				{
+#ifdef DEBUG
+					Serial.println("STOP++++++++++++++++++++++");
+#endif // DEBUG
+					stepController.stop();
+					goto endLoop;
+					break;
+				}
+				default:
+				{
+					break;
+				}
+				}
+			}
+		}
+	}
+
+endLoop:
+
+	endPosition_Axis = stepper_Axis.getPosition();
+	endPosition_Spindle = stepper_Spindle.getPosition();
+#ifdef SHOW_POSITION 
+	degrees_Spindle = StepsToDegrees_Spindle(endPosition_Spindle);
+	distance_Axis = StepsToDistance_Axis(endPosition_Axis, ID_AXIS_X);
+	SerialPrint("pageBE.t1.txt=");
+	SerialWrite(0x22);
+	SerialPrint(degrees_Spindle);
+	SerialPrint(nextionQuoteEnd);
+	SerialPrint("pageBE.t2.txt=");
+	SerialWrite(0x22);
+	SerialPrint(distance_Axis);
+	SerialPrint(nextionQuoteEnd);
+#endif //SHOW_POSITION
+	// Update Nextion
+	SerialPrint("pageRec.va0.val=0");
+	SerialPrint(nextionEnd);
+	SerialPrint("pageRec.bt3.val=0");// The first one may be ignored by Nextion, so resend.
+	SerialPrint(nextionEnd);
+	SerialPrint("pageRec.bt2.val=0");
+	SerialPrint(nextionEnd);
+	SerialPrint("pageRec.bt1.val=0");
+	SerialPrint(nextionEnd);
+
+#ifdef DEBUG
+	endPosition_Axis = stepper_Axis.getPosition();
+	endPosition_Spindle = stepper_Spindle.getPosition();
+	Serial.print("Spindle:");
+	Serial.println(endPosition_Spindle);
+	Serial.print("Axis:");
+	Serial.println(endPosition_Axis);
+#endif // DEBUG
 	returnSteps_Spindle = endPosition_Spindle;
 	SetEnable(ID_SPINDLE, false);
 	SetEnable(ID_AXIS_Z, false);
@@ -4672,8 +5445,7 @@ void GreekKeyPattern_End()
 			break;
 		}
 	}
-
-	returnSteps_Axis = endPosition_Axis;
+	startPositionAbs_Axis = 0;
 	returnSteps_Spindle = endPosition_Spindle;
 
 #ifdef DEBUG
@@ -5507,6 +6279,7 @@ void GreekKey_FromFile(int direction)
 
 	int selectedAxis = 0;
 	// Reset end positions
+	startPositionAbs_Axis = 0;
 	endPosition_Spindle = 0;
 	endPosition_Axis = 0;
 
@@ -6640,7 +7413,6 @@ EndLoops:
 		}
 	}
 
-	returnSteps_Axis = endPosition_Axis;
 	returnSteps_Spindle = endPosition_Spindle;
 
 #ifdef DEBUG
@@ -7378,8 +8150,8 @@ void ReturnToStartPosition(int axisId)
 	const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
 	const char* nextionEnd = "\xFF\xFF\xFF";
 
+	// Get shortest path to the spindle start position.
 	int32_t target_Spindle = returnSteps_Spindle % spindleStepsPerRev * (-1);
-	int32_t target_Axis = returnSteps_Axis * (-1);
 
 	StepControl stepController;
 	Stepper stepper_Spindle(PIN_SPINDLE_STEP, PIN_SPINDLE_DIR);
@@ -7387,10 +8159,9 @@ void ReturnToStartPosition(int axisId)
 	Stepper stepper_X(PIN_AXIS_X_STEP, PIN_AXIS_X_DIR);
 	Stepper stepper_B(PIN_AXIS_B_STEP, PIN_AXIS_B_DIR);
 
+	// Spindle uses relative position to start from.
 	stepper_Spindle.setPosition(0);
 
-	endPosition_Axis = 0;
-	endPosition_Spindle = 0;
 	MilliDelay(15);
 	stepper_Spindle
 		.setMaxSpeed(configSetup.maxSpd_Return_Spindle)
@@ -7401,99 +8172,116 @@ void ReturnToStartPosition(int axisId)
 	Serial.println("Begin ReturnToStartPosition()");
 	Serial.print("target_Spindle: ");
 	Serial.println(target_Spindle);
-	Serial.print("maxSpd_Return_Spindle: ");
-	Serial.println(configSetup.accel_Return_Spindle);
-	Serial.print("target_Axis: ");
-	Serial.println(target_Axis);
+	Serial.print("returnPositionAbs_Axis: ");
+	Serial.println(startPositionAbs_Axis);
+	Serial.print("endPosition_Axis: ");
+	Serial.println(endPosition_Axis);
 #endif // DEBUG
 
 	SetEnable(ID_SPINDLE, true);
-	MilliDelay(20);
+
 	switch (axisId)
 	{
-		case ID_AXIS_Z:
-		{
-			stepper_Z.setPosition(0);
-			stepper_Z
-				.setMaxSpeed(configSetup.maxSpd_Return_Axis_Z)
-				.setAcceleration(configSetup.accel_Return_Axis_Z)
-				.setTargetAbs(target_Axis);
+	case ID_AXIS_Z:
+	{
+		// Axis uses absolute position
+		// Ensure axis position is set to end position of last routine.
+		stepper_Z.setPosition(endPosition_Axis);
+		MilliDelay(20);
+		Serial.print("Z position: ");
+		Serial.println(stepper_Z.getPosition());
+		stepper_Z
+			.setMaxSpeed(configSetup.maxSpd_Return_Axis_Z)
+			.setAcceleration(configSetup.accel_Return_Axis_Z)
+			.setTargetAbs(startPositionAbs_Axis);
+
 #ifdef DEBUG
-			Serial.print("maxSpd_Return_Axis_Z: ");
-			Serial.println(configSetup.accel_Return_Axis_Z);
+		Serial.print("maxSpd_Return_Axis_Z: ");
+		Serial.println(configSetup.accel_Return_Axis_Z);
 #endif // DEBUG
-			SetEnable(ID_AXIS_Z, true);
-			if (pageCallerId == PAGE_MAIN)
-			{
-				// Only move the Z Axis
-				stepController.moveAsync(stepper_Z);
-			}
-			else
-			{
-				stepController.moveAsync(stepper_Z, stepper_Spindle);
-			}
-
-			break;
-		}
-		case ID_AXIS_X:
+		SetEnable(ID_AXIS_Z, true);
+		if (pageCallerId == PAGE_MAIN)
 		{
-			stepper_X.setPosition(0);
-			stepper_X
-				.setMaxSpeed(configSetup.maxSpd_Return_Axis_X)
-				.setAcceleration(configSetup.accel_Return_Axis_X)
-				.setTargetAbs(target_Axis);
+			// Only move the Z Axis
+			stepController.moveAsync(stepper_Z);
+		}
+		else
+		{
+			stepController.moveAsync(stepper_Z, stepper_Spindle);
+		}
+
+		break;
+	}
+	case ID_AXIS_X:
+	{
+		// Axis uses absolute position
+		// Ensure axis position is set to end position of last routine.
+		stepper_X.setPosition(endPosition_Axis);
+		MilliDelay(20);
+		Serial.print("X position: ");
+		Serial.println(stepper_X.getPosition());
+		stepper_X
+			.setMaxSpeed(configSetup.maxSpd_Return_Axis_X)
+			.setAcceleration(configSetup.accel_Return_Axis_X)
+			.setTargetAbs(startPositionAbs_Axis);
 #ifdef DEBUG
-			Serial.print("maxSpd_Return_Axis_X: ");
-			Serial.println(configSetup.accel_Return_Axis_X);
+		Serial.print("maxSpd_Return_Axis_X: ");
+		Serial.println(configSetup.accel_Return_Axis_X);
 #endif // DEBUG
 
-			SetEnable(ID_AXIS_X, true);
-			if (pageCallerId == PAGE_MAIN)
-			{
-				// Only move the X Axis
-				stepController.moveAsync(stepper_X);
-			}
-			else
-			{
-				stepController.moveAsync(stepper_X, stepper_Spindle);
-			}
-
-			break;
-		}
-		case ID_AXIS_B:
+		SetEnable(ID_AXIS_X, true);
+		if (pageCallerId == PAGE_MAIN)
 		{
-			stepper_B.setPosition(0);
-			stepper_B
-				.setMaxSpeed(configSetup.maxSpd_Return_Axis_B)
-				.setAcceleration(configSetup.accel_Return_Axis_B)
-				.setTargetAbs(target_Axis);
+			// Only move the X Axis
+			stepController.moveAsync(stepper_X);
+		}
+		else
+		{
+			stepController.moveAsync(stepper_X, stepper_Spindle);
+		}
+
+		break;
+	}
+	case ID_AXIS_B:
+	{
+		// Axis uses absolute position
+		// Ensure axis position is set to end position of last routine.
+		stepper_B.setPosition(endPosition_Axis);
+		MilliDelay(20);
+		Serial.print("B position: ");
+		Serial.println(stepper_B.getPosition());
+		stepper_B
+			.setMaxSpeed(configSetup.maxSpd_Return_Axis_B)
+			.setAcceleration(configSetup.accel_Return_Axis_B)
+			.setTargetAbs(startPositionAbs_Axis);
 #ifdef DEBUG
-			Serial.print("maxSpd_Return_Axis_B: ");
-			Serial.println(configSetup.accel_Return_Axis_B);
+		Serial.print("maxSpd_Return_Axis_B: ");
+		Serial.println(configSetup.accel_Return_Axis_B);
 #endif // DEBUG
-			SetEnable(ID_AXIS_B, true);
-			if (pageCallerId == PAGE_MAIN)
-			{
-				// Only move the B Axis
-				stepController.moveAsync(stepper_B);
-			}
-			else
-			{
-				stepController.moveAsync(stepper_B, stepper_Spindle);
-			}
-
-			break;
-		}
-		case ID_SPINDLE:
+		SetEnable(ID_AXIS_B, true);
+		if (pageCallerId == PAGE_MAIN)
 		{
-			// Only called from pages Main and One 
-			stepController.moveAsync(stepper_Spindle);
-			break;
+			// Only move the B Axis
+			stepController.moveAsync(stepper_B);
 		}
+		else
+		{
+			stepController.moveAsync(stepper_B, stepper_Spindle);
+		}
+
+		break;
+	}
+	case ID_SPINDLE:
+	{
+		// Only called from pages Main and One 
+		stepController.moveAsync(stepper_Spindle);
+		break;
+	}
 	}
 
 	while (stepController.isRunning())
 	{
+		Serial.println(stepper_Z.getPosition());
 
 		// Check for Cancel code  
 		if (SerialAvailable() >= 0)
@@ -7504,15 +8292,6 @@ void ReturnToStartPosition(int axisId)
 				case 83: // - S
 				{
 					stepController.stop();
-					////SetEnable(ID_AXIS_Z, false);
-					////SetEnable(ID_AXIS_X, false);
-					////SetEnable(ID_AXIS_B, false);
-					////stepper_X.setPosition(0);
-					////stepper_Z.setPosition(0);
-
-					////SetEnable(ID_SPINDLE, false);
-
-
 					break;
 				}
 			}
@@ -7520,320 +8299,316 @@ void ReturnToStartPosition(int axisId)
 
 		MilliDelay(10);
 	}
-	
+
 	endPosition_Spindle = stepper_Spindle.getPosition();
 
 	switch (axisId)
 	{
-		case ID_AXIS_Z:
-		{
-			endPosition_Axis = stepper_Z.getPosition();
-			break;
-		}
-		case ID_AXIS_X:
-		{
-			endPosition_Axis = stepper_X.getPosition();
-			break;
-		}
-		case ID_AXIS_B:
-		{
-			endPosition_Axis = stepper_B.getPosition();
-			break;
-		}
+	case ID_AXIS_Z:
+	{
+		endPosition_Axis = stepper_Z.getPosition();
+		break;
+	}
+	case ID_AXIS_X:
+	{
+		endPosition_Axis = stepper_X.getPosition();
+		break;
+	}
+	case ID_AXIS_B:
+	{
+		endPosition_Axis = stepper_B.getPosition();
+		break;
+	}
 	}
 
 	switch (pageCallerId)
 	{
-		case PAGE_MAIN:
+	case PAGE_MAIN:
+	{
+		if (axisId == ID_SPINDLE)
 		{
-			if (axisId == ID_SPINDLE)
-			{
-				SerialPrint("pageMain.bt1.val=0");
-				SerialPrint(nextionEnd);
-				SerialPrint("pageMain.bt1.val=0");
-				SerialPrint(nextionEnd);
-				SerialPrint("pageMain.va0.val=0");
-				SerialPrint(nextionEnd);
-				SerialPrint("pageMain.bt0.val=0");
-				SerialPrint(nextionEnd);
-				SerialPrint("pageBE.t1.txt=");
-				SerialWrite(0x22);
-				SerialPrint(endPosition_Spindle);
-				SerialPrint(nextionQuoteEnd);
-			}
-			else
-			{
-				SerialPrint("pageMain.bt7.val=0");
-				SerialPrint(nextionEnd);
-				SerialPrint("pageMain.bt7.val=0");
-				SerialPrint(nextionEnd);
-				SerialPrint("pageMain.va0.val=0");
-				SerialPrint(nextionEnd);
-				SerialPrint("pageMain.bt4.val=0");
-				SerialPrint(nextionEnd);
-				MilliDelay(10);
-
-				SerialPrint("pageBE.t2.txt=");
-				SerialWrite(0x22);
-				SerialPrint(endPosition_Axis);
-				SerialPrint(nextionQuoteEnd);
-			}
-			break;
-		}
-		case PAGE_ONE:
-		{
-			SerialPrint("pageOne.bt1.val=0");
+			SerialPrint("pageMain.bt1.val=0");
 			SerialPrint(nextionEnd);
-			SerialPrint("pageOne.bt1.val=0");
+			SerialPrint("pageMain.bt1.val=0");
 			SerialPrint(nextionEnd);
-			SerialPrint("pageOne.va0.val=0");
+			SerialPrint("pageMain.va0.val=0");
 			SerialPrint(nextionEnd);
-			SerialPrint("pageOne.bt0.val=0");
+			SerialPrint("pageMain.bt0.val=0");
 			SerialPrint(nextionEnd);
-
-			switch (configOne.axisId)
-			{
-				case ID_AXIS_Z:
-				{
-					SerialPrint("pageOne.bt11.val=1");
-					SerialPrint(nextionEnd);
-					SerialPrint("pageOne.bt11.txt=");
-					SerialWrite(0x22);
-					SerialPrint("Disabled");
-					SerialPrint(nextionQuoteEnd);
-					break;
-				}
-				case ID_AXIS_X:
-				{
-					SerialPrint("pageOne.bt12.val=1");
-					SerialPrint(nextionEnd);
-					SerialPrint("pageOne.bt12.txt=");
-					SerialWrite(0x22);
-					SerialPrint("Disabled");
-					SerialPrint(nextionQuoteEnd);
-					break;
-				}
-				case ID_AXIS_B:
-				{
-					SerialPrint("pageOne.bt13.val=1");
-					SerialPrint(nextionEnd);
-					SerialPrint("pageOne.bt13.txt=");
-					SerialWrite(0x22);
-					SerialPrint("Disabled");
-					SerialPrint(nextionQuoteEnd);
-					break;
-				}
-				case ID_SPINDLE:
-				{
-					SerialPrint("pageOne.bt10.val=1");
-					SerialPrint(nextionEnd);
-					SerialPrint("pageOne.bt10.txt=");
-					SerialWrite(0x22);
-					SerialPrint("Disabled");
-					SerialPrint(nextionQuoteEnd);
-					break;
-				}
-			}
-
 			SerialPrint("pageBE.t1.txt=");
 			SerialWrite(0x22);
 			SerialPrint(endPosition_Spindle);
 			SerialPrint(nextionQuoteEnd);
+		}
+		else
+		{
+			SerialPrint("pageMain.bt7.val=0");
+			SerialPrint(nextionEnd);
+			SerialPrint("pageMain.bt7.val=0");
+			SerialPrint(nextionEnd);
+			SerialPrint("pageMain.va0.val=0");
+			SerialPrint(nextionEnd);
+			SerialPrint("pageMain.bt4.val=0");
+			SerialPrint(nextionEnd);
+			MilliDelay(10);
 
 			SerialPrint("pageBE.t2.txt=");
 			SerialWrite(0x22);
 			SerialPrint(endPosition_Axis);
 			SerialPrint(nextionQuoteEnd);
-			break;
 		}
-		case PAGE_SYNC:
-		{
-			SerialPrint("pageSync.bt1.val=0");
-			SerialPrint(nextionEnd);
-			SerialPrint("pageSync.bt1.val=0");
-			SerialPrint(nextionEnd);
-			SerialPrint("pageSync.va0.val=0");
-			SerialPrint(nextionEnd);
-			SerialPrint("pageSync.bt0.val=0");
-			SerialPrint(nextionEnd);
-			SerialPrint("pageBE.t1.txt=");
-			SerialWrite(0x22);
-			SerialPrint(endPosition_Spindle);
-			SerialPrint(nextionQuoteEnd);
-			SerialPrint("pageBE.t2.txt=");
-			SerialWrite(0x22);
-			SerialPrint(endPosition_Axis);
-			SerialPrint(nextionQuoteEnd);
-			break;
-		}
-		case PAGE_REC:
-		{
-			SerialPrint("pageRec.bt1.val=0");
-			SerialPrint(nextionEnd);
-			SerialPrint("pageRec.bt1.val=0");
-			SerialPrint(nextionEnd);
-			SerialPrint("pageRec.va0.val=0");
-			SerialPrint(nextionEnd);
-			SerialPrint("pageRec.bt0.val=0");
-			SerialPrint(nextionEnd);
-			SerialPrint("pageBE.t1.txt=");
-			SerialWrite(0x22);
-			SerialPrint(endPosition_Spindle);
-			SerialPrint(nextionQuoteEnd);
+		break;
+	}
+	case PAGE_ONE:
+	{
+		SerialPrint("pageOne.bt1.val=0");
+		SerialPrint(nextionEnd);
+		SerialPrint("pageOne.bt1.val=0");
+		SerialPrint(nextionEnd);
+		SerialPrint("pageOne.va0.val=0");
+		SerialPrint(nextionEnd);
+		SerialPrint("pageOne.bt0.val=0");
+		SerialPrint(nextionEnd);
 
-			SerialPrint("pageBE.t2.txt=");
+		switch (configOne.axisId)
+		{
+		case ID_AXIS_Z:
+		{
+			SerialPrint("pageOne.bt11.val=1");
+			SerialPrint(nextionEnd);
+			SerialPrint("pageOne.bt11.txt=");
 			SerialWrite(0x22);
-			SerialPrint(endPosition_Axis);
+			SerialPrint("Disabled");
 			SerialPrint(nextionQuoteEnd);
 			break;
 		}
-		case PAGE_INDEX:
+		case ID_AXIS_X:
 		{
-			SerialPrint("pageIndex.bt1.val=0");
+			SerialPrint("pageOne.bt12.val=1");
 			SerialPrint(nextionEnd);
-			SerialPrint("pageIndex.bt1.val=0");
-			SerialPrint(nextionEnd);
-			SerialPrint("pageIndex.va0.val=0");
-			SerialPrint(nextionEnd);
-			SerialPrint("pageIndex.bt0.val=0");
-			SerialPrint(nextionEnd);
-			SerialPrint("pageBE.t1.txt=");
+			SerialPrint("pageOne.bt12.txt=");
 			SerialWrite(0x22);
-			SerialPrint(endPosition_Spindle);
+			SerialPrint("Disabled");
 			SerialPrint(nextionQuoteEnd);
 			break;
 		}
-		case PAGE_BE:
+		case ID_AXIS_B:
 		{
-			SerialPrint("pageBE.bt1.val=0");
+			SerialPrint("pageOne.bt13.val=1");
 			SerialPrint(nextionEnd);
-			SerialPrint("pageBE.bt1.val=0");
-			SerialPrint(nextionEnd);
-			SerialPrint("pageBE.va0.val=0");
-			SerialPrint(nextionEnd);
-			SerialPrint("pageBE.bt0.val=0");
-			SerialPrint(nextionEnd);
-			SerialPrint("pageBE.t1.txt=");
+			SerialPrint("pageOne.bt13.txt=");
 			SerialWrite(0x22);
-			SerialPrint(endPosition_Spindle);
+			SerialPrint("Disabled");
 			SerialPrint(nextionQuoteEnd);
 			break;
 		}
-		case PAGE_MOVE:
+		case ID_SPINDLE:
 		{
-			SerialPrint("pageMove.bt1.val=0");
+			SerialPrint("pageOne.bt10.val=1");
 			SerialPrint(nextionEnd);
-			SerialPrint("pageMove.bt1.val=0");
-			SerialPrint(nextionEnd);
-			SerialPrint("pageMove.va0.val=0");
-			SerialPrint(nextionEnd);
-			SerialPrint("pageMove.bt0.val=0");
-			SerialPrint(nextionEnd);
-			SerialPrint("pageBE.t2.txt=");
+			SerialPrint("pageOne.bt10.txt=");
 			SerialWrite(0x22);
-			SerialPrint(endPosition_Axis);
+			SerialPrint("Disabled");
 			SerialPrint(nextionQuoteEnd);
 			break;
+		}
 		}
 
-		case PAGE_GEO:
-		{
-			SerialPrint("pageGeo.bt1.val=0");
-			SerialPrint(nextionEnd);
-			SerialPrint("pageGeo.bt1.val=0");
-			SerialPrint(nextionEnd);
-			SerialPrint("pageGeo.bt0.val=0");
-			SerialPrint(nextionEnd);
-			SerialPrint("pageGeo.va0.val=0");
-			SerialPrint(nextionEnd);
-			SerialPrint("pageBE.t1.txt=");
-			SerialWrite(0x22);
-			SerialPrint(endPosition_Spindle);
-			SerialPrint(nextionQuoteEnd);
+		SerialPrint("pageBE.t1.txt=");
+		SerialWrite(0x22);
+		SerialPrint(endPosition_Spindle);
+		SerialPrint(nextionQuoteEnd);
 
-			SerialPrint("pageBE.t2.txt=");
-			SerialWrite(0x22);
-			SerialPrint(endPosition_Axis);
-			SerialPrint(nextionQuoteEnd);
-			initialPosition_Axis = 0;
-			break;
-		}
-		case PAGE_GRK:
-		{
-			SerialPrint("pageGrk.bt1.val=0");
-			SerialPrint(nextionEnd);
-			SerialPrint("pageGrk.bt1.val=0");
-			SerialPrint(nextionEnd);
-			SerialPrint("pageGrk.va0.val=0");
-			SerialPrint(nextionEnd);
-			SerialPrint("pageGrk.bt0.val=0");
-			SerialPrint(nextionEnd);
-			SerialPrint("pageBE.t1.txt=");
-			SerialWrite(0x22);
-			SerialPrint(endPosition_Spindle);
-			SerialPrint(nextionQuoteEnd);
+		SerialPrint("pageBE.t2.txt=");
+		SerialWrite(0x22);
+		SerialPrint(endPosition_Axis);
+		SerialPrint(nextionQuoteEnd);
+		break;
+	}
+	case PAGE_SYNC:
+	{
+		SerialPrint("pageSync.bt1.val=0");
+		SerialPrint(nextionEnd);
+		SerialPrint("pageSync.bt1.val=0");
+		SerialPrint(nextionEnd);
+		SerialPrint("pageSync.va0.val=0");
+		SerialPrint(nextionEnd);
+		SerialPrint("pageSync.bt0.val=0");
+		SerialPrint(nextionEnd);
+		SerialPrint("pageBE.t1.txt=");
+		SerialWrite(0x22);
+		SerialPrint(endPosition_Spindle);
+		SerialPrint(nextionQuoteEnd);
+		SerialPrint("pageBE.t2.txt=");
+		SerialWrite(0x22);
+		SerialPrint(endPosition_Axis);
+		SerialPrint(nextionQuoteEnd);
+		break;
+	}
+	case PAGE_REC:
+	{
+		SerialPrint("pageRec.bt1.val=0");
+		SerialPrint(nextionEnd);
+		SerialPrint("pageRec.bt1.val=0");
+		SerialPrint(nextionEnd);
+		SerialPrint("pageRec.va0.val=0");
+		SerialPrint(nextionEnd);
+		SerialPrint("pageRec.bt0.val=0");
+		SerialPrint(nextionEnd);
+		SerialPrint("pageBE.t1.txt=");
+		SerialWrite(0x22);
+		SerialPrint(endPosition_Spindle);
+		SerialPrint(nextionQuoteEnd);
 
-			SerialPrint("pageBE.t2.txt=");
-			SerialWrite(0x22);
-			SerialPrint(endPosition_Axis);
-			SerialPrint(nextionQuoteEnd);
-			break;
-		}
-		case PAGE_GRKFILE:
-		{
-			SerialPrint("pageGrkFile.bt1.val=0");
-			SerialPrint(nextionEnd);
-			SerialPrint("pageGrkFile.bt1.val=0");
-			SerialPrint(nextionEnd);
-			SerialPrint("pageGrkFile.va0.val=0");
-			SerialPrint(nextionEnd);
-			SerialPrint("pageGrkFile.bt0.val=0");
-			SerialPrint(nextionEnd);
-			SerialPrint("pageBE.t1.txt=");
-			SerialWrite(0x22);
-			SerialPrint(endPosition_Spindle);
-			SerialPrint(nextionQuoteEnd);
+		SerialPrint("pageBE.t2.txt=");
+		SerialWrite(0x22);
+		SerialPrint(endPosition_Axis);
+		SerialPrint(nextionQuoteEnd);
+		break;
+	}
+	case PAGE_INDEX:
+	{
+		SerialPrint("pageIndex.bt1.val=0");
+		SerialPrint(nextionEnd);
+		SerialPrint("pageIndex.bt1.val=0");
+		SerialPrint(nextionEnd);
+		SerialPrint("pageIndex.va0.val=0");
+		SerialPrint(nextionEnd);
+		SerialPrint("pageIndex.bt0.val=0");
+		SerialPrint(nextionEnd);
+		SerialPrint("pageBE.t1.txt=");
+		SerialWrite(0x22);
+		SerialPrint(endPosition_Spindle);
+		SerialPrint(nextionQuoteEnd);
+		break;
+	}
+	case PAGE_BE:
+	{
+		SerialPrint("pageBE.bt1.val=0");
+		SerialPrint(nextionEnd);
+		SerialPrint("pageBE.bt1.val=0");
+		SerialPrint(nextionEnd);
+		SerialPrint("pageBE.va0.val=0");
+		SerialPrint(nextionEnd);
+		SerialPrint("pageBE.bt0.val=0");
+		SerialPrint(nextionEnd);
+		SerialPrint("pageBE.t1.txt=");
+		SerialWrite(0x22);
+		SerialPrint(endPosition_Spindle);
+		SerialPrint(nextionQuoteEnd);
+		break;
+	}
+	case PAGE_MOVE:
+	{
+		SerialPrint("pageMove.bt1.val=0");
+		SerialPrint(nextionEnd);
+		SerialPrint("pageMove.bt1.val=0");
+		SerialPrint(nextionEnd);
+		SerialPrint("pageMove.va0.val=0");
+		SerialPrint(nextionEnd);
+		SerialPrint("pageMove.bt0.val=0");
+		SerialPrint(nextionEnd);
+		SerialPrint("pageBE.t2.txt=");
+		SerialWrite(0x22);
+		SerialPrint(endPosition_Axis);
+		SerialPrint(nextionQuoteEnd);
+		break;
+	}
 
-			SerialPrint("pageBE.t2.txt=");
-			SerialWrite(0x22);
-			SerialPrint(endPosition_Axis);
-			SerialPrint(nextionQuoteEnd);
-			break;
-		}
+	case PAGE_GEO:
+	{
+		SerialPrint("pageGeo.bt1.val=0");
+		SerialPrint(nextionEnd);
+		SerialPrint("pageGeo.bt1.val=0");
+		SerialPrint(nextionEnd);
+		SerialPrint("pageGeo.bt0.val=0");
+		SerialPrint(nextionEnd);
+		SerialPrint("pageGeo.va0.val=0");
+		SerialPrint(nextionEnd);
+		SerialPrint("pageBE.t1.txt=");
+		SerialWrite(0x22);
+		SerialPrint(endPosition_Spindle);
+		SerialPrint(nextionQuoteEnd);
+
+		SerialPrint("pageBE.t2.txt=");
+		SerialWrite(0x22);
+		SerialPrint(endPosition_Axis);
+		SerialPrint(nextionQuoteEnd);
+		break;
+	}
+	case PAGE_GRK:
+	{
+		SerialPrint("pageGrk.bt1.val=0");
+		SerialPrint(nextionEnd);
+		SerialPrint("pageGrk.bt1.val=0");
+		SerialPrint(nextionEnd);
+		SerialPrint("pageGrk.va0.val=0");
+		SerialPrint(nextionEnd);
+		SerialPrint("pageGrk.bt0.val=0");
+		SerialPrint(nextionEnd);
+		SerialPrint("pageBE.t1.txt=");
+		SerialWrite(0x22);
+		SerialPrint(endPosition_Spindle);
+		SerialPrint(nextionQuoteEnd);
+
+		SerialPrint("pageBE.t2.txt=");
+		SerialWrite(0x22);
+		SerialPrint(endPosition_Axis);
+		SerialPrint(nextionQuoteEnd);
+		break;
+	}
+	case PAGE_GRKFILE:
+	{
+		SerialPrint("pageGrkFile.bt1.val=0");
+		SerialPrint(nextionEnd);
+		SerialPrint("pageGrkFile.bt1.val=0");
+		SerialPrint(nextionEnd);
+		SerialPrint("pageGrkFile.va0.val=0");
+		SerialPrint(nextionEnd);
+		SerialPrint("pageGrkFile.bt0.val=0");
+		SerialPrint(nextionEnd);
+		SerialPrint("pageBE.t1.txt=");
+		SerialWrite(0x22);
+		SerialPrint(endPosition_Spindle);
+		SerialPrint(nextionQuoteEnd);
+
+		SerialPrint("pageBE.t2.txt=");
+		SerialWrite(0x22);
+		SerialPrint(endPosition_Axis);
+		SerialPrint(nextionQuoteEnd);
+		break;
+	}
 	}
 
 	if (pageCallerId == PAGE_MAIN)
 	{
 		switch (axisId)
 		{
-			case ID_SPINDLE:
-			{
-				stepper_Spindle.setPosition(0);
-				endPosition_Spindle = 0;
-				returnSteps_Spindle = 0;
-				break;
-			}
-			case ID_AXIS_Z:
-			{
-				stepper_Z.setPosition(0);
-				endPosition_Axis = 0;
-				returnSteps_Axis = 0;
-				break;
-			}
-			case ID_AXIS_X:
-			{
-				stepper_X.setPosition(0);
-				endPosition_Axis = 0;
-				returnSteps_Axis = 0;
-				break;
-			}
-			case ID_AXIS_B:
-			{
-				stepper_B.setPosition(0);
-				endPosition_Axis = 0;
-				returnSteps_Axis = 0;
-				break;
-			}
+		case ID_SPINDLE:
+		{
+			stepper_Spindle.setPosition(0);
+			endPosition_Spindle = 0;
+			returnSteps_Spindle = 0;
+			break;
+		}
+		case ID_AXIS_Z:
+		{
+			stepper_Z.setPosition(0);
+			endPosition_Axis = 0;
+			break;
+		}
+		case ID_AXIS_X:
+		{
+			stepper_X.setPosition(0);
+			endPosition_Axis = 0;
+			break;
+		}
+		case ID_AXIS_B:
+		{
+			stepper_B.setPosition(0);
+			endPosition_Axis = 0;
+			break;
+		}
 		}
 	}
 	else
@@ -7844,16 +8619,15 @@ void ReturnToStartPosition(int axisId)
 		stepper_B.setPosition(0);
 		endPosition_Axis = 0;
 		endPosition_Spindle = 0;
-		returnSteps_Axis = 0;
 		returnSteps_Spindle = 0;
 	}
- 
+
 	SetEnable(ID_SPINDLE, false);
 	SetEnable(ID_AXIS_Z, false);
 	SetEnable(ID_AXIS_X, false);
 	SetEnable(ID_AXIS_B, false);
-	Serial.println("End ReturnToStartPosition()");
 }
+
 
 // ================================================================================= 
 // Rose Patterns
@@ -7873,6 +8647,7 @@ float slideFunc_Axis(float spindleAngle)
 	float phi = fmodf(spindleAngle * kRatio, TWO_PI);
 	//float retVal = slideStepsAmplitude * cosf(phi);
 	return slideStepsAmplitude * cosf(phi); //retVal;
+
 }
 
 //------------------------------------------------------------------------------------
@@ -7922,29 +8697,35 @@ void tick()
 /// </comment>
 /// <param name="direction">Direction of pattern</param>
 /// <returns></returns>
-void RoseRadial_Org(int direction)
+void RoseRadial(int direction)
 {
 	bool runPattern = true;
 	IntervalTimer tickTimer;
-	RotateControl controllerRoseSpindle;
+	//RotateControl controllerRoseSpindle;
+	StepControl controllerRoseSpindle;
 
 	kRatio = (float)configRose.n / configRose.d;
 
 	// Initialize variables to 0
-	returnSteps_Axis = 0;
 	returnSteps_Spindle = 0;
 	slideStepsAmplitude = 0;
-	initialPosition_Axis = 0;
+	startPositionAbs_Axis = 0;
 
 	// Get spindle steps per revolution and max speed
 	spindleStepsPerRev = configSetup.gearRatio_Spindle * configSetup.microsteps_Spindle * configSetup.steps360_Spindle;
 	newMaxSpd_RoseSpindle = configRose.maxSpd_Spindle * configRose.speedPercent_Spindle * .01 * direction;
+	volatile int32_t spindleTarget = 2000000000;
+	Serial.print("Spindle Revolutions: ");
+	Serial.println(configRose.spindleRevolutions);
+	Serial.print("spindleTarget: ");
+	Serial.println(spindleTarget);
 
 	// Set spindle max speed and acceleration
 	stepperSpindle
 		.setMaxSpeed(newMaxSpd_RoseSpindle)
 		.setAcceleration(configRose.accel_Spindle)
 		.setPosition(0);
+	stepperSpindle.setTargetRel(spindleTarget);
 
 	// Enable spindle
 	SetEnable(ID_SPINDLE, true);
@@ -7956,12 +8737,27 @@ void RoseRadial_Org(int direction)
 			// Get Z axis amplitude steps and max speed
 			slideStepsAmplitude = ((configRose.amplitude_Radial_Z / (configSetup.distancePerRev_AxisZ)) * configSetup.steps360_Axis_Z * configSetup.microsteps_Axis_Z) / 2;  // Amplitude is normally measured from the middle to the top
 			newMaxSpd_RoseAxis = configRose.maxSpd_Axis_Z * configRose.speedPercent_Axis_Z * .01 * direction;
-		
+
+			stepperAxis_Z.setPosition(0);
+
+			Serial.print("Z Initial position:  ");
+			Serial.println(stepperAxis_Z.getPosition());
+			Serial.print("Z Max position:  ");
+			Serial.println(slideStepsAmplitude);
+
+			// Use Absolute position for Return function
+			// slideFunc_Axis initial call sets axis position to max amplitude (slideStepsAmplitude).
+			Serial.print("returnPositionAbs_Axis:  ");
+			startPositionAbs_Axis = slideStepsAmplitude;
+			Serial.print(startPositionAbs_Axis);
 			// Set Z axis max speed and acceleration
 			stepperAxis_Z
 				.setMaxSpeed(newMaxSpd_RoseAxis)
 				.setAcceleration(configRose.accel_Axis_Z)
-				.setPosition(slideFunc_Axis(0));
+				.setPosition(slideFunc_Axis(0)); 
+
+			Serial.print("Z Initial position_2:  ");
+			Serial.println(stepperAxis_Z.getPosition());
 
 			SetEnable(ID_AXIS_Z, true);
 			controllerAxis.rotateAsync(stepperAxis_Z);
@@ -7978,6 +8774,12 @@ void RoseRadial_Org(int direction)
 				slideStepsAmplitude = ((configRose.amplitude_Radial_X / (configSetup.distancePerRev_AxisXAlt)) * configSetup.steps360_Axis_XAlt * configSetup.microsteps_Axis_XAlt) / 2;  // Amplitude is normally measured from the middle to the top
 			}
 			newMaxSpd_RoseAxis = configRose.maxSpd_Axis_X * configRose.speedPercent_Axis_X * .01 * direction;
+
+			// Use Absolute position for Return function
+			// slideFunc_Axis initial call sets axis position to max amplitude (slideStepsAmplitude).
+			Serial.print("returnPositionAbs_Axis:  ");
+			startPositionAbs_Axis = slideStepsAmplitude;
+			Serial.print(startPositionAbs_Axis);
 			stepperAxis_X
 				.setMaxSpeed(newMaxSpd_RoseAxis)
 				.setAcceleration(configRose.accel_Axis_X)
@@ -8003,6 +8805,12 @@ void RoseRadial_Org(int direction)
 			}
 
 			newMaxSpd_RoseAxis = configRose.maxSpd_Axis_B * configRose.speedPercent_Axis_B * .01 * direction;
+
+			// Use Absolute position for Return function
+			// slideFunc_Axis initial call sets axis position to max amplitude (slideStepsAmplitude).
+			Serial.print("returnPositionAbs_Axis:  ");
+			startPositionAbs_Axis = slideStepsAmplitude;
+			Serial.print(startPositionAbs_Axis);
 			stepperAxis_B
 				.setMaxSpeed(newMaxSpd_RoseAxis)
 				.setAcceleration(configRose.accel_Axis_B)
@@ -8012,8 +8820,8 @@ void RoseRadial_Org(int direction)
 			break;
 		}
 	}
-	controllerRoseSpindle.rotateAsync(stepperSpindle); // let the spindle run with constant speed
-
+	//controllerRoseSpindle.rotateAsync(stepperSpindle); // let the spindle run with constant speed
+	controllerRoseSpindle.moveAsync(stepperSpindle);
 	controllerAxis.overrideSpeed(0);
 
 	tick();
@@ -8022,7 +8830,6 @@ void RoseRadial_Org(int direction)
 	tickTimer.priority(priorityLevel); // lowest priority, potentially long caclulations need to be interruptable by TeensyStep
 	tickTimer.begin(tick, recalcPeriod);
 
-	//while (controllerRoseSpindle.isRunning())
 	while (runPattern)
 	{
 		// Check for Cancel code  
@@ -8034,8 +8841,11 @@ void RoseRadial_Org(int direction)
 				case 83: // - S
 				{
 					tickTimer.end();
-					controllerRoseSpindle.stopAsync();
+					//controllerRoseSpindle.overrideSpeed(0);
+					controllerAxis.overrideSpeed(0);
 					controllerAxis.stopAsync();
+					controllerRoseSpindle.stopAsync();
+
 					MilliDelay(2000);
 					runPattern = false;
 					break;
@@ -8065,12 +8875,9 @@ void RoseRadial_Org(int direction)
 		case ID_AXIS_Z:
 		{
 			// Store Z axis position for possible use in Return to 0 method
-			endPosition_Axis = stepperAxis_Z.getPosition();
 
-			// Set Z axis position to 0
-			stepperAxis_Z.setPosition(0);
-			
-			Serial.print("Z reset position:  ");
+			endPosition_Axis = stepperAxis_Z.getPosition();
+			Serial.print("Z position:  ");
 			Serial.println(stepperAxis_Z.getPosition());
 
 			// Disable Z axis
@@ -8080,246 +8887,281 @@ void RoseRadial_Org(int direction)
 		case ID_AXIS_X:
 		{
 			endPosition_Axis = stepperAxis_X.getPosition();
-			stepperAxis_X.setPosition(0);
-
 			SetEnable(ID_AXIS_X, false);
 			break;
 		}
 		case ID_AXIS_B:
 		{
 			endPosition_Axis = stepperAxis_B.getPosition();
-			stepperAxis_B.setPosition(0);
-
 			SetEnable(ID_AXIS_B, false);
 			break;
 		}
 	}
 
-	// Calculate return steps for an axis
-	returnSteps_Axis = endPosition_Axis; // -initialPosition_Axis;
-
-	// Reset axis initial position variable to 0
-	initialPosition_Axis = 0;
-
 #ifdef DEBUG
 	Serial.print("returnSteps_Spindle:");
 	Serial.println(returnSteps_Spindle);
-	Serial.print("returnSteps_Axis: ");
-	Serial.println(returnSteps_Axis);
+	Serial.print("endPosition_Axis: ");
+	Serial.println(endPosition_Axis);
 	Serial.println("---------------");
 #endif // DEBUG
 
 }
 
-void RoseRadial(int direction)
-{
-	bool runPattern = true;
-	IntervalTimer tickTimer;
-	//RotateControl controllerRoseSpindle;
-	StepControl controllerRoseSpindle;
+//void RoseAxial(int direction)
+//void RoseRadial(int direction)
+//{
+//	Stepper stepperSpindleAxial(PIN_AXIS_Z_STEP, PIN_AXIS_Z_DIR);
+//	Stepper stepperAxis_ZAxial(PIN_SPINDLE_STEP, PIN_SPINDLE_DIR);
+//	
+//	bool runPattern = true;
+//	IntervalTimer tickTimer;
+//	//RotateControl controllerRoseSpindle;
+//	StepControl controllerRoseSpindle;
+//
+//	kRatio = (float)configRose.n / configRose.d;
+//
+//	// Initialize variables to 0
+//	returnSteps_Spindle = 0;
+//	slideStepsAmplitude = 0;
+//	startPositionAbs_Axis = 0;
+//
+//	// Get spindle steps per revolution and max speed
+//	//spindleStepsPerRev = configSetup.gearRatio_Spindle * configSetup.microsteps_Spindle * configSetup.steps360_Spindle;
+//	//newMaxSpd_RoseSpindle = configRose.maxSpd_Spindle * configRose.speedPercent_Spindle * .01 * direction;
+//	
+//	spindleStepsPerRev = ((configRose.amplitude_Radial_Z / (configSetup.distancePerRev_AxisZ)) * configSetup.steps360_Axis_Z * configSetup.microsteps_Axis_Z) / 2;  // Amplitude is normally measured from the middle to the top
+//	newMaxSpd_RoseSpindle = configRose.maxSpd_Axis_Z * configRose.speedPercent_Axis_Z * .01 * direction;
+//	
+//	volatile int32_t spindleTarget = 2000000000;
+//	Serial.print("Spindle Revolutions: ");
+//	Serial.println(configRose.spindleRevolutions);
+//	Serial.print("spindleTarget: ");
+//	Serial.println(spindleTarget);
+//
+//	// Set spindle max speed and acceleration
+//	stepperSpindleAxial
+//		.setMaxSpeed(newMaxSpd_RoseSpindle)
+//		.setAcceleration(configRose.accel_Spindle)
+//		.setPosition(0);
+//	stepperSpindleAxial.setTargetRel(spindleTarget);
+//
+//	// Enable spindle
+//	SetEnable(ID_SPINDLE, true);
+//
+//	switch (configRose.axisId)
+//	{
+//	case ID_AXIS_Z:
+//	{
+//		// Get Z axis amplitude steps and max speed
+//		//slideStepsAmplitude = ((configRose.amplitude_Radial_Z / (configSetup.distancePerRev_AxisZ)) * configSetup.steps360_Axis_Z * configSetup.microsteps_Axis_Z) / 2;  // Amplitude is normally measured from the middle to the top
+//		//newMaxSpd_RoseAxis = configRose.maxSpd_Axis_Z * configRose.speedPercent_Axis_Z * .01 * direction;
+//
+//
+//		slideStepsAmplitude = configSetup.gearRatio_Spindle * configSetup.microsteps_Spindle * configSetup.steps360_Spindle;
+//		newMaxSpd_RoseAxis = configRose.maxSpd_Spindle * configRose.speedPercent_Spindle * .01 * direction;
+//
+//		stepperAxis_ZAxial.setPosition(0);
+//
+//		Serial.print("Z Initial position:  ");
+//		Serial.println(stepperAxis_ZAxial.getPosition());
+//		Serial.print("Z Max position:  ");
+//		Serial.println(slideStepsAmplitude);
+//
+//		// Use Absolute position for Return function
+//		// slideFunc_Axis initial call sets axis position to max amplitude (slideStepsAmplitude).
+//		Serial.print("returnPositionAbs_Axis:  ");
+//		startPositionAbs_Axis = slideStepsAmplitude;
+//		Serial.print(startPositionAbs_Axis);
+//		// Set Z axis max speed and acceleration
+//		stepperAxis_ZAxial
+//			.setMaxSpeed(newMaxSpd_RoseAxis)
+//			.setAcceleration(configRose.accel_Axis_Z)
+//			.setPosition(slideFunc_Axis(0));
+//
+//		Serial.print("Z Initial position_2:  ");
+//		Serial.println(stepperAxis_ZAxial.getPosition());
+//
+//		SetEnable(ID_AXIS_Z, true);
+//		controllerAxis.rotateAsync(stepperAxis_ZAxial);
+//		break;
+//	}
+//	case ID_AXIS_X:
+//	{
+//		if (configSetup.xAltX == 0)
+//		{
+//			slideStepsAmplitude = ((configRose.amplitude_Radial_X / (configSetup.distancePerRev_AxisX)) * configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X) / 2;  // Amplitude is normally measured from the middle to the top
+//		}
+//		else
+//		{
+//			slideStepsAmplitude = ((configRose.amplitude_Radial_X / (configSetup.distancePerRev_AxisXAlt)) * configSetup.steps360_Axis_XAlt * configSetup.microsteps_Axis_XAlt) / 2;  // Amplitude is normally measured from the middle to the top
+//		}
+//		newMaxSpd_RoseAxis = configRose.maxSpd_Axis_X * configRose.speedPercent_Axis_X * .01 * direction;
+//
+//		// Use Absolute position for Return function
+//		// slideFunc_Axis initial call sets axis position to max amplitude (slideStepsAmplitude).
+//		Serial.print("returnPositionAbs_Axis:  ");
+//		startPositionAbs_Axis = slideStepsAmplitude;
+//		Serial.print(startPositionAbs_Axis);
+//		stepperAxis_X
+//			.setMaxSpeed(newMaxSpd_RoseAxis)
+//			.setAcceleration(configRose.accel_Axis_X)
+//			.setPosition(slideFunc_Axis(0)); // set start position of counter	
+//		SetEnable(ID_AXIS_X, true);
+//		controllerAxis.rotateAsync(stepperAxis_X);
+//		break;
+//	}
+//	case ID_AXIS_B:
+//	{
+//		switch (configSetup.radialOrLinear_Axis_B)
+//		{
+//		case RADIAL_B:
+//		{
+//			slideStepsAmplitude = DistanceToSteps_RadialB(configRose.amplitude_Radial_B) / 2;
+//			break;
+//		}
+//		case LINEAR_B:
+//		{
+//			slideStepsAmplitude = DistanceToSteps_LinearB(configRose.amplitude_Radial_B) / 2;
+//			break;
+//		}
+//		}
+//
+//		newMaxSpd_RoseAxis = configRose.maxSpd_Axis_B * configRose.speedPercent_Axis_B * .01 * direction;
+//
+//		// Use Absolute position for Return function
+//		// slideFunc_Axis initial call sets axis position to max amplitude (slideStepsAmplitude).
+//		Serial.print("returnPositionAbs_Axis:  ");
+//		startPositionAbs_Axis = slideStepsAmplitude;
+//		Serial.print(startPositionAbs_Axis);
+//		stepperAxis_B
+//			.setMaxSpeed(newMaxSpd_RoseAxis)
+//			.setAcceleration(configRose.accel_Axis_B)
+//			.setPosition(slideFunc_Axis(0)); // set start position of counter
+//		SetEnable(ID_AXIS_B, true);
+//		controllerAxis.rotateAsync(stepperAxis_B);
+//		break;
+//	}
+//	}
+//	//controllerRoseSpindle.rotateAsync(stepperSpindle); // let the spindle run with constant speed
+//	controllerRoseSpindle.moveAsync(stepperSpindleAxial);
+//	controllerAxis.overrideSpeed(0);
+//
+//	tick();
+//
+//	// use a timer to periodically calculate new targets for the slide
+//	tickTimer.priority(priorityLevel); // lowest priority, potentially long caclulations need to be interruptable by TeensyStep
+//	tickTimer.begin(tick, recalcPeriod);
+//
+//	while (runPattern)
+//	{
+//		// Check for Cancel code  
+//		if (SerialAvailable() >= 0)
+//		{
+//			incomingByte = SerialRead(serialId);
+//			switch (incomingByte)
+//			{
+//			case 83: // - S
+//			{
+//				tickTimer.end();
+//				//controllerRoseSpindle.overrideSpeed(0);
+//				controllerAxis.overrideSpeed(0);
+//				controllerAxis.stopAsync();
+//				controllerRoseSpindle.stopAsync();
+//
+//				MilliDelay(2000);
+//				runPattern = false;
+//				break;
+//			}
+//			}
+//		}
+//
+//		MilliDelay(20);
+//	} // End while
+//
+//	// endPosition_Spindle and endPosition_Axis may be used in future for reporting purposes
+//	// Store current spindle position for possible use in Return to 0 method
+//	endPosition_Spindle = stepperSpindleAxial.getPosition();
+//	returnSteps_Spindle = endPosition_Spindle;
+//
+//	// Set spindle position to 0
+//	stepperSpindleAxial.setPosition(0);
+//	Serial.println("===============");
+//	Serial.print("Spindle Reset Position: ");
+//	Serial.println(stepperSpindleAxial.getPosition());
+//
+//	// Disable spindle
+//	SetEnable(ID_SPINDLE, false);
+//
+//	switch (configRose.axisId)
+//	{
+//	case ID_AXIS_Z:
+//	{
+//		// Store Z axis position for possible use in Return to 0 method
+//
+//		endPosition_Axis = stepperAxis_ZAxial.getPosition();
+//		Serial.print("Z position:  ");
+//		Serial.println(stepperAxis_ZAxial.getPosition());
+//
+//		// Disable Z axis
+//		SetEnable(ID_AXIS_Z, false);
+//		break;
+//	}
+//	case ID_AXIS_X:
+//	{
+//		endPosition_Axis = stepperAxis_X.getPosition();
+//		SetEnable(ID_AXIS_X, false);
+//		break;
+//	}
+//	case ID_AXIS_B:
+//	{
+//		endPosition_Axis = stepperAxis_B.getPosition();
+//		SetEnable(ID_AXIS_B, false);
+//		break;
+//	}
+//	}
+//
+//#ifdef DEBUG
+//	Serial.print("returnSteps_Spindle:");
+//	Serial.println(returnSteps_Spindle);
+//	Serial.print("endPosition_Axis: ");
+//	Serial.println(endPosition_Axis);
+//	Serial.println("---------------");
+//#endif // DEBUG
+//
+//}
 
-	kRatio = (float)configRose.n / configRose.d;
 
-	// Initialize variables to 0
-	returnSteps_Axis = 0;
-	returnSteps_Spindle = 0;
-	slideStepsAmplitude = 0;
-	initialPosition_Axis = 0;
-
-	// Get spindle steps per revolution and max speed
-	spindleStepsPerRev = configSetup.gearRatio_Spindle * configSetup.microsteps_Spindle * configSetup.steps360_Spindle;
-	newMaxSpd_RoseSpindle = configRose.maxSpd_Spindle * configRose.speedPercent_Spindle * .01 * direction;
-	volatile int32_t spindleTarget = 2000000000;
-	Serial.print("Spindle Revolutions: ");
-	Serial.println(configRose.spindleRevolutions);
-	// Must be enabled on Nextion first
-	//if (configRose.spindleRevolutions > 0)
-	//{
-	//	spindleTarget = configRose.spindleRevolutions * spindleStepsPerRev;
-	//}
-
-		Serial.print("spindleTarget: ");
-		Serial.println(spindleTarget);
-	// Set spindle max speed and acceleration
-	stepperSpindle
-		.setMaxSpeed(newMaxSpd_RoseSpindle)
-		.setAcceleration(configRose.accel_Spindle)
-		.setPosition(0);
-	stepperSpindle.setTargetRel(spindleTarget);
-
-	// Enable spindle
-	SetEnable(ID_SPINDLE, true);
-
-	switch (configRose.axisId)
-	{
-	case ID_AXIS_Z:
-	{
-		// Get Z axis amplitude steps and max speed
-		slideStepsAmplitude = ((configRose.amplitude_Radial_Z / (configSetup.distancePerRev_AxisZ)) * configSetup.steps360_Axis_Z * configSetup.microsteps_Axis_Z) / 2;  // Amplitude is normally measured from the middle to the top
-		newMaxSpd_RoseAxis = configRose.maxSpd_Axis_Z * configRose.speedPercent_Axis_Z * .01 * direction;
-
-		// Set Z axis max speed and acceleration
-		stepperAxis_Z
-			.setMaxSpeed(newMaxSpd_RoseAxis)
-			.setAcceleration(configRose.accel_Axis_Z)
-			.setPosition(slideFunc_Axis(0));
-
-		SetEnable(ID_AXIS_Z, true);
-		controllerAxis.rotateAsync(stepperAxis_Z);
-		break;
-	}
-	case ID_AXIS_X:
-	{
-		if (configSetup.xAltX == 0)
-		{
-			slideStepsAmplitude = ((configRose.amplitude_Radial_X / (configSetup.distancePerRev_AxisX)) * configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X) / 2;  // Amplitude is normally measured from the middle to the top
-		}
-		else
-		{
-			slideStepsAmplitude = ((configRose.amplitude_Radial_X / (configSetup.distancePerRev_AxisXAlt)) * configSetup.steps360_Axis_XAlt * configSetup.microsteps_Axis_XAlt) / 2;  // Amplitude is normally measured from the middle to the top
-		}
-		newMaxSpd_RoseAxis = configRose.maxSpd_Axis_X * configRose.speedPercent_Axis_X * .01 * direction;
-		stepperAxis_X
-			.setMaxSpeed(newMaxSpd_RoseAxis)
-			.setAcceleration(configRose.accel_Axis_X)
-			.setPosition(slideFunc_Axis(0)); // set start position of counter	
-		SetEnable(ID_AXIS_X, true);
-		controllerAxis.rotateAsync(stepperAxis_X);
-		break;
-	}
-	case ID_AXIS_B:
-	{
-		switch (configSetup.radialOrLinear_Axis_B)
-		{
-		case RADIAL_B:
-		{
-			slideStepsAmplitude = DistanceToSteps_RadialB(configRose.amplitude_Radial_B) / 2;
-			break;
-		}
-		case LINEAR_B:
-		{
-			slideStepsAmplitude = DistanceToSteps_LinearB(configRose.amplitude_Radial_B) / 2;
-			break;
-		}
-		}
-
-		newMaxSpd_RoseAxis = configRose.maxSpd_Axis_B * configRose.speedPercent_Axis_B * .01 * direction;
-		stepperAxis_B
-			.setMaxSpeed(newMaxSpd_RoseAxis)
-			.setAcceleration(configRose.accel_Axis_B)
-			.setPosition(slideFunc_Axis(0)); // set start position of counter
-		SetEnable(ID_AXIS_B, true);
-		controllerAxis.rotateAsync(stepperAxis_B);
-		break;
-	}
-	}
-	//controllerRoseSpindle.rotateAsync(stepperSpindle); // let the spindle run with constant speed
-	controllerRoseSpindle.moveAsync(stepperSpindle);
-	controllerAxis.overrideSpeed(0);
-
-	tick();
-
-	// use a timer to periodically calculate new targets for the slide
-	tickTimer.priority(priorityLevel); // lowest priority, potentially long caclulations need to be interruptable by TeensyStep
-	tickTimer.begin(tick, recalcPeriod);
-
-	//while (controllerRoseSpindle.isRunning())
-	while (runPattern)
-	{
-		// Check for Cancel code  
-		if (SerialAvailable() >= 0)
-		{
-			incomingByte = SerialRead(serialId);
-			switch (incomingByte)
-			{
-			case 83: // - S
-			{
-				tickTimer.end();
-				//controllerRoseSpindle.overrideSpeed(0);
-				controllerAxis.overrideSpeed(0);
-				controllerAxis.stopAsync();
-				controllerRoseSpindle.stopAsync();
-
-				MilliDelay(2000);
-				runPattern = false;
-				break;
-			}
-			}
-		}
-
-		MilliDelay(20);
-	} // End while
-
-	// endPosition_Spindle and endPosition_Axis may be used in future for reporting purposes
-	// Store current spindle position for possible use in Return to 0 method
-	endPosition_Spindle = stepperSpindle.getPosition();
-	returnSteps_Spindle = endPosition_Spindle;
-
-	// Set spindle position to 0
-	stepperSpindle.setPosition(0);
-	Serial.println("===============");
-	Serial.print("Spindle Reset Position: ");
-	Serial.println(stepperSpindle.getPosition());
-
-	// Disable spindle
-	SetEnable(ID_SPINDLE, false);
-
-	switch (configRose.axisId)
-	{
-	case ID_AXIS_Z:
-	{
-		// Store Z axis position for possible use in Return to 0 method
-		endPosition_Axis = stepperAxis_Z.getPosition();
-
-		// Set Z axis position to 0
-		stepperAxis_Z.setPosition(0);
-
-		Serial.print("Z reset position:  ");
-		Serial.println(stepperAxis_Z.getPosition());
-
-		// Disable Z axis
-		SetEnable(ID_AXIS_Z, false);
-		break;
-	}
-	case ID_AXIS_X:
-	{
-		endPosition_Axis = stepperAxis_X.getPosition();
-		stepperAxis_X.setPosition(0);
-
-		SetEnable(ID_AXIS_X, false);
-		break;
-	}
-	case ID_AXIS_B:
-	{
-		endPosition_Axis = stepperAxis_B.getPosition();
-		stepperAxis_B.setPosition(0);
-
-		SetEnable(ID_AXIS_B, false);
-		break;
-	}
-	}
-
-	// Calculate return steps for an axis
-	returnSteps_Axis = endPosition_Axis; // -initialPosition_Axis;
-
-	// Reset axis initial position variable to 0
-	initialPosition_Axis = 0;
-
-#ifdef DEBUG
-	Serial.print("returnSteps_Spindle:");
-	Serial.println(returnSteps_Spindle);
-	Serial.print("returnSteps_Axis: ");
-	Serial.println(returnSteps_Axis);
-	Serial.println("---------------");
-#endif // DEBUG
-
-}
-
-//// ToDo: Not Functional
+//float slideFunc_Spindle(float spindleAngleZ)
+//{
+//	float phi = fmodf(spindleAngleZ * kRatio, TWO_PI);
+//	float retVal = spindleStepsAmplitude * cosf(phi);
+//	return retVal;
+//}
+//
+//void tickZ()
+//{
+//	float spindleAngleZ = stepperSpindle.getPosition() * (TWO_PI / spindleStepsPerRev); //convert steps to angle
+//	float slidePositionZ = stepperAxis_Z.getPosition();
+//
+//	float phi = fmodf(spindleAngleZ * kRatio, TWO_PI);
+//	float slideTargetZ = slideStepsAmplitude * cosf(phi);
+//
+//
+//	//float slideTargetZ = slideFunc_Axis_Z(spindleAngleZ);
+//
+//	float newSpeedZ = (slideTargetZ - slidePositionZ) / dtRose; // speed to reach target in given delta t (neglecting acceleration)
+//	float speedFacZ = newSpeedZ / newMaxSpd_RoseAxis;              // transform in relative factor (-1.0 .. 1.0)
+//
+//	controllerSpindle.overrideSpeed(speedFacZ);             // set new speed
+//
+//
+//}
+// ToDo: Not Functional
 //void RosePattern_Axial_Z(int direction)
 //{
 //	IntervalTimer tickTimerZ;
-//	RotateControl controllerRose;
+//	//RotateControl controllerRose;
 //	RotateControl rotateController1;
 //	bool runPattern = true;
 //
@@ -8348,9 +9190,9 @@ void RoseRadial(int direction)
 //
 //	rotateController1.rotateAsync(stepperAxis_Z);
 //	//controllerRose_Axis.overrideSpeed(0); // start with stopped slide
-//	controllerRose.rotateAsync(stepperSpindle); // let the spindle run with constant speed
+//	controllerSpindle.rotateAsync(stepperSpindle); // let the spindle run with constant speed
 //
-//	tickZ(rotateController1);
+//	tickZ();
 //
 //	// use a timer to periodically calculate new targets for the slide
 //	tickTimerZ.priority(priorityLevel); // lowest priority, potentially long caclulations need to be interruptable by TeensyStep
@@ -8407,9 +9249,9 @@ void RoseRadial(int direction)
 //			case 83: // - S
 //			{
 //				runPattern = false;
-//				controllerRose.overrideSpeed(0);
+//				controllerSpindle.overrideSpeed(0);
 //				rotateController1.overrideSpeed(0);
-//				controllerRose.stopAsync();
+//				controllerSpindle.stopAsync();
 //				rotateController1.stopAsync();
 //				break;
 //			}
@@ -8419,15 +9261,13 @@ void RoseRadial(int direction)
 //
 //	endPosition_Spindle = stepperSpindle.getPosition();
 //	endPosition_Axis = stepperAxis_Z.getPosition();
-//	returnSteps_Axis = endPosition_Axis;
 //	returnSteps_Spindle = endPosition_Spindle;
 //	stepperSpindle.setPosition(0);
-//	stepperAxis_Z.setPosition(0);
 //
 //	SetEnable(ID_SPINDLE, false);
 //	SetEnable(ID_AXIS_Z, false);
 //}
-//
+
 
 // ========================================================
  //Test EEPROM
@@ -8859,22 +9699,26 @@ void TestEEPROMConfig(int callerId)
 		case PAGE_GRKFILE:
 		{
 			configPageGreekKey eePageGrk;
+
 			EEPROM.get(eePromAddress_Grk, eePageGrk);
+			SerialPrint(pageConfig_t10);
+			SerialWrite(0x22);
+			SerialPrint(eePageGrk.maxSpd_Spindle);
+			SerialPrint(nextionQuoteEnd);
+
+			SerialPrint(pageConfig_t11);
+			SerialWrite(0x22);
+			SerialPrint(eePageGrk.accel_Spindle);
+			SerialPrint(nextionQuoteEnd);
+
+			Serial.print("Spindle Accel: ");
+			Serial.println(configGreekKey.accel_Spindle);
+			Serial.print("Spindle Accel-eeprom: ");
+			Serial.println(eePageGrk.accel_Spindle);
 			switch (configGreekKey.axisId)
 			{
 				case ID_AXIS_Z:
 				{
-
-					SerialPrint(pageConfig_t10);
-					SerialWrite(0x22);
-					SerialPrint(eePageGrk.maxSpd_Spindle);
-					SerialPrint(nextionQuoteEnd);
-
-					SerialPrint(pageConfig_t11);
-					SerialWrite(0x22);
-					SerialPrint(eePageGrk.accel_Spindle);
-					SerialPrint(nextionQuoteEnd);
-
 					SerialPrint(pageConfig_t12);
 					SerialWrite(0x22);
 					SerialPrint(eePageGrk.maxSpd_Axis_Z);
@@ -8888,16 +9732,6 @@ void TestEEPROMConfig(int callerId)
 				}
 				case ID_AXIS_X: // X Axis
 				{
-					SerialPrint(pageConfig_t10);
-					SerialWrite(0x22);
-					SerialPrint(eePageGrk.maxSpd_Spindle);
-					SerialPrint(nextionQuoteEnd);
-
-					SerialPrint(pageConfig_t11);
-					SerialWrite(0x22);
-					SerialPrint(eePageGrk.accel_Spindle);
-					SerialPrint(nextionQuoteEnd);
-
 					SerialPrint(pageConfig_t12);
 					SerialWrite(0x22);
 					SerialPrint(eePageGrk.maxSpd_Axis_X);
@@ -8911,16 +9745,6 @@ void TestEEPROMConfig(int callerId)
 				}
 				case ID_AXIS_B: // B Axis
 				{
-					SerialPrint(pageConfig_t10);
-					SerialWrite(0x22);
-					SerialPrint(eePageGrk.maxSpd_Spindle);
-					SerialPrint(nextionQuoteEnd);
-
-					SerialPrint(pageConfig_t11);
-					SerialWrite(0x22);
-					SerialPrint(eePageGrk.accel_Spindle);
-					SerialPrint(nextionQuoteEnd);
-
 					SerialPrint(pageConfig_t12);
 					SerialWrite(0x22);
 					SerialPrint(eePageGrk.maxSpd_Axis_B);
@@ -9108,8 +9932,6 @@ void TestEEPROMSetup()
 	SerialPrint(eePromPageSetup.polarity_Axis_B ? lowChar : highChar);
 	SerialPrint(nextionQuoteEnd);
 
-	Serial.print("AxisB-radialOrLinear: ");
-	Serial.println(eePromPageSetup.radialOrLinear_Axis_B);
 	// True=Linear, False = Radial
 	if (eePromPageSetup.radialOrLinear_Axis_B) 
 	{
@@ -9117,8 +9939,6 @@ void TestEEPROMSetup()
 		SerialPrint(nextionEnd);
 		SerialPrint(pageB_c1_1);
 		SerialPrint(nextionEnd);
-		Serial.print("C1_1: ");
-		Serial.println(pageB_c1_1);
 	}
 	else
 	{
@@ -9126,11 +9946,7 @@ void TestEEPROMSetup()
 		SerialPrint(nextionEnd);
 		SerialPrint(pageB_c1_0);
 		SerialPrint(nextionEnd);
-		Serial.print("C0_1: ");
-		Serial.println(pageB_c0_1);
 	}
-
-	
 
 	SerialPrint(pageB_t64);
 	SerialWrite(0x22);
