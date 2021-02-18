@@ -2,7 +2,7 @@
 /* *****************************************************************
 * 4Rose main entry
 * Author: Edward French
-* Version: 18 - 020221
+* Version: 19 - 021821
 ******************************************************************/
 
 #include "math.h"
@@ -30,7 +30,7 @@ Stepper stepperAxis_MainX(PIN_AXIS_X_STEP, PIN_AXIS_X_DIR);
 // TeensyStep controllers
 RotateControl controllerAxis;
 
-//RotateControl rotateController1;
+RotateControl controllerSpindle;
 
 /// <summary>
 /// Setup
@@ -72,8 +72,10 @@ void setup()
 	if (Serial1.available() > 0)
 	{
 		serialId = 1;
+#ifdef DEBUG
 		Serial.print("1-serialId: ");
 		Serial.println(serialId);
+#endif // Debug
 	}
 	// Serial2
 	Serial2.begin(115200); //Nextion Serial baud rate set in Nextion pageMain Preinitialize Event tab
@@ -89,8 +91,10 @@ void setup()
 	if (Serial2.available() > 0)
 	{
 		serialId = 2;
+#ifdef DEBUG
 		Serial.print("2-serialId: ");
 		Serial.println(serialId);
+#endif // Debug
 	}
 	// Serial3
 	Serial3.begin(115200); //Nextion Serial baud rate set in Nextion pageMain Preinitialize Event tab
@@ -106,14 +110,16 @@ void setup()
 	if (Serial3.available() > 0)
 	{
 		serialId = 3;
+#ifdef DEBUG
 		Serial.print("3-serialId: ");
 		Serial.println(serialId);
+#endif // Debug
 	}
 
-
+#ifdef DEBUG
 	Serial.print("serialId: ");
 	Serial.println(serialId);
-
+#endif // Debug
 	// Update with values from EEProm
 	EEPROM.get(eePromAddress_Setup, configSetup);
 	EEPROM.get(eePromAddress_Main, configMain);
@@ -289,17 +295,23 @@ void loop()
 	if (Serial1.available() > 0)
 	{
 		serialId = 1;
+#ifdef DEBUG
 		Serial.print("1.serialId: ");
+#endif // Debug
 	}
 	else if (Serial2.available() > 0)
 	{
 		serialId = 2;
-		//Serial.print("2.serialId: ");
+#ifdef DEBUG
+		Serial.print("2.serialId: ");
+#endif // Debug
 	}
 	else if (Serial3.available() > 0)
 	{
 		serialId = 3;
+#ifdef DEBUG
 		Serial.print("3.serialId: ");
+#endif // Debug
 	}
 
 	//SerialPrint("serialId: ");
@@ -311,13 +323,13 @@ void loop()
 	{
 		incomingByte = SerialRead(serialId);
 
-//#ifdef DEBUG
+#ifdef DEBUG
 		Serial.print("serialId: ");
 		Serial.println(serialId);
 //		Serial.print("incomingByte: ");
 //		Serial.println(incomingByte);
 //		Serial.println("MilliDelay");
-//#endif // DEBUG
+#endif // DEBUG
 
 		// Allow processing time for serial data
 		MilliDelay(15);
@@ -571,7 +583,6 @@ void loop()
 					case PAGE_REC:
 					{
 						configRec.accel_Spindle = (int)GetSerialFloat(serialId);
-						Serial.println(configRec.accel_Spindle);
 						EEPROM.put(eePromAddress_Rec, configRec);
 #ifdef DEBUG
 						Serial.print(accel_Char);
@@ -583,6 +594,7 @@ void loop()
 					case PAGE_GRKFILE:
 					{
 						configGreekKey.accel_Spindle = (int)GetSerialFloat(serialId);
+						EEPROM.put(eePromAddress_Grk, configGreekKey);
 #ifdef DEBUG
 						Serial.print("accel_Spindle: ");
 						Serial.println(configGreekKey.accel_Spindle);
@@ -663,9 +675,10 @@ void loop()
 			{
 			   break;
 			}
-			case 68: // D - Not Used
+			case 68: // D - Rec Style: Triangle, Square, Sawtooth
 			{
-
+				configRec.style = GetSerialInteger();
+				EEPROM.put(eePromAddress_Rec, configRec);
 				break;
 			}
 			case 69: //E - Index by divisions or degrees
@@ -2303,8 +2316,10 @@ void loop()
 			case 181: // µ - Move: Distance (Text)
 			{
 				float newDistance = GetSerialFloat(serialId);
+#ifdef DEBUG
 				Serial.print("newDistance: ");
 				Serial.println(newDistance);
+#endif // Debug
 				switch (configMove.axisId)
 				{
 					case ID_MOVE_AXIS_Z1:
@@ -2315,10 +2330,12 @@ void loop()
 					case ID_MOVE_AXIS_Z2:
 					{
 						configMove.distance_MoveZ2 = newDistance;
+#ifdef DEBUG
 						Serial.print("AxisId: ");
 						Serial.println(configMove.axisId);
 						Serial.print("distance_MoveZ2: ");
 						Serial.println(configMove.distance_MoveZ2);
+#endif // Debug
 						break;
 					}
 					case ID_MOVE_AXIS_X1:
@@ -2329,10 +2346,12 @@ void loop()
 					case ID_MOVE_AXIS_X2:
 					{
 						configMove.distance_MoveX2 = newDistance;
+#ifdef DEBUG
 						Serial.print("AxisId: ");
 						Serial.println(configMove.axisId);
 						Serial.print("distance_MoveX2: ");
 						Serial.println(configMove.distance_MoveX2);
+#endif // Debug
 						break;
 					}
 					case ID_MOVE_AXIS_B1:
@@ -3038,8 +3057,27 @@ void loop()
 				Serial.println(configRec.axisId);
 				Serial.print(radialOrAxial_Char);
 				Serial.println(configRec.radial_axial);
+				Serial.print("Style:");
+				Serial.println(configRec.style);
 	#endif // DEBUG
-				Reciprocate(waveDir);
+				switch (configRec.style)
+				{
+					case 0: // Triangle
+					{
+						Reciprocate_Triangle(waveDir);
+						break;
+					}
+					case 1: // Sawtooth
+					{
+						Reciprocate_Sawtooth(waveDir);
+						break;
+					}
+					case 2: // Square
+					{
+						Reciprocate_Square(waveDir);
+						break;
+					}
+				}
 
 				break;
 			}
@@ -3285,7 +3323,6 @@ void loop()
 			}
 			case 226: // â - Not Used
 			{
-				
 				break;
 			}
 			case 227: // ã - Rose: Axial Amplitude
@@ -3328,8 +3365,6 @@ void loop()
 			}
 			case 228: // ä - Rose: Radial Amplitude
 			{
-
-
 				switch (configRose.axisId)
 				{
 					case ID_AXIS_Z:
@@ -3466,9 +3501,6 @@ void loop()
 					break;
 				}
 				}
-
-
-
 
 				EEPROM.put(eePromAddress_Setup, configSetup);
 	#ifdef DEBUG
