@@ -763,6 +763,7 @@ void MoveAxis(int axisId, int directionAxis)
 	Stepper stepper_B(PIN_AXIS_B_STEP, PIN_AXIS_B_DIR);
 	double stepsToMove = 0;
 	float nextSpeed = 0;
+	int32_t position_Axis = endPosition_Axis;
 
 	const char * distancePer360_Char = "Distance/360:";
 	const char * stepsPer360_Char = "Steps/360:";
@@ -791,7 +792,7 @@ void MoveAxis(int axisId, int directionAxis)
 	{
 		case ID_MOVE_AXIS_Z1:
 		{
-			stepper_Z.setPosition(0);
+			////stepper_Z.setPosition(0);
 			stepsToMove = (configMove.distance_MoveZ1 / (configSetup.distancePerRev_AxisZ) * (configSetup.steps360_Axis_Z * configSetup.microsteps_Axis_Z));
 
 			// Set speed and acceleration
@@ -1165,6 +1166,7 @@ void MoveAxis(int axisId, int directionAxis)
 				case 83: // - S
 				{
 					stepController.stop();
+					stopSteppers = true;
 					break;
 				}
 			}
@@ -1179,26 +1181,23 @@ void MoveAxis(int axisId, int directionAxis)
 			{
 				case ID_AXIS_Z:
 				{
-					endPosition_Axis = stepper_Z.getPosition();
+					position_Axis = stepper_Z.getPosition();
 					break;
 				}
 				case ID_AXIS_X:
 				{
-					endPosition_Axis = stepper_X.getPosition();
-					
+					position_Axis = stepper_X.getPosition();
 					break;
 				}
 				case ID_AXIS_B:
 				{
-					// ToDo:
-					endPosition_Axis = stepper_B.getPosition();
-
+					position_Axis = stepper_B.getPosition();
 					break;
 				}
 			}
 #ifdef DEBUG
 			Serial.print(position_Char);
-			Serial.println(endPosition_Axis);
+			Serial.println(position_Axis);
 #endif // DEBUG
 		}
 
@@ -1223,7 +1222,8 @@ void MoveAxis(int axisId, int directionAxis)
 			SerialPrint(distanceTotal_MoveZ);
 			SerialPrint(nextionQuoteEnd);
 
-			endPosition_Axis = stepper_Z.getPosition();
+			//endPosition_Axis = stepper_Z.getPosition();
+			endPosition_Axis = endPosition_Axis + stepper_Z.getPosition();
 #ifdef DEBUG
 			Serial.print(position_Char);
 			Serial.println(endPosition_Axis);
@@ -1248,7 +1248,7 @@ void MoveAxis(int axisId, int directionAxis)
 			SerialWrite(0xff);
 			MilliDelay(5);
 #endif // Show Position
-			endPosition_Spindle = 0;
+			////endPosition_Spindle = 0;
 
 			SetEnable(ID_AXIS_Z, false);
 			break;
@@ -1260,7 +1260,8 @@ void MoveAxis(int axisId, int directionAxis)
 			SerialPrint(distanceTotal_MoveX);
 			SerialPrint(nextionQuoteEnd);
 
-			endPosition_Axis = stepper_X.getPosition();
+			//endPosition_Axis = stepper_X.getPosition();
+			endPosition_Axis = endPosition_Axis + stepper_X.getPosition();
 #ifdef DEBUG
 			Serial.print(position_Char);
 			Serial.println(endPosition_Axis);
@@ -1285,7 +1286,7 @@ void MoveAxis(int axisId, int directionAxis)
 			SerialWrite(0xff);
 			MilliDelay(5);*/
 #endif // Show Position
-			endPosition_Spindle = 0;
+			////endPosition_Spindle = 0;
 
 			SetEnable(ID_AXIS_X, false);
 			break;
@@ -1298,7 +1299,8 @@ void MoveAxis(int axisId, int directionAxis)
 			//SerialPrint(distanceTotal_MoveB);
 			//SerialPrint(nextionQuoteEnd);
 
-			endPosition_Axis = stepper_B.getPosition();
+			////endPosition_Axis = stepper_B.getPosition();
+			endPosition_Axis = endPosition_Axis + stepper_B.getPosition();
 #ifdef DEBUG
 			Serial.print(position_Char);
 			Serial.println(endPosition_Axis);
@@ -1323,14 +1325,14 @@ void MoveAxis(int axisId, int directionAxis)
 					SerialWrite(0xff);
 					MilliDelay(5);*/
 #endif // Show Position
-			endPosition_Spindle = 0;
+			////endPosition_Spindle = 0;
 
 			SetEnable(ID_AXIS_B, false);
 			break;
 		}
 	}
 
-	startPositionAbs_Axis = 0;
+	////startPositionAbs_Axis = 0;
 }
 
 /// <summary>
@@ -1370,7 +1372,7 @@ void OneRunStepper(int direction) // pageOne
 
 	float speedPercent = 0;
 	float currentSpeedPercent = 0;
-	int32_t targetPosition = 4294000000;// *direction;
+	int32_t targetPosition = 2147000000;// *direction;
 
 //#ifdef DEBUG
 //	Serial.print("ActiveAxis");
@@ -1702,8 +1704,8 @@ void Main_TwoSteppers(
 	int32_t accel_Axis = 0;
 	float speedPercentSpindle = 0;
 	float currentSpeedPercentSpindle = 0;
-	int32_t targetPosition_Axis = 4294000000;
-	int32_t targetPosition_Spindle = 4294000000;
+	int32_t targetPosition_Axis = 2147000000;
+	int32_t targetPosition_Spindle = 2147000000;
 
 	// initialCaller: Spindle or axis
 	bool stepper_Axis_Go = false;
@@ -1908,7 +1910,7 @@ void Main_TwoSteppers(
 					{
 						stepper_Axis_Go = true;
 						direction_Axis = DIR_CW;
-						targetPosition_Axis = 4294000000;
+						targetPosition_Axis = 2147000000;
 						speedPercentAxis = (float)((configMain.speedPercent_Axis_Z) * .01);
 						stepper_Z
 							.setMaxSpeed(configMain.maxSpd_Axis_Z * direction_Axis)
@@ -1928,7 +1930,7 @@ void Main_TwoSteppers(
 					{
 						stepper_Axis_Go = true;
 						direction_Axis = DIR_CCW;
-						targetPosition_Axis = -2000000000;
+						targetPosition_Axis = -2147000000;
 						speedPercentAxis = (float)((configMain.speedPercent_Axis_Z) * .01);
 						stepper_Z
 							.setMaxSpeed(configMain.maxSpd_Axis_Z * direction_Axis)
@@ -1977,7 +1979,7 @@ void Main_TwoSteppers(
 					if (!rotateController_MainSpindle.isRunning())
 					{
 						direction_Spindle = DIR_CW;
-						targetPosition_Spindle = 2000000000;
+						targetPosition_Spindle = 2147000000;
 						speedPercentSpindle = (float)(configMain.speedPercent_Spindle * .01);
 						stepper_Spindle
 							.setMaxSpeed(maxSpd_Spindle)
@@ -1999,7 +2001,7 @@ void Main_TwoSteppers(
 					if (!rotateController_MainSpindle.isRunning())
 					{
 						direction_Spindle = DIR_CCW;
-						targetPosition_Spindle = 2000000000;
+						targetPosition_Spindle = 2147000000;
 						speedPercentSpindle = (float)(configMain.speedPercent_Spindle * .01);
 						stepper_Spindle
 							.setMaxSpeed(maxSpd_Spindle * DIR_CCW)
@@ -2057,7 +2059,7 @@ void Main_TwoSteppers(
 					{
 						stepper_Axis_Go = true;
 						direction_Axis = DIR_CCW;
-						targetPosition_Axis = -2000000000;
+						targetPosition_Axis = -2147000000;
 						speedPercentAxis = (float)(configMain.speedPercent_Axis_X * .01);
 						stepper_X
 							.setMaxSpeed(configMain.maxSpd_Axis_X * direction_Axis)
@@ -2078,7 +2080,7 @@ void Main_TwoSteppers(
 					{
 						stepper_Axis_Go = true;
 						direction_Axis = DIR_CW;
-						targetPosition_Axis = 2000000000;
+						targetPosition_Axis = 2147000000;
 						speedPercentAxis = (float)(configMain.speedPercent_Axis_X * .01);
 						stepper_X
 							.setMaxSpeed(configMain.maxSpd_Axis_X * direction_Axis)
@@ -2099,7 +2101,7 @@ void Main_TwoSteppers(
 					{
 						stepper_Axis_Go = true;
 						direction_Axis = DIR_CCW;
-						targetPosition_Axis = -2000000000;
+						targetPosition_Axis = -2147000000;
 
 						speedPercentAxis = (float)((configMain.speedPercent_Axis_B) * .01);
 						stepper_B
@@ -2120,7 +2122,7 @@ void Main_TwoSteppers(
 					{
 						stepper_Axis_Go = true;
 						direction_Axis = DIR_CW;
-						targetPosition_Axis = 2000000000;
+						targetPosition_Axis = 2147000000;
 						speedPercentAxis = (float)((configMain.speedPercent_Axis_B) * .01);
 						stepper_B
 							.setMaxSpeed(configMain.maxSpd_Axis_B * direction_Axis)
@@ -2396,6 +2398,7 @@ void IndexSpindle(int directionSpindle)
 				case 83: // - S
 				{
 					stepController.stop();
+					stopSteppers = true;
 					break;
 				}
 			}
@@ -2417,6 +2420,8 @@ void IndexSpindle(int directionSpindle)
 	SerialPrint(nextionEnd);
 
 	returnSteps_Spindle = stepper_Spindle.getPosition();
+
+	endPosition_Spindle = endPosition_Spindle + returnSteps_Spindle;
 #ifdef SHOW_POSITION 
 	degrees_Spindle = StepsToDegrees_Spindle(returnSteps_Spindle);
 
@@ -2516,13 +2521,13 @@ void Sync(int directionSpindle, int directionAxis)
 		.setMaxSpeed(configSync.maxSpd_Spindle * configSync.speedPercent_Spindle * .01)
 		.setAcceleration(configSync.accel_Spindle)
 		.setTargetRel(targetSteps_Spindle);
-	stepper_Spindle.setPosition(0);
+	////stepper_Spindle.setPosition(0);
 
 	stepper_Axis
 		.setMaxSpeed(maxSpeed)
 		.setAcceleration(accel)
 		.setTargetRel(axisSteps);
-	stepper_Axis.setPosition(0);
+	////stepper_Axis.setPosition(0);
 
 #ifdef DEBUG
 	Serial.print(axisId_Char);
@@ -2848,7 +2853,7 @@ void Reciprocate_Triangle(int wavDir)
 	stepper_Spindle
 		.setMaxSpeed(configRec.maxSpd_Spindle * configRec.speedPercent_Spindle * .01)
 		.setAcceleration(configRec.accel_Spindle);
-	stepper_Spindle.setPosition(0);
+	////stepper_Spindle.setPosition(0);
 
 	int spindleSteps = 0;
 	long axisSteps = 0;
@@ -2886,7 +2891,7 @@ void Reciprocate_Triangle(int wavDir)
 	stepper_Axis
 		.setMaxSpeed(maxSpeed)
 		.setAcceleration(accel);
-	stepper_Axis.setPosition(0);
+	////stepper_Axis.setPosition(0);
 
 #ifdef DEBUG
 	Serial.print("SpindleMaxSpd:");
@@ -3090,8 +3095,11 @@ endLoop:
 	SerialPrint(nextionEnd);
 
 #ifdef DEBUG
-	endPosition_Axis = stepper_Axis.getPosition();
-	endPosition_Spindle = stepper_Spindle.getPosition();
+	//endPosition_Axis = stepper_Axis.getPosition();
+	endPosition_Axis = endPosition_Axis + stepper_Axis.getPosition();
+	//endPosition_Spindle = stepper_Spindle.getPosition();
+	endPosition_Spindle = endPosition_Spindle + stepper_Spindle.getPosition();
+
 	Serial.print("Spindle:");
 	Serial.println(endPosition_Spindle);
 	Serial.print("Axis:");
@@ -6299,11 +6307,14 @@ void GreekKey_FromFile(int direction)
 	int spindleSteps = 0;
 
 	int selectedAxis = 0;
-	// Reset end positions
+
+	// Reset start and end positions
 	startPositionAbs_Axis = 0;
 	endPosition_Spindle = 0;
 	endPosition_Axis = 0;
 
+	// Reset stopSteppers
+	stopSteppers = false;
 
 	// String variables
 	const char* pageBE_t3 = "pageBE.t3.txt="; // Spindle Begin
@@ -6500,6 +6511,12 @@ void GreekKey_FromFile(int direction)
 		// Inner loop
 		for (int i = 0; i <= fileLineCount; i++)
 		{
+			// Index or Move page stop pressed.
+			if (stopSteppers)
+			{
+				goto EndLoops;
+			}
+
 			// Reset hVal and vVal
 			angularAxisLegLength = 0;
 			angularSpindleLegLength = 0;
@@ -6676,6 +6693,73 @@ void GreekKey_FromFile(int direction)
 				case 69: // E - Exit
 				{
 					exitInnerForLoop = true;
+					break;
+				}
+				case 70: // F - Rec (Using settings on REC page).
+				{
+					int waveDir = DIR_CW;
+					if (segmentMultiplier < 0)
+					{
+						waveDir = DIR_CCW;
+					}
+
+					switch (configRec.style)
+					{
+						case 0: // Triangle
+						{
+							Reciprocate_Triangle(waveDir);
+							break;
+						}
+						case 1: // Sawtooth
+						{
+							Reciprocate_Sawtooth(waveDir);
+							break;
+						}
+						case 2: // Square
+						{
+							Reciprocate_Square(waveDir);
+							break;
+						}
+					}
+					break;
+				}
+				case 71: // G - Sync (Using settings on Sync page
+				{
+					int directionSpindle = 1;
+					int directionAxis = 1;
+					if (segmentMultiplier < 0) // Move in (towards headstock).
+					{
+						if (configSync.helixType = 1) // Right hand
+						{
+							directionAxis = DIR_CCW; // CCW
+							directionSpindle = DIR_CW; //CW
+						}
+						else // Left hand
+						{
+							directionAxis = DIR_CCW;// 0; // CCW
+							directionSpindle = DIR_CCW;// 0; //CCW
+						}
+
+					}
+					else // Move out (away from headstock).
+					{
+						if (segmentMultiplier < 0) // Move in (towards headstock).
+						{
+							if (configSync.helixType = 1) // Right hand
+							{
+								directionAxis = DIR_CW; // CW
+								directionSpindle = DIR_CCW; // CW
+							}
+							else // Left hand
+							{
+								directionAxis = DIR_CW; // CW
+								directionSpindle = DIR_CW;//0; // CCW
+							}
+
+						}
+					}
+
+					Sync(directionSpindle, directionAxis);
 					break;
 				}
 				case 72: // H  - Angular Move. Line must also contain V
@@ -7024,6 +7108,35 @@ void GreekKey_FromFile(int direction)
 					{
 						goto EndLoops;
 					}
+
+					break;
+				}
+				case 77: // M - Move axis (using settings on MOV page).
+				{
+					int axisId = abs(segmentMultiplier);
+					if (segmentMultiplier < 0)
+					{
+						MoveAxis(axisId, DIR_CCW);
+					}
+					else
+					{
+						MoveAxis(axisId, DIR_CW);
+					}
+					
+					break;
+				}
+				case 78: // N - Index spindle (using settings on IND page).
+				{
+					//configIndex_Main.indexId = abs(segmentMultiplier);
+					if (segmentMultiplier < 0)
+					{
+						IndexSpindle(DIR_CCW);
+					}
+					else
+					{
+						IndexSpindle(DIR_CW);
+					}
+					
 
 					break;
 				}
@@ -8744,7 +8857,7 @@ void RoseRadial(int direction)
 	spindleStepsPerRev = configSetup.gearRatio_Spindle * configSetup.microsteps_Spindle * configSetup.steps360_Spindle;
 	int32_t spindleMaxRotation = configRose.spindleRevolutions*spindleStepsPerRev;
 	newMaxSpd_RoseSpindle = configRose.maxSpd_Spindle * configRose.speedPercent_Spindle * .01 * direction;
-	volatile int32_t spindleTarget = 4294000000;
+	volatile int32_t spindleTarget = 2147000000;
 #ifdef DEBUG
 	Serial.print("Spindle Revolutions: ");
 	Serial.println(configRose.spindleRevolutions);
@@ -9019,7 +9132,7 @@ void RoseRadial(int direction)
 //	spindleStepsPerRev = ((configRose.amplitude_Radial_Z / (configSetup.distancePerRev_AxisZ)) * configSetup.steps360_Axis_Z * configSetup.microsteps_Axis_Z) / 2;  // Amplitude is normally measured from the middle to the top
 //	newMaxSpd_RoseSpindle = configRose.maxSpd_Axis_Z * configRose.speedPercent_Axis_Z * .01 * direction;
 //	
-//	volatile int32_t spindleTarget = 2000000000;
+//	volatile int32_t spindleTarget = 2147000000;
 //	Serial.print("Spindle Revolutions: ");
 //	Serial.println(configRose.spindleRevolutions);
 //	Serial.print("spindleTarget: ");
@@ -11745,6 +11858,11 @@ void LoadSettings_PageGeo()
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configRose.d = (int)returnVal;
 
+	iniValue = "SpindleRevolutions";
+	eePromAddress_Nextion = 696;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configRose.spindleRevolutions = (int)returnVal;
+
 	iniValue = "MaxSpeed_Spindle";
 	eePromAddress_Nextion = 828;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
@@ -12086,6 +12204,11 @@ void LoadSettings_PageRec()
 	int eePromAddress_Nextion = 464;
 	float returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configRec.axisId = (int)returnVal;
+
+	iniValue = "Style";
+	eePromAddress_Nextion = 564;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configRec.style = (int)returnVal;
 
 	iniValue = "RadialOrAxial"; 
 	eePromAddress_Nextion = 560;

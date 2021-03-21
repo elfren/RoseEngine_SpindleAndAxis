@@ -402,6 +402,8 @@ char * filename_Index2;
 int32_t returnSteps_Spindle = 0;
 int32_t startPositionAbs_Axis = 0;
 
+
+
 /////////////////////////////////////////////////////////////////////////
 // Rose settings
 /////////////////////////////////////////////////////////////////////////
@@ -418,6 +420,8 @@ int32_t endPosition_Spindle = 0;
 int32_t endPosition_Axis = 0;
 float degrees_Spindle = 0;
 float distance_Axis = 0;
+
+bool stopSteppers = false;
 
 // Accuracy interval 
 constexpr unsigned recalcPeriod = 25'000; //?s  period for calculation of new target points. Straight lines between those points. 
