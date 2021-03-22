@@ -2574,6 +2574,7 @@ void Sync(int directionSpindle, int directionAxis)
 	Serial.println("MoveAsync..............................................");
 #endif // Debug
 	stepController.moveAsync(stepper_Spindle, stepper_Axis);
+
 	while (stepController.isRunning())
 	{
 #ifdef DEBUG
@@ -2651,6 +2652,7 @@ void Sync(int directionSpindle, int directionAxis)
 			case 83: // - S
 			{
 				stepController.stopAsync();
+				stopSteppers = true;
 				break;
 			}
 			}
@@ -3056,6 +3058,7 @@ void Reciprocate_Triangle(int wavDir)
 			Serial.println("STOP++++++++++++++++++++++");
 #endif // DEBUG
 						stepController.stop();
+						stopSteppers = true;
 						goto endLoop;
 						break;
 					}
@@ -3443,6 +3446,7 @@ void Reciprocate_Sawtooth(int wavDir)
 					Serial.println("STOP++++++++++++++++++++++");
 #endif // DEBUG
 					stepController.stop();
+					stopSteppers = true;
 					goto endLoop;
 					break;
 				}
@@ -3836,6 +3840,7 @@ void Reciprocate_Square(int wavDir)
 					Serial.println("STOP++++++++++++++++++++++");
 #endif // DEBUG
 					stepController.stop();
+					stopSteppers = true;
 					goto endLoop;
 					break;
 				}
@@ -6502,8 +6507,6 @@ void GreekKey_FromFile(int direction)
 		}
 	}
 
-
-
 	for (int j = 1; j <= configGreekKey.patternCount_File; j++)
 	{ 
 		exitInnerForLoop = false;
@@ -6729,35 +6732,36 @@ void GreekKey_FromFile(int direction)
 					int directionAxis = 1;
 					if (segmentMultiplier < 0) // Move in (towards headstock).
 					{
-						if (configSync.helixType = 1) // Right hand
+						if (configSync.helixType == 1) // Right hand
 						{
-							directionAxis = DIR_CCW; // CCW
 							directionSpindle = DIR_CW; //CW
+							directionAxis = DIR_CCW; // CCW
 						}
 						else // Left hand
 						{
-							directionAxis = DIR_CCW;// 0; // CCW
 							directionSpindle = DIR_CCW;// 0; //CCW
+							directionAxis = DIR_CCW;// 0; // CCW	
 						}
 
 					}
 					else // Move out (away from headstock).
 					{
-						if (segmentMultiplier < 0) // Move in (towards headstock).
-						{
-							if (configSync.helixType = 1) // Right hand
+						//if (segmentMultiplier < 0) // Move in (towards headstock).
+						//{
+							if (configSync.helixType == 1) // Right hand
 							{
-								directionAxis = DIR_CW; // CW
 								directionSpindle = DIR_CCW; // CW
+								directionAxis = DIR_CW; // CW
 							}
 							else // Left hand
 							{
-								directionAxis = DIR_CW; // CW
 								directionSpindle = DIR_CW;//0; // CCW
+								directionAxis = DIR_CW; // CW
 							}
 
-						}
+						//}
 					}
+
 
 					Sync(directionSpindle, directionAxis);
 					break;
@@ -10924,10 +10928,7 @@ void TestAllTeensyEEPROMValues()
 			SerialWrite(0x22);
 			SerialPrint(configSync.speedPercent_Spindle);
 			SerialPrint(nextionQuoteEnd);
-#ifdef DEBUG
-			Serial.print("configSync.helixType: ");
-			Serial.println(configSync.helixType);
-#endif // Debug
+
 			switch (configSync.helixType)
 			{
 				case 0: //Left
