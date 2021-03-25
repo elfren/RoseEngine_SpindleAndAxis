@@ -1332,6 +1332,9 @@ void MoveAxis(int axisId, int directionAxis)
 		}
 	}
 
+	SetEnable(ID_AXIS_Z, false);
+	SetEnable(ID_AXIS_X, false);
+	SetEnable(ID_AXIS_B, false);
 	////startPositionAbs_Axis = 0;
 }
 
@@ -3957,94 +3960,94 @@ void GreekKey_Pattern_4a()
 		{
 			case RADIAL: // Axis Left CCW
 			{
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 3, DIR_CW, true); //1
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 3, reverseDirection * DIR_CW, true); //1
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, DIR_CCW); //2
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, reverseDirection * DIR_CCW); //2
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, DIR_CCW, true); //3
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, reverseDirection * DIR_CCW, true); //3
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, DIR_CW); //4
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, reverseDirection * DIR_CW); //4
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, DIR_CCW, true); //5
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, reverseDirection * DIR_CCW, true); //5
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, DIR_CCW); //6
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, reverseDirection * DIR_CCW); //6
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 3, DIR_CW, true); // 7
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 3, reverseDirection * DIR_CW, true); // 7
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 4, DIR_CW); //8
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 4, reverseDirection * DIR_CW); //8
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 8, DIR_CCW); //9
-				if (StopGreekKey() || stopAll)
-				{
-					goto EndLoop;
-				}
-
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 3, DIR_CCW, true); //10
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 8, reverseDirection * DIR_CCW); //9
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
 
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, DIR_CW); //11
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 3, reverseDirection * DIR_CCW, true); //10
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, DIR_CW, true); //12
+
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, reverseDirection * DIR_CW); //11
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, DIR_CCW); //13
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, reverseDirection * DIR_CW, true); //12
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, DIR_CW, true); // 14
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, reverseDirection * DIR_CCW); //13
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, DIR_CW); //15
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, reverseDirection * DIR_CW, true); // 14
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 3, DIR_CCW, true); //16
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, reverseDirection * DIR_CW); //15
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 4, DIR_CW); //17
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 3, reverseDirection * DIR_CCW, true); //16
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 8, DIR_CCW); //18
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 4, reverseDirection * DIR_CW); //17
+				if (StopGreekKey() || stopAll)
+				{
+					goto EndLoop;
+				}
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 8, reverseDirection * DIR_CCW); //18
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
@@ -4053,93 +4056,93 @@ void GreekKey_Pattern_4a()
 			}
 			case AXIAL: // Spindle Up CCW
 			{
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 3, DIR_CW); //1
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 3, reverseDirection * DIR_CW); //1
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, DIR_CCW, true); //2
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, reverseDirection * DIR_CCW, true); //2
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, DIR_CCW); //3
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, reverseDirection * DIR_CCW); //3
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, DIR_CW, true); //4
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, reverseDirection * DIR_CW, true); //4
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, DIR_CCW); //5
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, reverseDirection * DIR_CCW); //5
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, DIR_CCW, true); //6
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, reverseDirection * DIR_CCW, true); //6
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 3, DIR_CW); //7
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 3, reverseDirection * DIR_CW); //7
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 4, DIR_CW, true); //7
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 4, reverseDirection * DIR_CW, true); //7
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 8, DIR_CCW, true); //9
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 8, reverseDirection * DIR_CCW, true); //9
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
 
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 3, DIR_CCW); //10
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 3, reverseDirection * DIR_CCW); //10
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, DIR_CW, true); //11
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, reverseDirection * DIR_CW, true); //11
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, DIR_CW); //12
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, reverseDirection * DIR_CW); //12
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, DIR_CCW, true); //13
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, reverseDirection * DIR_CCW, true); //13
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, DIR_CW); //14
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, reverseDirection * DIR_CW); //14
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, DIR_CW, true); //15
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, reverseDirection * DIR_CW, true); //15
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 3, DIR_CCW); //16
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 3, reverseDirection * DIR_CCW); //16
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 4, DIR_CW, true); //17
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 4, reverseDirection * DIR_CW, true); //17
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 8, DIR_CCW, true); //18
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 8, reverseDirection * DIR_CCW, true); //18
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
@@ -4180,204 +4183,204 @@ void GreekKey_Pattern_4b()
 		{
 			case RADIAL: // Axis Left CCW
 			{
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, DIR_CCW); //1-U
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, reverseDirection * DIR_CCW); //1-U
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 			
 				}
 
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 3, DIR_CW, true); //2-L
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 3, reverseDirection * DIR_CW, true); //2-L
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 			
 				}
 
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, DIR_CCW); //3 U
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, reverseDirection * DIR_CCW); //3 U
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 			
 				}
 
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, DIR_CCW, true); //4 R
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, reverseDirection * DIR_CCW, true); //4 R
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 			
 				}
 
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, DIR_CW); //5 D
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, reverseDirection * DIR_CW); //5 D
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 			
 				}
 
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, DIR_CCW, true); //6 R
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, reverseDirection * DIR_CCW, true); //6 R
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 			
 				}
 
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 3, DIR_CCW); //7 U
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 3, reverseDirection * DIR_CCW); //7 U
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 			
 				}
 
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, DIR_CW, true); // 8 L
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, reverseDirection * DIR_CW, true); // 8 L
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 			
 				}
 
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, DIR_CW); //9 D
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, reverseDirection * DIR_CW); //9 D
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 			
 				}
 
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, DIR_CW, true); //10 L
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, reverseDirection * DIR_CW, true); //10 L
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 			
 				}
 
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, DIR_CCW); //11 U
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, reverseDirection * DIR_CCW); //11 U
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 			
 				}
 
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 3, DIR_CCW, true); //12 R
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 3, reverseDirection * DIR_CCW, true); //12 R
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 			
 				}
 
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 6, DIR_CW); //13 D
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 6, reverseDirection * DIR_CW); //13 D
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 			
 				}
 
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 4, DIR_CW, true); //14 L
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 4, reverseDirection * DIR_CW, true); //14 L
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 			
 				}
 
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 7, DIR_CCW); //15 U
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 7, reverseDirection * DIR_CCW); //15 U
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 			
 				}
 
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 3, DIR_CCW, true); //16 R
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 3, reverseDirection * DIR_CCW, true); //16 R
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 			
 				}
 
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, DIR_CCW); //17 U
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, reverseDirection * DIR_CCW); //17 U
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 			
 				}
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, DIR_CW, true); //18 L
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, reverseDirection * DIR_CW, true); //18 L
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 			
 				}
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, DIR_CW); //19 D
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, reverseDirection * DIR_CW); //19 D
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 			
 				}
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, DIR_CW, true); //20
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, reverseDirection * DIR_CW, true); //20
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 			
 				}
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 3, DIR_CCW); //21
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 3, reverseDirection * DIR_CCW); //21
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 			
 				}
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, DIR_CCW, true); //22
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, reverseDirection * DIR_CCW, true); //22
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 			
 				}
 
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, DIR_CW); //23
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, reverseDirection * DIR_CW); //23
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 			
 				}
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, DIR_CCW, true); //24
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, reverseDirection * DIR_CCW, true); //24
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 			
 				}
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, DIR_CCW); //25
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, reverseDirection * DIR_CCW); //25
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 			
 				}
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 3, DIR_CW, true); //26
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 3, reverseDirection * DIR_CW, true); //26
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 			
 				}
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 5, DIR_CW); //27
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 5, reverseDirection * DIR_CW); //27
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 			
 				}
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 6, DIR_CCW); //28
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 6, reverseDirection * DIR_CCW); //28
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 			
 				}
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 4, DIR_CCW, true); //29
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 4, reverseDirection * DIR_CCW, true); //29
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 			
 				}
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 7, DIR_CW); //30
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 7, reverseDirection * DIR_CW); //30
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 			
 				}
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 7, DIR_CCW); //31
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 7, reverseDirection * DIR_CCW); //31
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
@@ -4388,204 +4391,204 @@ void GreekKey_Pattern_4b()
 			case AXIAL: // Spindle Up CCW
 			{
 
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, DIR_CCW, true); //1-U
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, reverseDirection * DIR_CCW, true); //1-U
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
 
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 3, DIR_CW); //2-L
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 3, reverseDirection * DIR_CW); //2-L
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
 
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, DIR_CCW, true); //3 U
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, reverseDirection * DIR_CCW, true); //3 U
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
 
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, DIR_CCW); //4 R
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, reverseDirection * DIR_CCW); //4 R
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
 
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, DIR_CW, true); //5 D
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, reverseDirection * DIR_CW, true); //5 D
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
 
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, DIR_CCW); //6 R
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, reverseDirection * DIR_CCW); //6 R
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
 
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 3, DIR_CCW, true); //7 U
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 3, reverseDirection * DIR_CCW, true); //7 U
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
 
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, DIR_CW); // 8 L
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, reverseDirection * DIR_CW); // 8 L
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
 
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, DIR_CW, true); //9 D
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, reverseDirection * DIR_CW, true); //9 D
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
 
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, DIR_CW); //10 L
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, reverseDirection * DIR_CW); //10 L
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
 
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, DIR_CCW, true); //11 U
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, reverseDirection * DIR_CCW, true); //11 U
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
 
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 3, DIR_CCW); //12 R
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 3, reverseDirection * DIR_CCW); //12 R
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
 
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 6, DIR_CW, true); //13 D
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 6, reverseDirection * DIR_CW, true); //13 D
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
 
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 4, DIR_CW); //14 L
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 4, reverseDirection * DIR_CW); //14 L
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
 
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 7, DIR_CCW, true); //15 U
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 7, reverseDirection * DIR_CCW, true); //15 U
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
 
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 3, DIR_CCW); //16 R
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 3, reverseDirection * DIR_CCW); //16 R
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
 
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, DIR_CCW, true); //17 U
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, reverseDirection * DIR_CCW, true); //17 U
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, DIR_CW); //18 L
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, reverseDirection * DIR_CW); //18 L
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, DIR_CW, true); //19 D
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, reverseDirection * DIR_CW, true); //19 D
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, DIR_CW); //20
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, reverseDirection * DIR_CW); //20
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 3, DIR_CCW, true); //21
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 3, reverseDirection * DIR_CCW, true); //21
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, DIR_CCW); //22
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, reverseDirection * DIR_CCW); //22
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
 
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, DIR_CW, true); //23
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, reverseDirection * DIR_CW, true); //23
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, DIR_CCW); //24
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, reverseDirection * DIR_CCW); //24
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, DIR_CCW, true); //25
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, reverseDirection * DIR_CCW, true); //25
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 3, DIR_CW); //26
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 3, reverseDirection * DIR_CW); //26
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 5, DIR_CW, true); //27
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 5, reverseDirection * DIR_CW, true); //27
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 6, DIR_CCW, true); //28
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 6, reverseDirection * DIR_CCW, true); //28
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 4, DIR_CCW); //29
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 4, reverseDirection * DIR_CCW); //29
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 7, DIR_CW, true); //30
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 7, reverseDirection * DIR_CW, true); //30
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 7, DIR_CCW, true); //31
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 7, reverseDirection * DIR_CCW, true); //31
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
@@ -4627,49 +4630,49 @@ void GreekKey_Pattern_3a()
 		{
 			case RADIAL: // Axis Left CCW
 			{
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 3, DIR_CW, true); //1
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 3, reverseDirection * DIR_CW, true); //1
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 3, DIR_CCW); //2
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 3, reverseDirection * DIR_CCW); //2
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, DIR_CCW, true); //3
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, reverseDirection * DIR_CCW, true); //3
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, DIR_CW); //4
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, reverseDirection * DIR_CW); //4
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, DIR_CW, true); //5
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, reverseDirection * DIR_CW, true); //5
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, DIR_CW); //6
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, reverseDirection * DIR_CW); //6
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, DIR_CCW, true); //7
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, reverseDirection * DIR_CCW, true); //7
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 3, DIR_CCW); //8
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 3, reverseDirection * DIR_CCW); //8
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
@@ -4679,56 +4682,56 @@ void GreekKey_Pattern_3a()
 			}
 			case AXIAL: // Spindle Up CCW
 			{
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 3, DIR_CW); //1
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 3, reverseDirection * DIR_CW); //1
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
 
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 3, DIR_CCW, true); //2
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 3, reverseDirection * DIR_CCW, true); //2
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
 
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, DIR_CCW); //3
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, reverseDirection * DIR_CCW); //3
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
 
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, DIR_CW, true); //4
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, reverseDirection * DIR_CW, true); //4
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
 
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, DIR_CW); //5
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, reverseDirection * DIR_CW); //5
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
 
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, DIR_CW, true); //6
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, reverseDirection * DIR_CW, true); //6
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
 
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, DIR_CCW); //7
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, reverseDirection * DIR_CCW); //7
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
 
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 3, DIR_CCW, true); //8
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 3, reverseDirection * DIR_CCW, true); //8
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
@@ -4748,7 +4751,7 @@ EndLoop:
 }
 
 /// <summary>
-/// GreekKey_Pattern_3a
+/// GreekKey_Pattern_3b
 /// </summary>
 /// <comment>
 /// </comment>
@@ -4769,90 +4772,90 @@ void GreekKey_Pattern_3b()
 		{
 			case RADIAL: // Axis Left CCW
 			{
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 3, DIR_CW, true); //1  3R
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 3, reverseDirection * DIR_CW, true); //1  3R
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 3, DIR_CCW); //2 3U
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 3, reverseDirection * DIR_CCW); //2 3U
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, DIR_CCW, true); //3 2L
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, reverseDirection * DIR_CCW, true); //3 2L
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, DIR_CW); //4 1D
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, reverseDirection * DIR_CW); //4 1D
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, DIR_CW, true); //5 1R
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, reverseDirection * DIR_CW, true); //5 1R
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, DIR_CW); //6 1D
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, reverseDirection * DIR_CW); //6 1D
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, DIR_CCW, true); //7 2L
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, reverseDirection * DIR_CCW, true); //7 2L
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 5, DIR_CCW); //8 5U
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 5, reverseDirection * DIR_CCW); //8 5U
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, DIR_CW, true); //9 2R
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, reverseDirection * DIR_CW, true); //9 2R
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, DIR_CW); //10 1D
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, reverseDirection * DIR_CW); //10 1D
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, DIR_CCW, true); //11 1L
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, reverseDirection * DIR_CCW, true); //11 1L
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, DIR_CW); //12 1D
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, reverseDirection * DIR_CW); //12 1D
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, DIR_CW, true); //13 2R
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, reverseDirection * DIR_CW, true); //13 2R
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 3, DIR_CCW); //14 3U
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 3, reverseDirection * DIR_CCW); //14 3U
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
 
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 3, DIR_CCW, true); //15 3L
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 3, reverseDirection * DIR_CCW, true); //15 3L
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, DIR_CCW); //16 1U
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, reverseDirection * DIR_CCW); //16 1U
 
 				if (StopGreekKey() || stopAll)
 				{
@@ -4863,105 +4866,105 @@ void GreekKey_Pattern_3b()
 			case AXIAL: // Spindle Up CCW
 			{
 
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 3, DIR_CW); //1
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 3, reverseDirection * DIR_CW); //1
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
 	
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 3, DIR_CCW, true); //2
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 3, reverseDirection * DIR_CCW, true); //2
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
 
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, DIR_CCW); //3
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, reverseDirection * DIR_CCW); //3
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
 
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, DIR_CW, true); //4
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, reverseDirection * DIR_CW, true); //4
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
 
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, DIR_CW); //5
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, reverseDirection * DIR_CW); //5
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
 
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, DIR_CW, true); //6
-				if (StopGreekKey() || stopAll)
-				{
-					goto EndLoop;
-
-				}
-				
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, DIR_CCW); //7
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, reverseDirection * DIR_CW, true); //6
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
 				
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 5, DIR_CCW, true); //8
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, reverseDirection * DIR_CCW); //7
+				if (StopGreekKey() || stopAll)
+				{
+					goto EndLoop;
+
+				}
+				
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 5, reverseDirection * DIR_CCW, true); //8
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
 				
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, DIR_CW); //9
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, reverseDirection * DIR_CW); //9
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
 				
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, DIR_CW, true); //10
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, reverseDirection * DIR_CW, true); //10
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
 				
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, DIR_CCW); //11
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, reverseDirection * DIR_CCW); //11
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
 				
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, DIR_CW, true); //12
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, reverseDirection * DIR_CW, true); //12
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
 				
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, DIR_CW); //13
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, reverseDirection * DIR_CW); //13
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
 				
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 3, DIR_CCW, true); //14
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 3, reverseDirection * DIR_CCW, true); //14
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
 
 				
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 3, DIR_CCW); //15
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 3, reverseDirection * DIR_CCW); //15
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
 				
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, DIR_CCW, true); //16
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, reverseDirection * DIR_CCW, true); //16
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
@@ -5009,49 +5012,38 @@ void GreekKey_Pattern_2a()
 		{
 			case RADIAL: // Axis Left CCW
 			{
-				//stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, DIR_CW); //0a
-				//if (StopGreekKey() || stopAll)
-				//{
-				//	goto EndLoop;
 
-				//}
-				//stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, DIR_CCW); //0b
-				//if (StopGreekKey() || stopAll)
-				//{
-				//	goto EndLoop;
-
-				//}
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, DIR_CW, true); //1
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, reverseDirection * DIR_CW, true); //1
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, DIR_CCW); //2
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, reverseDirection * DIR_CCW); //2
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, DIR_CCW, true); //3
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, reverseDirection * DIR_CCW, true); //3
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, DIR_CW); //4
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, reverseDirection * DIR_CW); //4
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, DIR_CCW, true); //5
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, reverseDirection * DIR_CCW, true); //5
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, DIR_CCW); //6
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, reverseDirection * DIR_CCW); //6
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
@@ -5067,57 +5059,42 @@ void GreekKey_Pattern_2a()
 				Serial.println(axisShortLegSteps);
 #endif // DEBUG
 
-
-				//stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, DIR_CW); //0a
-				//if (StopGreekKey() || stopAll)
-				//{
-				//	goto EndLoop;
-
-				//}
-			
-				//stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, DIR_CCW); //0b
-				//if (StopGreekKey() || stopAll)
-				//{
-				//	goto EndLoop;
-
-				//}
-			
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, DIR_CW); //1
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, reverseDirection * DIR_CW); //1
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
 			
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, DIR_CCW, true); //2
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, reverseDirection * DIR_CCW, true); //2
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
 			
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, DIR_CCW); //3
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, reverseDirection * DIR_CCW); //3
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
 			
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, DIR_CCW, true); //4
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, reverseDirection * DIR_CCW, true); //4
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
 			
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, DIR_CCW); //5
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, reverseDirection * DIR_CCW); //5
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
 			
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, DIR_CCW, true); //6
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, reverseDirection * DIR_CCW, true); //6
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
@@ -5158,82 +5135,82 @@ void GreekKey_Pattern_2b()
 		{
 			case RADIAL: // Axis Left CCW
 			{
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, DIR_CW); //0a
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, reverseDirection * DIR_CW); //0a
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, DIR_CCW); //0b
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, reverseDirection * DIR_CCW); //0b
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;		
 				}
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, DIR_CW, true); //1
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, reverseDirection * DIR_CW, true); //1
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
 
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, DIR_CCW); //2
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, reverseDirection * DIR_CCW); //2
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
 
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, DIR_CCW, true); //3
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, reverseDirection * DIR_CCW, true); //3
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;		
 				}
 
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, DIR_CW); //4
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, reverseDirection * DIR_CW); //4
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;			
 				}
 
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, DIR_CCW, true); //5
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, reverseDirection * DIR_CCW, true); //5
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;		
 				}
 
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 3, DIR_CCW); //6
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 3, reverseDirection * DIR_CCW); //6
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;			
 				}
 
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, DIR_CW, true); // 7
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, reverseDirection * DIR_CW, true); // 7
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;	
 				}
 
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, DIR_CW); //8
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, reverseDirection * DIR_CW); //8
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;			
 				}
 
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, DIR_CW, true); //9
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, reverseDirection * DIR_CW, true); //9
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;			
 				}
 
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, DIR_CCW); //10
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, reverseDirection * DIR_CCW); //10
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;		
 				}
 
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, DIR_CCW, true); //11
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, reverseDirection * DIR_CCW, true); //11
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;		
 				}
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, DIR_CCW); //12
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, reverseDirection * DIR_CCW); //12
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;		
@@ -5242,85 +5219,85 @@ void GreekKey_Pattern_2b()
 			}
 			case AXIAL: // Spindle Up CCW
 			{
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, DIR_CW, true); //0a
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, reverseDirection * DIR_CW, true); //0a
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
 				
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, DIR_CCW, true); //0b
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, reverseDirection * DIR_CCW, true); //0b
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
 				
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, DIR_CCW); //1
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, reverseDirection * DIR_CCW); //1
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
 
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, DIR_CCW, true); //2
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, reverseDirection * DIR_CCW, true); //2
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
 
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, DIR_CCW); //3
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, reverseDirection * DIR_CCW); //3
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
 
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, DIR_CW, true); //4
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, reverseDirection * DIR_CW, true); //4
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
 
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, DIR_CCW); //5
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, reverseDirection * DIR_CCW); //5
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
 
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 3, DIR_CCW, true); //6
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 3, reverseDirection * DIR_CCW, true); //6
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
 
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, DIR_CW); //7
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, reverseDirection * DIR_CW); //7
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
 
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, DIR_CW, true); // 8
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, reverseDirection * DIR_CW, true); // 8
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
 
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, DIR_CW); //9
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, reverseDirection * DIR_CW); //9
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
 
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, DIR_CCW, true); //10
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 2, reverseDirection * DIR_CCW, true); //10
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
 
-				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, DIR_CCW); //11
+				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, reverseDirection * DIR_CCW); //11
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 				}
 				
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, DIR_CCW, true); //12
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, reverseDirection * DIR_CCW, true); //12
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
@@ -5498,7 +5475,10 @@ void GreekKeyPattern_End()
 bool GreekKey_Move_Axis(float segmentSteps, float multiplier, int direction, bool updatePosition)
 {
 	bool retVal = false;
-	int newDirection = direction * reverseDirection;
+	//int newDirection = direction; //* reverseDirection;
+
+	//Serial.print("newDirection: ");
+	//Serial.println(newDirection);
 	String axisName = "";
 	int stepPin = 0;
 	int dirPin = 0;
@@ -5550,8 +5530,8 @@ bool GreekKey_Move_Axis(float segmentSteps, float multiplier, int direction, boo
 	Serial.println(segmentSteps);
 	Serial.print("Move_Axis:multiplier ");
 	Serial.println(multiplier);
-	Serial.print("Move_Axis:newDirection ");
-	Serial.println(newDirection);
+	//Serial.print("Move_Axis:newDirection ");
+	//Serial.println(newDirection);
 	Serial.print("Move_Axis:updatePosition ");
 	Serial.println(updatePosition);
 #endif // DEBUG
@@ -5597,8 +5577,9 @@ bool GreekKey_Move_Axis(float segmentSteps, float multiplier, int direction, boo
 	actualSpeed = maxSpeed * speedPercentage * .01;
 	StepControl stepControllerAxis;
 	Stepper stepperAxis(stepPin, dirPin);
-    //int32_t targetSteps = round(segmentSteps * multiplier * direction);
-	int32_t targetSteps = round(segmentSteps * multiplier * newDirection);
+    int32_t targetSteps = round(segmentSteps * multiplier * direction);
+	//int32_t targetSteps = round(segmentSteps * multiplier * newDirection);
+	//int32_t targetSteps = round(segmentSteps * multiplier); // *newDirection);
 	stepperAxis
 		.setMaxSpeed(actualSpeed)
 		.setAcceleration(accel)
@@ -5875,18 +5856,17 @@ bool GreekKey_Move_Angular_TeensyStep(
 		.setAcceleration(accel_Axis);
 	stepper_Axis.setPosition(0);
 
-	int32_t targetSteps = round(shortLegLength_Axis * multiplier_Axis);// *direction_Axis);
+
+	int32_t targetSteps = round(abs(shortLegLength_Axis) * multiplier_Axis);
 	stepper_Axis.setTargetRel(targetSteps);
 
 	stepperSpindle
 		.setMaxSpeed(maxSpd_Spindle * currentSpeedPercent_Spindle)
 		.setAcceleration(accel_Spindle);
 	stepperSpindle.setPosition(0);
-	float spindleSteps = shortLegLength_Spindle * multiplier_Spindle;
+	float spindleSteps = abs(shortLegLength_Spindle) * multiplier_Spindle;
 	int32_t targetSteps_Spindle = (int32_t)round(spindleSteps);
 
-	// Convert Up to negative and Down to positive
-	targetSteps_Spindle = targetSteps_Spindle * (-1);
 	stepperSpindle.setTargetRel(targetSteps_Spindle);
 
 #ifdef DEBUG
@@ -6361,6 +6341,22 @@ void GreekKey_FromFile(int direction)
 
 			switch (moveType)
 			{
+				case 1: // Spindle segment count (Axial and Spindle segments reverse when Axial is selected.)
+				{
+					if (configGreekKey.radialOrAxial_File == RADIAL)
+					{
+						spindleSegmentCount = segmentMultiplier;
+					}
+					break;
+				}
+				case 2: // Axis segment count (Axial and Spindle segments reverse when Axial is selected.)
+				{
+					if (configGreekKey.radialOrAxial_File == AXIAL)
+					{
+						spindleSegmentCount = segmentMultiplier;
+					}
+					break;
+				}
 				case 69: // E - Exit
 				case 101: // e
 				{
@@ -6369,25 +6365,7 @@ void GreekKey_FromFile(int direction)
 
 					break;
 				}
-				case 83: // S - Spindle segment count (Axial and Spindle segments reverse when Axial is selected.)
-				case 115: // s
-				{
-					if (configGreekKey.radialOrAxial_File == RADIAL)
-					{
-						spindleSegmentCount = segmentMultiplier;
-					}
-					break;
-				}
 
-				case 65: // A - Axial segment count
-				case 97: // a
-				{
-					if (configGreekKey.radialOrAxial_File == AXIAL)
-					{
-						spindleSegmentCount = segmentMultiplier;
-					}
-					break;
-				}
 			}
 #ifdef DEBUG
 			//Serial.print("spindleSegmentCount:");
@@ -6527,6 +6505,24 @@ void GreekKey_FromFile(int direction)
 			// Get data
 			segmentMultiplier = GetGreekKeyDataFromSD(i);
 
+			int moveDirection = DIR_CW;
+			if ((segmentMultiplier * reverseDirection) < 0)
+			{
+				moveDirection = DIR_CCW;
+			}
+
+			int moveDirection_H = DIR_CW;
+			if ((angularAxisLegLength * reverseDirection) < 0)
+			{
+				moveDirection_H = DIR_CCW;
+			}
+
+			int moveDirection_V = DIR_CW;
+			if ((angularSpindleLegLength * reverseDirection) < 0)
+			{
+				moveDirection_V = DIR_CCW;
+			}
+
 			SerialPrint(pageGrkFile_t22);
 			SerialWrite(0x22);
 			SerialPrint(i);
@@ -6584,97 +6580,75 @@ void GreekKey_FromFile(int direction)
 
 			switch (moveType)
 			{
-				case 67: // C -Spindle
-				{
-					// Negative steps move CCW
-					if (configGreekKey.segmentOrActual == 2) // 2: Segment 
-					{
-						stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, segmentMultiplier, DIR_CW);
-					}
-					else  //3: Actual
-					{
-						spindleSteps = round((configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (segmentMultiplier / 360));
-						stopAll = GreekKey_Move_Spindle(spindleSteps, 1, DIR_CW);
-					}
-					if (stopAll)
-					{
-						goto EndLoops;
-					}
-					break;
-				}
-				case 68: // D  - Radial: Spindle Down CW   Axial: Axis Right CW
+				case 65: // A - Axis
 				{
 
 					switch (configGreekKey.radialOrAxial_File)
 					{
-						case RADIAL: // Spindle Down CW
+						case RADIAL: // Axis: Negative move direction is CCW
 						{
-							//SerialPrint(pageGrkFile_t21);
-							//SerialWrite(0x22);
-							//SerialPrint("Down");
-							//SerialPrint(nextionQuoteEnd);
+							if (configGreekKey.segmentOrActual == 2) // 2: Segment  
+							{
+								Serial.print("Z----shortSegmentStepsAxis--------------------------------------------------");
+								Serial.println(shortSegmentStepsAxis);
+								stopAll = GreekKey_Move_Axis(shortSegmentStepsAxis, abs(segmentMultiplier), moveDirection, true);
+							}
+							else //3: Actual
+							{
+								switch (configGreekKey.axisId)
+								{
+								case ID_AXIS_Z: // Z Axis
+								{
+									axisSteps = round((segmentMultiplier / configSetup.distancePerRev_AxisZ) * (configSetup.steps360_Axis_Z * configSetup.microsteps_Axis_Z));
+									break;
+								}
+								case ID_AXIS_X: // X Axis
+								{
+									if (configSetup.xAltX == 0)
+									{
+										axisSteps = round((segmentMultiplier / configSetup.distancePerRev_AxisX) * (configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X));
+									}
+									else
+									{
+										axisSteps = round((segmentMultiplier / configSetup.distancePerRev_AxisXAlt) * (configSetup.steps360_Axis_XAlt * configSetup.microsteps_Axis_XAlt));
+									}
+									break;
+								}
+								case ID_AXIS_B: // B Axis
+								{
+									switch (configSetup.radialOrLinear_Axis_B)
+									{
+									case RADIAL_B:
+									{
+										axisSteps = DistanceToSteps_RadialB(segmentMultiplier);
+										break;
+									}
+									case LINEAR_B:
+									{
+										axisSteps = DistanceToSteps_LinearB(segmentMultiplier);
+										break;
+									}
+									}
+									break;
+								}
+								}
+
+								stopAll = GreekKey_Move_Axis(axisSteps, 1, moveDirection, true);
+							}
+							break;
+						}
+						case AXIAL: // Spindle
+						{
 							if (configGreekKey.segmentOrActual == 2) // 2: Segment 
 							{
-								stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, segmentMultiplier, DIR_CW);
+								stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, abs(segmentMultiplier), moveDirection);
 							}
 							else  //3: Actual
 							{
 								spindleSteps = round((configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (segmentMultiplier / 360));
-								stopAll = GreekKey_Move_Spindle(spindleSteps, 1, DIR_CW);
+								stopAll = GreekKey_Move_Spindle(spindleSteps, 1, moveDirection);
 							}
 							break;
-						}
-						case AXIAL: // Axis Right CW
-						{
-							//SerialPrint(pageGrkFile_t21);
-							//SerialWrite(0x22);
-							//SerialPrint("Right");
-							//SerialPrint(nextionQuoteEnd);
-							if (configGreekKey.segmentOrActual == 2) // 2: Segment  
-							{
-								stopAll = GreekKey_Move_Axis(shortSegmentStepsAxis, segmentMultiplier, DIR_CW, true);
-							}
-							else  //3: Actual
-							{
-								switch (configGreekKey.axisId)
-								{
-									case ID_AXIS_Z: // Z Axis
-									{
-										axisSteps = round((segmentMultiplier / configSetup.distancePerRev_AxisZ) * (configSetup.steps360_Axis_Z * configSetup.microsteps_Axis_Z));
-										break;
-									}
-									case ID_AXIS_X: // X Axis
-									{
-										if (configSetup.xAltX == 0)
-										{
-											axisSteps = round((segmentMultiplier / configSetup.distancePerRev_AxisX) * (configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X));
-										}
-										else
-										{
-											axisSteps = round((segmentMultiplier / configSetup.distancePerRev_AxisXAlt) * (configSetup.steps360_Axis_XAlt * configSetup.microsteps_Axis_XAlt));
-										}
-										break;
-									}
-									case ID_AXIS_B: // B Axis
-									{
-										switch (configSetup.radialOrLinear_Axis_B)
-										{
-											case RADIAL_B:
-											{
-												axisSteps = round(DistanceToSteps_RadialB(segmentMultiplier));
-											}
-											case LINEAR_B:
-											{
-												axisSteps = round(DistanceToSteps_LinearB(segmentMultiplier));
-											}
-										}
-										
-										break;
-									}
-								}
-
-								stopAll = GreekKey_Move_Axis(axisSteps, 1, DIR_CW, true);
-							}
 						}
 					}
 
@@ -6693,79 +6667,33 @@ void GreekKey_FromFile(int direction)
 					break;
 				}
 
+				case 67: // C - Spindle
+				case 83: // S - Spindle
+				{
+					// Negative steps move CCW
+					if (configGreekKey.segmentOrActual == 2) // 2: Segment 
+					{
+						//stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, segmentMultiplier, DIR_CW);
+						stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, abs(segmentMultiplier), moveDirection);
+					}
+					else  //3: Actual
+					{
+						spindleSteps = round((configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (segmentMultiplier / 360));
+						stopAll = GreekKey_Move_Spindle(spindleSteps, 1, moveDirection);
+					}
+					if (stopAll)
+					{
+						goto EndLoops;
+					}
+					break;
+				}
+
 				case 69: // E - Exit
 				{
 					exitInnerForLoop = true;
 					break;
 				}
-				case 70: // F - Rec (Using settings on REC page).
-				{
-					int waveDir = DIR_CW;
-					if (segmentMultiplier < 0)
-					{
-						waveDir = DIR_CCW;
-					}
 
-					switch (configRec.style)
-					{
-						case 0: // Triangle
-						{
-							Reciprocate_Triangle(waveDir);
-							break;
-						}
-						case 1: // Sawtooth
-						{
-							Reciprocate_Sawtooth(waveDir);
-							break;
-						}
-						case 2: // Square
-						{
-							Reciprocate_Square(waveDir);
-							break;
-						}
-					}
-					break;
-				}
-				case 71: // G - Sync (Using settings on Sync page
-				{
-					int directionSpindle = 1;
-					int directionAxis = 1;
-					if (segmentMultiplier < 0) // Move in (towards headstock).
-					{
-						if (configSync.helixType == 1) // Right hand
-						{
-							directionSpindle = DIR_CW; //CW
-							directionAxis = DIR_CCW; // CCW
-						}
-						else // Left hand
-						{
-							directionSpindle = DIR_CCW;// 0; //CCW
-							directionAxis = DIR_CCW;// 0; // CCW	
-						}
-
-					}
-					else // Move out (away from headstock).
-					{
-						//if (segmentMultiplier < 0) // Move in (towards headstock).
-						//{
-							if (configSync.helixType == 1) // Right hand
-							{
-								directionSpindle = DIR_CCW; // CW
-								directionAxis = DIR_CW; // CW
-							}
-							else // Left hand
-							{
-								directionSpindle = DIR_CW;//0; // CCW
-								directionAxis = DIR_CW; // CW
-							}
-
-						//}
-					}
-
-
-					Sync(directionSpindle, directionAxis);
-					break;
-				}
 				case 72: // H  - Angular Move. Line must also contain V
 				{
 					//SerialPrint(pageGrkFile_t21);
@@ -6782,17 +6710,17 @@ void GreekKey_FromFile(int direction)
 								{
 									case ID_AXIS_Z: // Z Axis is primary
 									{
-										stopAll = GreekKey_Move_Angular_TeensyStep(shortSegmentStepsAxisZ, angularAxisLegLength * direction, spindleShortLegSteps, angularSpindleLegLength);
+										stopAll = GreekKey_Move_Angular_TeensyStep(abs(shortSegmentStepsAxisZ), abs(angularAxisLegLength) * moveDirection_H, abs(spindleShortLegSteps), abs(angularSpindleLegLength) * moveDirection_V);
 										break;
 									}
 									case ID_AXIS_X: // X Axis is primary
 									{
-										stopAll = GreekKey_Move_Angular_TeensyStep(shortSegmentStepsAxisX, angularAxisLegLength * direction, spindleShortLegSteps, angularSpindleLegLength);
+										stopAll = GreekKey_Move_Angular_TeensyStep(shortSegmentStepsAxisX, abs(angularAxisLegLength) * moveDirection_H, spindleShortLegSteps, abs(angularSpindleLegLength) * moveDirection_V);
 										break;
 									}
 									case ID_AXIS_B: // B Axis is primary
 									{
-										stopAll = GreekKey_Move_Angular_TeensyStep(shortSegmentStepsAxisB, angularAxisLegLength * direction, spindleShortLegSteps, angularSpindleLegLength);
+										stopAll = GreekKey_Move_Angular_TeensyStep(shortSegmentStepsAxisB, abs(angularAxisLegLength) * moveDirection_H, spindleShortLegSteps, abs(angularSpindleLegLength) * moveDirection_V);
 										break;
 									}
 								}
@@ -6935,6 +6863,7 @@ void GreekKey_FromFile(int direction)
 					//SerialWrite(0x22);
 					//SerialPrint("In");
 					//SerialPrint(nextionQuoteEnd);
+
 					if (configGreekKey.segmentOrActual == 2) // 2: Segment  
 					{
 						switch (configGreekKey.axisId)
@@ -7021,129 +6950,7 @@ void GreekKey_FromFile(int direction)
 
 					break;
 				}
-				case 76: // L - Move axis left
-				{
 
-					switch (configGreekKey.radialOrAxial_File)
-					{
-						case RADIAL: // Axis Left CCW
-						{
-							//SerialPrint(pageGrkFile_t21);
-							//SerialWrite(0x22);
-							//SerialPrint("Left");
-							//SerialPrint(nextionQuoteEnd);
-							if (configGreekKey.segmentOrActual == 2) // 2: Segment  
-							{
-								Serial.print("Z----shortSegmentStepsAxis--------------------------------------------------");
-								Serial.println(shortSegmentStepsAxis);
-								stopAll = GreekKey_Move_Axis(shortSegmentStepsAxis, segmentMultiplier, DIR_CCW, true);
-							}
-							else //3: Actual
-							{
-								switch (configGreekKey.axisId)
-								{
-									case ID_AXIS_Z: // Z Axis
-									{
-										axisSteps = round((segmentMultiplier / configSetup.distancePerRev_AxisZ) * (configSetup.steps360_Axis_Z * configSetup.microsteps_Axis_Z));
-										break;
-									}
-									case ID_AXIS_X: // X Axis
-									{
-										if (configSetup.xAltX == 0)
-										{
-											axisSteps = round((segmentMultiplier / configSetup.distancePerRev_AxisX) * (configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X));
-										}
-										else
-										{
-											axisSteps = round((segmentMultiplier / configSetup.distancePerRev_AxisXAlt) * (configSetup.steps360_Axis_XAlt * configSetup.microsteps_Axis_XAlt));
-										}
-										break;
-									}
-									case ID_AXIS_B: // B Axis
-									{
-										switch (configSetup.radialOrLinear_Axis_B)
-										{
-										case RADIAL_B:
-										{
-											axisSteps = DistanceToSteps_RadialB(segmentMultiplier);
-											break;
-										}
-										case LINEAR_B:
-										{
-											axisSteps = DistanceToSteps_LinearB(segmentMultiplier);
-											break;
-										}
-										}
-										break;
-									}
-								}
-
-								stopAll = GreekKey_Move_Axis(axisSteps, 1, DIR_CCW, true);
-							}
-							break;
-						}
-						case AXIAL: // Spindle Up CCW
-						{
-							//SerialPrint(pageGrkFile_t21);
-							//SerialWrite(0x22);
-							//SerialPrint("Up");
-							//SerialPrint(nextionQuoteEnd);
-							if (configGreekKey.segmentOrActual == 2) // 2: Segment 
-							{
-								stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, segmentMultiplier, DIR_CCW);
-							}
-							else  //3: Actual
-							{
-								spindleSteps = round((configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (segmentMultiplier / 360));
-								stopAll = GreekKey_Move_Spindle(spindleSteps, 1, DIR_CCW);
-							}
-							break;
-						}
-					}
-
-					if (!stopAll)
-					{
-						if (StopGreekKey())
-						{
-							goto EndLoops;
-						}
-					}
-					else
-					{
-						goto EndLoops;
-					}
-
-					break;
-				}
-				case 77: // M - Move axis (using settings on MOV page).
-				{
-					int axisId = abs(segmentMultiplier);
-					if (segmentMultiplier < 0)
-					{
-						MoveAxis(axisId, DIR_CCW);
-					}
-					else
-					{
-						MoveAxis(axisId, DIR_CW);
-					}
-					
-					break;
-				}
-				case 78: // N - Index spindle (using settings on IND page).
-				{
-					//configIndex_Main.indexId = abs(segmentMultiplier);
-					if (segmentMultiplier < 0)
-					{
-						IndexSpindle(DIR_CCW);
-					}
-					else
-					{
-						IndexSpindle(DIR_CW);
-					}
-					
-
-					break;
-				}
 				case 79: // O - Move alternate axis out (Doesn't change for Radial or Axial)
 				{
 					//SerialPrint(pageGrkFile_t21);
@@ -7213,197 +7020,117 @@ void GreekKey_FromFile(int direction)
 					break;
 				}
 				case 80: // P - Pause in seconds
-				case 87: // W - Pause in seconds
+				case 81: // Q - Page routines
 				{
-					GreekKey_Pause(segmentMultiplier);
-					break;
-				}
-				case 82: // R - Move axis right CW
-				{ 
-
-					switch (configGreekKey.radialOrAxial_File)
+					switch (runPageID)
 					{
-						case RADIAL: // Axis Right CW
+						case 3: // Ind
 						{
-							//SerialPrint(pageGrkFile_t21);
-							//SerialWrite(0x22);
-							//SerialPrint("Right");
-							//SerialPrint(nextionQuoteEnd);
-							if (configGreekKey.segmentOrActual == 2) // 2: Segment  
+
+							if (abs(segmentMultiplier) * moveDirection < 0)
 							{
-								stopAll = GreekKey_Move_Axis(shortSegmentStepsAxis, segmentMultiplier, DIR_CW, true);
+								IndexSpindle(DIR_CCW);
 							}
-							else  //3: Actual
+							else
 							{
-								switch (configGreekKey.axisId)
+								IndexSpindle(DIR_CW);
+							}
+
+							break;
+						}
+						case 4: // Mov
+						{
+
+							//int moveDirection = abs(segmentMultiplier);
+							if (abs(segmentMultiplier) * moveDirection < 0)
+							{
+								MoveAxis(configMove.axisId, DIR_CCW);
+							}
+							else
+							{
+								MoveAxis(configMove.axisId, DIR_CW);
+							}
+
+							break;
+						}
+						case 6: // Sync
+						{
+
+							int directionSpindle = 1;
+							int directionAxis = 1;
+							if (abs(segmentMultiplier) * moveDirection < 0) // Move in (towards headstock).
+							{
+								if (configSync.helixType == 1) // Right hand
 								{
-									case ID_AXIS_Z: // Z Axis
-									{
-										axisSteps = round((segmentMultiplier / configSetup.distancePerRev_AxisZ) * (configSetup.steps360_Axis_Z * configSetup.microsteps_Axis_Z));
-										break;
-									}
-									case ID_AXIS_X: // X Axis
-									{
-										if (configSetup.xAltX == 0)
-										{
-											axisSteps = round((segmentMultiplier / configSetup.distancePerRev_AxisX) * (configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X));
-										}
-										else
-										{
-											axisSteps = round((segmentMultiplier / configSetup.distancePerRev_AxisXAlt) * (configSetup.steps360_Axis_XAlt * configSetup.microsteps_Axis_XAlt));
-										}
-										break;
-									}
-									case ID_AXIS_B: // B Axis
-									{
-										switch (configSetup.radialOrLinear_Axis_B)
-										{
-										case RADIAL_B:
-										{
-											axisSteps = DistanceToSteps_RadialB(segmentMultiplier);
-											break;
-										}
-										case LINEAR_B:
-										{
-											axisSteps = DistanceToSteps_LinearB(segmentMultiplier);
-											break;
-										}
-										}
-										break;
-									}
+									directionSpindle = DIR_CW; //CW
+									directionAxis = DIR_CCW; // CCW
+								}
+								else // Left hand
+								{
+									directionSpindle = DIR_CCW;// 0; //CCW
+									directionAxis = DIR_CCW;// 0; // CCW	
 								}
 
-								stopAll = GreekKey_Move_Axis(axisSteps, 1, DIR_CW, true);
+							}
+							else // Move out (away from headstock).
+							{
+								//if (segmentMultiplier < 0) // Move in (towards headstock).
+								//{
+								if (configSync.helixType == 1) // Right hand
+								{
+									directionSpindle = DIR_CCW; // CW
+									directionAxis = DIR_CW; // CW
+								}
+								else // Left hand
+								{
+									directionSpindle = DIR_CW;//0; // CCW
+									directionAxis = DIR_CW; // CW
+								}
+
+								//}
 							}
 
+
+							Sync(directionSpindle, directionAxis);
 							break;
 						}
-						case AXIAL: // Spindle Down CW
+						case 7: // Rec
 						{
-							//SerialPrint(pageGrkFile_t21);
-							//SerialWrite(0x22);
-							//SerialPrint("Down");
-							//SerialPrint(nextionQuoteEnd);
-							if (configGreekKey.segmentOrActual == 2) // 2: Segment 
+
+							int waveDir = DIR_CW;
+							if (abs(segmentMultiplier) * moveDirection < 0)
 							{
-								stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, segmentMultiplier, DIR_CW);
+								waveDir = DIR_CCW;
 							}
-							else  //3: Actual
+
+							switch (configRec.style)
 							{
-								spindleSteps = round((configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (segmentMultiplier / 360));
-								stopAll = GreekKey_Move_Spindle(spindleSteps, 1, DIR_CW);
+								case 1: // Triangle
+								{
+									Reciprocate_Triangle(waveDir);
+									break;
+								}
+								case 2: // Sawtooth
+								{
+									Reciprocate_Sawtooth(waveDir);
+									break;
+								}
+								case 3: // Square
+								{
+									Reciprocate_Square(waveDir);
+									break;
+								}
 							}
 							break;
 						}
 					}
 
-					if (!stopAll)
-					{
-						if (StopGreekKey())
-						{
-							goto EndLoops;
-						}
-					}
-					else
-					{
-						goto EndLoops;
-					}
 
 					break;
 				}
-
-				case 85: // U - Spindle up CCW
+				case 87: // W - Count identifier
 				{
-
-					switch (configGreekKey.radialOrAxial_File)
-					{
-						case RADIAL: // Spindle Up CCW
-						{
-							//SerialPrint(pageGrkFile_t21);
-							//SerialWrite(0x22);
-							//SerialPrint("Up");
-							//SerialPrint(nextionQuoteEnd);
-							if (configGreekKey.segmentOrActual == 2) // 2: Segment 
-							{
-								stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, segmentMultiplier, DIR_CCW);
-							}
-							else  //3: Actual
-							{
-								spindleSteps = round((configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (segmentMultiplier / 360));
-								stopAll = GreekKey_Move_Spindle(spindleSteps, 1, DIR_CCW);
-							}
-
-							break;
-						}
-						case AXIAL: // Axis Left CCW
-						{
-							//SerialPrint(pageGrkFile_t21);
-							//SerialWrite(0x22);
-							//SerialPrint("Left");
-							//SerialPrint(nextionQuoteEnd);
-							if (configGreekKey.segmentOrActual == 2) // 2: Segment  
-							{
-								stopAll = GreekKey_Move_Axis(shortSegmentStepsAxis, segmentMultiplier, DIR_CCW, true);
-							}
-							else //3: Actual
-							{
-								switch (configGreekKey.axisId)
-								{
-									case ID_AXIS_Z: // Z Axis
-									{
-										axisSteps = round((segmentMultiplier / configSetup.distancePerRev_AxisZ) * (configSetup.steps360_Axis_Z * configSetup.microsteps_Axis_Z));
-										break;
-									}
-									case ID_AXIS_X: // X Axis
-									{
-										if (configSetup.xAltX == 0)
-										{
-											axisSteps = round((segmentMultiplier / configSetup.distancePerRev_AxisX) * (configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X));
-										}
-										else
-										{
-											axisSteps = round((segmentMultiplier / configSetup.distancePerRev_AxisXAlt) * (configSetup.steps360_Axis_XAlt * configSetup.microsteps_Axis_XAlt));
-										}
-										break;
-									}
-									case ID_AXIS_B: // B Axis
-									{
-										switch (configSetup.radialOrLinear_Axis_B)
-										{
-										case RADIAL_B:
-										{
-											axisSteps = DistanceToSteps_RadialB(segmentMultiplier);
-											break;
-										}
-										case LINEAR_B:
-										{
-											axisSteps = DistanceToSteps_LinearB(segmentMultiplier);
-											break;
-										}
-										}
-										break;
-									}
-								}
-
-								stopAll = GreekKey_Move_Axis(axisSteps, 1, DIR_CCW, true);
-							}
-
-							break;
-						}
-					}
-
-					if(!stopAll)
-					{ 
-						if(StopGreekKey())
-						{
-							goto EndLoops;
-						}
-					}
-					else
-					{
-						goto EndLoops;
-					}
-	
+					// Count identifier
 					break;
 				}
 				case 88: // X - X axis
@@ -8234,6 +7961,32 @@ double GetGreekKeyDataFromSD(int lineNumber)
 		return 0;
 	}
 
+	if (moveType == 87) // W - Spindle and Axis segment count
+	{
+		String countType = newSizeString[1];
+		if (countType == "S")
+		{
+			moveType = 1;
+#ifdef DEBUG
+			Serial.print("countType S: ");
+			Serial.print(moveType);
+			Serial.print("  -  ");
+			Serial.println(nStr);
+#endif // DEBUG
+		}
+		else if (countType == "A")
+		{
+			moveType = 2;
+		}
+		nStr = newSizeString.substring(2);
+#ifdef DEBUG
+		Serial.print("countType A: ");
+		Serial.print(moveType);
+		Serial.print("  -  ");
+		Serial.println(nStr);
+#endif // DEBUG
+	}
+
 	if (moveType == 72) // H
 	{
 		// Horizontal and Vertical move combined.
@@ -8257,6 +8010,38 @@ double GetGreekKeyDataFromSD(int lineNumber)
 		Serial.println(val);
 		Serial.print("vVal: ");
 		Serial.println(angularSpindleLegLength);
+#endif // DEBUG
+
+	}
+
+	if (moveType == 81) // Run page functions
+	{
+		String page = newSizeString[1];
+		if (page == "I")
+		{
+			runPageID = 3;
+		}
+		else if (page == "M")
+		{
+			runPageID = 4;
+		}
+		else if (page == "S")
+		{
+			runPageID = 6;
+		}
+		else if (page == "R")
+		{
+			runPageID = 7;
+		}
+
+
+
+		nStr = newSizeString.substring(2);
+#ifdef DEBUG
+		Serial.print("page 81: ");
+		Serial.println(page);
+		Serial.print("nStr 81: ");
+		Serial.println(nStr);
 #endif // DEBUG
 
 	}

@@ -3062,12 +3062,12 @@ void loop()
 	#endif // DEBUG
 				switch (configRec.style)
 				{
-					case 0: // Triangle
+					case 1: // Triangle
 					{
 						Reciprocate_Triangle(waveDir);
 						break;
 					}
-					case 1: // Sawtooth
+					case 3: // Sawtooth
 					{
 						Reciprocate_Sawtooth(waveDir);
 						break;
@@ -3612,7 +3612,7 @@ void loop()
 				reverseDirection = GetSerialInteger();
 				if (reverseDirection == 0)
 				{
-					reverseDirection = -1; // Nextion won't send negative number
+					reverseDirection = DIR_CCW; // Nextion won't send negative number
 				}
 	#ifdef DEBUG
 				Serial.print(axisId_Char);
