@@ -1,0 +1,3 @@
+Teensy 3.5 is used with the four axes board, while Teensy 3.2 is used with the two axes board.
+Hex files for direct uploading to Teensy are located in the Teensy35 and Teensy32 folders.
+The Nextion touch screen needs to be programmed to use 115200 baud.  This is done by first loading one of the hex files, 4Rose_V002_9600.hex, from either the Teensy35 or the Teensy32 folder. Once this is done, load one of the 4Rose_V003_115200.hex files.
