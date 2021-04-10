@@ -2,7 +2,7 @@
 /* *****************************************************************
 * 4Rose main entry
 * Author: Edward French
-* Version: 21 - 022121
+* Version: 22 - 032721
 ******************************************************************/
 
 #include "math.h"
@@ -321,7 +321,6 @@ void loop()
 	//SerialPrintln(serialId);
 
 	// All Nextion incoming data packets are terminated with one 0xFF byte
-	//if (serialId < 9)
 	if ((Serial1.available() > 0) || (Serial2.available() > 0)|| (Serial3.available() > 0))
 	{
 		incomingByte = SerialRead(serialId);
@@ -479,7 +478,7 @@ void loop()
 						break;
 					}
 					case PAGE_GRK:
-					case PAGE_GRKFILE:
+					case PAGE_PROGRAM:
 					{
 						configGreekKey.maxSpd_Spindle = (int)GetSerialFloat(serialId);
 						
@@ -594,7 +593,7 @@ void loop()
 						break;
 					}
 					case PAGE_GRK:
-					case PAGE_GRKFILE:
+					case PAGE_PROGRAM:
 					{
 						configGreekKey.accel_Spindle = (int)GetSerialFloat(serialId);
 						EEPROM.put(eePromAddress_Grk, configGreekKey);
@@ -1692,7 +1691,7 @@ void loop()
 						break;
 					}
 					case PAGE_GRK:
-					case PAGE_GRKFILE:
+					case PAGE_PROGRAM:
 					{
 						configGreekKey.speedPercent_Spindle = (int)GetSerialFloat(serialId);
 						EEPROM.put(eePromAddress_Grk, configGreekKey);
@@ -1886,7 +1885,7 @@ void loop()
 						break;
 					}
 					case PAGE_GRK:
-					case PAGE_GRKFILE:
+					case PAGE_PROGRAM:
 					{
 						int percentage = (int)GetSerialFloat(serialId);
 
@@ -2509,7 +2508,7 @@ void loop()
 						break;
 					}
 					case PAGE_GRK:
-					case PAGE_GRKFILE:
+					case PAGE_PROGRAM:
 					{
 						switch (configGreekKey.axisId)
 						{
@@ -2682,7 +2681,7 @@ void loop()
 						break;
 					}
 					case PAGE_GRK:
-					case PAGE_GRKFILE:
+					case PAGE_PROGRAM:
 					{
 						switch (configGreekKey.axisId)
 						{

@@ -94,7 +94,7 @@
 #define PAGE_SYNC 6
 #define PAGE_REC 7
 #define PAGE_GRK 8
-#define PAGE_GRKFILE 9
+#define PAGE_PROGRAM 9
 #define PAGE_GEO 10 
 #define PAGE_MORE 11
 
@@ -291,7 +291,7 @@ struct configPageGreekKey
 	int32_t radialOrAxial_Pattern;
 	float segmentLength_Pattern;
 
-	// pageGrkFile settings
+	// pageProgram settings
 	int32_t patternCount_File;
 	float countPatternPer360_File;
 	int32_t segmentOrActual;
@@ -447,8 +447,8 @@ String comment;
 int spindleShortLegSteps = 0;
 int axisShortLegSteps = 0;
 
-float angularAxisLegLength = 0; // Horizontal component of angular move
-float angularSpindleLegLength = 0; // Vertical component of angular move
+float hv_AxisLegLength = 0; // Horizontal component of angular move
+float hv_SpindleLegLength = 0; // Vertical component of angular move
 long angularAxisSpeed = 0;
 long angularSpindleSpeed = 0;
 

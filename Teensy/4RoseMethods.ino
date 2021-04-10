@@ -419,7 +419,7 @@ double GetSerialFloatA(Stream& port)
 /// </summary>
 /// <comment>
 /// </comment>
-/// <returns></returns>
+/// <returns>Integer value</returns>
 int GetSerialInteger()
 {
 	char inputHex;
@@ -719,31 +719,31 @@ float DistanceToSteps_Axis(float distance, int axisId)
 }
 
 /// <summary>
-/// AngularMaxSpeed
+/// AngularLengthAndMaxSpeed
 /// </summary>
 /// <comment>
-/// Calculate max speeds for Greek Key angular moves.
+/// Calculate max speeds and length for Greek Key angular moves.
 /// </comment>
 /// <param name="spindleMaxSpeed">Spindle Max Speed</param>
 /// <param name="axisMaxSpeed">Axis Max Speed</param>
 /// <returns>void</returns>
-void AngularMaxSpeed(long spindleMaxSpeed, long axisMaxSpeed)
+void AngularLengthAndMaxSpeed(long spindleMaxSpeed, long axisMaxSpeed)
 {
 
 	// Pathagorean Theorem
-	if (angularSpindleLegLength < 0)
+	if (hv_SpindleLegLength < 0)
 	{
-		angularSpindleLegLength = angularSpindleLegLength * (-1);
+		hv_SpindleLegLength = hv_SpindleLegLength * (-1);
 	}
-	if (angularAxisLegLength < 0)
+	if (hv_AxisLegLength < 0)
 	{
-		angularAxisLegLength = angularAxisLegLength * (-1);
+		hv_AxisLegLength = hv_AxisLegLength * (-1);
 	}
-	float hypotenuse = sqrt((angularSpindleLegLength * angularSpindleLegLength) + (angularAxisLegLength * angularAxisLegLength));
-	float axisMultiplier = hypotenuse / angularAxisLegLength;
-	float spindleMultiplier = hypotenuse / angularSpindleLegLength;
-	angularAxisLegLength = round(axisMaxSpeed * axisMultiplier);
-	angularSpindleLegLength = round(spindleMaxSpeed * spindleMultiplier);
+	float hypotenuse = sqrt((hv_SpindleLegLength * hv_SpindleLegLength) + (hv_AxisLegLength * hv_AxisLegLength));
+	float axisMultiplier = hypotenuse / hv_AxisLegLength;
+	float spindleMultiplier = hypotenuse / hv_SpindleLegLength;
+	hv_AxisLegLength = round(axisMaxSpeed * axisMultiplier);
+	hv_SpindleLegLength = round(spindleMaxSpeed * spindleMultiplier);
 
 }
 
@@ -5843,7 +5843,7 @@ bool GreekKey_Move_Angular_TeensyStep(
 	}
 
 	// ToDo:
-	AngularMaxSpeed(maxSpd_Spindle, maxSpd_Axis);
+	AngularLengthAndMaxSpeed(maxSpd_Spindle, maxSpd_Axis);
 
 	SetEnable(ID_SPINDLE, true);
 	currentSpeedPercent_Axis = speedPercent_Axis * .01;
@@ -5857,8 +5857,14 @@ bool GreekKey_Move_Angular_TeensyStep(
 	stepper_Axis.setPosition(0);
 
 
-	int32_t targetSteps = round(abs(shortLegLength_Axis) * multiplier_Axis);
-	stepper_Axis.setTargetRel(targetSteps);
+	int32_t targetSteps_Axis = round(abs(shortLegLength_Axis) * multiplier_Axis);
+	Serial.print("shortLegLength_Axis: ");
+	Serial.print(shortLegLength_Axis);
+	Serial.print("   multiplier_Axis: ");
+	Serial.print(multiplier_Axis);
+	Serial.print("   Axis targetSteps: ");
+	Serial.println(targetSteps_Axis);
+	stepper_Axis.setTargetRel(targetSteps_Axis);
 
 	stepperSpindle
 		.setMaxSpeed(maxSpd_Spindle * currentSpeedPercent_Spindle)
@@ -5866,7 +5872,12 @@ bool GreekKey_Move_Angular_TeensyStep(
 	stepperSpindle.setPosition(0);
 	float spindleSteps = abs(shortLegLength_Spindle) * multiplier_Spindle;
 	int32_t targetSteps_Spindle = (int32_t)round(spindleSteps);
-
+	Serial.print("shortLegLength_Spindle: ");
+	Serial.print(shortLegLength_Spindle);
+	Serial.print("   multiplier_Spindle: ");
+	Serial.print(multiplier_Spindle);
+	Serial.print("Spindle targetSteps: ");
+	Serial.println(targetSteps_Spindle);
 	stepperSpindle.setTargetRel(targetSteps_Spindle);
 
 #ifdef DEBUG
@@ -5876,7 +5887,7 @@ bool GreekKey_Move_Angular_TeensyStep(
 	Serial.print("targetSteps_Spindle:");
 	Serial.println(targetSteps_Spindle);
 	Serial.print("targetSteps_Axis:");
-	Serial.println(targetSteps);
+	Serial.println(targetSteps_Axis);
 #endif // DEBUG
 
 	stepController.moveAsync(stepperSpindle,stepper_Axis);
@@ -6306,9 +6317,9 @@ void GreekKey_FromFile(int direction)
 	const char* pageBE_t1 = "pageBE.t1.txt="; // Spindle End
 	const char* pageBE_t4 = "pageBE.t3.txt="; // Axis Begin
 	const char* pageBE_t2 = "pageBE.t1.txt="; // Axis End
-	const char* pageGrkFile_t15 = "pageGrkFile.t15.txt="; // Segments
-	const char* pageGrkFile_t21 = "pageGrkFile.t21.txt="; // Direction
-	const char* pageGrkFile_t22 = "pageGrkFile.t22.txt="; // Line Number
+	const char* pageProgram_t15 = "pageProgram.t15.txt="; // Segments
+	const char* pageProgram_t21 = "pageProgram.t21.txt="; // Direction
+	const char* pageProgram_t22 = "pageProgram.t22.txt="; // Line Number
 
 #ifdef DEBUG
 	Serial.print(">>>>>>>>>>>>>>>>>>>>segmentOrActual:");
@@ -6326,7 +6337,7 @@ void GreekKey_FromFile(int direction)
 #ifdef DEBUG
 				Serial.println("Exit Greek Key: File not found");
 #endif // DEBUG
-				SerialPrint("pageGrkFile.tFileName.txt=");
+				SerialPrint("pageProgram.tFileName.txt=");
 				SerialWrite(0x22);
 				SerialPrint("File not found");
 				SerialPrint(nextionQuoteEnd);
@@ -6499,8 +6510,8 @@ void GreekKey_FromFile(int direction)
 			}
 
 			// Reset hVal and vVal
-			angularAxisLegLength = 0;
-			angularSpindleLegLength = 0;
+			hv_AxisLegLength = 0;
+			hv_SpindleLegLength = 0;
 
 			// Get data
 			segmentMultiplier = GetGreekKeyDataFromSD(i);
@@ -6512,28 +6523,28 @@ void GreekKey_FromFile(int direction)
 			}
 
 			int moveDirection_H = DIR_CW;
-			if ((angularAxisLegLength * reverseDirection) < 0)
+			if ((hv_AxisLegLength * reverseDirection) < 0)
 			{
 				moveDirection_H = DIR_CCW;
 			}
 
 			int moveDirection_V = DIR_CW;
-			if ((angularSpindleLegLength * reverseDirection) < 0)
+			if ((hv_SpindleLegLength * reverseDirection) < 0)
 			{
 				moveDirection_V = DIR_CCW;
 			}
 
-			SerialPrint(pageGrkFile_t22);
+			SerialPrint(pageProgram_t22);
 			SerialWrite(0x22);
 			SerialPrint(i);
 			SerialPrint(nextionQuoteEnd);
 
-			SerialPrint(pageGrkFile_t21);
+			SerialPrint(pageProgram_t21);
 			SerialWrite(0x22);
 			SerialPrint(currentCommand);
 			SerialPrint(nextionQuoteEnd);
 
-			SerialPrint(pageGrkFile_t15);
+			SerialPrint(pageProgram_t15);
 			SerialWrite(0x22);
 			SerialPrint(segmentMultiplier);
 			SerialPrint(nextionQuoteEnd);
@@ -6589,7 +6600,7 @@ void GreekKey_FromFile(int direction)
 						{
 							if (configGreekKey.segmentOrActual == 2) // 2: Segment  
 							{
-								Serial.print("Z----shortSegmentStepsAxis--------------------------------------------------");
+								Serial.print("----shortSegmentStepsAxis--------------------------------------------------");
 								Serial.println(shortSegmentStepsAxis);
 								stopAll = GreekKey_Move_Axis(shortSegmentStepsAxis, abs(segmentMultiplier), moveDirection, true);
 							}
@@ -6670,16 +6681,64 @@ void GreekKey_FromFile(int direction)
 				case 67: // C - Spindle
 				case 83: // S - Spindle
 				{
-					// Negative steps move CCW
-					if (configGreekKey.segmentOrActual == 2) // 2: Segment 
+					switch (configGreekKey.radialOrAxial_File)
 					{
-						//stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, segmentMultiplier, DIR_CW);
-						stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, abs(segmentMultiplier), moveDirection);
-					}
-					else  //3: Actual
-					{
-						spindleSteps = round((configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (segmentMultiplier / 360));
-						stopAll = GreekKey_Move_Spindle(spindleSteps, 1, moveDirection);
+						case RADIAL: // Spindle Down CW
+						{
+							// Negative steps move CCW
+							if (configGreekKey.segmentOrActual == 2) // 2: Segment 
+							{
+								//stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, segmentMultiplier, DIR_CW);
+								stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, abs(segmentMultiplier), moveDirection);
+							}
+							else  //3: Actual
+							{
+								spindleSteps = round((configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (segmentMultiplier / 360));
+								stopAll = GreekKey_Move_Spindle(spindleSteps, 1, moveDirection);
+							}
+							break;
+						}
+						case AXIAL: // Move Axis instead of Spindle
+						{
+							if (configGreekKey.segmentOrActual == 2) // 2: Segment  
+							{
+								stopAll = GreekKey_Move_Axis(shortSegmentStepsAxis, abs(segmentMultiplier), moveDirection, true);
+							}
+							else  //3: Actual
+							{
+								switch (configGreekKey.axisId)
+								{
+								case ID_AXIS_Z: // Z Axis
+								{
+									axisSteps = round((segmentMultiplier / configSetup.distancePerRev_AxisZ) * (configSetup.steps360_Axis_Z * configSetup.microsteps_Axis_Z));
+									break;
+								}
+								case ID_AXIS_X: // X Axis
+								{
+									axisSteps = round((segmentMultiplier / configSetup.distancePerRev_AxisX) * (configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X));
+									break;
+								}
+								case ID_AXIS_B: // B Axis
+								{
+									switch (configSetup.radialOrLinear_Axis_B)
+									{
+										case RADIAL_B:
+										{
+											axisSteps = round(DistanceToSteps_RadialB(segmentMultiplier));
+										}
+										case LINEAR_B:
+										{
+											axisSteps = round(DistanceToSteps_LinearB(segmentMultiplier));
+										}
+									}
+
+									break;
+								}
+								}
+
+								stopAll = GreekKey_Move_Axis(axisSteps, 1, DIR_CW, true);
+							}
+						}
 					}
 					if (stopAll)
 					{
@@ -6696,10 +6755,6 @@ void GreekKey_FromFile(int direction)
 
 				case 72: // H  - Angular Move. Line must also contain V
 				{
-					//SerialPrint(pageGrkFile_t21);
-					//SerialWrite(0x22);
-					//SerialPrint("Angle");
-					//SerialPrint(nextionQuoteEnd);
 					switch (configGreekKey.radialOrAxial_File)
 					{
 						case RADIAL: // 
@@ -6710,17 +6765,24 @@ void GreekKey_FromFile(int direction)
 								{
 									case ID_AXIS_Z: // Z Axis is primary
 									{
-										stopAll = GreekKey_Move_Angular_TeensyStep(abs(shortSegmentStepsAxisZ), abs(angularAxisLegLength) * moveDirection_H, abs(spindleShortLegSteps), abs(angularSpindleLegLength) * moveDirection_V);
+										Serial.print("shortSegmentStepsAxisZ: ");
+										Serial.print(shortSegmentStepsAxisZ);
+										Serial.print("   (abs)angularAxisLegLength: ");
+										Serial.print(abs(hv_AxisLegLength));
+										Serial.print("   Axis moveDirection_H: ");
+										Serial.println(moveDirection_H);
+
+										stopAll = GreekKey_Move_Angular_TeensyStep(abs(shortSegmentStepsAxisZ), abs(hv_AxisLegLength) * moveDirection_H, abs(spindleShortLegSteps), abs(hv_SpindleLegLength) * moveDirection_V);
 										break;
 									}
 									case ID_AXIS_X: // X Axis is primary
 									{
-										stopAll = GreekKey_Move_Angular_TeensyStep(shortSegmentStepsAxisX, abs(angularAxisLegLength) * moveDirection_H, spindleShortLegSteps, abs(angularSpindleLegLength) * moveDirection_V);
+										stopAll = GreekKey_Move_Angular_TeensyStep(shortSegmentStepsAxisX, abs(hv_AxisLegLength) * moveDirection_H, spindleShortLegSteps, abs(hv_SpindleLegLength) * moveDirection_V);
 										break;
 									}
 									case ID_AXIS_B: // B Axis is primary
 									{
-										stopAll = GreekKey_Move_Angular_TeensyStep(shortSegmentStepsAxisB, abs(angularAxisLegLength) * moveDirection_H, spindleShortLegSteps, abs(angularSpindleLegLength) * moveDirection_V);
+										stopAll = GreekKey_Move_Angular_TeensyStep(shortSegmentStepsAxisB, abs(hv_AxisLegLength) * moveDirection_H, spindleShortLegSteps, abs(hv_SpindleLegLength) * moveDirection_V);
 										break;
 									}
 								}
@@ -6731,18 +6793,18 @@ void GreekKey_FromFile(int direction)
 								{
 									case ID_AXIS_Z: // Z Axis
 									{
-										axisSteps = (int)(round((angularAxisLegLength / configSetup.distancePerRev_AxisZ) * (configSetup.steps360_Axis_Z * configSetup.microsteps_Axis_Z)));
+										axisSteps = (int)(round((hv_AxisLegLength / configSetup.distancePerRev_AxisZ) * (configSetup.steps360_Axis_Z * configSetup.microsteps_Axis_Z)));
 										break;
 									}
 									case ID_AXIS_X: // X Axis
 									{
 										if (configSetup.xAltX == 0)
 										{
-											axisSteps = (int)(round((angularAxisLegLength / configSetup.distancePerRev_AxisX) * (configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X)));
+											axisSteps = (int)(round((hv_AxisLegLength / configSetup.distancePerRev_AxisX) * (configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X)));
 										}
 										else
 										{
-											axisSteps = (int)(round((angularAxisLegLength / configSetup.distancePerRev_AxisXAlt) * (configSetup.steps360_Axis_XAlt * configSetup.microsteps_Axis_XAlt)));
+											axisSteps = (int)(round((hv_AxisLegLength / configSetup.distancePerRev_AxisXAlt) * (configSetup.steps360_Axis_XAlt * configSetup.microsteps_Axis_XAlt)));
 										}
 										break;
 									}
@@ -6752,12 +6814,12 @@ void GreekKey_FromFile(int direction)
 										{
 											case RADIAL_B:
 											{
-												axisSteps = (int)(DistanceToSteps_RadialB(angularAxisLegLength));
+												axisSteps = (int)(DistanceToSteps_RadialB(hv_AxisLegLength));
 												break;
 											}
 											case LINEAR_B:
 											{
-												axisSteps = (int)(DistanceToSteps_LinearB(angularAxisLegLength));
+												axisSteps = (int)(DistanceToSteps_LinearB(hv_AxisLegLength));
 												break;
 											}
 										}
@@ -6767,7 +6829,7 @@ void GreekKey_FromFile(int direction)
 								}
 
 								axisSteps = axisSteps * direction;
-								spindleSteps = round((configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (angularSpindleLegLength / 360));
+								spindleSteps = round((configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (hv_SpindleLegLength / 360));
 								stopAll = GreekKey_Move_Angular_TeensyStep(axisSteps, 1, spindleSteps, 1);
 							}
 							break;
@@ -6780,17 +6842,34 @@ void GreekKey_FromFile(int direction)
 								{
 									case ID_AXIS_Z: //
 									{
-										stopAll = GreekKey_Move_Angular_TeensyStep(shortSegmentStepsAxisZ, angularSpindleLegLength * direction, spindleShortLegSteps, angularAxisLegLength);
+										Serial.print("shortSegmentStepsAxisZ: ");
+										Serial.print(shortSegmentStepsAxisZ);
+										Serial.print("   hv_AxisLegLength: ");
+										Serial.print(hv_AxisLegLength);
+										Serial.print("   moveDirection_H: ");
+										Serial.print(moveDirection_H);
+										Serial.print("   spindleShortLegSteps: ");
+										Serial.print(spindleShortLegSteps);
+										Serial.print("   hv_SpindleLegLength: ");
+										Serial.print(hv_SpindleLegLength);
+										Serial.print("   moveDirection_V: ");
+										Serial.println(moveDirection_V);
+
+
+										//stopAll = GreekKey_Move_Angular_TeensyStep(abs(spindleShortLegSteps), abs(hv_SpindleLegLength) * moveDirection_V, shortSegmentStepsAxisZ, abs(hv_AxisLegLength) * moveDirection_H);
+
+										stopAll = GreekKey_Move_Angular_TeensyStep(shortSegmentStepsAxisZ, abs(hv_SpindleLegLength) * moveDirection_V, abs(spindleShortLegSteps), abs(hv_AxisLegLength) * moveDirection_H);
+										//stopAll = GreekKey_Move_Angular_TeensyStep(abs(shortSegmentStepsAxisZ), abs(hv_AxisLegLength) * moveDirection_H, abs(spindleShortLegSteps), abs(hv_SpindleLegLength) * moveDirection_V);
 										break;
 									}
 									case ID_AXIS_X: // 
 									{
-										stopAll = GreekKey_Move_Angular_TeensyStep(shortSegmentStepsAxisX, angularSpindleLegLength * direction, spindleShortLegSteps, angularAxisLegLength);
+										stopAll = GreekKey_Move_Angular_TeensyStep(shortSegmentStepsAxisX, hv_SpindleLegLength * direction, spindleShortLegSteps, hv_AxisLegLength);
 										break;
 									}
 									case ID_AXIS_B: // 
 									{
-										stopAll = GreekKey_Move_Angular_TeensyStep(shortSegmentStepsAxisB, angularSpindleLegLength * direction, spindleShortLegSteps, angularAxisLegLength);
+										stopAll = GreekKey_Move_Angular_TeensyStep(shortSegmentStepsAxisB, hv_SpindleLegLength * direction, spindleShortLegSteps, hv_AxisLegLength);
 										break;
 									}
 								}
@@ -6801,18 +6880,18 @@ void GreekKey_FromFile(int direction)
 								{
 									case ID_AXIS_Z: // Z Axis
 									{
-										axisSteps = round((angularSpindleLegLength / configSetup.distancePerRev_AxisZ) * (configSetup.steps360_Axis_Z * configSetup.microsteps_Axis_Z));
+										axisSteps = round((hv_SpindleLegLength / configSetup.distancePerRev_AxisZ) * (configSetup.steps360_Axis_Z * configSetup.microsteps_Axis_Z));
 										break;
 									}
 									case ID_AXIS_X: // X Axis
 									{
 										if (configSetup.xAltX == 0)
 										{
-											axisSteps = round((angularSpindleLegLength / configSetup.distancePerRev_AxisX) * (configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X));
+											axisSteps = round((hv_SpindleLegLength / configSetup.distancePerRev_AxisX) * (configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X));
 										}
 										else
 										{
-											axisSteps = round((angularSpindleLegLength / configSetup.distancePerRev_AxisXAlt) * (configSetup.steps360_Axis_XAlt * configSetup.microsteps_Axis_XAlt));
+											axisSteps = round((hv_SpindleLegLength / configSetup.distancePerRev_AxisXAlt) * (configSetup.steps360_Axis_XAlt * configSetup.microsteps_Axis_XAlt));
 										}
 										break;
 									}
@@ -6822,12 +6901,12 @@ void GreekKey_FromFile(int direction)
 										{
 											case RADIAL_B:
 											{
-												axisSteps = DistanceToSteps_RadialB(angularSpindleLegLength);
+												axisSteps = DistanceToSteps_RadialB(hv_SpindleLegLength);
 												break;
 											}
 											case LINEAR_B:
 											{
-												axisSteps = DistanceToSteps_LinearB(angularSpindleLegLength);
+												axisSteps = DistanceToSteps_LinearB(hv_SpindleLegLength);
 												break;
 											}
 										}
@@ -6836,7 +6915,7 @@ void GreekKey_FromFile(int direction)
 								}
 
 								axisSteps = axisSteps * direction;
-								spindleSteps = round((configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (angularAxisLegLength / 360));
+								spindleSteps = round((configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (hv_AxisLegLength / 360));
 								stopAll = GreekKey_Move_Angular_TeensyStep(axisSteps, 1, spindleSteps, 1);
 							}
 
@@ -6859,7 +6938,7 @@ void GreekKey_FromFile(int direction)
 				}
 				case 73: // I - Move alternate axis in (Doesn't change for Radial or Axial)
 				{
-					//SerialPrint(pageGrkFile_t21);
+					//SerialPrint(pageProgram_t21);
 					//SerialWrite(0x22);
 					//SerialPrint("In");
 					//SerialPrint(nextionQuoteEnd);
@@ -6953,7 +7032,7 @@ void GreekKey_FromFile(int direction)
 
 				case 79: // O - Move alternate axis out (Doesn't change for Radial or Axial)
 				{
-					//SerialPrint(pageGrkFile_t21);
+					//SerialPrint(pageProgram_t21);
 					//SerialWrite(0x22);
 					//SerialPrint("Out");
 					//SerialPrint(nextionQuoteEnd);
@@ -7245,13 +7324,13 @@ void GreekKey_FromFile(int direction)
 
 EndLoops:
 		// Update Nextion
-	SerialPrint("pageGrkFile.va0.val=0");
+	SerialPrint("pageProgram.va0.val=0");
 	SerialPrint(nextionEnd);
-	SerialPrint("pageGrkFile.bt3.val=0");
+	SerialPrint("pageProgram.bt3.val=0");
 	SerialPrint(nextionEnd);
-	SerialPrint("pageGrkFile.bt2.val=0");
+	SerialPrint("pageProgram.bt2.val=0");
 	SerialPrint(nextionEnd);
-	SerialPrint("pageGrkFile.bt1.val=0");
+	SerialPrint("pageProgram.bt1.val=0");
 	SerialPrint(nextionEnd);
 
 	degrees_Spindle = StepsToDegrees_Spindle(endPosition_Spindle);
@@ -7561,7 +7640,7 @@ void GetFilenameFromSerial()
 			{
 				EEPROM.write(eePromAddress_Filename_Ind + i, 0);
 			}
-			else // pageGrkFile
+			else // pageProgram
 			{
 				EEPROM.write(eePromAddress_Filename_Grk + i, 0);
 			}
@@ -7572,7 +7651,7 @@ void GetFilenameFromSerial()
 		{
 			EEPROM.write(eePromAddress_Filename_Ind + i, input);
 		}
-		else // pageGrkFile
+		else // pageProgram
 		{
 			EEPROM.write(eePromAddress_Filename_Grk + i, input);
 		}
@@ -7583,7 +7662,7 @@ void GetFilenameFromSerial()
 	{
 		EEPROM.put(eePromAddress_Filename_Length_Ind, i);
 	}
-	else // pageGrkFile
+	else // pageProgram
 	{
 		EEPROM.put(eePromAddress_Filename_Length_Grk, i);
 	}
@@ -7998,18 +8077,18 @@ double GetGreekKeyDataFromSD(int lineNumber)
 		char charBuf[20];
 		nStr.toCharArray(charBuf, 20);
 		val = strtok(charBuf, "V");
-		angularAxisLegLength = atof(val);
+		hv_AxisLegLength = atof(val);
 		val = strtok(NULL, "\n");
-		angularSpindleLegLength = atof(val);
+		hv_SpindleLegLength = atof(val);
 #ifdef DEBUG
 		Serial.print("nStr: ");
-		Serial.println(nStr);
-		Serial.print("hVal: ");
-		Serial.println(angularAxisLegLength);
-		Serial.print("val: ");
-		Serial.println(val);
-		Serial.print("vVal: ");
-		Serial.println(angularSpindleLegLength);
+		Serial.print(nStr);
+		Serial.print("   hVal: ");
+		Serial.print(hv_AxisLegLength);
+		//Serial.print("val: ");
+		//Serial.println(val);
+		Serial.print("   vVal: ");
+		Serial.println(hv_SpindleLegLength);
 #endif // DEBUG
 
 	}
@@ -8483,15 +8562,15 @@ void ReturnToStartPosition(int axisId)
 		SerialPrint(nextionQuoteEnd);
 		break;
 	}
-	case PAGE_GRKFILE:
+	case PAGE_PROGRAM:
 	{
-		SerialPrint("pageGrkFile.bt1.val=0");
+		SerialPrint("pageProgram.bt1.val=0");
 		SerialPrint(nextionEnd);
-		SerialPrint("pageGrkFile.bt1.val=0");
+		SerialPrint("pageProgram.bt1.val=0");
 		SerialPrint(nextionEnd);
-		SerialPrint("pageGrkFile.va0.val=0");
+		SerialPrint("pageProgram.va0.val=0");
 		SerialPrint(nextionEnd);
-		SerialPrint("pageGrkFile.bt0.val=0");
+		SerialPrint("pageProgram.bt0.val=0");
 		SerialPrint(nextionEnd);
 		SerialPrint("pageBE.t1.txt=");
 		SerialWrite(0x22);
@@ -9686,7 +9765,7 @@ void TestEEPROMConfig(int callerId)
 			break;
 		}
 		case PAGE_GRK:
-		case PAGE_GRKFILE:
+		case PAGE_PROGRAM:
 		{
 			configPageGreekKey eePageGrk;
 
@@ -11150,7 +11229,7 @@ void TestAllTeensyEEPROMValues()
 			break;
 
 		}
-		case PAGE_GRKFILE:
+		case PAGE_PROGRAM:
 		{
 			SerialPrint("pageEEPROM.t5.txt=");
 			SerialWrite(0x22);
