@@ -2,7 +2,7 @@
 /* *****************************************************************
 * 4Rose main entry
 * Author: Edward French
-* Version: 19 - 021821
+* Version: 22 - 032721
 ******************************************************************/
 
 #include "math.h"
@@ -58,11 +58,11 @@ void setup()
 	// Initialize Nextion LCD for 115200 baud and enable Serial1,2,or3.
 	// Note: Nextion requires 3 0xFF bytes to signal end of transmission
 	// Serial1
-	Serial1.begin(115200); //Nextion Serial baud rate set in Nextion pageMain Preinitialize Event tab
-	Serial1.print("bauds=115200");
+	Serial1.begin(921600); //Nextion Serial baud rate set in Nextion pageMain Preinitialize Event tab
+	Serial1.print("bauds=921600");
 	Serial1.print(nextionEnd);
 	MilliDelay(50);
-	Serial1.print("bauds=115200");
+	Serial1.print("bauds=921600");
 	Serial1.print(nextionEnd);
 	MilliDelay(50);
 	Serial1.print("bkcmd=0");  // Set Nextion to return NO replies to each command
@@ -78,11 +78,11 @@ void setup()
 #endif // Debug
 	}
 	// Serial2
-	Serial2.begin(115200); //Nextion Serial baud rate set in Nextion pageMain Preinitialize Event tab
-	Serial2.print("bauds=115200");
+	Serial2.begin(921600); //Nextion Serial baud rate set in Nextion pageMain Preinitialize Event tab
+	Serial2.print("bauds=921600");
 	Serial2.print(nextionEnd);
 	MilliDelay(50);
-	Serial2.print("bauds=115200");
+	Serial2.print("bauds=921600");
 	Serial2.print(nextionEnd);
 	MilliDelay(50);
 	Serial2.print("bkcmd=0");  // Set Nextion to return NO replies to each command
@@ -97,11 +97,14 @@ void setup()
 #endif // Debug
 	}
 	// Serial3
-	Serial3.begin(115200); //Nextion Serial baud rate set in Nextion pageMain Preinitialize Event tab
-	Serial3.print("bauds=115200");
+	//Serial3.begin(115200); //Nextion Serial baud rate set in Nextion pageMain Preinitialize Event tab
+	Serial3.begin(921600); //Nextion Serial baud rate set in Nextion pageMain Preinitialize Event tab
+	//Serial3.print("bauds=115200");
+	Serial3.print("bauds=921600");
 	Serial3.print(nextionEnd);
 	MilliDelay(50);
-	Serial3.print("bauds=115200");
+	//Serial3.print("bauds=115200");
+	Serial3.print("bauds=921600");
 	Serial3.print(nextionEnd);
 	MilliDelay(50);
 	Serial3.print("bkcmd=0");  // Set Nextion to return NO replies to each command
@@ -318,7 +321,6 @@ void loop()
 	//SerialPrintln(serialId);
 
 	// All Nextion incoming data packets are terminated with one 0xFF byte
-	//if (serialId < 9)
 	if ((Serial1.available() > 0) || (Serial2.available() > 0)|| (Serial3.available() > 0))
 	{
 		incomingByte = SerialRead(serialId);
@@ -476,7 +478,7 @@ void loop()
 						break;
 					}
 					case PAGE_GRK:
-					case PAGE_GRKFILE:
+					case PAGE_PROGRAM:
 					{
 						configGreekKey.maxSpd_Spindle = (int)GetSerialFloat(serialId);
 						
@@ -591,7 +593,7 @@ void loop()
 						break;
 					}
 					case PAGE_GRK:
-					case PAGE_GRKFILE:
+					case PAGE_PROGRAM:
 					{
 						configGreekKey.accel_Spindle = (int)GetSerialFloat(serialId);
 						EEPROM.put(eePromAddress_Grk, configGreekKey);
@@ -1689,7 +1691,7 @@ void loop()
 						break;
 					}
 					case PAGE_GRK:
-					case PAGE_GRKFILE:
+					case PAGE_PROGRAM:
 					{
 						configGreekKey.speedPercent_Spindle = (int)GetSerialFloat(serialId);
 						EEPROM.put(eePromAddress_Grk, configGreekKey);
@@ -1883,7 +1885,7 @@ void loop()
 						break;
 					}
 					case PAGE_GRK:
-					case PAGE_GRKFILE:
+					case PAGE_PROGRAM:
 					{
 						int percentage = (int)GetSerialFloat(serialId);
 
@@ -2506,7 +2508,7 @@ void loop()
 						break;
 					}
 					case PAGE_GRK:
-					case PAGE_GRKFILE:
+					case PAGE_PROGRAM:
 					{
 						switch (configGreekKey.axisId)
 						{
@@ -2679,7 +2681,7 @@ void loop()
 						break;
 					}
 					case PAGE_GRK:
-					case PAGE_GRKFILE:
+					case PAGE_PROGRAM:
 					{
 						switch (configGreekKey.axisId)
 						{
@@ -3062,12 +3064,12 @@ void loop()
 	#endif // DEBUG
 				switch (configRec.style)
 				{
-					case 0: // Triangle
+					case 1: // Triangle
 					{
 						Reciprocate_Triangle(waveDir);
 						break;
 					}
-					case 1: // Sawtooth
+					case 3: // Sawtooth
 					{
 						Reciprocate_Sawtooth(waveDir);
 						break;
@@ -3612,7 +3614,7 @@ void loop()
 				reverseDirection = GetSerialInteger();
 				if (reverseDirection == 0)
 				{
-					reverseDirection = -1; // Nextion won't send negative number
+					reverseDirection = DIR_CCW; // Nextion won't send negative number
 				}
 	#ifdef DEBUG
 				Serial.print(axisId_Char);
