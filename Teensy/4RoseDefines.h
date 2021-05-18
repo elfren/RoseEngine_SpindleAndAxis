@@ -10,7 +10,7 @@
 // Pin assignments
 //==================================================================
 
-// Spindle
+//// Spindle
 #define ID_SPINDLE 3
 #define PIN_SPINDLE_DIR 2  //Stepper direction
 #define PIN_SPINDLE_STEP 3  //Stepper step
@@ -21,6 +21,22 @@
 #define PIN_AXIS_Z_DIR 5 // Stepper direction
 #define PIN_AXIS_Z_STEP 6 // Stepper step
 #define PIN_AXIS_Z_ENABLE 14 // Enable 
+
+
+// Swap Z and Spindle for DM542T testing
+// Spindle
+//#define ID_SPINDLE 3
+//#define PIN_SPINDLE_DIR 5  //Stepper direction
+//#define PIN_SPINDLE_STEP 6  //Stepper step
+//#define PIN_SPINDLE_ENABLE 14 //Enable
+//
+//// Z axis
+//#define ID_AXIS_Z 0
+//#define PIN_AXIS_Z_DIR 2 // Stepper direction
+//#define PIN_AXIS_Z_STEP 3 // Stepper step
+//#define PIN_AXIS_Z_ENABLE 4 // Enable 
+
+
 
 // X axis
 #define ID_AXIS_X 1
@@ -40,10 +56,10 @@
 
 // Move page
 #define ID_MOVE_AXIS_Z1 0
-#define ID_MOVE_AXIS_Z2 1
-#define ID_MOVE_AXIS_X1 2
-#define ID_MOVE_AXIS_X2 3
-#define ID_MOVE_AXIS_B1 4
+#define ID_MOVE_AXIS_Z2 3
+#define ID_MOVE_AXIS_X1 1
+#define ID_MOVE_AXIS_X2 4
+#define ID_MOVE_AXIS_B1 2
 #define ID_MOVE_AXIS_B2 5
 
 // SPI
@@ -62,7 +78,7 @@
 #define DIR_CCW -1
 #define DIR_CW 1
 
-#define BY_DEGREES 2
+#define BY_DEGREES 2 // ToDo: Change to 1 and 0
 #define BY_DIVISIONS 0
 
 #define FIXED 0
@@ -85,8 +101,8 @@
 // Page defines
 /////////////////////////////////////////////////////////////////////////
 
-#define PAGE_MAIN 0
-#define PAGE_SPLASH 1
+#define PAGE_MAIN 1
+#define PAGE_SPLASH 0
 #define PAGE_ONE 2
 #define PAGE_INDEX 3
 #define PAGE_MOVE 4
@@ -190,6 +206,7 @@ struct configPageSetup
 	uint32_t steps360_Axis_XAlt;
 	float distancePerRev_AxisXAlt;
 	bool polarity_Axis_XAlt;
+	uint32_t keepSteppersEnabled;
 };
 
 // Config Structs
@@ -381,7 +398,7 @@ int pageCallerId = 20;
 int serialId = 9; // Initialize with unused serial id.  Serial: 0 (Usb cable to PC), Serial1: 1, Serial2: 2, Serial3: 3
 byte incomingByte = 0;	// store incoming Serial data
 
-int enableTimeout = 200; // Workaround for DM542T external driver
+int enableTimeout = 300;// 200; // Workaround for DM542T external driver
 float distanceTotal_MoveZ = 0;
 float distanceTotal_MoveX = 0;
 
@@ -457,6 +474,13 @@ const char* filename_Reset = "/Reset.ini";
 int iniFileType = INI_4AXES;
 
 int runPageID = 0;
+
+String commandRecip = "";
+String commandMove = "";
+String commandIndex = "";
+String commandSync = "";
+String commandBRadius = "";
+
 
 /////////////////////////////////////////////////////////////////////////
 // FreeMemory

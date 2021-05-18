@@ -2,7 +2,7 @@
 /* *****************************************************************
 * 4Rose main entry
 * Author: Edward French
-* Version: 22 - 032721
+* Version: 23 - 04/10/21
 ******************************************************************/
 
 #include "math.h"
@@ -163,13 +163,16 @@ void setup()
 
 	pinMode(PIN_SPINDLE_ENABLE, OUTPUT);
 	pinMode(PIN_AXIS_Z_ENABLE, OUTPUT);
+
 	pinMode(PIN_AXIS_X_ENABLE, OUTPUT);
 	pinMode(PIN_AXIS_B_ENABLE, OUTPUT);
+	
 
-	SetEnable(ID_SPINDLE, false);
-	SetEnable(ID_AXIS_Z, false);
-	SetEnable(ID_AXIS_X, false);
-	SetEnable(ID_AXIS_B, false);
+	SetEnable(ID_SPINDLE, false, true);
+	SetEnable(ID_AXIS_Z, false, true);
+	//SetEnable(ID_AXIS_Z, true);
+	SetEnable(ID_AXIS_X, false, true);
+	SetEnable(ID_AXIS_B, false, true);
 
 	// Initialize Limit switches
 	pinMode(configSetup.limit_Min_Z, INPUT_PULLUP);
@@ -205,7 +208,7 @@ void setup()
 	// Start SD
 	BeginSD();
 
-	SetEnable(ID_SPINDLE, false);
+	SetEnable(ID_SPINDLE, false, true);
 
 	for (int i = 0; i < 3; i++) // Verify Teensy is operational
 	{
@@ -368,7 +371,14 @@ void loop()
 			case 45: // - - Return Spindle and B axis to start positions
 			{
 				pageCallerId = GetSerialInteger();
-				ReturnToStartPosition(ID_AXIS_B);
+				if (pageCallerId == PAGE_MOVE)
+				{
+					ReturnToStartPosition_MovePage(configMove.axisId);
+				}
+				else
+				{
+					ReturnToStartPosition(ID_AXIS_B);
+				}
 				break;
 			}
 			case 46: // . - Greek Key: Pattern count(pattern repeats)
@@ -685,6 +695,7 @@ void loop()
 			}
 			case 69: //E - Index by divisions or degrees
 			{
+				// ToDo: Change to 0 and 1
 				switch (configIndex_Main.indexId)
 				{
 					case 1:
@@ -875,8 +886,8 @@ void loop()
 			}
 			case 80: // P - Greek Key Source: Pattern or file
 			{
-				configGreekKey.fileOrPattern = (int)GetSerialFloat(serialId);
-				EEPROM.put(eePromAddress_Grk, configGreekKey);
+				configSetup.keepSteppersEnabled = GetSerialInteger();
+				EEPROM.put(eePromAddress_Setup, configSetup);
 				break;
 			}
 			case 81: // Q - Index1 counter clockwise
@@ -1416,22 +1427,22 @@ void loop()
 				{
 					case ID_AXIS_Z:
 					{
-						SetEnable(ID_AXIS_Z, true);
+						SetEnable(ID_AXIS_Z, true, false);
 						break;
 					}
 					case ID_AXIS_X:
 					{
-						SetEnable(ID_AXIS_X, true);
+						SetEnable(ID_AXIS_X, true, false);
 						break;
 					}
 					case ID_AXIS_B:
 					{
-						SetEnable(ID_AXIS_B, true);
+						SetEnable(ID_AXIS_B, true, false);
 						break;
 					}
 					case ID_SPINDLE:
 					{
-						SetEnable(ID_SPINDLE, true);
+						SetEnable(ID_SPINDLE, true, false);
 						break;
 					}
 				}
@@ -1444,22 +1455,22 @@ void loop()
 				{
 					case ID_AXIS_Z:
 					{
-						SetEnable(ID_AXIS_Z, false);
+						SetEnable(ID_AXIS_Z, false, false);
 						break;
 					}
 					case ID_AXIS_X:
 					{
-						SetEnable(ID_AXIS_X, false);
+						SetEnable(ID_AXIS_X, false, false);
 						break;
 					}
 					case ID_AXIS_B:
 					{
-						SetEnable(ID_AXIS_B, false);
+						SetEnable(ID_AXIS_B, false, false);
 						break;
 					}
 					case ID_SPINDLE:
 					{
-						SetEnable(ID_SPINDLE, false);
+						SetEnable(ID_SPINDLE, false, false);
 						break;
 					}
 				}
@@ -2389,11 +2400,18 @@ void loop()
 			{
 
 				MoveAxis(configMove.axisId, DIR_CCW);
+				//MilliDelay(2000);
+				//SetEnable(ID_AXIS_Z, false);
+				//SetEnable(ID_AXIS_X, false);
+				//SetEnable(ID_AXIS_B, false);
 				break;
 			}
 			case 184: // ¸ - Move: CW
 			{
 				MoveAxis(configMove.axisId, DIR_CW);
+				//SetEnable(ID_AXIS_Z, false);
+				//SetEnable(ID_AXIS_X, false);
+				//SetEnable(ID_AXIS_B, false);
 				break;
 			}
 			case 185: // ¹ - Axis Max speed
@@ -2876,6 +2894,11 @@ void loop()
 						}
 
 #ifdef DEBUG
+						Serial.print("Steps per revolution: ");
+						Serial.print(stepsPerRevolution);
+						Serial.print("  NewIndexSize: ");
+						Serial.print(newIndexSize);
+						Serial.print("   ");
 						Serial.print(index5_Char);
 						Serial.print(indexSizeChar);
 						Serial.println(configIndex_5.sizeInSteps);
@@ -3158,7 +3181,16 @@ void loop()
 			case 206: // Î -  Return: Spindle and Z axis to start positions
 			{
 				pageCallerId = GetSerialInteger();
-				ReturnToStartPosition(ID_AXIS_Z);
+
+				if (pageCallerId == PAGE_MOVE)
+				{
+					ReturnToStartPosition_MovePage(configMove.axisId);
+				}
+				else
+				{
+					ReturnToStartPosition(ID_AXIS_Z);
+				}
+				
 				break;
 			}
 			case 207: // Ï - Not Used
@@ -3220,7 +3252,15 @@ void loop()
 			case 215: // × - Return: Spindle and X axis to start positions
 			{
 				pageCallerId = GetSerialInteger();
-				ReturnToStartPosition(ID_AXIS_X);
+
+				if (pageCallerId == PAGE_MOVE)
+				{
+					ReturnToStartPosition_MovePage(configMove.axisId);
+				}
+				else
+				{
+					ReturnToStartPosition(ID_AXIS_X);
+				}
 				break;
 			}
 			case 216: // Ø - Setup:Polarity Spindle (High or Low)
@@ -3662,6 +3702,31 @@ void loop()
 						GreekKey_Pattern_3b();
 						break;
 					}
+				}
+
+				// 0 = Change to disabled, 1 = keep enabled
+				if (configSetup.keepSteppersEnabled == 1)
+				{
+					SerialPrint("pageGrk.bt10.val=1"); // 0 = enabled
+					SerialPrint("\xFF\xFF\xFF");
+					SerialPrint("pageGrk.bt11.val=1"); // 0 = enabled
+					SerialPrint("\xFF\xFF\xFF");
+				}
+				else
+				{
+					SerialPrint("pageGrk.bt10.val=0"); // 1 = disabled
+					SerialPrint("\xFF\xFF\xFF");
+					SerialPrint("pageGrk.bt10.txt="); // 1 = disabled
+					SerialPrint("\x22");
+					SerialPrint("Disabled");
+					SerialPrint("\x22\xFF\xFF\xFF");
+
+					SerialPrint("pageGrk.bt11.val=0"); // 1 = disabled
+					SerialPrint("\xFF\xFF\xFF");
+					SerialPrint("pageGrk.bt11.txt="); // 1 = disabled
+					SerialPrint("\x22");
+					SerialPrint("Disabled");
+					SerialPrint("\x22\xFF\xFF\xFF");
 				}
 
 				break;
