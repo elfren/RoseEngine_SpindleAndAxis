@@ -2721,9 +2721,9 @@ void IndexSpindle(int directionSpindle)
 	//stepper_Spindle.setTargetRel(256000);
 
 	SetEnable(ID_SPINDLE, true, true);
-	//stepController.moveAsync(stepper_Spindle);
+	stepController.moveAsync(stepper_Spindle);
 	//StepControl(10, 8000) stepController;  // pulsewidth 10µs, acceleration update 8ms
-	stepController.move(stepper_Spindle);
+	//stepController.move(stepper_Spindle);
 	while (stepController.isRunning())
 	{
 		MilliDelay(5);
