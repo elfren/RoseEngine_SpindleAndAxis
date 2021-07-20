@@ -2,7 +2,7 @@
 /* *****************************************************************
 * 4Rose main entry
 * Author: Edward French
-* Version: 23 - 04/10/21
+* Version: 24 - 05/21/21
 ******************************************************************/
 
 #include "math.h"
@@ -646,6 +646,8 @@ void loop()
 					reverseDirection = DIR_CW;
 				}
 
+				Serial.print("++++++++++++++++reverseDirection: ");
+				Serial.println(reverseDirection);
 				GreekKey_FromFile(reverseDirection);
 
 				break;
