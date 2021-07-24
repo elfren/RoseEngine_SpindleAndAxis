@@ -12943,6 +12943,19 @@ void LoadSettings()
 	SerialPrint(nextionEnd);
 	SerialPrint("vis g0,1");
 	SerialPrint(nextionEnd);
+
+	SerialPrint("vis t5, 0");
+	SerialPrint(nextionEnd);
+	SerialPrint("vis t6, 0");
+	SerialPrint(nextionEnd);
+	SerialPrint("vis t7, 0");
+	SerialPrint(nextionEnd);
+	SerialPrint("vis t8, 0");
+	SerialPrint(nextionEnd);
+	SerialPrint("vis t11, 0");
+	SerialPrint(nextionEnd);
+	SerialPrint("vis t12, 0");
+	SerialPrint(nextionEnd);
 }
 
 /// <summary>
@@ -13517,12 +13530,12 @@ void LoadSettings_PageRec()
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configRec.waves_Radial = (int)returnVal;
 
-	iniValue = "Radial_Spindle_Amplitude"; // Radial Degrees
+	iniValue = "Radial_Spindle_Degrees"; // Radial Degrees
 	eePromAddress_Nextion = 308;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
-	configRec.amplitude_Radial_Axis = returnVal;
+	configRec.degrees_Radial_Spindle = returnVal;
 
-	iniValue = "Radial_Axis_Distance";
+	iniValue = "Radial_Axis_Amplitude";
 	eePromAddress_Nextion = 232;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
 	configRec.amplitude_Radial_Axis = returnVal;
@@ -13532,12 +13545,12 @@ void LoadSettings_PageRec()
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configRec.waves_Axial = (int)returnVal;
 
-	iniValue = "Axial_Spindle_Degrees";
+	iniValue = "Axial_Spindle_Amplitude";
 	eePromAddress_Nextion = 744;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
 	configRec.amplitude_Axial_Spindle = returnVal;
 
-	iniValue = "Axial_Axis_Amplitude";
+	iniValue = "Axial_Axis_Distance";
 	eePromAddress_Nextion = 324;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
 	configRec.distance_Axial_Axis = returnVal;
@@ -14158,6 +14171,7 @@ float GetIniValue(const char* iniKey, const char* iniValue, int eePromNextion, b
 		Serial.print(",");
 		Serial.println(eePromNextion);
 #endif // DEBUG
+
 	}
 	else
 	{
