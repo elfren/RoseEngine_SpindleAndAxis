@@ -354,6 +354,8 @@ double GetSerialFloatA(Stream& port)
 	double retVal = atof(in);
 
 #ifdef DEBUG
+	Serial.print("In: ");
+	Serial.println(in);
 	Serial.print("Float: ");
 	Serial.println(retVal, 4);
 #endif //DEBUG
@@ -4406,6 +4408,7 @@ bool StopGreekKey()
 void GreekKey_Pattern_4a()
 {
 	bool stopAll = false;
+	const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
 	int totalSpindleSegments = 8;
 	if (configGreekKey.radialOrAxial_Pattern == AXIAL)
 	{
@@ -4415,6 +4418,10 @@ void GreekKey_Pattern_4a()
 
 	for (int i = 1; i <= configGreekKey.patternCount_Pattern;i++)// / 2; i++)
 	{
+		SerialPrint("t2.txt=");
+		SerialWrite(0x22);
+		SerialPrint(i);
+		SerialPrint(nextionQuoteEnd);
 		switch (configGreekKey.radialOrAxial_Pattern)
 		{
 			case RADIAL: // Axis Left CCW
@@ -4629,6 +4636,7 @@ void GreekKey_Pattern_4b()
 {
 
 	bool stopAll = false;
+	const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
 	int totalSpindleSegments = 13;
 	if (configGreekKey.radialOrAxial_Pattern == AXIAL)
 	{
@@ -4638,6 +4646,10 @@ void GreekKey_Pattern_4b()
 
 	for (int i = 1; i <= configGreekKey.patternCount_Pattern; i++)
 	{
+		SerialPrint("t2.txt=");
+		SerialWrite(0x22);
+		SerialPrint(i);
+		SerialPrint(nextionQuoteEnd);
 		switch (configGreekKey.radialOrAxial_Pattern)
 		{
 			case RADIAL: // Axis Left CCW
@@ -5075,6 +5087,7 @@ EndLoop:
 void GreekKey_Pattern_3a()
 {
 	bool stopAll = false;
+	const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
 	int totalSpindleSegments = 4;
 	if (configGreekKey.radialOrAxial_Pattern == AXIAL)
 	{
@@ -5084,7 +5097,10 @@ void GreekKey_Pattern_3a()
 
 	for (int i = 1; i <= configGreekKey.patternCount_Pattern; i++)
 	{
-
+		SerialPrint("t2.txt=");
+		SerialWrite(0x22);
+		SerialPrint(i);
+		SerialPrint(nextionQuoteEnd);
 		switch (configGreekKey.radialOrAxial_Pattern)
 		{
 			case RADIAL: // Axis Left CCW
@@ -5218,6 +5234,7 @@ EndLoop:
 void GreekKey_Pattern_3b()
 {
 	bool stopAll = false;
+	const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
 	int totalSpindleSegments = 8;
 	if (configGreekKey.radialOrAxial_Pattern == AXIAL)
 	{
@@ -5227,6 +5244,10 @@ void GreekKey_Pattern_3b()
 
 	for (int i = 1; i <= configGreekKey.patternCount_Pattern; i++)
 	{
+		SerialPrint("t2.txt=");
+		SerialWrite(0x22);
+		SerialPrint(i);
+		SerialPrint(nextionQuoteEnd);
 		switch (configGreekKey.radialOrAxial_Pattern)
 		{
 			case RADIAL: // Axis Left CCW
@@ -5448,6 +5469,7 @@ EndLoop:
 void GreekKey_Pattern_2a()
 {
 	bool stopAll = false;
+	const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
 	int totalSpindleSegments = 3;
 	if (configGreekKey.radialOrAxial_Pattern == AXIAL)
 	{
@@ -5467,6 +5489,10 @@ void GreekKey_Pattern_2a()
 		Serial.println(i);
 #endif // DEBUG
 
+		SerialPrint("t2.txt=");
+		SerialWrite(0x22);
+		SerialPrint(i);
+		SerialPrint(nextionQuoteEnd);
 		switch (configGreekKey.radialOrAxial_Pattern)
 		{
 			case RADIAL: // Axis Left CCW
@@ -5580,6 +5606,7 @@ EndLoop:
 void GreekKey_Pattern_2b()
 {
 	bool stopAll = false;
+	const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
 	int totalSpindleSegments = 6;
 	if (configGreekKey.radialOrAxial_Pattern == AXIAL)
 	{
@@ -5589,7 +5616,10 @@ void GreekKey_Pattern_2b()
 
 	for (int i = 1; i <= configGreekKey.patternCount_Pattern; i++)
 	{
-
+		SerialPrint("t2.txt=");
+		SerialWrite(0x22);
+		SerialPrint(i);
+		SerialPrint(nextionQuoteEnd);
 		switch (configGreekKey.radialOrAxial_Pattern)
 		{
 			case RADIAL: // Axis Left CCW
@@ -6996,6 +7026,10 @@ void GreekKey_FromFile(int direction)
 	{ 
 		exitInnerForLoop = false;
 
+		SerialPrint("t2.txt=");
+		SerialWrite(0x22);
+		SerialPrint(j);
+		SerialPrint(nextionQuoteEnd);
 		// Inner loop
 		for (int i = 0; i <= fileLineCount; i++)
 		{
@@ -9634,13 +9668,13 @@ void ReturnToStartPosition(int axisId)
 
 	case PAGE_GEO:
 	{
-		SerialPrint("pageGeo.bt1.val=0");
+		SerialPrint("pageRose.bt1.val=0");
 		SerialPrint(nextionEnd);
-		SerialPrint("pageGeo.bt1.val=0");
+		SerialPrint("pageRose.bt1.val=0");
 		SerialPrint(nextionEnd);
-		SerialPrint("pageGeo.bt0.val=0");
+		SerialPrint("pageRose.bt0.val=0");
 		SerialPrint(nextionEnd);
-		SerialPrint("pageGeo.va0.val=0");
+		SerialPrint("pageRose.va0.val=0");
 		SerialPrint(nextionEnd);
 		SerialPrint("pageBE.t1.txt=");
 		SerialWrite(0x22);
@@ -10246,13 +10280,13 @@ void RoseRadial(int direction)
 	SerialPrint(nextionQuoteEnd);
 #endif //SHOW_POSITION
 	// Update Nextion
-	SerialPrint("pageGeo.va0.val=0");
+	SerialPrint("pageRose.va0.val=0");
 	SerialPrint(nextionEnd);
-	SerialPrint("pageGeo.bt3.val=0");// The first one may be ignored by Nextion, so resend.
+	SerialPrint("pageRose.bt3.val=0");// The first one may be ignored by Nextion, so resend.
 	SerialPrint(nextionEnd);
-	SerialPrint("pageGeo.bt2.val=0");
+	SerialPrint("pageRose.bt2.val=0");
 	SerialPrint(nextionEnd);
-	SerialPrint("pageGeo.bt1.val=0");
+	SerialPrint("pageRose.bt1.val=0");
 	SerialPrint(nextionEnd);
 
 #ifdef DEBUG
@@ -10265,23 +10299,23 @@ void RoseRadial(int direction)
 	// 0 = Change to disabled, 1 = keep enabled
 	if (configSetup.keepSteppersEnabled == 1)
 	{
-		SerialPrint("pageGeo.bt10.val=1"); // 0 = enabled
+		SerialPrint("pageRose.bt10.val=1"); // 0 = enabled
 		SerialPrint("\xFF\xFF\xFF");
-		SerialPrint("pageGeo.bt11.val=1"); // 0 = enabled
+		SerialPrint("pageRose.bt11.val=1"); // 0 = enabled
 		SerialPrint("\xFF\xFF\xFF");
 	}
 	else
 	{
-		SerialPrint("pageGeo.bt10.val=0"); // 1 = disabled
+		SerialPrint("pageRose.bt10.val=0"); // 1 = disabled
 		SerialPrint("\xFF\xFF\xFF");
-		SerialPrint("pageGeo.bt10.txt="); // 1 = disabled
+		SerialPrint("pageRose.bt10.txt="); // 1 = disabled
 		SerialPrint("\x22");
 		SerialPrint("Disabled");
 		SerialPrint("\x22\xFF\xFF\xFF");
 
-		SerialPrint("pageGeo.bt11.val=0"); // 1 = disabled
+		SerialPrint("pageRose.bt11.val=0"); // 1 = disabled
 		SerialPrint("\xFF\xFF\xFF");
-		SerialPrint("pageGeo.bt11.txt="); // 1 = disabled
+		SerialPrint("pageRose.bt11.txt="); // 1 = disabled
 		SerialPrint("\x22");
 		SerialPrint("Disabled");
 		SerialPrint("\x22\xFF\xFF\xFF");
@@ -12769,6 +12803,11 @@ void TestAllTeensyEEPROMValues()
 			SerialPrint(configRose.d);
 			SerialPrint(nextionQuoteEnd);
 
+			SerialPrint("pageEEPROM.t29.txt=");
+			SerialWrite(0x22);
+			SerialPrint(configRose.spindleRevolutions);
+			SerialPrint(nextionQuoteEnd);
+
 			switch (configRose.axisId)
 			{
 				case ID_AXIS_Z:
@@ -12794,10 +12833,7 @@ void TestAllTeensyEEPROMValues()
 					SerialPrint(configRose.speedPercent_Axis_Z);
 					SerialPrint(nextionQuoteEnd);
 
-					SerialPrint("pageEEPROM.t29.txt=");
-					SerialWrite(0x22);
-					SerialPrint(configRose.spindleRevolutions);
-					SerialPrint(nextionQuoteEnd);
+
 
 					SerialPrint("pageEEPROM.t32.txt=");
 					SerialWrite(0x22);
@@ -12827,10 +12863,10 @@ void TestAllTeensyEEPROMValues()
 					SerialPrint(configRose.speedPercent_Axis_X);
 					SerialPrint(nextionQuoteEnd);
 
-					SerialPrint("pageEEPROM.t29.txt=");
-					SerialWrite(0x22);
-					SerialPrint(configRose.spindleRevolutions);
-					SerialPrint(nextionQuoteEnd);
+					//SerialPrint("pageEEPROM.t29.txt=");
+					//SerialWrite(0x22);
+					//SerialPrint(configRose.spindleRevolutions);
+					//SerialPrint(nextionQuoteEnd);
 
 					SerialPrint("pageEEPROM.t32.txt=");
 					SerialWrite(0x22);
@@ -12861,10 +12897,10 @@ void TestAllTeensyEEPROMValues()
 					SerialPrint(configRose.speedPercent_Axis_B);
 					SerialPrint(nextionQuoteEnd);
 
-					SerialPrint("pageEEPROM.t29.txt=");
-					SerialWrite(0x22);
-					SerialPrint(configRose.spindleRevolutions);
-					SerialPrint(nextionQuoteEnd);
+					//SerialPrint("pageEEPROM.t29.txt=");
+					//SerialWrite(0x22);
+					//SerialPrint(configRose.spindleRevolutions);
+					//SerialPrint(nextionQuoteEnd);
 
 					SerialPrint("pageEEPROM.t32.txt=");
 					SerialWrite(0x22);
@@ -12932,7 +12968,7 @@ void LoadSettings()
 	LoadSettings_PageSync();
 	LoadSettings_PageRec();
 	LoadSettings_PageGrk();
-	LoadSettings_PageGeo();
+	LoadSettings_PageRose();
 
 	// Update Nextion
 	//Serial.println("Show restart");
@@ -13075,16 +13111,16 @@ void LoadSettings_PageIndex()
 }
 
 /// <summary>
-/// LoadSettings_PageGeo
+/// LoadSettings_PageRose
 /// </summary>
 /// <comment>
 /// Load ini file settings for Geo page
 /// </comment>
 /// <returns></returns>
-void LoadSettings_PageGeo()
+void LoadSettings_PageRose()
 {
 
-	const char* iniKey = "Geo";
+	const char* iniKey = "Rose";
 	const char* iniValue = "AxisId";
 	int eePromAddress_Nextion = 164;
 	float returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
@@ -13107,8 +13143,8 @@ void LoadSettings_PageGeo()
 
 	iniValue = "SpindleRevolutions";
 	eePromAddress_Nextion = 696;
-	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
-	configRose.spindleRevolutions = (int)returnVal;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configRose.spindleRevolutions = returnVal;
 
 	iniValue = "MaxSpeed_Spindle";
 	eePromAddress_Nextion = 828;
@@ -13122,7 +13158,7 @@ void LoadSettings_PageGeo()
 
 	iniValue = "SpeedPercentage_Spindle";
 	eePromAddress_Nextion = 100;
-	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
 	configRose.speedPercent_Spindle = (int)returnVal;
 
 	// Z axis

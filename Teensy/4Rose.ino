@@ -2,7 +2,7 @@
 /* *****************************************************************
 * 4Rose main entry
 * Author: Edward French
-* Version: 25 - 07/21/21
+* Version: 24 - 07/25/21
 ******************************************************************/
 
 #include "math.h"
@@ -1487,7 +1487,7 @@ void loop()
 				configRose.spindleRevolutions = GetSerialFloat(serialId);
 				EEPROM.put(eePromAddress_Rose, configRose);
 #ifdef DEBUG
-				Serial.print("Spindle Revolutions: ");
+				Serial.print("Spindle Revolutions-a97: ");
 				Serial.println(configRose.spindleRevolutions);
 #endif // DEBUG
 				break;
@@ -3745,13 +3745,15 @@ void loop()
 			}
 			case 250: // ù - Rose: Spindle revolutions
 			{
-				float revs = GetSerialFloat(serialId);
-				configRose.spindleRevolutions = revs;
+				//float revs = GetSerialFloat(serialId);
+				//configRose.spindleRevolutions = revs;
+				configRose.spindleRevolutions = GetSerialFloat(serialId);
+
 				EEPROM.put(eePromAddress_Rose, configRose);
 #ifdef DEBUG
 				Serial.print("Spindle Revolutions-250: ");
 				Serial.println(configRose.spindleRevolutions);
-				Serial.println(revs);
+				//Serial.println(revs);
 #endif // DEBUG
 				break;
 			}
