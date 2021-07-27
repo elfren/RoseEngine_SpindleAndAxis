@@ -111,7 +111,7 @@
 #define PAGE_REC 7
 #define PAGE_GRK 8
 #define PAGE_PROGRAM 9
-#define PAGE_GEO 10 
+#define PAGE_ROSE 10 
 #define PAGE_MORE 11
 
 /////////////////////////////////////////////////////////////////////////

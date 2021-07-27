@@ -2797,6 +2797,153 @@ void IndexSpindle(int directionSpindle)
 	SerialPrint(nextionEnd);
 }
 
+
+
+/// <summary>
+/// Index Size
+/// </summary>
+/// <comment>
+/// Converts unit size of index to steps
+/// </comment>
+/// <param name="newIndexSize">Unit size of index</param>
+/// <returns></returns>
+void IndexSize(double newIndexSize)
+{
+	const char* indexId_Char = "Index ID:";
+	const char* index1_Char = "Index1";
+	const char* index2_Char = "Index2";
+	const char* index3_Char = "Index3";
+	const char* index4_Char = "Index4";
+	const char* index5_Char = "Index5";
+	const char* newIndexSize_Char = "New Index Size:";
+	const char* indexSizeChar = " Size:";
+	const char* degreeDivision_Char = " Degree or Division:";
+	
+	int stepsPerRevolution = (int)round(configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle);
+#ifdef DEBUG
+	Serial.print(indexId_Char);
+	Serial.println(configIndex_Main.indexId);
+	Serial.println(newIndexSize);
+#endif // DEBUG
+	switch (configIndex_Main.indexId)
+	{
+		case 1:
+		{
+			configIndex_1.sizeInUnits = newIndexSize;
+
+			// Default: Divisions
+			if (configIndex_1.degreeOrDivision == BY_DEGREES) // Degrees
+			{
+				configIndex_1.sizeInSteps = stepsPerRevolution * (newIndexSize / 360);
+			}
+			else
+			{
+				configIndex_1.sizeInSteps = stepsPerRevolution / (newIndexSize);
+			}
+	#ifdef DEBUG
+			Serial.print(index1_Char);
+			Serial.print(indexSizeChar);
+			Serial.println(configIndex_1.sizeInSteps);
+	#endif // DEBUG
+			EEPROM.put(eePromAddress_Ind_1, configIndex_1);
+			break;
+		}
+		case 2:
+		{
+			configIndex_2.sizeInUnits = newIndexSize;
+
+			// Default: Divisions
+			if (configIndex_2.degreeOrDivision == BY_DEGREES) // Degrees
+			{
+				configIndex_2.sizeInSteps = stepsPerRevolution * (newIndexSize / 360);
+			}
+			else
+			{
+				configIndex_2.sizeInSteps = stepsPerRevolution / (newIndexSize);
+			}
+	#ifdef DEBUG
+			Serial.print(index2_Char);
+			Serial.print(indexSizeChar);
+			Serial.println(configIndex_2.sizeInSteps);
+	#endif // DEBUG
+			EEPROM.put(eePromAddress_Ind_2, configIndex_2);
+			break;
+		}
+		case 3:
+		{
+			configIndex_3.sizeInUnits = newIndexSize;
+
+			// Default: Divisions
+			if (configIndex_3.degreeOrDivision == BY_DEGREES) // Degrees
+			{
+				configIndex_3.sizeInSteps = stepsPerRevolution * (newIndexSize / 360);
+			}
+			else
+			{
+				configIndex_3.sizeInSteps = stepsPerRevolution / (newIndexSize);
+			}
+
+	#ifdef DEBUG
+			Serial.print(index3_Char);
+			Serial.print(indexSizeChar);
+			Serial.println(configIndex_3.sizeInSteps);
+	#endif // DEBUG
+			EEPROM.put(eePromAddress_Ind_3, configIndex_3);
+			break;
+		}
+		case 4:
+		{
+			configIndex_4.sizeInUnits = newIndexSize;
+
+			// Default: Divisions
+			if (configIndex_4.degreeOrDivision == BY_DEGREES) // Degrees
+			{
+				configIndex_4.sizeInSteps = stepsPerRevolution * (newIndexSize / 360);
+			}
+			else
+			{
+				configIndex_4.sizeInSteps = stepsPerRevolution / (newIndexSize);
+			}
+
+	#ifdef DEBUG
+			Serial.print(index4_Char);
+			Serial.print(indexSizeChar);
+			Serial.println(configIndex_4.sizeInSteps);
+	#endif // DEBUG
+			EEPROM.put(eePromAddress_Ind_4, configIndex_4);
+			break;
+		}
+		case 5:
+		{
+			configIndex_5.sizeInUnits = newIndexSize;
+
+			// Default: Divisions
+			if (configIndex_5.degreeOrDivision == BY_DEGREES) // Degrees
+			{
+				configIndex_5.sizeInSteps = stepsPerRevolution * (newIndexSize / 360);
+			}
+			else
+			{
+				configIndex_5.sizeInSteps = stepsPerRevolution / (newIndexSize);
+			}
+
+	#ifdef DEBUG
+			Serial.print("Steps per revolution: ");
+			Serial.print(stepsPerRevolution);
+			Serial.print("  NewIndexSize: ");
+			Serial.print(newIndexSize);
+			Serial.print("   ");
+			Serial.print(index5_Char);
+			Serial.print(indexSizeChar);
+			Serial.println(configIndex_5.sizeInSteps);
+	#endif // DEBUG
+			EEPROM.put(eePromAddress_Ind_5, configIndex_5);
+			break;
+		}
+	}
+
+}
+
 /// <summary>
 /// Sync
 /// </summary>
@@ -3255,6 +3402,20 @@ void Reciprocate_Triangle(int wavDir)
 			waves = configRec.waves_Radial;
 			float spindleDegrees = configRec.degrees_Radial_Spindle / (configRec.waves_Radial * 2);
 			spindleSteps = round((configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (spindleDegrees / 360) * wavDir);
+			Serial.print("configRec.degrees_Radial_Spindle:");
+			Serial.println(configRec.degrees_Radial_Spindle);
+			Serial.print("configRec.waves_Radial*2:");
+			Serial.println(configRec.waves_Radial * 2);
+			Serial.print("configSetup.microsteps_Spindle:");
+			Serial.println(configSetup.microsteps_Spindle);
+			Serial.print("configSetup.steps360_Spindle:");
+			Serial.println(configSetup.steps360_Spindle);
+			Serial.print("configSetup.gearRatio_Spindle:");
+			Serial.println(configSetup.gearRatio_Spindle);
+			Serial.print("spindleDegrees / 360:");
+			Serial.println(spindleDegrees / 360);
+			Serial.print("spindleSteps:");
+			Serial.println(spindleSteps);
 			////axisSteps = (DistanceToSteps_Axis(configRec.amplitude_Radial_Axis, configRec.axisId) / 2) * wavDir;
 			axisSteps = (DistanceToSteps_Axis(configRec.amplitude_Radial_Axis, configRec.axisId) ) * wavDir;
 			break;
@@ -3369,18 +3530,20 @@ void Reciprocate_Triangle(int wavDir)
 	for (int i = 0; i < (waves * 2); i++)
 	{
 
-
-		switch (configRec.radial_axial)
-		{
-			case RADIAL: // Radial
+		if(i>=1)
+		{ 
+			switch (configRec.radial_axial)
 			{
-				axisSteps *= -1;
-				break;
-			}
-			case AXIAL: // Axial
-			{
-				spindleSteps *= -1;
-				break;
+				case RADIAL: // Radial
+				{
+					axisSteps *= -1;
+					break;
+				}
+				case AXIAL: // Axial
+				{
+					spindleSteps *= -1;
+					break;
+				}
 			}
 		}
 #ifdef DEBUG
@@ -3615,6 +3778,22 @@ void Reciprocate_Sawtooth(int wavDir)
 		waves = configRec.waves_Radial;
 		float spindleDegrees = configRec.degrees_Radial_Spindle / (configRec.waves_Radial * 2);
 		spindleSteps = round((configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (spindleDegrees / 360) * wavDir);
+
+
+		Serial.print("configRec.degrees_Radial_Spindle:");
+		Serial.println(configRec.degrees_Radial_Spindle);
+		Serial.print("configRec.waves_Radial*2:");
+		Serial.println(configRec.waves_Radial*2);
+		Serial.print("configSetup.microsteps_Spindle:");
+		Serial.println(configSetup.microsteps_Spindle);
+		Serial.print("configSetup.steps360_Spindle:");
+		Serial.println(configSetup.steps360_Spindle);
+		Serial.print("configSetup.gearRatio_Spindle:");
+		Serial.println(configSetup.gearRatio_Spindle);
+		Serial.print("spindleDegrees / 360:");
+		Serial.println(spindleDegrees / 360);
+		Serial.print("spindleSteps:");
+		Serial.println(spindleSteps);
 		////axisSteps = (DistanceToSteps_Axis(configRec.amplitude_Radial_Axis, configRec.axisId) / 2) * wavDir;
 		axisSteps = (DistanceToSteps_Axis(configRec.amplitude_Radial_Axis, configRec.axisId)) * wavDir;
 		break;
@@ -9400,7 +9579,7 @@ void ReturnToStartPosition(int axisId)
 	while (stepController.isRunning())
 	{
 #ifdef DEBUG
-		Serial.println(stepper_Z.getPosition());
+		//Serial.println(stepper_Z.getPosition());
 #endif // Debug
 
 		// Check for Cancel code  
@@ -9666,7 +9845,7 @@ void ReturnToStartPosition(int axisId)
 		break;
 	}
 
-	case PAGE_GEO:
+	case PAGE_ROSE:
 	{
 		SerialPrint("pageRose.bt1.val=0");
 		SerialPrint(nextionEnd);
@@ -11052,7 +11231,7 @@ void TestEEPROMConfig(int callerId)
 			}
 			break;
 		}
-		case PAGE_GEO:
+		case PAGE_ROSE:
 		{
 			configPageRose eePageRose;
 			EEPROM.get(eePromAddress_Rose, eePageRose);
@@ -12776,7 +12955,7 @@ void TestAllTeensyEEPROMValues()
 			}
 			break;
 		}
-		case PAGE_GEO:
+		case PAGE_ROSE:
 		{
 			SerialPrint("pageEEPROM.t5.txt=");
 			SerialWrite(0x22);
@@ -13039,7 +13218,8 @@ void LoadSettings_PageIndex()
 	iniValue = "Size_1";
 	eePromAddress_Nextion = 352;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
-	configIndex_1.sizeInSteps = returnVal;
+	configIndex_1.sizeInUnits = returnVal;
+	IndexSize(returnVal);
 
 	// Index 2
 	iniValue = "DivisionsOrDegrees_1";
@@ -13052,10 +13232,20 @@ void LoadSettings_PageIndex()
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configIndex_2.fileOrFixed = (int)returnVal;
 
+
 	iniValue = "Size_2";
 	eePromAddress_Nextion = 360;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
-	configIndex_2.sizeInSteps = returnVal;
+	configIndex_2.sizeInUnits = returnVal;
+	IndexSize(returnVal);
+
+	Serial.print("returnVal:  ");
+	Serial.println(returnVal);
+	Serial.print("configIndex_2.sizeInSteps: ");
+	Serial.println(configIndex_2.sizeInSteps);
+	
+	Serial.print("configIndex_2.sizeInUnits: ");
+	Serial.println(configIndex_2.sizeInUnits);
 
 	// Index 3
 	iniValue = "DivisionsOrDegrees_3";
@@ -13071,7 +13261,8 @@ void LoadSettings_PageIndex()
 	iniValue = "Size_3";
 	eePromAddress_Nextion = 580;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
-	configIndex_3.sizeInSteps = returnVal;
+	configIndex_3.sizeInUnits = returnVal;
+	IndexSize(returnVal);
 
 	// Index 4
 	iniValue = "DivisionsOrDegrees_4";
@@ -13087,7 +13278,8 @@ void LoadSettings_PageIndex()
 	iniValue = "Size_4";
 	eePromAddress_Nextion = 672;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
-	configIndex_4.sizeInSteps = returnVal;
+	configIndex_4.sizeInUnits = returnVal;
+	IndexSize(returnVal);
 
 	// Index 5
 	iniValue = "DivisionsOrDegrees_5";
@@ -13103,11 +13295,15 @@ void LoadSettings_PageIndex()
 	iniValue = "Size_5";
 	eePromAddress_Nextion = 680;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
-	configIndex_5.sizeInSteps = returnVal;
+	configIndex_5.sizeInUnits = returnVal;
+	IndexSize(returnVal);
+
 	EEPROM.put(eePromAddress_Ind_Main, configIndex_Main);
 	EEPROM.put(eePromAddress_Ind_1, configIndex_1);
 	EEPROM.put(eePromAddress_Ind_2, configIndex_2);
 	EEPROM.put(eePromAddress_Ind_3, configIndex_3);
+	EEPROM.put(eePromAddress_Ind_4, configIndex_4);
+	EEPROM.put(eePromAddress_Ind_5, configIndex_5);
 }
 
 /// <summary>
