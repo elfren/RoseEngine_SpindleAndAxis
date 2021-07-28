@@ -831,9 +831,13 @@ void MoveAxis(int axisId, int directionAxis)
 	Stepper stepper_Z(PIN_AXIS_Z_STEP, PIN_AXIS_Z_DIR);
 	Stepper stepper_X(PIN_AXIS_X_STEP, PIN_AXIS_X_DIR);
 	Stepper stepper_B(PIN_AXIS_B_STEP, PIN_AXIS_B_DIR);
+
+	int limitPin_Max = configSetup.limit_Max_Z;
+	int limitPin_Min = configSetup.limit_Min_Z;
+
 	double stepsToMove = 0;
 	float nextSpeed = 0;
-	int32_t position_Axis = endPosition_Axis;
+	//int32_t position_Axis = endPosition_Axis;
 
 	const char * distancePer360_Char = "Distance/360:";
 	const char * stepsPer360_Char = "Steps/360:";
@@ -862,6 +866,8 @@ void MoveAxis(int axisId, int directionAxis)
 	{
 		case ID_MOVE_AXIS_Z1:
 		{
+			limitPin_Max = configSetup.limit_Max_Z;
+			limitPin_Min = configSetup.limit_Min_Z;
 			//stepper_Z.setPosition(0);
 			Serial.print("Initial position: ");
 			Serial.println(stepper_Z.getPosition());
@@ -871,36 +877,7 @@ void MoveAxis(int axisId, int directionAxis)
 			Serial.print("Enable position: ");
 			Serial.println(stepper_Z.getPosition());
 
-			//SetEnable(ID_AXIS_Z, false);
-			//SetEnable(ID_AXIS_Z, true);
-			//SetEnable(ID_AXIS_Z, false);
-			//SetEnable(ID_AXIS_Z, true);
-			//MilliDelay(15);
-			//if (directionAxis <= 0)
-			//{
-			//	digitalWrite(PIN_AXIS_Z_DIR, LOW);
-			//	MilliDelay(15);
-			//	digitalWrite(PIN_AXIS_Z_DIR, HIGH);
-			//	MilliDelay(15);
-			//	digitalWrite(PIN_AXIS_Z_DIR, LOW);
-			//}
-			//else
-			//{
-			//	digitalWrite(PIN_AXIS_Z_DIR, HIGH);
-			//	MilliDelay(15);
-			//	digitalWrite(PIN_AXIS_Z_DIR, LOW);
-			//	MilliDelay(15);
-			//	digitalWrite(PIN_AXIS_Z_DIR, HIGH);
-			//}
-
-
-			//digitalWrite(PIN_AXIS_Z_ENABLE, LOW);
 			MilliDelay(6);
-			//digitalWrite(PIN_AXIS_Z_DIR, HIGH);
-			//MilliDelay(15);
-			//digitalWrite(PIN_AXIS_Z_DIR, LOW);
-			//MilliDelay(300);
-			
 
 			stepsToMove = (configMove.distance_MoveZ1 / (configSetup.distancePerRev_AxisZ) * (configSetup.steps360_Axis_Z * configSetup.microsteps_Axis_Z));
 
@@ -945,6 +922,8 @@ void MoveAxis(int axisId, int directionAxis)
 		}
 		case ID_MOVE_AXIS_Z2:
 		{
+			limitPin_Max = configSetup.limit_Max_Z;
+			limitPin_Min = configSetup.limit_Min_Z;
 			SetEnable(ID_AXIS_Z, true, true);
 			stepper_Z.setPosition(0);
 			stepsToMove = (configMove.distance_MoveZ2 / (configSetup.distancePerRev_AxisZ) * (configSetup.steps360_Axis_Z * configSetup.microsteps_Axis_Z));
@@ -987,6 +966,8 @@ void MoveAxis(int axisId, int directionAxis)
 
 		case ID_MOVE_AXIS_X1:
 		{
+			limitPin_Max = configSetup.limit_Max_X;
+			limitPin_Min = configSetup.limit_Min_X;
 			SetEnable(ID_AXIS_X, true, true);
 #ifdef DEBUG
 			Serial.print("xAltX: ");
@@ -1070,6 +1051,8 @@ void MoveAxis(int axisId, int directionAxis)
 		}
 		case ID_MOVE_AXIS_X2:
 		{
+			limitPin_Max = configSetup.limit_Max_X;
+			limitPin_Min = configSetup.limit_Min_X;
 			SetEnable(ID_AXIS_X, true, true);
 #ifdef DEBUG
 			Serial.print("xAltX: ");
@@ -1122,6 +1105,8 @@ void MoveAxis(int axisId, int directionAxis)
 
 		case ID_MOVE_AXIS_B1:
 		{
+			limitPin_Max = configSetup.limit_Max_B;
+			limitPin_Min = configSetup.limit_Min_B;
 			SetEnable(ID_AXIS_B, true, true);
 			if (configSetup.radialOrLinear_Axis_B==RADIAL_B)
 			{
@@ -1170,6 +1155,8 @@ void MoveAxis(int axisId, int directionAxis)
 		}
 		case ID_MOVE_AXIS_B2:
 		{
+			limitPin_Max = configSetup.limit_Max_B;
+			limitPin_Min = configSetup.limit_Min_B;
 			SetEnable(ID_AXIS_B, true, true);
 			if (configSetup.radialOrLinear_Axis_B == RADIAL_B)
 			{
@@ -1217,66 +1204,33 @@ void MoveAxis(int axisId, int directionAxis)
 		}
 	}
 
-#ifdef DEBUG
-	int iCounter = 0;
-#endif // DEBUG
-
-
+	// Set limit switches HIGH
+	digitalWrite(limitPin_Max, HIGH);
+	digitalWrite(limitPin_Min, HIGH);
 	
 	while (stepController.isRunning())
 	{
-#ifdef SHOW_POSITION 
-		// Track Positions not implemented while steppers are running
-		//if (configGeneral.trackPositions == 1)
-		//{
-		//	switch (axisId)
-		//	{
-		//		case ID_AXIS_Z:
-		//		{
-		//			endPosition_Axis = stepper_Z.getPosition();
-		//			distance_Axis = StepsToDistance_Axis(endPosition_Axis, ID_AXIS_Z);
 
-		//			SerialPrint("pageBE.t2.txt=");
-		//			SerialWrite(0x22);
-		//			SerialPrint(distance_Axis);
-		//			SerialWrite(0x22);
-		//			SerialWrite(0xff);
-		//			SerialWrite(0xff);
-		//			SerialWrite(0xff);
-		//			MilliDelay(5);
-		//			SerialPrint("pageBE.t2.txt=");
-		//			SerialWrite(0x22);
-		//			SerialPrint(distance_Axis);
-		//			SerialWrite(0x22);
-		//			SerialWrite(0xff);
-		//			SerialWrite(0xff);
-		//			SerialWrite(0xff);
-		//			break;
-		//		}
-		//		case ID_AXIS_X:
-		//		{
-		//			endPosition_Axis = stepper_X.getPosition();
-		//			distance_Axis = StepsToDistance_Axis(endPosition_Axis, ID_AXIS_Z);
-		//			SerialPrint("pageBE.t2.txt=");
-		//			SerialWrite(0x22);
-		//			SerialPrint(distance_Axis);
-		//			SerialWrite(0x22);
-		//			SerialWrite(0xff);
-		//			SerialWrite(0xff);
-		//			SerialWrite(0xff);
-		//			MilliDelay(5);
-		//			SerialPrint("pageBE.t2.txt=");
-		//			SerialWrite(0x22);
-		//			SerialPrint(distance_Axis);
-		//			SerialWrite(0x22);
-		//			SerialWrite(0xff);
-		//			SerialWrite(0xff);
-		//			SerialWrite(0xff);
-		//			break;
-		//		}
-		//	}
-		//}
-#endif // Show Position
+		if ((digitalRead(limitPin_Max) == LOW) && directionAxis > 0)
+		{
+			Serial.println("                          limitPin_Max) == LOW");
+				stepController.emergencyStop();
+				stopSteppers = true;
+				goto endLoop;
+
+		}
+		else if ((digitalRead(limitPin_Min) == LOW) && directionAxis < 0)
+		{
+			Serial.println("                          limitPin_Min) == LOW");
+
+				stepController.emergencyStop();
+				stopSteppers = true;
+				goto endLoop;
+
+		}
+
+		////////////////////////////////////////////
+
 
 		// Check for Cancel code  
 		if (SerialAvailable() >= 0)
@@ -1294,40 +1248,10 @@ void MoveAxis(int axisId, int directionAxis)
 		}
 
 		MilliDelay(2);
-//#ifdef DEBUG
-//
-//		if (iCounter % 50 == 0)
-//		{
-//			switch (axisId)
-//			{
-//				case ID_MOVE_AXIS_Z2:
-//				case ID_MOVE_AXIS_Z1:
-//				{
-//					position_Axis = stepper_Z.getPosition();
-//					break;
-//				}
-//				case ID_MOVE_AXIS_X1:
-//				case ID_MOVE_AXIS_X2:
-//				{
-//					position_Axis = stepper_X.getPosition();
-//					break;
-//				}
-//				case ID_MOVE_AXIS_B1:
-//				case ID_MOVE_AXIS_B2:
-//				{
-//					position_Axis = stepper_B.getPosition();
-//					break;
-//				}
-//			}
-//#ifdef DEBUG
-//			Serial.print(position_Char);
-//			Serial.println(position_Axis);
-//#endif // DEBUG
-//		}
-//
-//		iCounter++;
-//#endif // DEBUG
+
 	}
+
+	endLoop:
 
 	// Update Move flag on Nextion. 
 	SerialPrint(pageMove_va0_Char);
@@ -1495,10 +1419,10 @@ void OneRunStepper(int direction) // pageOne
 	RotateControl rotateController;
 
 	//v011
-	const char * pageOne_bt10_bco1_Char = "pageOne.bt10.bco1=55715";
-	const char* pageSplash_vaSpEnabled_val_Char = "pageSplash.vaSpEnabled.val=1";
+//	const char * pageOne_bt10_bco1_Char = "pageOne.bt10.bco1=55715";
+//	const char* pageSplash_vaSpEnabled_val_Char = "pageSplash.vaSpEnabled.val=1";
 	//const char* pageOne_bt10_val_Char = "pageOne.bt10.val=1";
-	const char * nextionEnd = "\xFF\xFF\xFF";
+//	const char * nextionEnd = "\xFF\xFF\xFF";
 
 	// Reset end positions
 	startPositionAbs_Axis = 0;
@@ -1711,13 +1635,13 @@ void OneRunStepper(int direction) // pageOne
 		if ((digitalRead(limitPin_Max) == LOW) && direction == DIR_CW)
 		{
 			rotateController.overrideSpeed(0);
-			rotateController.stop();
+			rotateController.emergencyStop();
 			goto endLoop;
 		}
 		else if ((digitalRead(limitPin_Min) == LOW) && direction == DIR_CCW)
 		{
 			rotateController.overrideSpeed(0);
-			rotateController.stop();
+			rotateController.emergencyStop();
 			goto endLoop;
 		}
 		MilliDelay(10);
@@ -2415,24 +2339,19 @@ void Main_TwoSteppers(
 
 		if (stepper_Axis_Go)
 		{
-			//Serial.print("limit_Min: ");
-			//Serial.print(digitalRead(limitPin_Min));
-			//Serial.print("    limit_Max: ");
-			//Serial.print(digitalRead(limitPin_Max));
-			//Serial.print("          Direction_Axis: ");
-			//Serial.println(direction_Axis);
+
 			if ((digitalRead(limitPin_Max) == LOW) && direction_Axis==DIR_CW)
 			{
 				Serial.println("Limit_Max - CW - Tripped");
 
 				rotateController_MainAxis.overrideSpeed(0);
-				rotateController_MainAxis.stop();
+				rotateController_MainAxis.emergencyStop();
 				if (configSetup.limit_StopSpindle)
 				{
 					// Stop the spindle
 					rotateController_MainSpindle.overrideSpeed(0);
 					MilliDelay(5);
-					rotateController_MainSpindle.stop();
+					rotateController_MainSpindle.emergencyStop();
 					SetEnable(ID_SPINDLE, false, true);
 					stepper_Spindle_Go = false;
 
@@ -2476,7 +2395,7 @@ void Main_TwoSteppers(
 			{
 				Serial.println("Limit_Min - CW - Tripped");
 				rotateController_MainAxis.overrideSpeed(0);
-				rotateController_MainAxis.stop();
+				rotateController_MainAxis.emergencyStop();
 				stepper_Axis_Go = false;
 
 				if (configSetup.limit_StopSpindle)
@@ -2484,7 +2403,7 @@ void Main_TwoSteppers(
 					// Stop the spindle
 					rotateController_MainSpindle.overrideSpeed(0);
 					MilliDelay(5);
-					rotateController_MainSpindle.stop();
+					rotateController_MainSpindle.emergencyStop();
 					SetEnable(ID_SPINDLE, false, true);
 					stepper_Spindle_Go = false;
 					// 0 = Change to disabled, 1 = keep enabled
@@ -2815,9 +2734,9 @@ void IndexSize(double newIndexSize)
 	const char* index3_Char = "Index3";
 	const char* index4_Char = "Index4";
 	const char* index5_Char = "Index5";
-	const char* newIndexSize_Char = "New Index Size:";
+//	const char* newIndexSize_Char = "New Index Size:";
 	const char* indexSizeChar = " Size:";
-	const char* degreeDivision_Char = " Degree or Division:";
+//	const char* degreeDivision_Char = " Degree or Division:";
 	
 	int stepsPerRevolution = (int)round(configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle);
 #ifdef DEBUG
@@ -2974,6 +2893,8 @@ void Sync(int directionSpindle, int directionAxis)
 
 	int stepPin = 0;
 	int dirPin = 0;
+	int limitPin_Max = configSetup.limit_Max_Z;
+	int limitPin_Min = configSetup.limit_Min_Z;
 	int32_t maxSpeed = 0;
 	int32_t accel = 0;
 	long axisSteps = 0;
@@ -2985,6 +2906,8 @@ void Sync(int directionSpindle, int directionAxis)
 		{
 			stepPin = PIN_AXIS_Z_STEP;
 			dirPin = PIN_AXIS_Z_DIR;
+			limitPin_Max = configSetup.limit_Max_Z;
+			limitPin_Min = configSetup.limit_Min_Z;
 			maxSpeed = configSync.maxSpd_Axis_Z * configSync.speedPercent_Axis_Z * .01;
 			accel = configSync.accel_Axis_Z;
 			axisSteps = DistanceToSteps_Axis(configSync.distance, configSync.axisId) * directionAxis;
@@ -2994,6 +2917,8 @@ void Sync(int directionSpindle, int directionAxis)
 		{
 			stepPin = PIN_AXIS_X_STEP;
 			dirPin = PIN_AXIS_X_DIR;
+			limitPin_Max = configSetup.limit_Max_X;
+			limitPin_Min = configSetup.limit_Min_X;
 			maxSpeed = configSync.maxSpd_Axis_X * configSync.speedPercent_Axis_X * .01;
 			accel = configSync.accel_Axis_X;
 			axisSteps = DistanceToSteps_Axis(configSync.distance, configSync.axisId) * directionAxis;
@@ -3003,6 +2928,8 @@ void Sync(int directionSpindle, int directionAxis)
 		{
 			stepPin = PIN_AXIS_B_STEP;
 			dirPin = PIN_AXIS_B_DIR;
+			limitPin_Max = configSetup.limit_Max_B;
+			limitPin_Min = configSetup.limit_Min_B;
 			maxSpeed = configSync.maxSpd_Axis_B * configSync.speedPercent_Axis_B * .01;
 			accel = configSync.accel_Axis_B;
 			switch (configSetup.radialOrLinear_Axis_B)
@@ -3022,6 +2949,11 @@ void Sync(int directionSpindle, int directionAxis)
 			break;
 		}
 	}
+
+	// Set limit switches HIGH
+	digitalWrite(limitPin_Max, HIGH);
+	digitalWrite(limitPin_Min, HIGH);
+
 	StepControl stepController;
 	Stepper stepper_Spindle(PIN_SPINDLE_STEP, PIN_SPINDLE_DIR);
 	Stepper stepper_Axis(stepPin, dirPin);
@@ -3088,70 +3020,36 @@ void Sync(int directionSpindle, int directionAxis)
 
 	while (stepController.isRunning())
 	{
-#ifdef DEBUG
 
+		///////////////////////////////////////////
+
+		if ((digitalRead(limitPin_Max) == LOW))// && axisSteps > 0)
+		{
+			Serial.println("                          limitPin_Max) == LOW");
+			if (axisSteps > 0)
+			{
+
+				stepController.emergencyStop();
+				stopSteppers = true;
+				goto endLoop;
+			}
+		}
+		else if ((digitalRead(limitPin_Min) == LOW))// && axisSteps < 0)
+		{
+			Serial.println("                          limitPin_Min) == LOW");
+			if (axisSteps < 0)
+			{
+				stepController.emergencyStop();
+				stopSteppers = true;
+				goto endLoop;
+			}
+		}
+
+		////////////////////////////////////////////
+
+#ifdef DEBUG
 		endPosition_Spindle = stepper_Spindle.getPosition();
 		endPosition_Axis = stepper_Axis.getPosition();
-//		switch (idAxis)
-//		{
-//		case ID_AXIS_X:
-//		{
-//			endPosition_Axis = stepper_X.getPosition();
-//#ifdef SHOW_POSITION 
-//			// Track Positions not implemented while steppers are running
-//			/*if (configGeneral.trackPositions == 1)
-//			{
-//				degrees_Spindle = StepsToDegrees_Spindle(endPosition_Spindle);
-//				distance_Axis = StepsToDistance_Axis(endPosition_Axis, ID_AXIS_X);
-//				SerialPrint("pageBE.t1.txt=");
-//				SerialWrite(0x22);
-//				SerialPrint(degrees_Spindle);
-//				SerialWrite(0x22);
-//				SerialWrite(0xff);
-//				SerialWrite(0xff);
-//				SerialWrite(0xff);
-//				MilliDelay(10);
-//				SerialPrint("pageBE.t2.txt=");
-//				SerialWrite(0x22);
-//				SerialPrint(distance_Axis);
-//				SerialWrite(0x22);
-//				SerialWrite(0xff);
-//				SerialWrite(0xff);
-//				SerialWrite(0xff);
-//			}*/
-//#endif // Show Position
-//			break;
-//		}
-//		case ID_AXIS_Z:
-//		{
-//			endPosition_Axis = stepper_Z.getPosition();
-//#ifdef SHOW_POSITION 
-//			// Track Positions not implemented while steppers are running
-//			/*if (configGeneral.trackPositions == 1)
-//			{
-//				degrees_Spindle = StepsToDegrees_Spindle(endPosition_Spindle);
-//				distance_Axis = StepsToDistance_Axis(endPosition_Axis, ID_AXIS_Z);
-//				SerialPrint("pageBE.t1.txt=");
-//				SerialWrite(0x22);
-//				SerialPrint(degrees_Spindle);
-//				SerialWrite(0x22);
-//				SerialWrite(0xff);
-//				SerialWrite(0xff);
-//				SerialWrite(0xff);
-//				MilliDelay(10);
-//				SerialPrint("pageBE.t2.txt=");
-//				SerialWrite(0x22);
-//				SerialPrint(distance_Axis);
-//				SerialWrite(0x22);
-//				SerialWrite(0xff);
-//				SerialWrite(0xff);
-//				SerialWrite(0xff);
-//			}*/
-//#endif // Show Position
-//			break;
-//		}
-//		}
-
 #endif // DEBUG
 
 		// Check for Cancel code  
@@ -3171,6 +3069,8 @@ void Sync(int directionSpindle, int directionAxis)
 
 		MilliDelay(10);
 	}
+
+endLoop:
 
 	returnSteps_Spindle = stepper_Spindle.getPosition();
 	endPosition_Axis = stepper_Axis.getPosition();
@@ -3322,11 +3222,15 @@ void Reciprocate_Triangle(int wavDir)
 	const char* nextionEnd = "\xFF\xFF\xFF";
 	int stepPin = 0;
 	int dirPin = 0;
+	int limitPin_Max = configSetup.limit_Max_Z;
+	int limitPin_Min = configSetup.limit_Min_Z;
 	int32_t maxSpeed = 0;
 	int32_t accel = 0;
 	int32_t waves = 0;
 	int32_t speedPercent = 0;
 	startPositionAbs_Axis = 0;
+
+
 
 	switch (configRec.axisId)
 	{
@@ -3334,6 +3238,8 @@ void Reciprocate_Triangle(int wavDir)
 		{
 			stepPin = PIN_AXIS_Z_STEP;
 			dirPin = PIN_AXIS_Z_DIR;
+			limitPin_Max = configSetup.limit_Max_Z;
+			limitPin_Min = configSetup.limit_Min_Z;
 			maxSpeed = configRec.maxSpd_Axis_Z * configRec.speedPercent_Axis_Z * .01;
 			accel = configRec.accel_Axis_Z;
 			speedPercent = configRec.speedPercent_Axis_Z;
@@ -3351,6 +3257,8 @@ void Reciprocate_Triangle(int wavDir)
 		{
 			stepPin = PIN_AXIS_X_STEP;
 			dirPin = PIN_AXIS_X_DIR;
+			limitPin_Max = configSetup.limit_Max_X;
+			limitPin_Min = configSetup.limit_Min_X;
 			maxSpeed = configRec.maxSpd_Axis_X * configRec.speedPercent_Axis_X * .01;
 			accel = configRec.accel_Axis_X;
 			speedPercent = configRec.speedPercent_Axis_X;
@@ -3368,6 +3276,8 @@ void Reciprocate_Triangle(int wavDir)
 		{
 			stepPin = PIN_AXIS_B_STEP;
 			dirPin = PIN_AXIS_B_DIR;
+			limitPin_Max = configSetup.limit_Max_B;
+			limitPin_Min = configSetup.limit_Min_B;
 			maxSpeed = configRec.maxSpd_Axis_B * configRec.speedPercent_Axis_B * .01;
 			accel = configRec.accel_Axis_B;
 			speedPercent = configRec.speedPercent_Axis_B;
@@ -3382,6 +3292,10 @@ void Reciprocate_Triangle(int wavDir)
 			break;
 		}
 	}
+
+	// Set limit switches HIGH
+	digitalWrite(limitPin_Max, HIGH);
+	digitalWrite(limitPin_Min, HIGH);
 
 	StepControl stepController;
 	Stepper stepper_Spindle(PIN_SPINDLE_STEP, PIN_SPINDLE_DIR);
@@ -3572,31 +3486,31 @@ void Reciprocate_Triangle(int wavDir)
 			//Serial.print("Axis:");
 			//Serial.println(endPosition_Axis);
 #endif // DEBUG
-#ifdef SHOW_POSITION 
-			// Track Positions not implemented while steppers are running
-			/*if (configGeneral.trackPositions == 1)
+			///////////////////////////////////////////
+
+			if ((digitalRead(limitPin_Max) == LOW))// && axisSteps > 0)
 			{
-				endPosition_Axis = stepper_X.getPosition();
-				endPosition_Spindle = stepper_Spindle.getPosition();
-				degrees_Spindle = StepsToDegrees_Spindle(endPosition_Spindle);
-				distance_Axis = StepsToDistance_Axis(endPosition_Axis, ID_AXIS_X);
-				SerialPrint("pageBE.t1.txt=");
-				SerialWrite(0x22);
-				SerialPrint(degrees_Spindle);
-				SerialWrite(0x22);
-				SerialWrite(0xff);
-				SerialWrite(0xff);
-				SerialWrite(0xff);
-				MilliDelay(10);
-				SerialPrint("pageBE.t2.txt=");
-				SerialWrite(0x22);
-				SerialPrint(distance_Axis);
-				SerialWrite(0x22);
-				SerialWrite(0xff);
-				SerialWrite(0xff);
-				SerialWrite(0xff);
-			}*/
-#endif //SHOW_POSITION
+				Serial.println("                          limitPin_Max) == LOW");
+				if(axisSteps>0)
+				{ 
+
+					stepController.emergencyStop();
+					stopSteppers = true;
+					goto endLoop;
+				}
+			}
+			else if ((digitalRead(limitPin_Min) == LOW))// && axisSteps < 0)
+			{
+				Serial.println("                          limitPin_Min) == LOW");
+				if (axisSteps < 0)
+				{
+					stepController.emergencyStop();
+					stopSteppers = true;
+					goto endLoop;
+				}
+			}
+
+			////////////////////////////////////////////
 
 			// Check for Cancel code  
 			if (SerialAvailable() > 0)
@@ -3696,6 +3610,8 @@ void Reciprocate_Sawtooth(int wavDir)
 {
 	const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
 	const char* nextionEnd = "\xFF\xFF\xFF";
+	int limitPin_Max = configSetup.limit_Max_Z;
+	int limitPin_Min = configSetup.limit_Min_Z;
 	int stepPin = 0;
 	int dirPin = 0;
 	int32_t maxSpeed = 0;
@@ -3706,59 +3622,68 @@ void Reciprocate_Sawtooth(int wavDir)
 
 	switch (configRec.axisId)
 	{
-	case ID_AXIS_Z:
-	{
-		stepPin = PIN_AXIS_Z_STEP;
-		dirPin = PIN_AXIS_Z_DIR;
-		maxSpeed = configRec.maxSpd_Axis_Z * configRec.speedPercent_Axis_Z * .01;
-		accel = configRec.accel_Axis_Z;
-		speedPercent = configRec.speedPercent_Axis_Z;
-#ifdef DEBUG
-		Serial.print("Z---AxisMaxSpd:");
-		Serial.println(configRec.maxSpd_Axis_Z);
-		Serial.print("Z---AxisSpeedPercent:");
-		Serial.println(configRec.speedPercent_Axis_Z);
-		Serial.print("Z---AxisAccel:");
-		Serial.println(configRec.accel_Axis_Z);
-#endif // DEBUG
-		break;
-	}
-	case ID_AXIS_X:
-	{
-		stepPin = PIN_AXIS_X_STEP;
-		dirPin = PIN_AXIS_X_DIR;
-		maxSpeed = configRec.maxSpd_Axis_X * configRec.speedPercent_Axis_X * .01;
-		accel = configRec.accel_Axis_X;
-		speedPercent = configRec.speedPercent_Axis_X;
-#ifdef DEBUG
-		Serial.print("X---AxisMaxSpd:");
-		Serial.println(configRec.maxSpd_Axis_X);
-		Serial.print("X---AxisSpeedPercent:");
-		Serial.println(configRec.speedPercent_Axis_X);
-		Serial.print("X---AxisAccel:");
-		Serial.println(configRec.accel_Axis_X);
-#endif // DEBUG
-		break;
-	}
-	case ID_AXIS_B:
-	{
-		stepPin = PIN_AXIS_B_STEP;
-		dirPin = PIN_AXIS_B_DIR;
-		maxSpeed = configRec.maxSpd_Axis_B * configRec.speedPercent_Axis_B * .01;
-		accel = configRec.accel_Axis_B;
-		speedPercent = configRec.speedPercent_Axis_B;
-#ifdef DEBUG
-		Serial.print("B---AxisMaxSpd:");
-		Serial.println(configRec.maxSpd_Axis_B);
-		Serial.print("B---AxisSpeedPercent:");
-		Serial.println(configRec.speedPercent_Axis_B);
-		Serial.print("B---AxisAccel:");
-		Serial.println(configRec.accel_Axis_B);
-#endif // DEBUG
-		break;
-	}
+		case ID_AXIS_Z:
+		{
+			stepPin = PIN_AXIS_Z_STEP;
+			dirPin = PIN_AXIS_Z_DIR;
+			limitPin_Max = configSetup.limit_Max_Z;
+			limitPin_Min = configSetup.limit_Min_Z;
+			maxSpeed = configRec.maxSpd_Axis_Z * configRec.speedPercent_Axis_Z * .01;
+			accel = configRec.accel_Axis_Z;
+			speedPercent = configRec.speedPercent_Axis_Z;
+	#ifdef DEBUG
+			Serial.print("Z---AxisMaxSpd:");
+			Serial.println(configRec.maxSpd_Axis_Z);
+			Serial.print("Z---AxisSpeedPercent:");
+			Serial.println(configRec.speedPercent_Axis_Z);
+			Serial.print("Z---AxisAccel:");
+			Serial.println(configRec.accel_Axis_Z);
+	#endif // DEBUG
+			break;
+		}
+		case ID_AXIS_X:
+		{
+			stepPin = PIN_AXIS_X_STEP;
+			dirPin = PIN_AXIS_X_DIR;
+			limitPin_Max = configSetup.limit_Max_X;
+			limitPin_Min = configSetup.limit_Min_X;
+			maxSpeed = configRec.maxSpd_Axis_X * configRec.speedPercent_Axis_X * .01;
+			accel = configRec.accel_Axis_X;
+			speedPercent = configRec.speedPercent_Axis_X;
+	#ifdef DEBUG
+			Serial.print("X---AxisMaxSpd:");
+			Serial.println(configRec.maxSpd_Axis_X);
+			Serial.print("X---AxisSpeedPercent:");
+			Serial.println(configRec.speedPercent_Axis_X);
+			Serial.print("X---AxisAccel:");
+			Serial.println(configRec.accel_Axis_X);
+	#endif // DEBUG
+			break;
+		}
+		case ID_AXIS_B:
+		{
+			stepPin = PIN_AXIS_B_STEP;
+			dirPin = PIN_AXIS_B_DIR;
+			limitPin_Max = configSetup.limit_Max_B;
+			limitPin_Min = configSetup.limit_Min_B;
+			maxSpeed = configRec.maxSpd_Axis_B * configRec.speedPercent_Axis_B * .01;
+			accel = configRec.accel_Axis_B;
+			speedPercent = configRec.speedPercent_Axis_B;
+	#ifdef DEBUG
+			Serial.print("B---AxisMaxSpd:");
+			Serial.println(configRec.maxSpd_Axis_B);
+			Serial.print("B---AxisSpeedPercent:");
+			Serial.println(configRec.speedPercent_Axis_B);
+			Serial.print("B---AxisAccel:");
+			Serial.println(configRec.accel_Axis_B);
+	#endif // DEBUG
+			break;
+		}
 	}
 
+	// Set limit switches HIGH
+	digitalWrite(limitPin_Max, HIGH);
+	digitalWrite(limitPin_Min, HIGH);
 	StepControl stepController;
 	Stepper stepper_Spindle(PIN_SPINDLE_STEP, PIN_SPINDLE_DIR);
 	Stepper stepper_Axis(stepPin, dirPin);
@@ -3904,8 +3829,8 @@ void Reciprocate_Sawtooth(int wavDir)
 		break;
 	}
 	}
-	int32_t axisSteps_0 = 0;
-	int32_t spindleSteps_0 = 0;
+//	int32_t axisSteps_0 = 0;
+//	int32_t spindleSteps_0 = 0;
 	int32_t i_mod_2 = 0;
 	for (int i = 1; i <= (waves * 2) + 2; i++)
 	{
@@ -4001,31 +3926,33 @@ void Reciprocate_Sawtooth(int wavDir)
 			//Serial.print("Axis:");
 			//Serial.println(endPosition_Axis);
 #endif // DEBUG
-#ifdef SHOW_POSITION 
-			// Track Positions not implemented while steppers are running
-			/*if (configGeneral.trackPositions == 1)
+
+						///////////////////////////////////////////
+
+			if ((digitalRead(limitPin_Max) == LOW))// && axisSteps > 0)
 			{
-				endPosition_Axis = stepper_X.getPosition();
-				endPosition_Spindle = stepper_Spindle.getPosition();
-				degrees_Spindle = StepsToDegrees_Spindle(endPosition_Spindle);
-				distance_Axis = StepsToDistance_Axis(endPosition_Axis, ID_AXIS_X);
-				SerialPrint("pageBE.t1.txt=");
-				SerialWrite(0x22);
-				SerialPrint(degrees_Spindle);
-				SerialWrite(0x22);
-				SerialWrite(0xff);
-				SerialWrite(0xff);
-				SerialWrite(0xff);
-				MilliDelay(10);
-				SerialPrint("pageBE.t2.txt=");
-				SerialWrite(0x22);
-				SerialPrint(distance_Axis);
-				SerialWrite(0x22);
-				SerialWrite(0xff);
-				SerialWrite(0xff);
-				SerialWrite(0xff);
-			}*/
-#endif //SHOW_POSITION
+				Serial.println("                          limitPin_Max) == LOW");
+				if (axisSteps > 0)
+				{
+
+					stepController.emergencyStop();
+					stopSteppers = true;
+					goto endLoop;
+				}
+			}
+			else if ((digitalRead(limitPin_Min) == LOW))// && axisSteps < 0)
+			{
+				Serial.println("                          limitPin_Min) == LOW");
+				if (axisSteps < 0)
+				{
+					stepController.emergencyStop();
+					stopSteppers = true;
+					goto endLoop;
+				}
+			}
+
+			////////////////////////////////////////////
+
 
 			// Check for Cancel code  
 			if (SerialAvailable() > 0)
@@ -4124,6 +4051,8 @@ void Reciprocate_Square(int wavDir)
 	const char* nextionEnd = "\xFF\xFF\xFF";
 	int stepPin = 0;
 	int dirPin = 0;
+	int limitPin_Max = configSetup.limit_Max_Z;
+	int limitPin_Min = configSetup.limit_Min_Z;
 	int32_t maxSpeed = 0;
 	int32_t accel = 0;
 	int32_t waves = 0;
@@ -4136,6 +4065,8 @@ void Reciprocate_Square(int wavDir)
 	{
 		stepPin = PIN_AXIS_Z_STEP;
 		dirPin = PIN_AXIS_Z_DIR;
+		limitPin_Max = configSetup.limit_Max_Z;
+		limitPin_Min = configSetup.limit_Min_Z;
 		maxSpeed = configRec.maxSpd_Axis_Z * configRec.speedPercent_Axis_Z * .01;
 		accel = configRec.accel_Axis_Z;
 		speedPercent = configRec.speedPercent_Axis_Z;
@@ -4153,6 +4084,8 @@ void Reciprocate_Square(int wavDir)
 	{
 		stepPin = PIN_AXIS_X_STEP;
 		dirPin = PIN_AXIS_X_DIR;
+		limitPin_Max = configSetup.limit_Max_X;
+		limitPin_Min = configSetup.limit_Min_X;
 		maxSpeed = configRec.maxSpd_Axis_X * configRec.speedPercent_Axis_X * .01;
 		accel = configRec.accel_Axis_X;
 		speedPercent = configRec.speedPercent_Axis_X;
@@ -4170,6 +4103,8 @@ void Reciprocate_Square(int wavDir)
 	{
 		stepPin = PIN_AXIS_B_STEP;
 		dirPin = PIN_AXIS_B_DIR;
+		limitPin_Max = configSetup.limit_Max_B;
+		limitPin_Min = configSetup.limit_Min_B;
 		maxSpeed = configRec.maxSpd_Axis_B * configRec.speedPercent_Axis_B * .01;
 		accel = configRec.accel_Axis_B;
 		speedPercent = configRec.speedPercent_Axis_B;
@@ -4184,6 +4119,10 @@ void Reciprocate_Square(int wavDir)
 		break;
 	}
 	}
+
+	// Set limit switches HIGH
+	digitalWrite(limitPin_Max, HIGH);
+	digitalWrite(limitPin_Min, HIGH);
 
 	StepControl stepController;
 	Stepper stepper_Spindle(PIN_SPINDLE_STEP, PIN_SPINDLE_DIR);
@@ -4314,8 +4253,8 @@ void Reciprocate_Square(int wavDir)
 		break;
 	}
 	}
-	int32_t axisSteps_0 = 0;
-	int32_t spindleSteps_0 = 0;
+//	int32_t axisSteps_0 = 0;
+//	int32_t spindleSteps_0 = 0;
 	int32_t leg = 1;
 	for (int i = 4; i < ((waves + 4) * 2); i++)
 	{
@@ -4420,6 +4359,32 @@ void Reciprocate_Square(int wavDir)
 			//Serial.print("Axis:");
 			//Serial.println(endPosition_Axis);
 #endif // DEBUG
+
+						///////////////////////////////////////////
+
+			if ((digitalRead(limitPin_Max) == LOW))// && axisSteps > 0)
+			{
+				Serial.println("                          limitPin_Max) == LOW");
+				if (axisSteps > 0)
+				{
+
+					stepController.emergencyStop();
+					stopSteppers = true;
+					goto endLoop;
+				}
+			}
+			else if ((digitalRead(limitPin_Min) == LOW))// && axisSteps < 0)
+			{
+				Serial.println("                          limitPin_Min) == LOW");
+				if (axisSteps < 0)
+				{
+					stepController.emergencyStop();
+					stopSteppers = true;
+					goto endLoop;
+				}
+			}
+
+			////////////////////////////////////////////
 #ifdef SHOW_POSITION 
 			// Track Positions not implemented while steppers are running
 			/*if (configGeneral.trackPositions == 1)
@@ -6150,6 +6115,8 @@ bool GreekKey_Move_Axis(float segmentSteps, float multiplier, int direction, boo
 	String axisName = "";
 	int stepPin = 0;
 	int dirPin = 0;
+	int limitPin_Max = configSetup.limit_Max_Z;
+	int limitPin_Min = configSetup.limit_Min_Z;
 	int maxSpeed = 0;
 	int accel = 0;
 	int speedPercentage = 0;
@@ -6164,6 +6131,7 @@ bool GreekKey_Move_Axis(float segmentSteps, float multiplier, int direction, boo
 		{
 			case ID_AXIS_Z:
 			{
+
 				currentAxis = ID_AXIS_X;
 #ifdef DEBUG
 				Serial.print("X-CurrentAxis:  ");
@@ -6173,6 +6141,7 @@ bool GreekKey_Move_Axis(float segmentSteps, float multiplier, int direction, boo
 			}
 			case ID_AXIS_X:
 			{
+
 				currentAxis = ID_AXIS_Z;
 #ifdef DEBUG
 				Serial.print("Z-CurrentAxis:  ");
@@ -6182,6 +6151,7 @@ bool GreekKey_Move_Axis(float segmentSteps, float multiplier, int direction, boo
 			}
 			case ID_AXIS_B: // Assumes the toolpath is on the outside of the workpiece generally moving in Z axis
 			{
+
 				currentAxis = ID_AXIS_X;
 #ifdef DEBUG
 				Serial.print("X-CurrentAxis:  ");
@@ -6212,6 +6182,8 @@ bool GreekKey_Move_Axis(float segmentSteps, float multiplier, int direction, boo
 			axisName = "Z";
 			stepPin = PIN_AXIS_Z_STEP;
 			dirPin = PIN_AXIS_Z_DIR;
+			limitPin_Max = configSetup.limit_Max_Z;
+			limitPin_Min = configSetup.limit_Min_Z;
 			SetEnable(ID_AXIS_Z, true, true);
 			maxSpeed = configGreekKey.maxSpd_Axis_Z;
 			accel = configGreekKey.accel_Axis_Z;
@@ -6223,6 +6195,8 @@ bool GreekKey_Move_Axis(float segmentSteps, float multiplier, int direction, boo
 			axisName = "X";
 			stepPin = PIN_AXIS_X_STEP;
 			dirPin = PIN_AXIS_X_DIR;
+			limitPin_Max = configSetup.limit_Max_X;
+			limitPin_Min = configSetup.limit_Min_X;
 			SetEnable(ID_AXIS_X, true, true);
 			maxSpeed = configGreekKey.maxSpd_Axis_X;
 			accel = configGreekKey.accel_Axis_X;
@@ -6234,6 +6208,8 @@ bool GreekKey_Move_Axis(float segmentSteps, float multiplier, int direction, boo
 			axisName = "B";
 			stepPin = PIN_AXIS_B_STEP;
 			dirPin = PIN_AXIS_B_DIR;
+			limitPin_Max = configSetup.limit_Max_B;
+			limitPin_Min = configSetup.limit_Min_B;
 			SetEnable(ID_AXIS_B, true, true);
 			maxSpeed = configGreekKey.maxSpd_Axis_B;
 			accel = configGreekKey.accel_Axis_B;
@@ -6241,6 +6217,10 @@ bool GreekKey_Move_Axis(float segmentSteps, float multiplier, int direction, boo
 			break;
 		}
 	}
+
+	// Set limit switches HIGH
+	digitalWrite(limitPin_Max, HIGH);
+	digitalWrite(limitPin_Min, HIGH);
 
 	actualSpeed = maxSpeed * speedPercentage * .01;
 	StepControl stepControllerAxis;
@@ -6291,6 +6271,21 @@ bool GreekKey_Move_Axis(float segmentSteps, float multiplier, int direction, boo
 	stepControllerAxis.moveAsync(stepperAxis);
 	while (stepControllerAxis.isRunning())
 	{
+		if ((digitalRead(limitPin_Max) == LOW)|| (digitalRead(limitPin_Min) == LOW))
+		{
+			Serial.println("                          limitPin == LOW");
+
+			stepControllerAxis.emergencyStop();
+			stopSteppers = true;
+			// Disable all motors
+			SetEnable(ID_SPINDLE, false, true);
+			SetEnable(ID_AXIS_Z, false, true);
+			SetEnable(ID_AXIS_X, false, true);
+			SetEnable(ID_AXIS_B, false, true);
+			goto EndLoops;
+
+		}
+
 		if (StopGreekKey())
 		{
 #ifdef DEBUG
@@ -6314,6 +6309,7 @@ bool GreekKey_Move_Axis(float segmentSteps, float multiplier, int direction, boo
 		MilliDelay(5);
 	}
 
+EndLoops:
 #ifdef DEBUG
 	Serial.print("endPosition_Axis:");
 	Serial.println(endPosition_Axis);
@@ -6448,6 +6444,9 @@ bool GreekKey_Move_Angular_TeensyStep(
 {
 	int stepPin_Axis = PIN_AXIS_Z_STEP;
 	int dirPin_Axis = PIN_AXIS_Z_DIR;
+	int limitPin_Max = configSetup.limit_Max_Z;
+	int limitPin_Min = configSetup.limit_Min_Z;
+
 
 	int maxSpd_Axis = 0;
 	int accel_Axis = 0;
@@ -6470,6 +6469,8 @@ bool GreekKey_Move_Angular_TeensyStep(
 		{
 			stepPin_Axis = PIN_AXIS_Z_STEP;
 			dirPin_Axis = PIN_AXIS_Z_DIR;
+			limitPin_Max = configSetup.limit_Max_Z;
+			limitPin_Min = configSetup.limit_Min_Z;
 			SetEnable(ID_AXIS_Z, true, true);
 
 			maxSpd_Axis = configGreekKey.maxSpd_Axis_Z;
@@ -6482,7 +6483,8 @@ bool GreekKey_Move_Angular_TeensyStep(
 		{
 			stepPin_Axis = PIN_AXIS_X_STEP;
 			dirPin_Axis = PIN_AXIS_X_DIR;
-
+			limitPin_Max = configSetup.limit_Max_X;
+			limitPin_Min = configSetup.limit_Min_X;
 			SetEnable(ID_AXIS_X, true, true);
 
 			maxSpd_Axis = configGreekKey.maxSpd_Axis_X;
@@ -6495,7 +6497,8 @@ bool GreekKey_Move_Angular_TeensyStep(
 		{
 			stepPin_Axis = PIN_AXIS_B_STEP;
 			dirPin_Axis = PIN_AXIS_B_DIR;
-
+			limitPin_Max = configSetup.limit_Max_B;
+			limitPin_Min = configSetup.limit_Min_B;
 			SetEnable(ID_AXIS_B, true, true);
 
 			maxSpd_Axis = configGreekKey.maxSpd_Axis_B;
@@ -6512,6 +6515,10 @@ bool GreekKey_Move_Angular_TeensyStep(
 			break;
 		}
 	}
+
+	// Set limit switches HIGH
+	digitalWrite(limitPin_Max, HIGH);
+	digitalWrite(limitPin_Min, HIGH);
 
 	// ToDo:
 	AngularLengthAndMaxSpeed(maxSpd_Spindle, maxSpd_Axis);
@@ -6566,6 +6573,20 @@ bool GreekKey_Move_Angular_TeensyStep(
 	stepController.moveAsync(stepperSpindle,stepper_Axis);
 	while (stepController.isRunning())
 	{
+		if ((digitalRead(limitPin_Max) == LOW) || (digitalRead(limitPin_Min) == LOW))
+		{
+			Serial.println("                          limitPin == LOW");
+
+			stepController.emergencyStop();
+			stopSteppers = true;
+			// Disable all motors
+			SetEnable(ID_SPINDLE, false, true);
+			SetEnable(ID_AXIS_Z, false, true);
+			SetEnable(ID_AXIS_X, false, true);
+			SetEnable(ID_AXIS_B, false, true);
+			break;
+
+		}
 		if (StopGreekKey())
 		{
 #ifdef DEBUG
@@ -6575,6 +6596,7 @@ bool GreekKey_Move_Angular_TeensyStep(
 			SetEnable(ID_SPINDLE, false, true);
 			SetEnable(ID_AXIS_Z, false, true);
 			SetEnable(ID_AXIS_X, false, true);
+			SetEnable(ID_AXIS_B, false, true);
 			retVal = true;
 			break;
 		}
@@ -6959,6 +6981,8 @@ void GreekKey_FromFile(int direction)
 {
 	const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
 	const char* nextionEnd = "\xFF\xFF\xFF";
+
+
 	int eePromAddress = 0;
 
 #ifdef DEBUG
@@ -7144,6 +7168,7 @@ void GreekKey_FromFile(int direction)
 	{
 		case ID_AXIS_Z: // Z Axis
 		{	
+
 			shortSegmentStepsAxis = shortSegmentStepsAxisZ;
 #ifdef DEBUG
 			Serial.print("configGreekKey_Main.patternCount_File:");
@@ -7163,6 +7188,7 @@ void GreekKey_FromFile(int direction)
 		}
 		case ID_AXIS_X: // X Axis
 		{
+
 			shortSegmentStepsAxis = shortSegmentStepsAxisX;
 #ifdef DEBUG
 			Serial.print("configGreekKey_Main.patternCount_File:");
@@ -7182,6 +7208,7 @@ void GreekKey_FromFile(int direction)
 		}
 		case ID_AXIS_B: // B Axis
 		{
+
 			shortSegmentStepsAxis = shortSegmentStepsAxisB;
 #ifdef DEBUG
 			Serial.print("configGreekKey_Main.patternCount_File:");
@@ -7200,6 +7227,8 @@ void GreekKey_FromFile(int direction)
 			break;
 		}
 	}
+
+
 
 	for (int j = 1; j <= configGreekKey.patternCount_File; j++)
 	{ 
@@ -8498,6 +8527,7 @@ void GreekKey_FromFile(int direction)
 			} // End Switch(moveType)
 
 			stopAll = StopGreekKey();
+
 			if (stopAll)
 			{
 				goto EndLoops;
@@ -10211,6 +10241,8 @@ void RoseRadial(int direction)
 {
 	const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
 	const char* nextionEnd = "\xFF\xFF\xFF";
+	int limitPin_Max = configSetup.limit_Max_Z;
+	int limitPin_Min = configSetup.limit_Min_Z;
 	bool runPattern = true;
 	int32_t spindleCurrentPosition = 0;
 	IntervalTimer tickTimer;
@@ -10249,6 +10281,8 @@ void RoseRadial(int direction)
 	{
 		case ID_AXIS_Z:
 		{
+			limitPin_Max = configSetup.limit_Max_Z;
+			limitPin_Min = configSetup.limit_Min_Z;
 			// Get Z axis amplitude steps and max speed
 			slideStepsAmplitude = ((configRose.amplitude_Radial_Z / (configSetup.distancePerRev_AxisZ)) * configSetup.steps360_Axis_Z * configSetup.microsteps_Axis_Z) / 2;  // Amplitude is normally measured from the middle to the top
 			newMaxSpd_RoseAxis = configRose.maxSpd_Axis_Z * configRose.speedPercent_Axis_Z * .01 * direction;
@@ -10283,6 +10317,8 @@ void RoseRadial(int direction)
 		}
 		case ID_AXIS_X:
 		{
+			limitPin_Max = configSetup.limit_Max_X;
+			limitPin_Min = configSetup.limit_Min_X;
 			if (configSetup.xAltX == 0)
 			{
 				slideStepsAmplitude = ((configRose.amplitude_Radial_X / (configSetup.distancePerRev_AxisX)) * configSetup.steps360_Axis_X * configSetup.microsteps_Axis_X) / 2;  // Amplitude is normally measured from the middle to the top
@@ -10310,6 +10346,8 @@ void RoseRadial(int direction)
 		}
 		case ID_AXIS_B:
 		{
+			limitPin_Max = configSetup.limit_Max_B;
+			limitPin_Min = configSetup.limit_Min_B;
 			switch (configSetup.radialOrLinear_Axis_B)
 			{
 			case RADIAL_B:
@@ -10342,6 +10380,11 @@ void RoseRadial(int direction)
 			break;
 		}
 	}
+
+	// Set limit switches HIGH
+	digitalWrite(limitPin_Max, HIGH);
+	digitalWrite(limitPin_Min, HIGH);
+
 	//controllerRoseSpindle.rotateAsync(stepperSpindle); // let the spindle run with constant speed
 	controllerRoseSpindle.moveAsync(stepperSpindle);
 	controllerAxis.overrideSpeed(0);
@@ -10357,6 +10400,9 @@ void RoseRadial(int direction)
 #endif // Debug
 	while (runPattern)
 	{
+
+
+
 		spindleCurrentPosition = stepperSpindle.getPosition();
 		if (spindleCurrentPosition < 0)
 		{
@@ -10399,6 +10445,33 @@ void RoseRadial(int direction)
 				}
 			}
 		}
+
+		///////////////////////////////////////////
+
+		if ((digitalRead(limitPin_Max) == LOW))// && axisSteps > 0)
+		{
+			Serial.println("                          limitPin_Max) == LOW");
+			tickTimer.end();
+			controllerAxis.overrideSpeed(0);
+			controllerAxis.emergencyStop();
+			controllerRoseSpindle.emergencyStop();
+
+			MilliDelay(2000);
+			runPattern = false;
+		}
+		else if ((digitalRead(limitPin_Min) == LOW))// && axisSteps < 0)
+		{
+			Serial.println("                          limitPin_Min) == LOW");
+			tickTimer.end();
+			controllerAxis.overrideSpeed(0);
+			controllerAxis.emergencyStop();
+			controllerRoseSpindle.emergencyStop();
+
+			MilliDelay(2000);
+			runPattern = false;
+		}
+
+		////////////////////////////////////////////
 
 		MilliDelay(20);
 	} // End while

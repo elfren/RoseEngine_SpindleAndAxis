@@ -2,7 +2,7 @@
 /* *****************************************************************
 * 4Rose main entry
 * Author: Edward French
-* Version: 24 - 07/25/21
+* Version: 24 - 07/28/21
 ******************************************************************/
 
 #include "math.h"
@@ -319,9 +319,6 @@ void loop()
 		Serial.print("3.serialId: ");
 #endif // Debug
 	}
-
-	//SerialPrint("serialId: ");
-	//SerialPrintln(serialId);
 
 	// All Nextion incoming data packets are terminated with one 0xFF byte
 	if ((Serial1.available() > 0) || (Serial2.available() > 0)|| (Serial3.available() > 0))
