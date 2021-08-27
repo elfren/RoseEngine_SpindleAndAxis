@@ -1272,8 +1272,11 @@ void MoveAxis(int axisId, int directionAxis)
 			SerialPrint(distanceTotal_MoveZ);
 			SerialPrint(nextionQuoteEnd);
 
-			//endPosition_Axis = stepper_Z.getPosition();
-			endPosition_Axis = endPosition_Axis + stepper_Z.getPosition();
+			endPosition_Axis = stepper_Z.getPosition();
+			Serial.print(position_Char);
+			Serial.println(endPosition_Axis);
+			//endPosition_Axis = endPosition_Axis + stepper_Z.getPosition();
+			startPositionAbs_Axis = endPosition_Axis;
 #ifdef DEBUG
 			Serial.print(position_Char);
 			Serial.println(endPosition_Axis);
@@ -1311,8 +1314,9 @@ void MoveAxis(int axisId, int directionAxis)
 			SerialPrint(distanceTotal_MoveX);
 			SerialPrint(nextionQuoteEnd);
 
-			//endPosition_Axis = stepper_X.getPosition();
-			endPosition_Axis = endPosition_Axis + stepper_X.getPosition();
+			endPosition_Axis = stepper_X.getPosition();
+			//endPosition_Axis = endPosition_Axis + stepper_X.getPosition();
+			startPositionAbs_Axis = endPosition_Axis;
 #ifdef DEBUG
 			Serial.print(position_Char);
 			Serial.println(endPosition_Axis);
@@ -1351,8 +1355,9 @@ void MoveAxis(int axisId, int directionAxis)
 			//SerialPrint(distanceTotal_MoveB);
 			//SerialPrint(nextionQuoteEnd);
 
-			////endPosition_Axis = stepper_B.getPosition();
-			endPosition_Axis = endPosition_Axis + stepper_B.getPosition();
+			endPosition_Axis = stepper_B.getPosition();
+			////endPosition_Axis = endPosition_Axis + stepper_B.getPosition();
+			startPositionAbs_Axis = endPosition_Axis;
 #ifdef DEBUG
 			Serial.print(position_Char);
 			Serial.println(endPosition_Axis);
@@ -4570,7 +4575,7 @@ void GreekKey_Pattern_4a()
 		{
 			case RADIAL: // Axis Left CCW
 			{
-				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 3, reverseDirection * DIR_CW, true); //1
+				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 3, reverseDirection * DIR_CW, true); //1 
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
@@ -7030,11 +7035,14 @@ void GreekKey_FromFile(int direction)
 #endif // DEBUG
 	// Get Spindle segment count and line count from file :
 	badFilename = false;
+	badCommand = false;
 	if (configGreekKey.segmentOrActual == 2) // 2: Segment 
 	{
 		for (lineCounter = 0; lineCounter <= fileLineCount; lineCounter++)
 		{
 			segmentMultiplier = GetGreekKeyDataFromSD(lineCounter);
+			Serial.print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>badCommand:  ");
+			Serial.println(badCommand);
 			if (badFilename)
 			{
 #ifdef DEBUG
@@ -7043,6 +7051,29 @@ void GreekKey_FromFile(int direction)
 				SerialPrint("pageProgram.tFileName.txt=");
 				SerialWrite(0x22);
 				SerialPrint("File not found");
+				SerialPrint(nextionQuoteEnd);
+
+				goto EndLoops;
+			}
+
+			if (badCommand)
+			{
+#ifdef DEBUG
+				Serial.println("Exit Greek Key: Bad Command");
+#endif // DEBUG
+				SerialPrint("pageProgram.tFileName.txt=");
+				SerialWrite(0x22);
+				SerialPrint("Bad Command");
+				SerialPrint(nextionQuoteEnd);
+
+				SerialPrint(pageProgram_t22);
+				SerialWrite(0x22);
+				SerialPrint(lineCounter);
+				SerialPrint(nextionQuoteEnd);
+
+				SerialPrint(pageProgram_t21);
+				SerialWrite(0x22);
+				SerialPrint(currentCommand);
 				SerialPrint(nextionQuoteEnd);
 
 				goto EndLoops;
@@ -7253,6 +7284,33 @@ void GreekKey_FromFile(int direction)
 
 			// Get data
 			segmentMultiplier = GetGreekKeyDataFromSD(i);
+			Serial.print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>badCommand:  ");
+			Serial.println(badCommand);
+
+			if (badCommand)
+			{
+#ifdef DEBUG
+				Serial.println("Exit Greek Key: Bad Command");
+#endif // DEBUG
+				SerialPrint("pageProgram.tFileName.txt=");
+				SerialWrite(0x22);
+				SerialPrint("Bad Command");
+				SerialPrint(nextionQuoteEnd);
+
+				SerialPrint(pageProgram_t22);
+				SerialWrite(0x22);
+				SerialPrint(lineCounter);
+				SerialPrint(nextionQuoteEnd);
+
+				SerialPrint(pageProgram_t21);
+				SerialWrite(0x22);
+				SerialPrint(currentCommand);
+				SerialPrint(nextionQuoteEnd);
+
+				goto EndLoops;
+			}
+
+
 
 			int moveDirection = DIR_CW;
 			////////if ((segmentMultiplier * reverseDirection) < 0)
@@ -8208,110 +8266,110 @@ void GreekKey_FromFile(int direction)
 				}
 				case 81: // Q - (deprecate)Page routines
 				{
-					switch (runPageID)
-					{
-						case 3: // (deprecate)Ind
-						{
+					//switch (runPageID)
+					//{
+					//	case 3: // (deprecate)Ind
+					//	{
 
-							if (abs(segmentMultiplier) * moveDirection < 0)
-							{
-								IndexSpindle(DIR_CCW);
-							}
-							else
-							{
-								IndexSpindle(DIR_CW);
-							}
+					//		if (abs(segmentMultiplier) * moveDirection < 0)
+					//		{
+					//			IndexSpindle(DIR_CCW);
+					//		}
+					//		else
+					//		{
+					//			IndexSpindle(DIR_CW);
+					//		}
 
-							break;
-						}
-						case 4: // (deprecate)Move
-						{
+					//		break;
+					//	}
+					//	case 4: // (deprecate)Move
+					//	{
 
-							//int moveDirection = abs(segmentMultiplier);
-							if (abs(segmentMultiplier) * moveDirection < 0)
-							{
-								MoveAxis(configMove.axisId, DIR_CCW);
-							}
-							else
-							{
-								MoveAxis(configMove.axisId, DIR_CW);
-							}
+					//		//int moveDirection = abs(segmentMultiplier);
+					//		if (abs(segmentMultiplier) * moveDirection < 0)
+					//		{
+					//			MoveAxis(configMove.axisId, DIR_CCW);
+					//		}
+					//		else
+					//		{
+					//			MoveAxis(configMove.axisId, DIR_CW);
+					//		}
 
-							break;
-						}
-						case 6: // (deprecate)Sync
-						{
+					//		break;
+					//	}
+					//	case 6: // (deprecate)Sync
+					//	{
 
-							int directionSpindle = 1;
-							int directionAxis = 1;
-							////if (abs(segmentMultiplier) * moveDirection < 0) // Move in (towards headstock).
-							if ((segmentMultiplier) * moveDirection < 0) // Move in (towards headstock).
-							{
-								if (configSync.helixType == 1) // Right hand
-								{
-									directionSpindle = DIR_CW; //CW
-									directionAxis = DIR_CCW; // CCW
-								}
-								else // Left hand
-								{
-									directionSpindle = DIR_CCW;// 0; //CCW
-									directionAxis = DIR_CCW;// 0; // CCW	
-								}
+					//		int directionSpindle = 1;
+					//		int directionAxis = 1;
+					//		////if (abs(segmentMultiplier) * moveDirection < 0) // Move in (towards headstock).
+					//		if ((segmentMultiplier) * moveDirection < 0) // Move in (towards headstock).
+					//		{
+					//			if (configSync.helixType == 1) // Right hand
+					//			{
+					//				directionSpindle = DIR_CW; //CW
+					//				directionAxis = DIR_CCW; // CCW
+					//			}
+					//			else // Left hand
+					//			{
+					//				directionSpindle = DIR_CCW;// 0; //CCW
+					//				directionAxis = DIR_CCW;// 0; // CCW	
+					//			}
 
-							}
-							else // Move out (away from headstock).
-							{
-								//if (segmentMultiplier < 0) // Move in (towards headstock).
-								//{
-								if (configSync.helixType == 1) // Right hand
-								{
-									directionSpindle = DIR_CCW; // CW
-									directionAxis = DIR_CW; // CW
-								}
-								else // Left hand
-								{
-									directionSpindle = DIR_CW;//0; // CCW
-									directionAxis = DIR_CW; // CW
-								}
+					//		}
+					//		else // Move out (away from headstock).
+					//		{
+					//			//if (segmentMultiplier < 0) // Move in (towards headstock).
+					//			//{
+					//			if (configSync.helixType == 1) // Right hand
+					//			{
+					//				directionSpindle = DIR_CCW; // CW
+					//				directionAxis = DIR_CW; // CW
+					//			}
+					//			else // Left hand
+					//			{
+					//				directionSpindle = DIR_CW;//0; // CCW
+					//				directionAxis = DIR_CW; // CW
+					//			}
 
-								//}
-							}
+					//			//}
+					//		}
 
 
-							Sync(directionSpindle, directionAxis);
-							break;
-						}
-						case 7: // (deprecate)Recip
-						{
+					//		Sync(directionSpindle, directionAxis);
+					//		break;
+					//	}
+					//	case 7: // (deprecate)Recip
+					//	{
 
-							int waveDir = DIR_CW;
-							////if (abs(segmentMultiplier) * moveDirection < 0)
-							if ((segmentMultiplier) * moveDirection < 0)
-							{
-								waveDir = DIR_CCW;
-							}
+					//		int waveDir = DIR_CW;
+					//		////if (abs(segmentMultiplier) * moveDirection < 0)
+					//		if ((segmentMultiplier) * moveDirection < 0)
+					//		{
+					//			waveDir = DIR_CCW;
+					//		}
 
-							switch (configRec.style)
-							{
-								case 1: // Triangle
-								{
-									Reciprocate_Triangle(waveDir);
-									break;
-								}
-								case 2: // Sawtooth
-								{
-									Reciprocate_Sawtooth(waveDir);
-									break;
-								}
-								case 3: // Square
-								{
-									Reciprocate_Square(waveDir);
-									break;
-								}
-							}
-							break;
-						}
-					}
+					//		switch (configRec.style)
+					//		{
+					//			case 1: // Triangle
+					//			{
+					//				Reciprocate_Triangle(waveDir);
+					//				break;
+					//			}
+					//			case 2: // Sawtooth
+					//			{
+					//				Reciprocate_Sawtooth(waveDir);
+					//				break;
+					//			}
+					//			case 3: // Square
+					//			{
+					//				Reciprocate_Square(waveDir);
+					//				break;
+					//			}
+					//		}
+					//		break;
+					//	}
+					//}
 
 
 					break;
@@ -9283,6 +9341,208 @@ double GetGreekKeyDataFromSD(int lineNumber)
 	Serial.println(nStr);
 #endif
 
+	switch (moveType)
+	{
+		
+		case 59:// ; - Comment
+		{
+	#ifdef DEBUG
+			Serial.println("MoveType 59");
+	#endif // DEBUG
+
+			comment = nStr;
+			return 0;
+			break;
+		}
+		case 13: // Empty line
+		case 65: // A
+		case 66: // B
+		case 67: // C
+		case 69: // E
+		case 73: // I
+		case 79: // O
+		case 80: // P
+		case 83: // S
+		case 88: // X
+		case 90: // Z
+		{
+			// Valid entries
+			//return 0;
+			break;
+		}
+		case 70:// F - Move page settings
+		{
+			commandMove = newSizeString[1];
+
+			nStr = newSizeString.substring(2);
+#ifdef DEBUG
+			Serial.print("page 70: ");
+			Serial.println(commandMove);
+			Serial.print("nStr 70: ");
+			Serial.println(nStr);
+#endif // DEBUG
+			break;
+		} 
+
+		case 71:// G - Sync page settings
+		{
+			commandSync = newSizeString[1];
+
+			nStr = newSizeString.substring(2);
+#ifdef DEBUG
+			Serial.print("page 71: ");
+			Serial.println(commandSync);
+			Serial.print("nStr 71: ");
+			Serial.println(nStr);
+#endif // DEBUG
+			break;
+		}
+
+		case 72:// H and V
+		{
+			// Horizontal and Vertical move combined.
+			// Parse nStr 
+			//String delimiter = "V";
+			//String horizontal = nStr.substring(0,nStr.find)
+			//String h = split(nStr, "V");
+			char* val;
+			char charBuf[20];
+			nStr.toCharArray(charBuf, 20);
+			val = strtok(charBuf, "V");
+			hv_AxisLegLength = atof(val);
+			val = strtok(NULL, "\n");
+			hv_SpindleLegLength = atof(val);
+#ifdef DEBUG
+			Serial.print("nStr: ");
+			Serial.print(nStr);
+			Serial.print("   hVal: ");
+			Serial.print(hv_AxisLegLength);
+			//Serial.print("val: ");
+			//Serial.println(val);
+			Serial.print("   vVal: ");
+			Serial.println(hv_SpindleLegLength);
+#endif // DEBUG
+			break;
+		}
+
+		case 74:// J - BRadius
+		{
+			commandBRadius = newSizeString[1];
+			nStr = newSizeString.substring(2);
+#ifdef DEBUG
+			Serial.print("page 74: ");
+			Serial.println(commandSync);
+			Serial.print("nStr 74: ");
+			Serial.println(nStr);
+#endif // DEBUG
+			break;
+		}
+
+		case 78:// N - Index page settings
+		{
+			commandIndex = newSizeString[1];
+
+			nStr = newSizeString.substring(2);
+#ifdef DEBUG
+			Serial.print("page 78: ");
+			Serial.println(commandIndex);
+			Serial.print("nStr 78: ");
+			Serial.println(nStr);
+#endif // DEBUG
+			break;
+		}
+
+
+		case 81:// Q - Run page functions -No longer valid
+		{
+			badCommand = true;
+			Serial.print("================================Bad Command: ");
+			Serial.println(badCommand);
+			return 0;
+			////		String page = newSizeString[1];
+			////		if (page == "I")
+			////		{
+			////			runPageID = 3;
+			////		}
+			////		else if (page == "M")
+			////		{
+			////			runPageID = 4;
+			////		}
+			////		else if (page == "S")
+			////		{
+			////			runPageID = 6;
+			////		}
+			////		else if (page == "R")
+			////		{
+			////			runPageID = 7;
+			////		}
+			////
+			////
+			////
+			////		nStr = newSizeString.substring(2);
+			////#ifdef DEBUG
+			////		Serial.print("page 81: ");
+			////		Serial.println(page);
+			////		Serial.print("nStr 81: ");
+			////		Serial.println(nStr);
+			////#endif // DEBUG
+
+			break;
+		}
+
+		case 86:// V - Recip page settings
+		{
+
+			commandRecip = newSizeString[1];
+
+			nStr = newSizeString.substring(2);
+#ifdef DEBUG
+			Serial.print("page 86: ");
+			Serial.println(commandRecip);
+			Serial.print("nStr 86: ");
+			Serial.println(nStr);
+#endif // DEBUG
+			break;
+		}
+
+		case 87:// W - Spindle and Axis segment count
+		{
+			String countType = newSizeString[1];
+			if (countType == "S")
+			{
+				moveType = 1;
+#ifdef DEBUG
+				Serial.print("countType S: ");
+				Serial.print(moveType);
+				Serial.print("  -  ");
+				Serial.println(nStr);
+#endif // DEBUG
+			}
+			else if (countType == "A")
+			{
+				moveType = 2;
+			}
+			nStr = newSizeString.substring(2);
+#ifdef DEBUG
+			Serial.print("countType A: ");
+			Serial.print(moveType);
+			Serial.print("  -  ");
+			Serial.println(nStr);
+#endif // DEBUG
+			break;
+		}
+
+		default:
+		{
+			badCommand = true;
+			Serial.print("================================Bad Command2: ");
+			Serial.println(badCommand);
+			return 0;
+		}
+	}
+
+
+	/*
 	if (moveType == 59) // ;
 	{
 #ifdef DEBUG
@@ -9402,33 +9662,35 @@ double GetGreekKeyDataFromSD(int lineNumber)
 
 	if (moveType == 81) // Q - Run page functions
 	{
-		String page = newSizeString[1];
-		if (page == "I")
-		{
-			runPageID = 3;
-		}
-		else if (page == "M")
-		{
-			runPageID = 4;
-		}
-		else if (page == "S")
-		{
-			runPageID = 6;
-		}
-		else if (page == "R")
-		{
-			runPageID = 7;
-		}
-
-
-
-		nStr = newSizeString.substring(2);
-#ifdef DEBUG
-		Serial.print("page 81: ");
-		Serial.println(page);
-		Serial.print("nStr 81: ");
-		Serial.println(nStr);
-#endif // DEBUG
+		badCommand = true;
+		return -1;
+////		String page = newSizeString[1];
+////		if (page == "I")
+////		{
+////			runPageID = 3;
+////		}
+////		else if (page == "M")
+////		{
+////			runPageID = 4;
+////		}
+////		else if (page == "S")
+////		{
+////			runPageID = 6;
+////		}
+////		else if (page == "R")
+////		{
+////			runPageID = 7;
+////		}
+////
+////
+////
+////		nStr = newSizeString.substring(2);
+////#ifdef DEBUG
+////		Serial.print("page 81: ");
+////		Serial.println(page);
+////		Serial.print("nStr 81: ");
+////		Serial.println(nStr);
+////#endif // DEBUG
 
 	}
 
@@ -9445,7 +9707,7 @@ double GetGreekKeyDataFromSD(int lineNumber)
 		Serial.println(nStr);
 #endif // DEBUG
 	}
-
+	*/
 	// Return size string as double
 	const char *newSizeChar = static_cast<const char*>(nStr.c_str());
 
@@ -10020,15 +10282,18 @@ void ReturnToStartPosition_MovePage(int axisId)
 		{
 			// Axis uses absolute position
 			// Ensure axis position is set to end position of last routine.
-			//stepper_Z.setPosition(endPosition_Axis);
-			stepper_Z.setPosition(0);
+			stepper_Z.setPosition(endPosition_Axis);
+			//stepper_Z.setPosition(0);
+
+
 			MilliDelay(20);
 			Serial.print("Z position: ");
 			Serial.println(stepper_Z.getPosition());
 			stepper_Z
 				.setMaxSpeed(configSetup.maxSpd_Return_Axis_Z)
 				.setAcceleration(configSetup.accel_Return_Axis_Z)
-				.setTargetAbs(startPositionAbs_Axis);
+				.setTargetAbs(0);
+				//.setTargetAbs(startPositionAbs_Axis);
 
 	#ifdef DEBUG
 			Serial.print("maxSpd_Return_Axis_Z: ");
@@ -10046,8 +10311,8 @@ void ReturnToStartPosition_MovePage(int axisId)
 		{
 			// Axis uses absolute position
 			// Ensure axis position is set to end position of last routine.
-			//stepper_X.setPosition(endPosition_Axis);
-			stepper_X.setPosition(0);
+			stepper_X.setPosition(endPosition_Axis);
+			//stepper_X.setPosition(0);
 			MilliDelay(20);
 	#ifdef DEBUG
 			Serial.print("X position: ");
@@ -10056,7 +10321,8 @@ void ReturnToStartPosition_MovePage(int axisId)
 			stepper_X
 				.setMaxSpeed(configSetup.maxSpd_Return_Axis_X)
 				.setAcceleration(configSetup.accel_Return_Axis_X)
-				.setTargetAbs(startPositionAbs_Axis);
+				.setTargetAbs(0);
+			//.setTargetAbs(startPositionAbs_Axis);
 	#ifdef DEBUG
 			Serial.print("maxSpd_Return_Axis_X: ");
 			Serial.println(configSetup.accel_Return_Axis_X);
@@ -10075,8 +10341,8 @@ void ReturnToStartPosition_MovePage(int axisId)
 		{
 			// Axis uses absolute position
 			// Ensure axis position is set to end position of last routine.
-			//stepper_B.setPosition(endPosition_Axis);
-			stepper_B.setPosition(0);
+			stepper_B.setPosition(endPosition_Axis);
+			//stepper_B.setPosition(0);
 			MilliDelay(20);
 	#ifdef DEBUG
 			Serial.print("B position: ");
@@ -10085,7 +10351,8 @@ void ReturnToStartPosition_MovePage(int axisId)
 			stepper_B
 				.setMaxSpeed(configSetup.maxSpd_Return_Axis_B)
 				.setAcceleration(configSetup.accel_Return_Axis_B)
-				.setTargetAbs(startPositionAbs_Axis);
+				.setTargetAbs(0);
+			//.setTargetAbs(startPositionAbs_Axis);
 	#ifdef DEBUG
 			Serial.print("maxSpd_Return_Axis_B: ");
 			Serial.println(configSetup.accel_Return_Axis_B);
@@ -10100,7 +10367,7 @@ void ReturnToStartPosition_MovePage(int axisId)
 	while (stepController.isRunning())
 	{
 #ifdef DEBUG
-		Serial.println(stepper_Z.getPosition());
+//		Serial.println(stepper_Z.getPosition());
 #endif // Debug
 
 		// Check for Cancel code  
@@ -13221,8 +13488,10 @@ void LoadSettings()
 	LoadSettings_PageRec();
 	LoadSettings_PageGrk();
 	LoadSettings_PageRose();
+	LoadSettings_PageProgram();
 
 	// Update Nextion
+	// Splash Page
 	//Serial.println("Show restart");
 	SerialPrint("bt0.bco=9563");
 	SerialPrint(nextionEnd);
@@ -13244,6 +13513,10 @@ void LoadSettings()
 	SerialPrint(nextionEnd);
 	SerialPrint("vis t12, 0");
 	SerialPrint(nextionEnd);
+
+
+
+
 }
 
 /// <summary>
@@ -13256,7 +13529,7 @@ void LoadSettings()
 void LoadSettings_PageIndex()
 {
 	// Index Main
-	const char* iniKey = "Ind";
+	const char* iniKey = "Index";
 	const char* iniValue = "IndexId";
 	int eePromAddress_Nextion = 368;
 	float returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
@@ -13520,7 +13793,7 @@ void LoadSettings_PageRose()
 /// <returns></returns>
 void LoadSettings_PageMove()
 {
-	const char* iniKey = "Mov";
+	const char* iniKey = "Move";
 	const char* iniValue = "AxisId";
 	int eePromAddress_Nextion = 456;
 	float returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
@@ -13617,19 +13890,20 @@ void LoadSettings_PageMove()
 void LoadSettings_PageGrk()
 {
 	// Greek Key Main
-	const char* iniKey = "Grk";
-	const char* iniValue = "AxisId";
+	const char* iniKey = "GreekKey";
+
+	const char* iniValue = "AxisId"; //(Shared by GreekKey and Program)
 	int eePromAddress_Nextion = 752;
 	float returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configGreekKey.axisId = (int)returnVal;
 
-	iniValue = "FileOrPattern";
+	/*iniValue = "FileOrPattern";
 	eePromAddress_Nextion = 200;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
-	configGreekKey.fileOrPattern = (int)returnVal;
+	configGreekKey.fileOrPattern = (int)returnVal;*/
 
 
-	// Greek Key Spindle (Shared by Pattern and File)
+	// Greek Key Spindle (Shared by GreekKey and Program)
 	iniValue = "MaxSpeed_Spindle";
 	eePromAddress_Nextion = 804;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
@@ -13645,7 +13919,7 @@ void LoadSettings_PageGrk()
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configGreekKey.speedPercent_Spindle = (int)returnVal;
 
-	// Z axis
+	// Z axis (Shared by GreekKey and Program)
 	iniValue = "MaxSpeed_Z";
 	eePromAddress_Nextion = 864;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
@@ -13661,7 +13935,7 @@ void LoadSettings_PageGrk()
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configGreekKey.speedPercent_Axis_Z = (int)returnVal;
 
-	// X axis
+	// X axis (Shared by GreekKey and Program)
 	iniValue = "MaxSpeed_X";
 	eePromAddress_Nextion = 852;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
@@ -13677,7 +13951,7 @@ void LoadSettings_PageGrk()
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configGreekKey.speedPercent_Axis_X = (int)returnVal;
 
-	// B axis
+	// B axis  (Shared by GreekKey and Program)
 	iniValue = "MaxSpeed_B";
 	eePromAddress_Nextion = 816;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
@@ -13693,54 +13967,71 @@ void LoadSettings_PageGrk()
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configGreekKey.speedPercent_Axis_B = (int)returnVal;
 
-	iniValue = "RadialOrAxial_Pattern";
+	iniValue = "RadialOrAxial";
 	eePromAddress_Nextion = 432;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configGreekKey.radialOrAxial_Pattern = (int)returnVal;
 
 	iniValue = "PatternType";
-	eePromAddress_Nextion = 696;
+	eePromAddress_Nextion = 508;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configGreekKey.patternId = (int)returnVal;
 
-	iniValue = "Pattern_PatternsPer360";
+	iniValue = "PatternsPer360";
 	eePromAddress_Nextion = 372;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
 	configGreekKey.countPatternPer360_Pattern = (int)returnVal;
 
-	iniValue = "Pattern_PatternCount";
+	iniValue = "PatternCount";
 	eePromAddress_Nextion = 496;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configGreekKey.patternCount_Pattern = (int)returnVal;
 
-	iniValue = "Pattern_SegmentLength";
+	iniValue = "SegmentLength";
 	eePromAddress_Nextion = 620;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
 	configGreekKey.segmentLength_Pattern = (int)returnVal;
 
-	iniValue = "RadialOrAxial_File";
-	eePromAddress_Nextion = 436;
-	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
-	configGreekKey.radialOrAxial_File = (int)returnVal;
+	EEPROM.put(eePromAddress_Grk, configGreekKey);
 
-	iniValue = "File_PatternsPer360";
-	eePromAddress_Nextion = 636;
-	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
-	configGreekKey.countPatternPer360_File = (int)returnVal;
+}
 
-	iniValue = "File_PatternCount";
-	eePromAddress_Nextion = 756;
-	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
-	configGreekKey.patternCount_File = (int)returnVal;
+void LoadSettings_PageProgram()
+{
+	// Greek Key Main
+	const char* iniKey = "Program";
 
-	iniValue = "File_SegmentLength";
+	const char* iniValue = "SegmentsOrActual";
+	int eePromAddress_Nextion = 156;
+	int returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configGreekKey.segmentOrActual = (int)returnVal;
+
+	iniValue = "SegmentLength";
 	eePromAddress_Nextion = 300;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
 	configGreekKey.segmentLength_File = (int)returnVal;
 
+    iniValue = "RadialOrAxial";
+	eePromAddress_Nextion = 436;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configGreekKey.radialOrAxial_File = (int)returnVal;
+
+	iniValue = "PatternsPer360";
+	eePromAddress_Nextion = 636;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configGreekKey.countPatternPer360_File = (int)returnVal;
+
+	iniValue = "PatternCount";
+	eePromAddress_Nextion = 756;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
+	configGreekKey.patternCount_File = (int)returnVal;
+
+
+
 	EEPROM.put(eePromAddress_Grk, configGreekKey);
 
 }
+
 
 /// <summary>
 /// LoadSettings_PageRec
@@ -13751,7 +14042,7 @@ void LoadSettings_PageGrk()
 /// <returns></returns>
 void LoadSettings_PageRec()
 {
-	const char* iniKey = "Rec";
+	const char* iniKey = "Recip";
 	const char* iniValue = "AxisId";
 	int eePromAddress_Nextion = 464;
 	float returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
@@ -14398,6 +14689,7 @@ void LoadSettings_PageReturns()
 float GetIniValue(const char* iniKey, const char* iniValue, int eePromNextion, bool asString)
 {
 	const char* nextionEnd = "\xFF\xFF\xFF";
+	const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
 	const size_t bufferLen = 80;
 	char buffer[bufferLen];
 	const char* filename = filename_4Axes;
@@ -14477,6 +14769,20 @@ float GetIniValue(const char* iniKey, const char* iniValue, int eePromNextion, b
 		Serial.println(eePromNextion);
 #endif // DEBUG
 
+		SerialPrint("pageMore.t11.txt=");
+		SerialWrite(0x22);
+		SerialPrint(iniKey);
+		SerialPrint(nextionQuoteEnd);
+
+		SerialPrint("pageMore.t12.txt=");
+		SerialWrite(0x22);
+		SerialPrint(iniValue);
+		SerialPrint(nextionQuoteEnd);
+
+		SerialPrint("pageMore.t13.txt=");
+		SerialWrite(0x22);
+		SerialPrint(buffer);
+		SerialPrint(nextionQuoteEnd);
 	}
 	else
 	{

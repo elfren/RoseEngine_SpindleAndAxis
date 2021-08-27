@@ -411,6 +411,7 @@ int lastFileIndex = -1;
 int maxFiles = 100;
 String sdFilename;
 bool badFilename = false;
+bool badCommand = false;
 bool fileDataAvailable = false;
 
 String filename_Index2a;
