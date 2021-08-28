@@ -2,7 +2,7 @@
 /* *****************************************************************
 * 4Rose main entry
 * Author: Edward French
-* Version: 23 - 04/10/21
+* Version: 24 - 07/28/21
 ******************************************************************/
 
 #include "math.h"
@@ -320,9 +320,6 @@ void loop()
 #endif // Debug
 	}
 
-	//SerialPrint("serialId: ");
-	//SerialPrintln(serialId);
-
 	// All Nextion incoming data packets are terminated with one 0xFF byte
 	if ((Serial1.available() > 0) || (Serial2.available() > 0)|| (Serial3.available() > 0))
 	{
@@ -502,7 +499,7 @@ void loop()
 
 						break;
 					}
-					case PAGE_GEO:
+					case PAGE_ROSE:
 					{
 						configRose.maxSpd_Spindle = (int)GetSerialFloat(serialId);
 						EEPROM.put(eePromAddress_Rose, configRose);
@@ -614,7 +611,7 @@ void loop()
 						break;
 
 					}
-					case PAGE_GEO:
+					case PAGE_ROSE:
 					{
 						configRose.accel_Spindle = (int)GetSerialFloat(serialId);
 						EEPROM.put(eePromAddress_Rose, configRose);
@@ -646,6 +643,8 @@ void loop()
 					reverseDirection = DIR_CW;
 				}
 
+				Serial.print("++++++++++++++++reverseDirection: ");
+				Serial.println(reverseDirection);
 				GreekKey_FromFile(reverseDirection);
 
 				break;
@@ -887,6 +886,23 @@ void loop()
 			case 80: // P - Greek Key Source: Pattern or file
 			{
 				configSetup.keepSteppersEnabled = GetSerialInteger();
+				// Enable or disable the steppers
+				if (configSetup.keepSteppersEnabled == 1)
+				{
+					// Enable all steppers
+					SetEnable(ID_SPINDLE, true, true);
+					SetEnable(ID_AXIS_Z, true, true);
+					SetEnable(ID_AXIS_X, true, true);
+					SetEnable(ID_AXIS_B, true, true);
+				}
+				else
+				{
+					// Disable all steppers
+					SetEnable(ID_SPINDLE, false, true);
+					SetEnable(ID_AXIS_Z, false, true);
+					SetEnable(ID_AXIS_X, false, true);
+					SetEnable(ID_AXIS_B, false, true);
+				}
 				EEPROM.put(eePromAddress_Setup, configSetup);
 				break;
 			}
@@ -1485,7 +1501,7 @@ void loop()
 				configRose.spindleRevolutions = GetSerialFloat(serialId);
 				EEPROM.put(eePromAddress_Rose, configRose);
 #ifdef DEBUG
-				Serial.print("Spindle Revolutions: ");
+				Serial.print("Spindle Revolutions-a97: ");
 				Serial.println(configRose.spindleRevolutions);
 #endif // DEBUG
 				break;
@@ -1713,7 +1729,7 @@ void loop()
 
 						break;
 					}
-					case PAGE_GEO:
+					case PAGE_ROSE:
 					{
 						configRose.speedPercent_Spindle = (int)GetSerialFloat(serialId);
 						EEPROM.put(eePromAddress_Rose, configRose);
@@ -1931,7 +1947,7 @@ void loop()
 
 						break;
 					}
-					case PAGE_GEO:
+					case PAGE_ROSE:
 					{
 						if (configRose.axisId == ID_AXIS_Z)
 						{
@@ -2552,7 +2568,7 @@ void loop()
 
 						break;
 					}
-					case PAGE_GEO:
+					case PAGE_ROSE:
 					{
 						switch (configRose.axisId)
 						{
@@ -2724,7 +2740,7 @@ void loop()
 						EEPROM.put(eePromAddress_Grk, configGreekKey);
 						break;
 					}
-					case PAGE_GEO:
+					case PAGE_ROSE:
 					{
 						switch (configRose.axisId)
 						{
@@ -2785,128 +2801,15 @@ void loop()
 			case 191: // ¿ - Index: Size
 			{
 				double newIndexSize = GetSerialFloat(serialId);
-				int stepsPerRevolution = (int)round(configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle);
+
+				IndexSize(newIndexSize);
+
 	#ifdef DEBUG
 				Serial.print(indexId_Char);
 				Serial.println(configIndex_Main.indexId);
 				Serial.println(newIndexSize);
 	#endif // DEBUG
-				switch (configIndex_Main.indexId)
-				{
-					case 1:
-					{
-						configIndex_1.sizeInUnits = newIndexSize;
 
-						// Default: Divisions
-						if (configIndex_1.degreeOrDivision == BY_DEGREES) // Degrees
-						{
-							configIndex_1.sizeInSteps = stepsPerRevolution * (newIndexSize / 360);
-						}
-						else
-						{
-							configIndex_1.sizeInSteps = stepsPerRevolution / (newIndexSize);
-						}
-		#ifdef DEBUG
-						Serial.print(index1_Char);
-						Serial.print(indexSizeChar);
-						Serial.println(configIndex_1.sizeInSteps);
-		#endif // DEBUG
-						EEPROM.put(eePromAddress_Ind_1, configIndex_1);
-						break;
-					}
-					case 2:
-					{
-						configIndex_2.sizeInUnits = newIndexSize;
-
-						// Default: Divisions
-						if (configIndex_2.degreeOrDivision == BY_DEGREES) // Degrees
-						{
-							configIndex_2.sizeInSteps = stepsPerRevolution * (newIndexSize / 360);
-						}
-						else
-						{
-							configIndex_2.sizeInSteps = stepsPerRevolution / (newIndexSize);
-						}
-		#ifdef DEBUG
-						Serial.print(index2_Char);
-						Serial.print(indexSizeChar);
-						Serial.println(configIndex_2.sizeInSteps);
-		#endif // DEBUG
-						EEPROM.put(eePromAddress_Ind_2, configIndex_2);
-						break;
-					}
-					case 3:
-					{
-						configIndex_3.sizeInUnits = newIndexSize;
-
-						// Default: Divisions
-						if (configIndex_3.degreeOrDivision == BY_DEGREES) // Degrees
-						{
-							configIndex_3.sizeInSteps = stepsPerRevolution * (newIndexSize / 360);
-						}
-						else
-						{
-							configIndex_3.sizeInSteps = stepsPerRevolution / (newIndexSize);
-						}
-
-		#ifdef DEBUG
-						Serial.print(index3_Char);
-						Serial.print(indexSizeChar);
-						Serial.println(configIndex_3.sizeInSteps);
-		#endif // DEBUG
-						EEPROM.put(eePromAddress_Ind_3, configIndex_3);
-						break;
-					}
-					case 4:
-					{
-						configIndex_4.sizeInUnits = newIndexSize;
-
-						// Default: Divisions
-						if (configIndex_4.degreeOrDivision == BY_DEGREES) // Degrees
-						{
-							configIndex_4.sizeInSteps = stepsPerRevolution * (newIndexSize / 360);
-						}
-						else
-						{
-							configIndex_4.sizeInSteps = stepsPerRevolution / (newIndexSize);
-						}
-
-#ifdef DEBUG
-						Serial.print(index4_Char);
-						Serial.print(indexSizeChar);
-						Serial.println(configIndex_4.sizeInSteps);
-#endif // DEBUG
-						EEPROM.put(eePromAddress_Ind_4, configIndex_4);
-						break;
-					}
-					case 5:
-					{
-						configIndex_5.sizeInUnits = newIndexSize;
-
-						// Default: Divisions
-						if (configIndex_5.degreeOrDivision == BY_DEGREES) // Degrees
-						{
-							configIndex_5.sizeInSteps = stepsPerRevolution * (newIndexSize / 360);
-						}
-						else
-						{
-							configIndex_5.sizeInSteps = stepsPerRevolution / (newIndexSize);
-						}
-
-#ifdef DEBUG
-						Serial.print("Steps per revolution: ");
-						Serial.print(stepsPerRevolution);
-						Serial.print("  NewIndexSize: ");
-						Serial.print(newIndexSize);
-						Serial.print("   ");
-						Serial.print(index5_Char);
-						Serial.print(indexSizeChar);
-						Serial.println(configIndex_5.sizeInSteps);
-#endif // DEBUG
-						EEPROM.put(eePromAddress_Ind_5, configIndex_5);
-						break;
-					}
-				}
 
 				break;
 			}
@@ -3069,7 +2972,7 @@ void loop()
 			{
 				int waveDir = GetSerialFloat(serialId);
 
-				// In: -1  Out: 1
+				// In: -1  Out: 1  (Nextion can't send negative numbers)
 				if (waveDir != WAVE_OUT)
 				{
 					waveDir = WAVE_IN;
@@ -3460,7 +3363,7 @@ void loop()
 			case 231: // ç - Rose: Return Axis and Spindle
 			{
 				int axisId = GetSerialInteger();
-				pageCallerId = PAGE_GEO;
+				pageCallerId = PAGE_ROSE;
 				ReturnToStartPosition(axisId);
 				break;
 			}
@@ -3743,13 +3646,15 @@ void loop()
 			}
 			case 250: // ù - Rose: Spindle revolutions
 			{
-				float revs = GetSerialFloat(serialId);
-				configRose.spindleRevolutions = revs;
+				//float revs = GetSerialFloat(serialId);
+				//configRose.spindleRevolutions = revs;
+				configRose.spindleRevolutions = GetSerialFloat(serialId);
+
 				EEPROM.put(eePromAddress_Rose, configRose);
 #ifdef DEBUG
 				Serial.print("Spindle Revolutions-250: ");
 				Serial.println(configRose.spindleRevolutions);
-				Serial.println(revs);
+				//Serial.println(revs);
 #endif // DEBUG
 				break;
 			}
