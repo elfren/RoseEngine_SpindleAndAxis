@@ -2,7 +2,7 @@
 /* *****************************************************************
 * 4Rose main entry
 * Author: Edward French
-* Version: 24 - 07/28/21
+* Version: 26 - 08/28/21
 ******************************************************************/
 
 #include "math.h"
@@ -178,20 +178,27 @@ void setup()
 	pinMode(configSetup.limit_Min_Z, INPUT_PULLUP);
 	pinMode(configSetup.limit_Max_Z, INPUT_PULLUP);
 	MilliDelay(10);
-	digitalWrite(configSetup.limit_Min_Z, HIGH);  // Enable
-	digitalWrite(configSetup.limit_Max_Z, HIGH);  // Enable
+	//digitalWrite(configSetup.limit_Min_Z, HIGH);  // Enable
+	//digitalWrite(configSetup.limit_Max_Z, HIGH);  // Enable
+	digitalWrite(configSetup.limit_Min_Z, configSetup.limit_NCorNO);  // Enable
+	digitalWrite(configSetup.limit_Max_Z, configSetup.limit_NCorNO);  // Enable
 
 	pinMode(configSetup.limit_Min_X, INPUT_PULLUP);
 	pinMode(configSetup.limit_Max_X, INPUT_PULLUP);
 
 	MilliDelay(10);
-	digitalWrite(configSetup.limit_Min_X, HIGH);  // Enable
-	digitalWrite(configSetup.limit_Max_X, HIGH);  // Enable
+	digitalWrite(configSetup.limit_Max_X, configSetup.limit_NCorNO);  // Enable
+	digitalWrite(configSetup.limit_Max_X, configSetup.limit_NCorNO);  // Enable
 
 	pinMode(configSetup.limit_Min_B, INPUT_PULLUP);
 	pinMode(configSetup.limit_Max_B, INPUT_PULLUP);
-	digitalWrite(configSetup.limit_Min_B, HIGH);  // Enable
-	digitalWrite(configSetup.limit_Max_B, HIGH);  // Enable
+	digitalWrite(configSetup.limit_Min_B, configSetup.limit_NCorNO);  // Enable
+	digitalWrite(configSetup.limit_Max_B, configSetup.limit_NCorNO);  // Enable
+
+	MilliDelay(10);
+	
+	pinMode(configSetup.eStop, INPUT_PULLUP);
+	digitalWrite(configSetup.eStop, configSetup.limit_NCorNO);  // Enable
 
 	MilliDelay(10);
 
@@ -645,7 +652,7 @@ void loop()
 
 				Serial.print("++++++++++++++++reverseDirection: ");
 				Serial.println(reverseDirection);
-				GreekKey_FromFile(reverseDirection);
+				Program_FromFile(reverseDirection);
 
 				break;
 			}
@@ -767,9 +774,14 @@ void loop()
 				EEPROM.put(eePromAddress_Rose, configRose);
 				break;
 			}
-			case 71: // G - Not Used
+			case 71: // G - EStop
 			{	
-
+				configSetup.eStop = (int)GetSerialFloat(serialId);
+				EEPROM.put(eePromAddress_Setup, configSetup);
+#ifdef DEBUG
+				Serial.print("eStop:  ");
+				Serial.println(configSetup.eStop);
+#endif // DEBUG
 				break;
 			}
 			case 72: // H - Rose: AxisId
@@ -2245,7 +2257,14 @@ void loop()
 			}
 			case 161: // ¡ - Not used
 			{
-	
+				configSetup.limit_NCorNO = GetSerialInteger();
+#ifdef DEBUG
+				Serial.print("configSetup.limit_NCorNO :");
+				Serial.println(configSetup.limit_NCorNO);
+#endif // DEBUG
+
+				EEPROM.put(eePromAddress_Setup, configSetup);
+
 				break;
 			}
 			case 162: // ¢ - Not Used
