@@ -1430,6 +1430,10 @@ void MoveAxis(int axisId, int directionAxis)
 
 	const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
 	const char* nextionEnd = "\xFF\xFF\xFF";
+	eStopTriggered = false;
+	MilliDelay(10);
+	SerialPrint("pageSplash.vaEStop.val=0");
+	SerialPrint(nextionEnd);
 #ifdef DEBUG
 	Serial.println("AxisId: =============================================");
 	Serial.println(axisId);
@@ -2014,6 +2018,12 @@ endLoop:
 /// <returns></returns>
 void OneRunStepper(int direction) // pageOne
 {
+	const char* nextionEnd = "\xFF\xFF\xFF";
+	eStopTriggered = false;
+	MilliDelay(10);
+	SerialPrint("pageSplash.vaEStop.val=0");
+	SerialPrint(nextionEnd);
+
 	RotateControl rotateController;
 
 	//v011
@@ -2495,7 +2505,11 @@ void Main_TwoSteppers(
 	const char * stopped_Char = "Stopped";
 	const char * go_Char = "Go: ";
 	const char * axis_Char = "Axis-";
-	
+	const char* nextionEnd = "\xFF\xFF\xFF";
+	eStopTriggered = false;
+	MilliDelay(10);
+	SerialPrint("pageSplash.vaEStop.val=0");
+	SerialPrint(nextionEnd);
 
 #ifdef DEBUG
 	Serial.print(initialCaller_Char);
@@ -3609,6 +3623,10 @@ void IndexFromFile(int directionSpindle)
 	const char* pageSync_b5_Char = "pageSync.b5.pco=0";
 	const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
 	const char* nextionEnd = "\xFF\xFF\xFF";
+	eStopTriggered = false;
+	MilliDelay(10);
+	SerialPrint("pageSplash.vaEStop.val=0");
+	SerialPrint(nextionEnd);
 
 	double newIndexSize = 0;
 	int lineNumber = 0;
@@ -3992,6 +4010,10 @@ void Sync(int directionSpindle, int directionAxis)
 
 	const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
 	const char* nextionEnd = "\xFF\xFF\xFF";
+	eStopTriggered = false;
+	MilliDelay(10);
+	SerialPrint("pageSplash.vaEStop.val=0");
+	SerialPrint(nextionEnd);
 
 	int stepPin = 0;
 	int dirPin = 0;
@@ -4145,7 +4167,7 @@ void Sync(int directionSpindle, int directionAxis)
 			{
 				stepController.emergencyStop();
 				stopSteppers = true;
-				SetLimitColors(PAGE_ONE, DIR_CCW);
+				SetLimitColors(PAGE_SYNC, DIR_CCW);
 				goto endLoop;
 			}
 		}
@@ -4355,6 +4377,11 @@ void Reciprocate_Triangle(int wavDir)
 {
 	const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
 	const char* nextionEnd = "\xFF\xFF\xFF";
+	eStopTriggered = false;
+	MilliDelay(10);
+	SerialPrint("pageSplash.vaEStop.val=0");
+	SerialPrint(nextionEnd);
+
 	int stepPin = 0;
 	int dirPin = 0;
 	int limitPin_Max = configSetup.limit_Max_Z;
@@ -4624,7 +4651,7 @@ void Reciprocate_Triangle(int wavDir)
 
 			if ((digitalRead(limitPin_Max) != configSetup.limit_NCorNO))// && axisSteps > 0)
 			{
-				Serial.println("                          limitPin_Max");
+				Serial.println("                         limitPin_Max");
 				if(axisSteps>0)
 				{ 
 
@@ -4768,6 +4795,11 @@ void Reciprocate_Sawtooth(int wavDir)
 {
 	const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
 	const char* nextionEnd = "\xFF\xFF\xFF";
+	eStopTriggered = false;
+	MilliDelay(10);
+	SerialPrint("pageSplash.vaEStop.val=0");
+	SerialPrint(nextionEnd);
+
 	int limitPin_Max = configSetup.limit_Max_Z;
 	int limitPin_Min = configSetup.limit_Min_Z;
 	int stepPin = 0;
@@ -5231,6 +5263,11 @@ void Reciprocate_Square(int wavDir)
 {
 	const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
 	const char* nextionEnd = "\xFF\xFF\xFF";
+	eStopTriggered = false;
+	MilliDelay(10);
+	SerialPrint("pageSplash.vaEStop.val=0");
+	SerialPrint(nextionEnd);
+
 	int stepPin = 0;
 	int dirPin = 0;
 	int limitPin_Max = configSetup.limit_Max_Z;
@@ -5760,9 +5797,14 @@ void GreekKey_Pattern_4a()
 {
 	bool stopAll = false;
 	const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
+	String nextionEnd = "\xFF\xFF\xFF";
+
 	int totalSpindleSegments = 8;
 	limitTriggered = false;
 	eStopTriggered = false;
+	MilliDelay(10);
+	SerialPrint("pageSplash.vaEStop.val=0");
+	SerialPrint(nextionEnd);
 	if (configGreekKey.radialOrAxial_Pattern == AXIAL)
 	{
 		totalSpindleSegments = 4;
@@ -5997,7 +6039,12 @@ void GreekKey_Pattern_4b()
 	const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
 	int totalSpindleSegments = 13;
 	limitTriggered = false;
+	String nextionEnd = "\xFF\xFF\xFF";
 	eStopTriggered = false;
+	MilliDelay(10);
+	SerialPrint("pageSplash.vaEStop.val=0");
+	SerialPrint(nextionEnd);
+
 	if (configGreekKey.radialOrAxial_Pattern == AXIAL)
 	{
 		totalSpindleSegments = 4;
@@ -6455,7 +6502,12 @@ void GreekKey_Pattern_3a()
 	const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
 	int totalSpindleSegments = 4;
 	limitTriggered = false;
+	String nextionEnd = "\xFF\xFF\xFF";
 	eStopTriggered = false;
+	MilliDelay(10);
+	SerialPrint("pageSplash.vaEStop.val=0");
+	SerialPrint(nextionEnd);
+
 	if (configGreekKey.radialOrAxial_Pattern == AXIAL)
 	{
 		totalSpindleSegments = 3;
@@ -6609,7 +6661,12 @@ void GreekKey_Pattern_3b()
 	const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
 	int totalSpindleSegments = 8;
 	limitTriggered = false;
+	String nextionEnd = "\xFF\xFF\xFF";
 	eStopTriggered = false;
+	MilliDelay(10);
+	SerialPrint("pageSplash.vaEStop.val=0");
+	SerialPrint(nextionEnd);
+
 	if (configGreekKey.radialOrAxial_Pattern == AXIAL)
 	{
 		totalSpindleSegments = 3;
@@ -6851,7 +6908,12 @@ void GreekKey_Pattern_2a()
 	const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
 	int totalSpindleSegments = 3;
 	limitTriggered = false;
+	String nextionEnd = "\xFF\xFF\xFF";
 	eStopTriggered = false;
+	MilliDelay(10);
+	SerialPrint("pageSplash.vaEStop.val=0");
+	SerialPrint(nextionEnd);
+
 	if (configGreekKey.radialOrAxial_Pattern == AXIAL)
 	{
 		totalSpindleSegments = 2;
@@ -6994,7 +7056,12 @@ void GreekKey_Pattern_2b()
 	const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
 	int totalSpindleSegments = 6;
 	limitTriggered = false;
+	String nextionEnd = "\xFF\xFF\xFF";
 	eStopTriggered = false;
+	MilliDelay(10);
+	SerialPrint("pageSplash.vaEStop.val=0");
+	SerialPrint(nextionEnd);
+
 	if (configGreekKey.radialOrAxial_Pattern == AXIAL)
 	{
 		totalSpindleSegments = 2;
@@ -7488,8 +7555,12 @@ bool GreekKey_Move_Axis(float segmentSteps, float multiplier, int direction, boo
 	}
 
 	// Set limit switches HIGH
-	//digitalWrite(limitPin_Max, HIGH);
-	//digitalWrite(limitPin_Min, HIGH);
+	digitalWrite(limitPin_Max, HIGH);
+	digitalWrite(limitPin_Min, HIGH);
+
+	uint8_t maxLimitSetting = digitalRead(limitPin_Min);
+	Serial.print("maxLimitSetting:                   ");
+	Serial.println(maxLimitSetting);
 
 	actualSpeed = maxSpeed * speedPercentage * .01;
 	StepControl stepControllerAxis;
@@ -7540,43 +7611,80 @@ bool GreekKey_Move_Axis(float segmentSteps, float multiplier, int direction, boo
 	stepControllerAxis.moveAsync(stepperAxis);
 	while (stepControllerAxis.isRunning())
 	{
-		if (digitalRead(limitPin_Max) != configSetup.limit_NCorNO)
+		//if (digitalRead(limitPin_Max) != configSetup.limit_NCorNO)
+		//{
+		//	Serial.print("                          limit_NCorNO: ");
+		//	Serial.print(configSetup.limit_NCorNO);
+		//	Serial.print(" limit_Max: ");
+		//	Serial.println(digitalRead(limitPin_Max));
+
+		//	stepControllerAxis.emergencyStop();
+		//	stopSteppers = true;
+		//	// Disable all motors
+		//	SetEnable(ID_SPINDLE, false, true);
+		//	SetEnable(ID_AXIS_Z, false, true);
+		//	SetEnable(ID_AXIS_X, false, true);
+		//	SetEnable(ID_AXIS_B, false, true);
+		//	SetLimitColors(PAGE_GRK, DIR_CW);
+		//	//goto EndLoops;
+		//	return;
+		//}
+		//if  (digitalRead(limitPin_Min) != configSetup.limit_NCorNO)
+		//{
+		//	Serial.print("                          limit_NCorNO: ");
+		//	Serial.print(configSetup.limit_NCorNO);
+		//	Serial.print(" limit_Min: ");
+		//	Serial.println(digitalRead(limitPin_Max));
+
+		//	stepControllerAxis.emergencyStop();
+		//	stopSteppers = true;
+		//	// Disable all motors
+		//	SetEnable(ID_SPINDLE, false, true);
+		//	SetEnable(ID_AXIS_Z, false, true);
+		//	SetEnable(ID_AXIS_X, false, true);
+		//	SetEnable(ID_AXIS_B, false, true);
+		//	SetLimitColors(PAGE_GRK, DIR_CCW);
+
+		//	//goto EndLoops;
+		//	return;
+		//}
+
+
+		/////////////////////////////////////////////////////////////////
+
+		if ((digitalRead(limitPin_Max) != configSetup.limit_NCorNO))// && axisSteps > 0)
 		{
-			Serial.print("                          limit_NCorNO: ");
-			Serial.print(configSetup.limit_NCorNO);
-			Serial.print(" limit_Max: ");
-			Serial.println(digitalRead(limitPin_Max));
+			Serial.println("       a                   limitPin_Max");
+			if (targetSteps > 0)
+			{
 
-			stepControllerAxis.emergencyStop();
-			stopSteppers = true;
-			// Disable all motors
-			SetEnable(ID_SPINDLE, false, true);
-			SetEnable(ID_AXIS_Z, false, true);
-			SetEnable(ID_AXIS_X, false, true);
-			SetEnable(ID_AXIS_B, false, true);
-			SetLimitColors(PAGE_GRK, DIR_CW);
-			//goto EndLoops;
-			return;
+				stepControllerAxis.emergencyStop();
+				stopSteppers = true;
+				SetEnable(ID_SPINDLE, false, true);
+				SetEnable(ID_AXIS_Z, false, true);
+				SetEnable(ID_AXIS_X, false, true);
+				SetEnable(ID_AXIS_B, false, true);
+				SetLimitColors(PAGE_GRK, DIR_CW);
+				//goto endLoop;
+				return;
+			}
 		}
-		if  (digitalRead(limitPin_Min) != configSetup.limit_NCorNO)
+		if ((digitalRead(limitPin_Min) != configSetup.limit_NCorNO))// && axisSteps < 0)
 		{
-			Serial.print("                          limit_NCorNO: ");
-			Serial.print(configSetup.limit_NCorNO);
-			Serial.print(" limit_Min: ");
-			Serial.println(digitalRead(limitPin_Max));
-
-			stepControllerAxis.emergencyStop();
-			stopSteppers = true;
-			// Disable all motors
-			SetEnable(ID_SPINDLE, false, true);
-			SetEnable(ID_AXIS_Z, false, true);
-			SetEnable(ID_AXIS_X, false, true);
-			SetEnable(ID_AXIS_B, false, true);
-			SetLimitColors(PAGE_GRK, DIR_CCW);
-
-			//goto EndLoops;
-			return;
+			Serial.println("                          limitPin_Min");
+			if (targetSteps < 0)
+			{
+				stepControllerAxis.emergencyStop();
+				stopSteppers = true;
+				SetEnable(ID_SPINDLE, false, true);
+				SetEnable(ID_AXIS_Z, false, true);
+				SetEnable(ID_AXIS_X, false, true);
+				SetEnable(ID_AXIS_B, false, true);
+				SetLimitColors(PAGE_GRK, DIR_CCW);
+				return;
+			}
 		}
+		/////////////////////////////////////////////////////////////////////
 
 		if (configSetup.eStop != 0)
 		{
@@ -8346,7 +8454,11 @@ void Program_FromFile(int direction)
 	const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
 	const char* nextionEnd = "\xFF\xFF\xFF";
 	limitTriggered = false;
+
 	eStopTriggered = false;
+	MilliDelay(10);
+	SerialPrint("pageSplash.vaEStop.val=0");
+	SerialPrint(nextionEnd);
 
 	int eePromAddress = 0;
 
@@ -11268,6 +11380,10 @@ void ReturnToStartPosition(int axisId)
 {
 	const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
 	const char* nextionEnd = "\xFF\xFF\xFF";
+	eStopTriggered = false;
+	MilliDelay(10);
+	SerialPrint("pageSplash.vaEStop.val=0");
+	SerialPrint(nextionEnd);
 
 	// Get shortest path to the spindle start position.
 	int32_t target_Spindle = returnSteps_Spindle % spindleStepsPerRev * (-1);
@@ -11806,6 +11922,10 @@ void ReturnToStartPosition_MovePage(int axisId)
 {
 	const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
 	const char* nextionEnd = "\xFF\xFF\xFF";
+	eStopTriggered = false;
+	MilliDelay(10);
+	SerialPrint("pageSplash.vaEStop.val=0");
+	SerialPrint(nextionEnd);
 
 	StepControl stepController;
 	Stepper stepper_Z(PIN_AXIS_Z_STEP, PIN_AXIS_Z_DIR);
@@ -12067,6 +12187,11 @@ void RoseRadial(int direction)
 {
 	const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
 	const char* nextionEnd = "\xFF\xFF\xFF";
+	eStopTriggered = false;
+	MilliDelay(10);
+	SerialPrint("pageSplash.vaEStop.val=0");
+	SerialPrint(nextionEnd);
+
 	int limitPin_Max = configSetup.limit_Max_Z;
 	int limitPin_Min = configSetup.limit_Min_Z;
 	limitTriggered = false;
@@ -16084,6 +16209,7 @@ void SetEStopColors(uint32_t page)
 	String bt2_val = "bt2.val=0";
 	String bt3_bco = "bt3.bco=55715";
 	String bt3_val = "bt3.val=0";
+	const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
 	String nextionEnd = "\xFF\xFF\xFF";
 	eStopTriggered = true;
 	if (page == PAGE_MAIN)
@@ -16106,6 +16232,46 @@ void SetEStopColors(uint32_t page)
 			MilliDelay(10);
 			SerialPrint("pageMain.bt6.val=0");
 			SerialPrint(nextionEnd);
+
+			SerialPrint("pageMain.bt7.bco=55715");
+			SerialPrint(nextionEnd);
+			MilliDelay(10);
+			SerialPrint("pageMain.bt7.val=0");
+			SerialPrint(nextionEnd);
+
+			////////////////////////////////////
+			SerialPrint("pageMain.bt0.bco=55715");
+			SerialPrint(nextionEnd);
+			MilliDelay(10);
+			SerialPrint("pageMain.bt0.val=0");
+			SerialPrint(nextionEnd);
+
+			SerialPrint("pageMain.bt1.bco=55715");
+			SerialPrint(nextionEnd);
+			MilliDelay(10);
+			SerialPrint("pageMain.bt1.val=0");
+			SerialPrint(nextionEnd);
+
+			SerialPrint("pageMain.bt2.bco=55715");
+			SerialPrint(nextionEnd);
+			MilliDelay(10);
+			SerialPrint("pageMain.bt2.val=0");
+			SerialPrint(nextionEnd);
+
+			SerialPrint("pageMain.bt3.bco=55715");
+			SerialPrint(nextionEnd);
+			MilliDelay(10);
+			SerialPrint("pageMain.bt3.val=0");
+			SerialPrint(nextionEnd);
+
+			MilliDelay(10);
+			SerialPrint("pageMain.va2.val=10");
+			SerialPrint(nextionEnd);
+
+			SerialPrint("pageMain.t0.txt=");
+			SerialWrite(0x22);
+			SerialPrint("10");
+			SerialPrint(nextionQuoteEnd);
 
 	}
 	else
@@ -16188,6 +16354,10 @@ void SetEStopColors(uint32_t page)
 		SerialPrint(bt3_val);
 		SerialPrint(nextionEnd);
 	}
+
+	MilliDelay(10);
+	SerialPrint("pageSplash.vaEStop.val=1");
+	SerialPrint(nextionEnd);
 }
 
 void SetLimitColors(uint32_t page, uint32_t direction)
