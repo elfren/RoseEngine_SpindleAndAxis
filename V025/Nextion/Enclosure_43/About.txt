@@ -1,0 +1,2 @@
+Print at 30% to 100% infill.
+Note: The bezel only has one hole created for the Nextion.  The other three need to be drilled (2.5mm) and all four should be tapped (3mm).
