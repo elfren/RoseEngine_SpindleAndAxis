@@ -16005,7 +16005,7 @@ void LoadSettings_PageLimits()
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configSetup.home_X = (int)returnVal;
 
-	iniValue = "EStop";
+	iniValue = "Stop";
 	eePromAddress_Nextion = 264;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configSetup.eStop = (int)returnVal;
