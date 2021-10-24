@@ -5,7 +5,7 @@
 #pragma once
 #define SHOW_POSITION
 #define DEBUG
-
+#define TEENSY_32
 //==================================================================
 // Pin assignments
 //==================================================================
@@ -49,6 +49,7 @@
 #define PIN_AXIS_B_DIR 23  // Stepper direction
 #define PIN_AXIS_B_STEP 16  // Stepper step
 #define PIN_AXIS_B_ENABLE 17 // Enable 
+
 
 /////////////////////////////////////////////////////////////////////////
 // Constants
@@ -113,6 +114,7 @@
 #define PAGE_PROGRAM 9
 #define PAGE_ROSE 10 
 #define PAGE_MORE 11
+#define PAGE_RETURN 21
 
 /////////////////////////////////////////////////////////////////////////
 // Structs
@@ -207,6 +209,8 @@ struct configPageSetup
 	float distancePerRev_AxisXAlt;
 	bool polarity_Axis_XAlt;
 	uint32_t keepSteppersEnabled;
+	uint32_t eStop;
+	uint32_t limit_NCorNO; // 0 (LOW) is NC, 1 (HIGH) is NO
 };
 
 // Config Structs
@@ -388,12 +392,14 @@ unsigned int eePromAddress_Ind_5 = 1700;  // EEProm address for Index_3
 
 unsigned int eePromAddress_Filename_Ind = 1800; // EEProm address for filename
 unsigned int eePromAddress_Filename_Length_Ind = 1900; // EEProm address for length of filename
-unsigned int eePromAddress_Filename_Grk = 2000; // EEProm address for filename
-unsigned int eePromAddress_Filename_Length_Grk = 2100; // EEProm address for length of filename
+unsigned int eePromAddress_Filename_Program = 2000; // EEProm address for filename
+unsigned int eePromAddress_Filename_Length_Program = 2100; // EEProm address for length of filename
 
 //==================================================================
 // Global Variables
 //==================================================================
+bool limitTriggered = false;
+bool eStopTriggered = false;
 int pageCallerId = 20;
 int serialId = 9; // Initialize with unused serial id.  Serial: 0 (Usb cable to PC), Serial1: 1, Serial2: 2, Serial3: 3
 byte incomingByte = 0;	// store incoming Serial data
@@ -409,7 +415,7 @@ int filenameLength = 0;
 int currentFileIndex = 0;
 int lastFileIndex = -1;
 int maxFiles = 100;
-String sdFilename;
+String filename_Program;
 bool badFilename = false;
 bool badCommand = false;
 bool fileDataAvailable = false;
@@ -481,6 +487,8 @@ String commandMove = "";
 String commandIndex = "";
 String commandSync = "";
 String commandBRadius = "";
+
+String enableDisableStepperID = "";
 
 
 /////////////////////////////////////////////////////////////////////////

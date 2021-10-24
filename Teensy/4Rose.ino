@@ -2,7 +2,7 @@
 /* *****************************************************************
 * 4Rose main entry
 * Author: Edward French
-* Version: 24 - 07/28/21
+* Version: 26 - 08/28/21
 ******************************************************************/
 
 #include "math.h"
@@ -178,20 +178,30 @@ void setup()
 	pinMode(configSetup.limit_Min_Z, INPUT_PULLUP);
 	pinMode(configSetup.limit_Max_Z, INPUT_PULLUP);
 	MilliDelay(10);
-	digitalWrite(configSetup.limit_Min_Z, HIGH);  // Enable
-	digitalWrite(configSetup.limit_Max_Z, HIGH);  // Enable
+	//digitalWrite(configSetup.limit_Min_Z, HIGH);  // Enable
+	//digitalWrite(configSetup.limit_Max_Z, HIGH);  // Enable
+	digitalWrite(configSetup.limit_Min_Z, configSetup.limit_NCorNO);  // Enable
+	digitalWrite(configSetup.limit_Max_Z, configSetup.limit_NCorNO);  // Enable
 
 	pinMode(configSetup.limit_Min_X, INPUT_PULLUP);
 	pinMode(configSetup.limit_Max_X, INPUT_PULLUP);
 
 	MilliDelay(10);
-	digitalWrite(configSetup.limit_Min_X, HIGH);  // Enable
-	digitalWrite(configSetup.limit_Max_X, HIGH);  // Enable
+	digitalWrite(configSetup.limit_Max_X, configSetup.limit_NCorNO);  // Enable
+	digitalWrite(configSetup.limit_Max_X, configSetup.limit_NCorNO);  // Enable
 
 	pinMode(configSetup.limit_Min_B, INPUT_PULLUP);
 	pinMode(configSetup.limit_Max_B, INPUT_PULLUP);
-	digitalWrite(configSetup.limit_Min_B, HIGH);  // Enable
-	digitalWrite(configSetup.limit_Max_B, HIGH);  // Enable
+	digitalWrite(configSetup.limit_Min_B, configSetup.limit_NCorNO);  // Enable
+	digitalWrite(configSetup.limit_Max_B, configSetup.limit_NCorNO);  // Enable
+
+	MilliDelay(10);
+	
+	if (configSetup.eStop != 0)
+	{
+		pinMode(configSetup.eStop, INPUT_PULLUP);
+		digitalWrite(configSetup.eStop, configSetup.limit_NCorNO);  // Enable
+	}
 
 	MilliDelay(10);
 
@@ -645,7 +655,7 @@ void loop()
 
 				Serial.print("++++++++++++++++reverseDirection: ");
 				Serial.println(reverseDirection);
-				GreekKey_FromFile(reverseDirection);
+				Program_FromFile(reverseDirection);
 
 				break;
 			}
@@ -767,9 +777,14 @@ void loop()
 				EEPROM.put(eePromAddress_Rose, configRose);
 				break;
 			}
-			case 71: // G - Not Used
+			case 71: // G - EStop
 			{	
-
+				configSetup.eStop = (int)GetSerialFloat(serialId);
+				EEPROM.put(eePromAddress_Setup, configSetup);
+#ifdef DEBUG
+				Serial.print("eStop:  ");
+				Serial.println(configSetup.eStop);
+#endif // DEBUG
 				break;
 			}
 			case 72: // H - Rose: AxisId
@@ -906,460 +921,622 @@ void loop()
 				EEPROM.put(eePromAddress_Setup, configSetup);
 				break;
 			}
+
+
+//			case 81: // Q - Index1 counter clockwise
+//			{
+//				double newIndexSize = 0;
+//	#ifdef DEBUG
+//				Serial.print(indexId_Char);
+//				Serial.println(configIndex_Main.indexId);
+//	#endif // DEBUG
+//
+//				badFilename = false;
+//
+//				// ToDo: Move to IndexSpindle()
+//				switch (configIndex_Main.indexId)
+//				{
+//					case 1:
+//					{
+//	#ifdef DEBUG
+//						Serial.print(fileOrFixed_Char);
+//						Serial.println(configIndex_1.fileOrFixed);
+//	#endif // DEBUG
+//						if (configIndex_1.fileOrFixed == FILE_SD)
+//						{
+//							int lineNumber = GetSerialInteger();
+//							if (lineNumber == 255)
+//							{
+//								lineNumber = 0;
+//							}
+//
+//							newIndexSize = GetIndexDataFromSD(lineNumber);
+//							configIndex_1.sizeInSteps = (configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (newIndexSize / 360);
+//	#ifdef DEBUG
+//							Serial.print(lineNumber_Char);
+//							Serial.println(lineNumber);
+//							Serial.print(newIndexSize_Char);
+//							Serial.println(newIndexSize);
+//							Serial.println(index1_Char);
+//							Serial.print(indexSizeChar);
+//							Serial.println(configIndex_1.sizeInSteps);
+//							Serial.println("");
+//	#endif // DEBUG
+//							SerialPrint(pageIndex_t7_Char); // Nextion may not get the first packet
+//							SerialWrite(0x22);
+//							SerialPrint(newIndexSize,4);
+//							SerialPrint(nextionQuoteEnd);
+//
+//							SerialPrint(pageIndex_t7_Char);
+//							SerialWrite(0x22);
+//							SerialPrint(newIndexSize,4);
+//							SerialPrint(nextionQuoteEnd);
+//						}
+//
+//						break;
+//					}
+//					case 2:
+//					{
+//	#ifdef DEBUG
+//						Serial.print(index2_Char);
+//						Serial.println(fileOrFixed_Char);
+//						Serial.println(configIndex_2.fileOrFixed);
+//	#endif // DEBUG
+//						if (configIndex_2.fileOrFixed == FILE_SD)
+//						{
+//							int lineNumber = GetSerialInteger();
+//							if (lineNumber == 255)
+//							{
+//								lineNumber = 0;
+//							}
+//
+//							newIndexSize = GetIndexDataFromSD(lineNumber);
+//							configIndex_2.sizeInSteps = (configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (newIndexSize / 360);
+//	#ifdef DEBUG
+//
+//							Serial.print(lineNumber_Char);
+//							Serial.println(lineNumber);
+//							Serial.print(newIndexSize_Char);
+//							Serial.println(newIndexSize);
+//							Serial.print(index2_Char);
+//							Serial.print(indexSizeChar);
+//							Serial.println(configIndex_2.sizeInSteps);
+//	#endif // DEBUG
+//							SerialPrint(pageIndex_t7_Char);
+//							SerialWrite(0x22);
+//							SerialPrint(newIndexSize, 4);
+//							SerialPrint(nextionQuoteEnd);
+//
+//							SerialPrint(pageIndex_t7_Char);
+//							SerialWrite(0x22);
+//							SerialPrint(newIndexSize, 4);
+//							SerialPrint(nextionQuoteEnd);
+//						}
+//
+//						break;
+//					}
+//					case 3:
+//					{
+//	#ifdef DEBUG
+//						Serial.print(index3_Char);
+//						Serial.print(fileOrFixed_Char);
+//						Serial.println(configIndex_3.fileOrFixed);
+//	#endif // DEBUG
+//
+//
+//						if (configIndex_3.fileOrFixed == FILE_SD)
+//						{
+//							int lineNumber = GetSerialInteger();
+//							if (lineNumber == 255)
+//							{
+//								lineNumber = 0;
+//							}
+//							newIndexSize = GetIndexDataFromSD(lineNumber);
+//							configIndex_3.sizeInSteps = (configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (newIndexSize / 360);
+//	#ifdef DEBUG
+//
+//							Serial.print(lineNumber_Char);
+//							Serial.println(lineNumber);
+//							Serial.print(newIndexSize_Char);
+//							Serial.println(newIndexSize);
+//							Serial.print(index3_Char);
+//							Serial.print(indexSizeChar);
+//							Serial.println(configIndex_3.sizeInSteps);
+//	#endif // DEBUG
+//							SerialPrint(pageIndex_t7_Char); // Nextion may not get the first packet
+//							SerialWrite(0x22);
+//							SerialPrint(newIndexSize, 4);
+//							SerialPrint(nextionQuoteEnd);
+//
+//							SerialPrint(pageIndex_t7_Char);
+//							SerialWrite(0x22);
+//							SerialPrint(newIndexSize, 4);
+//							SerialPrint(nextionQuoteEnd);
+//						}
+//
+//						break;
+//					}
+//					case 4:
+//					{
+//#ifdef DEBUG
+//						Serial.print(index4_Char);
+//						Serial.print(fileOrFixed_Char);
+//						Serial.println(configIndex_4.fileOrFixed);
+//#endif // DEBUG
+//
+//
+//						if (configIndex_4.fileOrFixed == FILE_SD)
+//						{
+//							int lineNumber = GetSerialInteger();
+//							if (lineNumber == 255)
+//							{
+//								lineNumber = 0;
+//							}
+//							newIndexSize = GetIndexDataFromSD(lineNumber);
+//							configIndex_4.sizeInSteps = (configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (newIndexSize / 360);
+//#ifdef DEBUG
+//
+//							Serial.print(lineNumber_Char);
+//							Serial.println(lineNumber);
+//							Serial.print(newIndexSize_Char);
+//							Serial.println(newIndexSize);
+//							Serial.print(index4_Char);
+//							Serial.print(indexSizeChar);
+//							Serial.println(configIndex_4.sizeInSteps);
+//#endif // DEBUG
+//							SerialPrint(pageIndex_t7_Char); // Nextion may not get the first packet
+//							SerialWrite(0x22);
+//							SerialPrint(newIndexSize, 4);
+//							SerialPrint(nextionQuoteEnd);
+//
+//							SerialPrint(pageIndex_t7_Char);
+//							SerialWrite(0x22);
+//							SerialPrint(newIndexSize, 4);
+//							SerialPrint(nextionQuoteEnd);
+//						}
+//
+//						break;
+//					}
+//					case 5:
+//					{
+//#ifdef DEBUG
+//						Serial.print(index5_Char);
+//						Serial.print(fileOrFixed_Char);
+//						Serial.println(configIndex_5.fileOrFixed);
+//#endif // DEBUG
+//
+//
+//						if (configIndex_5.fileOrFixed == FILE_SD)
+//						{
+//							int lineNumber = GetSerialInteger();
+//							if (lineNumber == 255)
+//							{
+//								lineNumber = 0;
+//							}
+//							newIndexSize = GetIndexDataFromSD(lineNumber);
+//							configIndex_5.sizeInSteps = (configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (newIndexSize / 360);
+//#ifdef DEBUG
+//
+//							Serial.print(lineNumber_Char);
+//							Serial.println(lineNumber);
+//							Serial.print(newIndexSize_Char);
+//							Serial.println(newIndexSize);
+//							Serial.print(index5_Char);
+//							Serial.print(indexSizeChar);
+//							Serial.println(configIndex_5.sizeInSteps);
+//#endif // DEBUG
+//							SerialPrint(pageIndex_t7_Char); // Nextion may not get the first packet
+//							SerialWrite(0x22);
+//							SerialPrint(newIndexSize, 4);
+//							SerialPrint(nextionQuoteEnd);
+//
+//							SerialPrint(pageIndex_t7_Char);
+//							SerialWrite(0x22);
+//							SerialPrint(newIndexSize, 4);
+//							SerialPrint(nextionQuoteEnd);
+//						}
+//
+//						break;
+//					}
+//				}
+//
+//				if (!badFilename)
+//				{
+//					IndexSpindle(DIR_CCW);
+//
+//				}
+//				else
+//				{
+//					// Update Index flag on Nextion. 
+//					//SerialPrint(pageIndex_bt3_pco_Char);
+//					//SerialPrint(nextionEnd);
+//					SerialPrint(pageIndex_va0_Char);
+//					SerialPrint(nextionEnd);
+//					SerialPrint(pageIndex_bt3_Char);
+//					SerialPrint(nextionEnd);
+//					SerialPrint(pageIndex_bt2_Char);
+//					SerialPrint(nextionEnd);
+//					SerialPrint(pageIndex_bt1_Char);
+//					SerialPrint(nextionEnd);
+//					SerialPrint(pageSync_b6_Char);
+//					SerialPrint(nextionEnd);
+//					SerialPrint(pageSync_b5_Char);
+//					SerialPrint(nextionEnd);
+//				}
+//				break;
+//			}
+//			case 82: // R - Index1 Clockwise
+//			{
+//				double newIndexSize = 0;
+//				badFilename = false;
+//	#ifdef DEBUG
+//				Serial.print(indexId_Char);
+//				Serial.println(configIndex_Main.indexId);
+//				Serial.print(index1_Char);
+//				Serial.print(fileOrFixed_Char);
+//				Serial.println(configIndex_1.fileOrFixed);
+//	#endif // DEBUG
+//				switch (configIndex_Main.indexId)
+//				{
+//					case 1:
+//					{
+//						if (configIndex_1.fileOrFixed == FILE_SD)
+//						{
+//							int lineNumber = GetSerialInteger();
+//							if (lineNumber == 255)
+//							{
+//								lineNumber = 0;
+//							}
+//
+//							newIndexSize = GetIndexDataFromSD(lineNumber);
+//							configIndex_1.sizeInSteps = (configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (newIndexSize / 360);
+//		#ifdef DEBUG
+//							Serial.print(lineNumber_Char);
+//							Serial.println(lineNumber);
+//							Serial.print(newIndexSize_Char);
+//							Serial.println(newIndexSize);
+//							Serial.print(index1_Char);
+//							Serial.print(indexSizeChar);
+//							Serial.println(configIndex_1.sizeInSteps);
+//							Serial.println("");
+//		#endif // DEBUG
+//							SerialPrint(pageIndex_t7_Char); // Nextion may not get the first packet
+//							SerialWrite(0x22);
+//							SerialPrint(newIndexSize, 4);
+//							SerialPrint(nextionQuoteEnd);
+//
+//							SerialPrint(pageIndex_t7_Char);
+//							SerialWrite(0x22);
+//							SerialPrint(newIndexSize, 4);
+//							SerialPrint(nextionQuoteEnd);
+//						}
+//
+//						break;
+//					}
+//					case 2:
+//					{
+//						if (configIndex_2.fileOrFixed == FILE_SD)
+//						{
+//							int lineNumber = GetSerialInteger();
+//							if (lineNumber == 255)
+//							{
+//								lineNumber = 0;
+//							}
+//
+//							newIndexSize = GetIndexDataFromSD(lineNumber);
+//							configIndex_2.sizeInSteps = (configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (newIndexSize / 360);
+//#ifdef DEBUG
+//							Serial.println("");
+//							Serial.print(lineNumber_Char);
+//							Serial.println(lineNumber);
+//							Serial.print(newIndexSize_Char);
+//							Serial.println(newIndexSize);
+//							Serial.print(index2_Char);
+//							Serial.print(indexSizeChar);
+//							Serial.println(configIndex_2.sizeInSteps);
+//							Serial.println("");
+//#endif // DEBUG
+//							SerialPrint(pageIndex_t7_Char);
+//							SerialWrite(0x22);
+//							SerialPrint(newIndexSize, 4);
+//							SerialPrint(nextionQuoteEnd);
+//
+//							SerialPrint(pageIndex_t7_Char);
+//							SerialWrite(0x22);
+//							SerialPrint(newIndexSize, 4);
+//							SerialPrint(nextionQuoteEnd);
+//						}
+//						break;
+//					}
+//					case 3:
+//					{
+//						if (configIndex_3.fileOrFixed == FILE_SD)
+//						{
+//							int lineNumber = GetSerialInteger();
+//							if (lineNumber == 255)
+//							{
+//								lineNumber = 0;
+//							}
+//							newIndexSize = GetIndexDataFromSD(lineNumber);
+//							configIndex_3.sizeInSteps = (configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (newIndexSize / 360);
+//		#ifdef DEBUG
+//							Serial.print(lineNumber_Char);
+//							Serial.println(lineNumber);
+//							Serial.print(newIndexSize_Char);
+//							Serial.println(newIndexSize);
+//							Serial.print(index3_Char);
+//							Serial.print(indexSizeChar);
+//							Serial.println(configIndex_3.sizeInSteps);
+//							Serial.println("");
+//		#endif // DEBUG
+//							SerialPrint(pageIndex_t7_Char); // Nextion may not get the first packet
+//							SerialWrite(0x22);
+//							SerialPrint(newIndexSize, 4);
+//							SerialPrint(nextionQuoteEnd);
+//
+//							SerialPrint(pageIndex_t7_Char);
+//							SerialWrite(0x22);
+//							SerialPrint(newIndexSize, 4);
+//							SerialPrint(nextionQuoteEnd);
+//						}
+//
+//						break;
+//					}
+//					case 4:
+//					{
+//						if (configIndex_4.fileOrFixed == FILE_SD)
+//						{
+//							int lineNumber = GetSerialInteger();
+//							if (lineNumber == 255)
+//							{
+//								lineNumber = 0;
+//							}
+//							newIndexSize = GetIndexDataFromSD(lineNumber);
+//							configIndex_4.sizeInSteps = (configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (newIndexSize / 360);
+//#ifdef DEBUG
+//							Serial.print(lineNumber_Char);
+//							Serial.println(lineNumber);
+//							Serial.print(newIndexSize_Char);
+//							Serial.println(newIndexSize);
+//							Serial.print(index3_Char);
+//							Serial.print(indexSizeChar);
+//							Serial.println(configIndex_4.sizeInSteps);
+//							Serial.println("");
+//#endif // DEBUG
+//							SerialPrint(pageIndex_t7_Char); // Nextion may not get the first packet
+//							SerialWrite(0x22);
+//							SerialPrint(newIndexSize, 4);
+//							SerialPrint(nextionQuoteEnd);
+//
+//							SerialPrint(pageIndex_t7_Char);
+//							SerialWrite(0x22);
+//							SerialPrint(newIndexSize, 4);
+//							SerialPrint(nextionQuoteEnd);
+//						}
+//
+//						break;
+//					}
+//					case 5:
+//					{
+//						if (configIndex_5.fileOrFixed == FILE_SD)
+//						{
+//							int lineNumber = GetSerialInteger();
+//							if (lineNumber == 255)
+//							{
+//								lineNumber = 0;
+//							}
+//							newIndexSize = GetIndexDataFromSD(lineNumber);
+//							configIndex_5.sizeInSteps = (configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (newIndexSize / 360);
+//#ifdef DEBUG
+//							Serial.print(lineNumber_Char);
+//							Serial.println(lineNumber);
+//							Serial.print(newIndexSize_Char);
+//							Serial.println(newIndexSize);
+//							Serial.print(index3_Char);
+//							Serial.print(indexSizeChar);
+//							Serial.println(configIndex_5.sizeInSteps);
+//							Serial.println("");
+//#endif // DEBUG
+//							SerialPrint(pageIndex_t7_Char); // Nextion may not get the first packet
+//							SerialWrite(0x22);
+//							SerialPrint(newIndexSize, 4);
+//							SerialPrint(nextionQuoteEnd);
+//
+//							SerialPrint(pageIndex_t7_Char);
+//							SerialWrite(0x22);
+//							SerialPrint(newIndexSize, 4);
+//							SerialPrint(nextionQuoteEnd);
+//						}
+//
+//						break;
+//					}
+//				}
+//
+//				if (!badFilename)
+//				{
+//					IndexSpindle(DIR_CW);
+//
+//				}
+//				else
+//				{
+//					// On fail reset Index flag on Nextion. 
+//					//SerialPrint(pageIndex_bt3_pco_Char);
+//					//SerialPrint(nextionEnd);
+//					SerialPrint(pageIndex_va0_Char);
+//					SerialPrint(nextionEnd);
+//					SerialPrint(pageIndex_bt3_Char);
+//					SerialPrint(nextionEnd);
+//					SerialPrint(pageIndex_bt2_Char);
+//					SerialPrint(nextionEnd);
+//					SerialPrint(pageIndex_bt1_Char);
+//					SerialPrint(nextionEnd);
+//					SerialPrint(pageSync_b6_Char);
+//					SerialPrint(nextionEnd);
+//					SerialPrint(pageSync_b5_Char);
+//					SerialPrint(nextionEnd);
+//
+//				}
+//				break;
+//			}
+
 			case 81: // Q - Index1 counter clockwise
 			{
-				double newIndexSize = 0;
-	#ifdef DEBUG
-				Serial.print(indexId_Char);
-				Serial.println(configIndex_Main.indexId);
-	#endif // DEBUG
-
-				badFilename = false;
 
 				switch (configIndex_Main.indexId)
 				{
-					case 1:
-					{
-	#ifdef DEBUG
-						Serial.print(fileOrFixed_Char);
-						Serial.println(configIndex_1.fileOrFixed);
-	#endif // DEBUG
-						if (configIndex_1.fileOrFixed == FILE_SD)
-						{
-							int lineNumber = GetSerialInteger();
-							if (lineNumber == 255)
-							{
-								lineNumber = 0;
-							}
-
-							newIndexSize = GetIndexDataFromSD(lineNumber);
-							configIndex_1.sizeInSteps = (configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (newIndexSize / 360);
-	#ifdef DEBUG
-							Serial.print(lineNumber_Char);
-							Serial.println(lineNumber);
-							Serial.print(newIndexSize_Char);
-							Serial.println(newIndexSize);
-							Serial.println(index1_Char);
-							Serial.print(indexSizeChar);
-							Serial.println(configIndex_1.sizeInSteps);
-							Serial.println("");
-	#endif // DEBUG
-							SerialPrint(pageIndex_t7_Char); // Nextion may not get the first packet
-							SerialWrite(0x22);
-							SerialPrint(newIndexSize,4);
-							SerialPrint(nextionQuoteEnd);
-
-							SerialPrint(pageIndex_t7_Char);
-							SerialWrite(0x22);
-							SerialPrint(newIndexSize,4);
-							SerialPrint(nextionQuoteEnd);
-						}
-
-						break;
-					}
-					case 2:
-					{
-	#ifdef DEBUG
-						Serial.print(index2_Char);
-						Serial.println(fileOrFixed_Char);
-						Serial.println(configIndex_2.fileOrFixed);
-	#endif // DEBUG
-						if (configIndex_2.fileOrFixed == FILE_SD)
-						{
-							int lineNumber = GetSerialInteger();
-							if (lineNumber == 255)
-							{
-								lineNumber = 0;
-							}
-
-							newIndexSize = GetIndexDataFromSD(lineNumber);
-							configIndex_2.sizeInSteps = (configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (newIndexSize / 360);
-	#ifdef DEBUG
-
-							Serial.print(lineNumber_Char);
-							Serial.println(lineNumber);
-							Serial.print(newIndexSize_Char);
-							Serial.println(newIndexSize);
-							Serial.print(index2_Char);
-							Serial.print(indexSizeChar);
-							Serial.println(configIndex_2.sizeInSteps);
-	#endif // DEBUG
-							SerialPrint(pageIndex_t7_Char);
-							SerialWrite(0x22);
-							SerialPrint(newIndexSize, 4);
-							SerialPrint(nextionQuoteEnd);
-
-							SerialPrint(pageIndex_t7_Char);
-							SerialWrite(0x22);
-							SerialPrint(newIndexSize, 4);
-							SerialPrint(nextionQuoteEnd);
-						}
-
-						break;
-					}
-					case 3:
-					{
-	#ifdef DEBUG
-						Serial.print(index3_Char);
-						Serial.print(fileOrFixed_Char);
-						Serial.println(configIndex_3.fileOrFixed);
-	#endif // DEBUG
-
-
-						if (configIndex_3.fileOrFixed == FILE_SD)
-						{
-							int lineNumber = GetSerialInteger();
-							if (lineNumber == 255)
-							{
-								lineNumber = 0;
-							}
-							newIndexSize = GetIndexDataFromSD(lineNumber);
-							configIndex_3.sizeInSteps = (configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (newIndexSize / 360);
-	#ifdef DEBUG
-
-							Serial.print(lineNumber_Char);
-							Serial.println(lineNumber);
-							Serial.print(newIndexSize_Char);
-							Serial.println(newIndexSize);
-							Serial.print(index3_Char);
-							Serial.print(indexSizeChar);
-							Serial.println(configIndex_3.sizeInSteps);
-	#endif // DEBUG
-							SerialPrint(pageIndex_t7_Char); // Nextion may not get the first packet
-							SerialWrite(0x22);
-							SerialPrint(newIndexSize, 4);
-							SerialPrint(nextionQuoteEnd);
-
-							SerialPrint(pageIndex_t7_Char);
-							SerialWrite(0x22);
-							SerialPrint(newIndexSize, 4);
-							SerialPrint(nextionQuoteEnd);
-						}
-
-						break;
-					}
-					case 4:
-					{
-#ifdef DEBUG
-						Serial.print(index4_Char);
-						Serial.print(fileOrFixed_Char);
-						Serial.println(configIndex_4.fileOrFixed);
-#endif // DEBUG
-
-
-						if (configIndex_4.fileOrFixed == FILE_SD)
-						{
-							int lineNumber = GetSerialInteger();
-							if (lineNumber == 255)
-							{
-								lineNumber = 0;
-							}
-							newIndexSize = GetIndexDataFromSD(lineNumber);
-							configIndex_4.sizeInSteps = (configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (newIndexSize / 360);
-#ifdef DEBUG
-
-							Serial.print(lineNumber_Char);
-							Serial.println(lineNumber);
-							Serial.print(newIndexSize_Char);
-							Serial.println(newIndexSize);
-							Serial.print(index4_Char);
-							Serial.print(indexSizeChar);
-							Serial.println(configIndex_4.sizeInSteps);
-#endif // DEBUG
-							SerialPrint(pageIndex_t7_Char); // Nextion may not get the first packet
-							SerialWrite(0x22);
-							SerialPrint(newIndexSize, 4);
-							SerialPrint(nextionQuoteEnd);
-
-							SerialPrint(pageIndex_t7_Char);
-							SerialWrite(0x22);
-							SerialPrint(newIndexSize, 4);
-							SerialPrint(nextionQuoteEnd);
-						}
-
-						break;
-					}
-					case 5:
-					{
-#ifdef DEBUG
-						Serial.print(index5_Char);
-						Serial.print(fileOrFixed_Char);
-						Serial.println(configIndex_5.fileOrFixed);
-#endif // DEBUG
-
-
-						if (configIndex_5.fileOrFixed == FILE_SD)
-						{
-							int lineNumber = GetSerialInteger();
-							if (lineNumber == 255)
-							{
-								lineNumber = 0;
-							}
-							newIndexSize = GetIndexDataFromSD(lineNumber);
-							configIndex_5.sizeInSteps = (configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (newIndexSize / 360);
-#ifdef DEBUG
-
-							Serial.print(lineNumber_Char);
-							Serial.println(lineNumber);
-							Serial.print(newIndexSize_Char);
-							Serial.println(newIndexSize);
-							Serial.print(index5_Char);
-							Serial.print(indexSizeChar);
-							Serial.println(configIndex_5.sizeInSteps);
-#endif // DEBUG
-							SerialPrint(pageIndex_t7_Char); // Nextion may not get the first packet
-							SerialWrite(0x22);
-							SerialPrint(newIndexSize, 4);
-							SerialPrint(nextionQuoteEnd);
-
-							SerialPrint(pageIndex_t7_Char);
-							SerialWrite(0x22);
-							SerialPrint(newIndexSize, 4);
-							SerialPrint(nextionQuoteEnd);
-						}
-
-						break;
-					}
-				}
-
-				if (!badFilename)
+				case 1:
 				{
-					IndexSpindle(DIR_CCW);
+					if (configIndex_1.fileOrFixed == FILE_SD)
+					{
+						IndexFromFile(DIR_CCW);
+					}
+					else
+					{
+						IndexSpindle(DIR_CCW);
+					}
 
+					break;
 				}
-				else
+				case 2:
 				{
-					// Update Index flag on Nextion. 
-					//SerialPrint(pageIndex_bt3_pco_Char);
-					//SerialPrint(nextionEnd);
-					SerialPrint(pageIndex_va0_Char);
-					SerialPrint(nextionEnd);
-					SerialPrint(pageIndex_bt3_Char);
-					SerialPrint(nextionEnd);
-					SerialPrint(pageIndex_bt2_Char);
-					SerialPrint(nextionEnd);
-					SerialPrint(pageIndex_bt1_Char);
-					SerialPrint(nextionEnd);
-					SerialPrint(pageSync_b6_Char);
-					SerialPrint(nextionEnd);
-					SerialPrint(pageSync_b5_Char);
-					SerialPrint(nextionEnd);
+					if (configIndex_2.fileOrFixed == FILE_SD)
+					{
+						IndexFromFile(DIR_CCW);
+					}
+					else
+					{
+						IndexSpindle(DIR_CCW);
+					}
+
+					break;
 				}
+				case 3:
+				{
+					if (configIndex_3.fileOrFixed == FILE_SD)
+					{
+						IndexFromFile(DIR_CCW);
+					}
+					else
+					{
+						IndexSpindle(DIR_CCW);
+					}
+
+					break;
+				}
+				case 4:
+				{
+					if (configIndex_4.fileOrFixed == FILE_SD)
+					{
+						IndexFromFile(DIR_CCW);
+					}
+					else
+					{
+						IndexSpindle(DIR_CCW);
+					}
+
+					break;
+				}
+				case 5:
+				{
+					if (configIndex_5.fileOrFixed == FILE_SD)
+					{
+						IndexFromFile(DIR_CCW);
+					}
+					else
+					{
+						IndexSpindle(DIR_CCW);
+					}
+
+					break;
+				}
+				}
+
+
 				break;
 			}
 			case 82: // R - Index1 Clockwise
 			{
 				double newIndexSize = 0;
 				badFilename = false;
-	#ifdef DEBUG
+#ifdef DEBUG
 				Serial.print(indexId_Char);
 				Serial.println(configIndex_Main.indexId);
 				Serial.print(index1_Char);
 				Serial.print(fileOrFixed_Char);
 				Serial.println(configIndex_1.fileOrFixed);
-	#endif // DEBUG
+#endif // DEBUG
 				switch (configIndex_Main.indexId)
 				{
-					case 1:
-					{
-						if (configIndex_1.fileOrFixed == FILE_SD)
-						{
-							int lineNumber = GetSerialInteger();
-							if (lineNumber == 255)
-							{
-								lineNumber = 0;
-							}
-
-							newIndexSize = GetIndexDataFromSD(lineNumber);
-							configIndex_1.sizeInSteps = (configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (newIndexSize / 360);
-		#ifdef DEBUG
-							Serial.print(lineNumber_Char);
-							Serial.println(lineNumber);
-							Serial.print(newIndexSize_Char);
-							Serial.println(newIndexSize);
-							Serial.print(index1_Char);
-							Serial.print(indexSizeChar);
-							Serial.println(configIndex_1.sizeInSteps);
-							Serial.println("");
-		#endif // DEBUG
-							SerialPrint(pageIndex_t7_Char); // Nextion may not get the first packet
-							SerialWrite(0x22);
-							SerialPrint(newIndexSize, 4);
-							SerialPrint(nextionQuoteEnd);
-
-							SerialPrint(pageIndex_t7_Char);
-							SerialWrite(0x22);
-							SerialPrint(newIndexSize, 4);
-							SerialPrint(nextionQuoteEnd);
-						}
-
-						break;
-					}
-					case 2:
-					{
-						if (configIndex_2.fileOrFixed == FILE_SD)
-						{
-							int lineNumber = GetSerialInteger();
-							if (lineNumber == 255)
-							{
-								lineNumber = 0;
-							}
-
-							newIndexSize = GetIndexDataFromSD(lineNumber);
-							configIndex_2.sizeInSteps = (configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (newIndexSize / 360);
-#ifdef DEBUG
-							Serial.println("");
-							Serial.print(lineNumber_Char);
-							Serial.println(lineNumber);
-							Serial.print(newIndexSize_Char);
-							Serial.println(newIndexSize);
-							Serial.print(index2_Char);
-							Serial.print(indexSizeChar);
-							Serial.println(configIndex_2.sizeInSteps);
-							Serial.println("");
-#endif // DEBUG
-							SerialPrint(pageIndex_t7_Char);
-							SerialWrite(0x22);
-							SerialPrint(newIndexSize, 4);
-							SerialPrint(nextionQuoteEnd);
-
-							SerialPrint(pageIndex_t7_Char);
-							SerialWrite(0x22);
-							SerialPrint(newIndexSize, 4);
-							SerialPrint(nextionQuoteEnd);
-						}
-						break;
-					}
-					case 3:
-					{
-						if (configIndex_3.fileOrFixed == FILE_SD)
-						{
-							int lineNumber = GetSerialInteger();
-							if (lineNumber == 255)
-							{
-								lineNumber = 0;
-							}
-							newIndexSize = GetIndexDataFromSD(lineNumber);
-							configIndex_3.sizeInSteps = (configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (newIndexSize / 360);
-		#ifdef DEBUG
-							Serial.print(lineNumber_Char);
-							Serial.println(lineNumber);
-							Serial.print(newIndexSize_Char);
-							Serial.println(newIndexSize);
-							Serial.print(index3_Char);
-							Serial.print(indexSizeChar);
-							Serial.println(configIndex_3.sizeInSteps);
-							Serial.println("");
-		#endif // DEBUG
-							SerialPrint(pageIndex_t7_Char); // Nextion may not get the first packet
-							SerialWrite(0x22);
-							SerialPrint(newIndexSize, 4);
-							SerialPrint(nextionQuoteEnd);
-
-							SerialPrint(pageIndex_t7_Char);
-							SerialWrite(0x22);
-							SerialPrint(newIndexSize, 4);
-							SerialPrint(nextionQuoteEnd);
-						}
-
-						break;
-					}
-					case 4:
-					{
-						if (configIndex_4.fileOrFixed == FILE_SD)
-						{
-							int lineNumber = GetSerialInteger();
-							if (lineNumber == 255)
-							{
-								lineNumber = 0;
-							}
-							newIndexSize = GetIndexDataFromSD(lineNumber);
-							configIndex_4.sizeInSteps = (configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (newIndexSize / 360);
-#ifdef DEBUG
-							Serial.print(lineNumber_Char);
-							Serial.println(lineNumber);
-							Serial.print(newIndexSize_Char);
-							Serial.println(newIndexSize);
-							Serial.print(index3_Char);
-							Serial.print(indexSizeChar);
-							Serial.println(configIndex_4.sizeInSteps);
-							Serial.println("");
-#endif // DEBUG
-							SerialPrint(pageIndex_t7_Char); // Nextion may not get the first packet
-							SerialWrite(0x22);
-							SerialPrint(newIndexSize, 4);
-							SerialPrint(nextionQuoteEnd);
-
-							SerialPrint(pageIndex_t7_Char);
-							SerialWrite(0x22);
-							SerialPrint(newIndexSize, 4);
-							SerialPrint(nextionQuoteEnd);
-						}
-
-						break;
-					}
-					case 5:
-					{
-						if (configIndex_5.fileOrFixed == FILE_SD)
-						{
-							int lineNumber = GetSerialInteger();
-							if (lineNumber == 255)
-							{
-								lineNumber = 0;
-							}
-							newIndexSize = GetIndexDataFromSD(lineNumber);
-							configIndex_5.sizeInSteps = (configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (newIndexSize / 360);
-#ifdef DEBUG
-							Serial.print(lineNumber_Char);
-							Serial.println(lineNumber);
-							Serial.print(newIndexSize_Char);
-							Serial.println(newIndexSize);
-							Serial.print(index3_Char);
-							Serial.print(indexSizeChar);
-							Serial.println(configIndex_5.sizeInSteps);
-							Serial.println("");
-#endif // DEBUG
-							SerialPrint(pageIndex_t7_Char); // Nextion may not get the first packet
-							SerialWrite(0x22);
-							SerialPrint(newIndexSize, 4);
-							SerialPrint(nextionQuoteEnd);
-
-							SerialPrint(pageIndex_t7_Char);
-							SerialWrite(0x22);
-							SerialPrint(newIndexSize, 4);
-							SerialPrint(nextionQuoteEnd);
-						}
-
-						break;
-					}
-				}
-
-				if (!badFilename)
+				case 1:
 				{
-					IndexSpindle(DIR_CW);
-
+					if (configIndex_1.fileOrFixed == FILE_SD)
+					{
+						IndexFromFile(DIR_CW);
+					}
+					else
+					{
+						IndexSpindle(DIR_CW);
+					}
+					break;
 				}
-				else
+				case 2:
 				{
-					// On fail reset Index flag on Nextion. 
-					//SerialPrint(pageIndex_bt3_pco_Char);
-					//SerialPrint(nextionEnd);
-					SerialPrint(pageIndex_va0_Char);
-					SerialPrint(nextionEnd);
-					SerialPrint(pageIndex_bt3_Char);
-					SerialPrint(nextionEnd);
-					SerialPrint(pageIndex_bt2_Char);
-					SerialPrint(nextionEnd);
-					SerialPrint(pageIndex_bt1_Char);
-					SerialPrint(nextionEnd);
-					SerialPrint(pageSync_b6_Char);
-					SerialPrint(nextionEnd);
-					SerialPrint(pageSync_b5_Char);
-					SerialPrint(nextionEnd);
-
+					if (configIndex_2.fileOrFixed == FILE_SD)
+					{
+						IndexFromFile(DIR_CW);
+					}
+					else
+					{
+						IndexSpindle(DIR_CW);
+					}
+					break;
 				}
+				case 3:
+				{
+					if (configIndex_3.fileOrFixed == FILE_SD)
+					{
+						IndexFromFile(DIR_CW);
+					}
+					else
+					{
+						IndexSpindle(DIR_CW);
+					}
+
+					break;
+				}
+				case 4:
+				{
+					if (configIndex_4.fileOrFixed == FILE_SD)
+					{
+						IndexFromFile(DIR_CW);
+					}
+					else
+					{
+						IndexSpindle(DIR_CW);
+					}
+
+					break;
+				}
+				case 5:
+				{
+					if (configIndex_5.fileOrFixed == FILE_SD)
+					{
+						IndexFromFile(DIR_CW);
+					}
+					else
+					{
+						IndexSpindle(DIR_CW);
+					}
+
+					break;
+				}
+				}
+
+
 				break;
 			}
+
+
 			case 83: // S - Stop Steppers - Implemented in individual methods
 			{
 
@@ -2245,7 +2422,14 @@ void loop()
 			}
 			case 161: // ¡ - Not used
 			{
-	
+				configSetup.limit_NCorNO = GetSerialInteger();
+#ifdef DEBUG
+				Serial.print("configSetup.limit_NCorNO :");
+				Serial.println(configSetup.limit_NCorNO);
+#endif // DEBUG
+
+				EEPROM.put(eePromAddress_Setup, configSetup);
+
 				break;
 			}
 			case 162: // ¢ - Not Used
