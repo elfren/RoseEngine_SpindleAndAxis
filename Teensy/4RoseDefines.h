@@ -11,61 +11,62 @@
 //==================================================================
 
 //// Spindle
-#define ID_SPINDLE 3
+#define ID_SPINDLE 0  // ToDo: Verify Nextion sends 4 for spindle
 #define PIN_SPINDLE_DIR 2  //Stepper direction
 #define PIN_SPINDLE_STEP 3  //Stepper step
 #define PIN_SPINDLE_ENABLE 4 //Enable
 
+//#define PIN_SPINDLE_DIR 23  // Stepper direction
+//#define PIN_SPINDLE_STEP 16  // Stepper step
+//#define PIN_SPINDLE_ENABLE 17 // Enable 
+
 // Z axis
-#define ID_AXIS_Z 0
+#define ID_AXIS_Z 1
 #define PIN_AXIS_Z_DIR 5 // Stepper direction
 #define PIN_AXIS_Z_STEP 6 // Stepper step
 #define PIN_AXIS_Z_ENABLE 14 // Enable 
 
 
-// Swap Z and Spindle for DM542T testing
-// Spindle
-//#define ID_SPINDLE 3
-//#define PIN_SPINDLE_DIR 5  //Stepper direction
-//#define PIN_SPINDLE_STEP 6  //Stepper step
-//#define PIN_SPINDLE_ENABLE 14 //Enable
-//
-//// Z axis
-//#define ID_AXIS_Z 0
-//#define PIN_AXIS_Z_DIR 2 // Stepper direction
-//#define PIN_AXIS_Z_STEP 3 // Stepper step
-//#define PIN_AXIS_Z_ENABLE 4 // Enable 
-
-
-
 // X axis
-#define ID_AXIS_X 1
+#define ID_AXIS_X 2
 #define PIN_AXIS_X_DIR 20  // Stepper direction
 #define PIN_AXIS_X_STEP 21 // Stepper step
 #define PIN_AXIS_X_ENABLE 22 // Enable 
 
-// B axis
-#define ID_AXIS_B 2
-#define PIN_AXIS_B_DIR 23  // Stepper direction
-#define PIN_AXIS_B_STEP 16  // Stepper step
-#define PIN_AXIS_B_ENABLE 17 // Enable 
+// M3 axis
+#define ID_AXIS_3 3
+#define PIN_AXIS_3_DIR 23  // Stepper direction
+#define PIN_AXIS_3_STEP 16  // Stepper step
+#define PIN_AXIS_3_ENABLE 17 // Enable 
+
+// M4 axis
+#define ID_AXIS_4 4
+#define PIN_AXIS_4_DIR 19  // Stepper direction
+#define PIN_AXIS_4_STEP 18  // Stepper step
+#define PIN_AXIS_4_ENABLE 15 // Enable 
+
 
 
 /////////////////////////////////////////////////////////////////////////
 // Constants
 /////////////////////////////////////////////////////////////////////////
 
+
 // Move page
-#define ID_MOVE_AXIS_Z1 0
-#define ID_MOVE_AXIS_Z2 3
-#define ID_MOVE_AXIS_X1 1
-#define ID_MOVE_AXIS_X2 4
-#define ID_MOVE_AXIS_B1 2
-#define ID_MOVE_AXIS_B2 5
+#define ID_MOVE_AXIS_Z1 1
+#define ID_MOVE_AXIS_Z2 11
+#define ID_MOVE_AXIS_X1 2
+#define ID_MOVE_AXIS_X2 12
+#define ID_MOVE_AXIS_M3_1 3
+#define ID_MOVE_AXIS_M3_2 13
+
+#define ID_MOVE_AXIS_M4_1 4
+#define ID_MOVE_AXIS_M4_2 14
 
 // SPI
 #define PIN_SPI_CS_10 10  // Primary pin for SPI
 #define PIN_SPI_CS_9 9
+// ToDo: Allow on 4 motor board
 #define PIN_SPI_CS_15 15
 #define PIN_SPI_CS_24 24
 
@@ -93,18 +94,29 @@
 
 #define RADIAL 0
 #define AXIAL 1
-#define RADIAL_B 0
-#define LINEAR_B 1
+#define RADIAL_M3 0
+#define LINEAR_M3 1
+#define RADIAL_M4 0
+#define LINEAR_M4 1
 
 #define INI_4AXES 0
 #define INI_RESET 1
+
+#define TRIANGLE_STYLE 1
+#define SQUARE_STYLE 2
+#define SAWTOOTH_STYLE 3
+
+#define INDEX_1 1
+#define INDEX_2 2
+#define INDEX_3 3
+#define INDEX_4 4
+#define INDEX_5 5
 /////////////////////////////////////////////////////////////////////////
 // Page defines
 /////////////////////////////////////////////////////////////////////////
-
-#define PAGE_MAIN 1
 #define PAGE_SPLASH 0
-#define PAGE_ONE 2
+#define PAGE_MAIN 1
+#define PAGE_MULTI 2
 #define PAGE_INDEX 3
 #define PAGE_MOVE 4
 #define PAGE_BE 5
@@ -113,48 +125,82 @@
 #define PAGE_GRK 8
 #define PAGE_PROGRAM 9
 #define PAGE_ROSE 10 
-#define PAGE_MORE 11
-#define PAGE_RETURN 21
+#define PAGE_ADV 11 
+#define PAGE_NUMBERPAD 12 
+#define PAGE_SPINDLE 13
+#define PAGE_Z 14
+#define PAGE_X 15
+#define PAGE_ALTERNATEX 16
+#define PAGE_MOTOR_3 17
+#define PAGE_MOTOR_4 18
+#define PAGE_LIMITS 19
+#define PAGE_MORE 21
+#define PAGE_RETURNS 20
 
 /////////////////////////////////////////////////////////////////////////
 // Structs
 /////////////////////////////////////////////////////////////////////////
 
+struct nextionData
+{
+	uint8_t value24;
+	uint8_t value16;
+	uint8_t value08;
+	uint8_t value00;
+};
+
+struct nextionData2
+{
+	uint8_t value00;
+	uint8_t value08;
+	uint8_t value16;
+	uint8_t value24;
+};
+
+
 struct configPageMov
 {
 	uint32_t axisId;
-	int32_t maxSpd_Axis_Z;
+	uint32_t maxSpd_Axis_Z;
 	uint32_t accel_Axis_Z;
-	int32_t speedPercent_Axis_Z;
-	int32_t maxSpd_Axis_X;
+	uint32_t speedPercent_Axis_Z;
+	uint32_t maxSpd_Axis_X;
 	uint32_t accel_Axis_X;
-	int32_t speedPercent_Axis_X;
-	int32_t maxSpd_Axis_B;
-	uint32_t accel_Axis_B;
-	int32_t speedPercent_Axis_B;
+	uint32_t speedPercent_Axis_X;
+	uint32_t maxSpd_Motor_3;
+	uint32_t accel_Motor_3;
+	uint32_t speedPercent_Axis_M3;
+	uint32_t maxSpd_Motor_4;
+	uint32_t accel_Motor_4;
+	uint32_t speedPercent_Axis_M4;
 	float distance_MoveZ1;
 	float distance_MoveX1;
-	float distance_MoveB1;
+	float distance_MoveM3_1;
+	float distance_MoveM4_1;
 	float distance_MoveZ2;
 	float distance_MoveX2;
-	float distance_MoveB2;
+	float distance_MoveM3_2;
+	float distance_MoveM4_2;
 };
 
 struct configPageSync
 {
 	uint32_t axisId;
-	int32_t maxSpd_Spindle;
+	uint32_t maxSpd_Spindle;
 	uint32_t accel_Spindle;
-	int32_t maxSpd_Axis_Z;
+	uint32_t maxSpd_Axis_Z;
 	uint32_t accel_Axis_Z;
-	int32_t maxSpd_Axis_X;
+	uint32_t maxSpd_Axis_X;
 	uint32_t accel_Axis_X;
-	int32_t maxSpd_Axis_B;
-	uint32_t accel_Axis_B;
-	int32_t speedPercent_Spindle;
-	int32_t speedPercent_Axis_Z;
-	int32_t speedPercent_Axis_X;
-	int32_t speedPercent_Axis_B;
+	uint32_t maxSpd_Axis_M3;
+	uint32_t accel_Axis_M3;
+	uint32_t maxSpd_Axis_M4;
+	uint32_t accel_Axis_M4;
+	uint32_t speedPercent_Spindle;
+	uint32_t speedPercent_Axis_Z;
+	uint32_t speedPercent_Axis_X;
+	uint32_t speedPercent_Axis_M3;
+	uint32_t speedPercent_Axis_M4;
 	uint32_t helixType;
 	float distance;
 	float revolutions_Spindle;
@@ -176,31 +222,48 @@ struct configPageSetup
 	float distancePerRev_AxisX;
 	uint32_t limit_Min_X;
 	uint32_t limit_Max_X;
-	uint32_t radialOrLinear_Axis_B;
-	uint32_t microsteps_Axis_B;
-	uint32_t steps360_Axis_B;
-	float gearRatio_AxisB;
-	float distancePerRev_AxisB;
-	float radiusB;
-	uint32_t limit_Min_B;
-	uint32_t limit_Max_B;
-	int32_t maxSpd_Return_Spindle;
+	uint32_t radialOrLinear_Axis_M3;
+	uint32_t microsteps_Axis_M3;
+	uint32_t steps360_Axis_M3;
+	float gearRatio_AxisM3;
+	float distancePerRev_AxisM3;
+	float radiusM3;
+	uint32_t limit_Min_M3;
+	uint32_t limit_Max_M3;
+
+	uint32_t radialOrLinear_Axis_M4;
+	uint32_t microsteps_Axis_M4;
+	uint32_t steps360_Axis_M4;
+	float gearRatio_AxisM4;
+	float distancePerRev_AxisM4;
+	float radiusM4;
+	uint32_t limit_Min_M4;
+	uint32_t limit_Max_M4;
+
+	uint32_t maxSpd_Return_Spindle;
 	uint32_t accel_Return_Spindle;
-	int32_t maxSpd_Return_Axis_Z;
+	uint32_t maxSpd_Return_Axis_Z;
 	uint32_t accel_Return_Axis_Z;
-	int32_t maxSpd_Return_Axis_X;
+	uint32_t maxSpd_Return_Axis_X;
 	uint32_t accel_Return_Axis_X;
-	int32_t maxSpd_Return_Axis_B;
-	uint32_t accel_Return_Axis_B;
+	uint32_t maxSpd_Return_Axis_M3;
+	uint32_t accel_Return_Axis_M3;
+
+	uint32_t maxSpd_Return_Axis_M4;
+	uint32_t accel_Return_Axis_M4;
+
 	bool polarity_Spindle;
 	bool polarity_Axis_Z;
 	bool polarity_Axis_X;
-	bool polarity_Axis_B;
+	bool polarity_Axis_M3;
+
+	bool polarity_Axis_M4;
+
 	uint32_t home_Z;
 	uint32_t home_X;
-	uint32_t home_B;
-	uint32_t pulseWidth_Spindle;
-	uint32_t speedUpdatePeriod_Spindle;
+	uint32_t home_M3;
+	uint32_t home_M4;
+
 	uint32_t limit_StopSpindle;
 
 	uint32_t xAltX;
@@ -211,35 +274,41 @@ struct configPageSetup
 	uint32_t keepSteppersEnabled;
 	uint32_t eStop;
 	uint32_t limit_NCorNO; // 0 (LOW) is NC, 1 (HIGH) is NO
+	uint32_t cutterMotorPin;
+	uint32_t vendorId;
+	uint32_t motorCount;
 };
 
 // Config Structs
-struct configSteppers // 
-{
-	int32_t maxSpd_Spindle;
-	uint32_t accel_Spindle;
-	int32_t maxSpd_Axis;
-	uint32_t accel_Axis;
-	int32_t speedPercent_Spindle;
-	int32_t speedPercent_Axis;
-};
+//struct configSteppers // 
+//{
+//	uint32_t maxSpd_Spindle;
+//	uint32_t accel_Spindle;
+//	uint32_t maxSpd_Axis;
+//	uint32_t accel_Axis;
+//	uint32_t speedPercent_Spindle;
+//	uint32_t speedPercent_Axis;
+//};
 
 struct configPageRec // page 5,6,13,14
 {
-	int32_t maxSpd_Spindle;
-	int32_t maxSpd_Axis_Z;
-	int32_t maxSpd_Axis_X;
-	int32_t maxSpd_Axis_B;
-	int32_t speedPercent_Spindle;
-	int32_t speedPercent_Axis_Z;
-	int32_t speedPercent_Axis_X;
-	int32_t speedPercent_Axis_B;
+	uint32_t maxSpd_Spindle;
+	uint32_t maxSpd_Axis_Z;
+	uint32_t maxSpd_Axis_X;
+	uint32_t maxSpd_Axis_M3;
+	uint32_t maxSpd_Axis_M4;
+	uint32_t speedPercent_Spindle;
+	uint32_t speedPercent_Axis_Z;
+	uint32_t speedPercent_Axis_X;
+	uint32_t speedPercent_Axis_M3;
+	uint32_t speedPercent_Axis_M4;
 	uint32_t accel_Spindle;
 	uint32_t accel_Axis_Z;
 	uint32_t accel_Axis_X;
-	uint32_t accel_Axis_B;
-	int32_t waves_Axial;
-	int32_t waves_Radial;
+	uint32_t accel_Axis_M3;
+	uint32_t accel_Axis_M4;
+	uint32_t waves_Axial;
+	uint32_t waves_Radial;
 	float distance_Axial_Axis;
 	float amplitude_Axial_Spindle;
 	float amplitude_Radial_Axis;
@@ -251,53 +320,70 @@ struct configPageRec // page 5,6,13,14
 
 struct configPageRose // page 12
 {
-	int32_t maxSpd_Spindle;
-	int32_t maxSpd_Axis_Z;
+	uint32_t maxSpd_Spindle;
+	uint32_t maxSpd_Axis_Z;
 	uint32_t maxSpd_Axis_X;
-	uint32_t maxSpd_Axis_B;
+	uint32_t maxSpd_Axis_M3;
+	uint32_t maxSpd_Axis_M4;
 
 	uint32_t accel_Spindle;
 	uint32_t accel_Axis_Z;
 	uint32_t accel_Axis_X;
-	uint32_t accel_Axis_B;
+	uint32_t accel_Axis_M3;
+	uint32_t accel_Axis_M4;
 
-	int32_t speedPercent_Spindle;
-	int32_t speedPercent_Axis_Z;
-	int32_t speedPercent_Axis_X;
-	int32_t speedPercent_Axis_B;
+	uint32_t speedPercent_Spindle;
+	uint32_t speedPercent_Axis_Z;
+	uint32_t speedPercent_Axis_X;
+	uint32_t speedPercent_Axis_M3;
+	uint32_t speedPercent_Axis_M4;
 
-	int32_t n;
-	int32_t d;
+	uint32_t n;
+	uint32_t d;
 	uint32_t axisId;
 	uint32_t radial_Axial;
 
 	float amplitude_Axial_Z;
 	float amplitude_Axial_X;
-	float amplitude_Axial_B;
+	float amplitude_Axial_M3;
+	float amplitude_Axial_M4;
 
 	float amplitude_Radial_Z;
 	float amplitude_Radial_X;
-	float amplitude_Radial_B;
+	float amplitude_Radial_M3;
+	float amplitude_Radial_M4;
 
 	float spindleRevolutions;
 };
 
-struct configPageMainOne  // page 2 (pageOne) and page 0 (pageMain)
+struct configPageMainMulti  // page 2 (pageMulti) and page 0 (pageMain)
 {
-	int32_t accel_Axis_B;
-	int32_t maxSpd_Spindle;
-	int32_t maxSpd_Axis_Z;
-	int32_t maxSpd_Axis_X;
-	int32_t maxSpd_Axis_B;
-	int32_t speedPercent_Spindle;
-	int32_t speedPercent_Axis_Z;
-	int32_t speedPercent_Axis_X;
-	int32_t speedPercent_Axis_B;
-	int32_t accel_Spindle;
-	int32_t accel_Axis_Z;
-	int32_t accel_Axis_X;
-	
-	int32_t axisId; // Z:0, X:1, B:2, Spindle:3
+
+	uint32_t maxSpd_Spindle;
+	uint32_t maxSpd_Axis_Z;
+	uint32_t maxSpd_Axis_X;
+	uint32_t maxSpd_Axis_M3;
+	uint32_t maxSpd_Axis_M4;
+	uint32_t speedPercent_Spindle;
+	uint32_t speedPercent_Axis_Z;
+	uint32_t speedPercent_Axis_X;
+	uint32_t speedPercent_Axis_M3;
+	uint32_t speedPercent_Axis_M4;
+	uint32_t accel_Spindle;
+	uint32_t accel_Axis_Z;
+	uint32_t accel_Axis_X;
+	uint32_t accel_Axis_M3;
+	uint32_t accel_Axis_M4;
+	uint32_t direction;
+	uint32_t multiAxesIDs;
+	uint32_t axisId; // Z:0, X:1, M3:2, M4:3,Spindle:4
+	float targetDistance_Spindle;
+	float targetDistance_Z;
+	float targetDistance_X;
+	float targetDistance_M3;
+	float targetDistance_M4;
+	float synchro_M3_Percentage;
+	uint32_t synchro_M3_Spindle;
 };
 
 struct configPageGreekKey
@@ -308,96 +394,110 @@ struct configPageGreekKey
 	// pageGrk settings
 	uint32_t patternId;
 	float countPatternPer360_Pattern;
-	int32_t patternCount_Pattern;
-	int32_t radialOrAxial_Pattern;
+	uint32_t patternCount_Pattern;
+	uint32_t radialOrAxial_Pattern;
 	float segmentLength_Pattern;
 
 	// pageProgram settings
-	int32_t patternCount_File;
+	uint32_t patternCount_File;
 	float countPatternPer360_File;
-	int32_t segmentOrActual;
-	int32_t radialOrAxial_File;
+	uint32_t segmentOrActual;
+	uint32_t radialOrAxial_File;
 	float segmentLength_File;
 
 	// Stepper settings
-	int32_t maxSpd_Spindle;
-	int32_t maxSpd_Axis_Z;
-	int32_t maxSpd_Axis_X;
-	int32_t maxSpd_Axis_B;
-	int32_t speedPercent_Spindle;
-	int32_t speedPercent_Axis_Z;
-	int32_t speedPercent_Axis_X;
-	int32_t speedPercent_Axis_B;
+	uint32_t maxSpd_Spindle;
+	uint32_t maxSpd_Axis_Z;
+	uint32_t maxSpd_Axis_X;
+	uint32_t maxSpd_Axis_M3;
+	uint32_t maxSpd_Axis_M4;
+	uint32_t speedPercent_Spindle;
+	uint32_t speedPercent_Axis_Z;
+	uint32_t speedPercent_Axis_X;
+	uint32_t speedPercent_Axis_M3;
+	uint32_t speedPercent_Axis_M4;
 	uint32_t accel_Spindle;
 	uint32_t accel_Axis_Z;
 	uint32_t accel_Axis_X;
-	uint32_t accel_Axis_B;
+	uint32_t accel_Axis_M3;
+	uint32_t accel_Axis_M4;
 };
 
 struct configPageIndex
 {
-	int32_t indexId;
-	int32_t maxSpd;
-	int32_t speedPercent;
-	uint32_t accel;
+	uint32_t axisId;
+	uint32_t indexId;
+	uint32_t maxSpd_Spindle;
+	uint32_t maxSpd_Axis_M3;
+	uint32_t maxSpd_Axis_M4;
+	uint32_t speedPercent_Spindle;
+	uint32_t speedPercent_Axis_M3;
+	uint32_t speedPercent_Axis_M4;
+	uint32_t accel_Spindle;
+	uint32_t accel_Axis_M3;
+	uint32_t accel_Axis_M4;
+	float synchro_M3_Percentage;
+	uint32_t synchro_M3_Spindle;
 };
 
 struct configIndex
 {
 	uint32_t degreeOrDivision; // Type
 	uint32_t fileOrFixed; // Source
-	int32_t sizeInSteps;
-	double sizeInUnits;
+	uint32_t sizeInSteps;
+	float sizeInUnits;
 
 };
 
+// Nextion data structures
+nextionData nexData1;
+nextionData2 nexData2;
 /////////////////////////////////////////////////////////////////////////
 // Config and Setup variables
 /////////////////////////////////////////////////////////////////////////
-configPageSetup configSetup;
-configPageMainOne configMain;
-configPageSync configSync;
-configPageRec configRec;
-configPageMainOne configOne;
-configPageIndex configIndex_Main;
 configIndex configIndex_1;
 configIndex configIndex_2;
 configIndex configIndex_3;
 configIndex configIndex_4;
 configIndex configIndex_5;
 configPageMov configMove;
+configPageSync configSync;
+configPageSetup configSetup;
+configPageRec configRec;
 configPageRose configRose;
+configPageMainMulti configMain;
+configPageMainMulti configMulti;
+configPageIndex configIndex_Prime;
 configPageGreekKey configGreekKey;
-//configSteppers configGreekKey_Z;
-//configSteppers configGreekKey_X;
-//configSteppers configGreekKey_B;
 
-unsigned int eePromAddress_Setup = 0; // EEProm address for Setup
-unsigned int eePromAddress_Sync = 300;  // EEProm address for Sync
-unsigned int eePromAddress_Main = 400;  // EEProm address for Main
-unsigned int eePromAddress_Mov = 500; // EEProm address for Move
-unsigned int eePromAddress_Rose = 600; // EEProm address for Rose
-unsigned int eePromAddress_Rec = 700;
-unsigned int eePromAddress_One = 900;  // EEProm address for Sp 
-unsigned int eePromAddress_Grk = 1000;  // EEProm address for Greek Key Main
-//unsigned int eePromAddress_Grk_Z = 1100; //  EEProm address for Greek Key Z
-//unsigned int eePromAddress_Grk_X = 1200; //  EEProm address for Greek Key X 
-//unsigned int eePromAddress_Grk_B = 1300; //  EEProm address for Greek Key B
-unsigned int eePromAddress_Ind_Main = 1400;  // EEProm address for Index_Main
-unsigned int eePromAddress_Ind_1 = 1500;  // EEProm address for Index_1
-unsigned int eePromAddress_Ind_2 = 1550;  // EEProm address for Index_2
-unsigned int eePromAddress_Ind_3 = 1600;  // EEProm address for Index_3 
-unsigned int eePromAddress_Ind_4 = 1650;  // EEProm address for Index_3 
-unsigned int eePromAddress_Ind_5 = 1700;  // EEProm address for Index_3 
+unsigned int eePromAddress_Setup = 0; // EEProm address for Setup (220)
+unsigned int eePromAddress_Sync = 300;  // EEProm address for Sync (76)
 
-unsigned int eePromAddress_Filename_Ind = 1800; // EEProm address for filename
-unsigned int eePromAddress_Filename_Length_Ind = 1900; // EEProm address for length of filename
-unsigned int eePromAddress_Filename_Program = 2000; // EEProm address for filename
-unsigned int eePromAddress_Filename_Length_Program = 2100; // EEProm address for length of filename
+unsigned int eePromAddress_Mov = 500; // EEProm address for Move (84)
+unsigned int eePromAddress_Main = 600;  // EEProm address for Main (100)
+unsigned int eePromAddress_Rec = 750; //   (96)
+unsigned int eePromAddress_Multi = 900;  // EEProm address for Multi (100)
+unsigned int eePromAddress_Rose = 1100; // EEProm address for Rose (112)
+
+unsigned int eePromAddress_Grk = 1250;  // EEProm address for Greek Key and Program (108)
+
+unsigned int eePromAddress_Ind_Prime = 1400;  // EEProm address for Index_Main (20)
+unsigned int eePromAddress_Ind_1 = 1500;  // EEProm address for Index_1 (24)
+unsigned int eePromAddress_Ind_2 = 1550;  // EEProm address for Index_2 (24)
+unsigned int eePromAddress_Ind_3 = 1600;  // EEProm address for Index_3 (24)
+unsigned int eePromAddress_Ind_4 = 1650;  // EEProm address for Index_3 (24)
+unsigned int eePromAddress_Ind_5 = 1700;  // EEProm address for Index_3 (24)
+
+unsigned int eePromAddress_Filename_Ind = 1950; // EEProm address for filename (13)
+unsigned int eePromAddress_Filename_Length_Ind = 2000; // EEProm address for length of filename (13)
+unsigned int eePromAddress_Filename_Program = 2050; // EEProm address for filename (13)
+unsigned int eePromAddress_Filename_Length_Program = 2100; // EEProm address for length of filename (13)
 
 //==================================================================
 // Global Variables
 //==================================================================
+const char* nextionEnd = "\xFF\xFF\xFF";
+const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
 bool limitTriggered = false;
 bool eStopTriggered = false;
 int pageCallerId = 20;
@@ -424,7 +524,49 @@ String filename_Index2a;
 char * filename_Index2;
 
 int32_t returnSteps_Spindle = 0;
+int32_t returnSteps_M3 = 0;
+int32_t returnSteps_M4 = 0;
+
 int32_t startPositionAbs_Axis = 0;
+
+
+uint8_t value0 = 0;
+uint8_t value8 = 0;
+uint8_t value16 = 0;
+uint8_t value24 = 0;
+uint32_t packedValue = 0;
+
+float synchro_Ratio = 0;
+
+
+// PageMulti
+int stepperPosition_1 = 30;
+int stepperPosition_2 = 30;
+int stepperPosition_3 = 30;
+int stepperPosition_4 = 30;
+int stepperPosition_5 = 30;
+int stepperId_1 = 40;
+int stepperId_2 = 40;
+int stepperId_3 = 40;
+int stepperId_4 = 40;
+int stepperId_5 = 40;
+int stepper1_step = 48;
+int stepper1_dir = 49;
+
+int stepper2_step = 50;
+int stepper2_dir = 51;
+
+int stepper3_step = 52;
+int stepper3_dir = 53;
+
+int stepper4_step = 54;
+int stepper4_dir = 55;
+
+int stepper5_step = 56;
+int stepper5_dir = 57;
+
+int checkedCount = 0;
+
 
 
 
@@ -439,10 +581,15 @@ volatile float slideStepsAmplitude;
 volatile float spindleStepsAmplitude;
 volatile float kRatio;
 
+
 //float initialPosition_Axis = 0;
 int32_t endPosition_Spindle = 0;
+int32_t endPosition_M3 = 0;
+int32_t endPosition_M4 = 0;
 int32_t endPosition_Axis = 0;
 float degrees_Spindle = 0;
+float degrees_M3 = 0;
+float degrees_M4 = 0;
 float distance_Axis = 0;
 
 bool stopSteppers = false;
