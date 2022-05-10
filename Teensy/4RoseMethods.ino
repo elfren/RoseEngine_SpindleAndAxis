@@ -6042,7 +6042,7 @@ void IndexFromFile(int directionSpindle)
 /// </comment>
 /// <param name="newIndexSize">Unit size of index</param>
 /// <returns></returns>
-void IndexSize(float newIndexSize)
+void IndexSize(float newIndexSize, int currentIndex)
 {
 	const char* indexId_Char = "Index ID:";
 	const char* index1_Char = "Index1";
@@ -6056,11 +6056,13 @@ void IndexSize(float newIndexSize)
 	
 	int stepsPerRevolution = (int)round(configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle);
 #ifdef DEBUG
+	Serial.print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 	Serial.print(indexId_Char);
-	Serial.println(configIndex_Prime.indexId);
+	Serial.println(currentIndex);
 	Serial.println(newIndexSize);
+	Serial.print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 #endif // DEBUG
-	switch (configIndex_Prime.indexId)
+	switch (currentIndex)
 	{
 		case INDEX_1:
 		{
@@ -13350,6 +13352,35 @@ void GetFileListFromSD(int fileIndex)
 	return;
 }
 
+
+String GetFilenameFromEEPROM()
+{
+	int filename_Length;
+
+
+	// Get filename from EEPROM
+	EEPROM.get(eePromAddress_Filename_Length_Program, filename_Length);
+
+	char arChar[20];
+	int i;
+	for (i = 0; i <= filename_Length; i++)
+	{
+		arChar[i] = EEPROM.read(i + eePromAddress_Filename_Program);
+		Serial.print("arChar[i]:  ");
+		Serial.println(arChar[i]);
+	}
+	arChar[i++] = 0;
+
+	String programFilename(arChar);
+
+	// Open file
+	Serial.print("arChar:  ");
+	Serial.println(arChar);
+
+	return programFilename;
+
+
+}
 /// <summary>
 /// GetGreekKeyDataFromSD
 /// </summary>
@@ -18440,10 +18471,12 @@ void TestAllTeensyEEPROMValues() // ToDo
 			SerialPrint(configGreekKey.segmentLength_File);
 			SerialPrint(nextionQuoteEnd);
 
-			Serial.print("pageEEPROM.t309.txt=");
-			Serial.write(0x22);
-			Serial.print(configGreekKey.segmentLength_File);
-			Serial.println(nextionQuoteEnd);
+			SerialPrint("pageEEPROM.t312.txt=");
+			SerialWrite(0x22);
+			//Serial.print(configGreekKey.f);
+			String programFilename =  GetFilenameFromEEPROM();
+			SerialPrint(programFilename);
+			SerialPrintln(nextionQuoteEnd);
 
 			switch (configGreekKey.radialOrAxial_File)
 			{
@@ -18967,7 +19000,7 @@ void LoadSettings_PageIndex() // ToDo
 	iniValue = "Size_1";
 	eePromAddress_Nextion = 352;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
-	IndexSize(returnVal);
+	IndexSize(returnVal, ID_INDEX_1);
 
 	Serial.print("returnVal:  ");
 	Serial.println(returnVal);
@@ -18993,7 +19026,7 @@ void LoadSettings_PageIndex() // ToDo
 	eePromAddress_Nextion = 360;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
 	//configIndex_2.sizeInUnits = returnVal;
-	IndexSize(returnVal);
+	IndexSize(returnVal, ID_INDEX_2);
 
 	Serial.print("returnVal:  ");
 	Serial.println(returnVal);
@@ -19018,7 +19051,7 @@ void LoadSettings_PageIndex() // ToDo
 	eePromAddress_Nextion = 580;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
 	//configIndex_3.sizeInUnits = returnVal;
-	IndexSize(returnVal);
+	IndexSize(returnVal, ID_INDEX_3);
 
 	// Index 4
 	iniValue = "DivisionsOrDegrees_4";
@@ -19035,7 +19068,7 @@ void LoadSettings_PageIndex() // ToDo
 	eePromAddress_Nextion = 672;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
 	//configIndex_4.sizeInUnits = returnVal;
-	IndexSize(returnVal);
+	IndexSize(returnVal, ID_INDEX_4);
 
 	// Index 5
 	iniValue = "DivisionsOrDegrees_5";
@@ -19052,7 +19085,7 @@ void LoadSettings_PageIndex() // ToDo
 	eePromAddress_Nextion = 680;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
 	//configIndex_5.sizeInUnits = returnVal;
-	IndexSize(returnVal);
+	IndexSize(returnVal, ID_INDEX_5);
 
 	EEPROM.put(eePromAddress_Ind_Prime, configIndex_Prime);
 	EEPROM.put(eePromAddress_Ind_1, configIndex_1);
@@ -20140,6 +20173,7 @@ void LoadSettings_PagePreferences()
 	configSetup.limit_NCorNO = (int)returnVal;
 	value8 = (uint8_t)configSetup.limit_NCorNO;
 
+	iniKey = "Preferences";
 	iniValue = "RadialOrLineal_M3";
 	returnVal = ReturnIniValue(iniKey, iniValue);
 	configSetup.radialOrLinear_Axis_M3 = (int)returnVal;

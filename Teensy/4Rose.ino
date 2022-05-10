@@ -2472,7 +2472,7 @@ void loop()
 		{
 			float newIndexSize = GetSerialFloat(serialId);
 
-			IndexSize(newIndexSize);
+			IndexSize(newIndexSize,configIndex_Prime.indexId);
 
 #ifdef DEBUG
 			Serial.print(indexId_Char);
