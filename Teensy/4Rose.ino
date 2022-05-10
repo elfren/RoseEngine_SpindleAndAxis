@@ -2,7 +2,7 @@
 /* *****************************************************************
 * 4Rose main entry
 * Author: Edward French
-* Version: v3.0 - 03/10/22
+* Version: v3.0.f.beta - 05/09/22
 ******************************************************************/
 
 #include "math.h"
@@ -27,7 +27,7 @@ Stepper stepperAxis_X(PIN_AXIS_X_STEP, PIN_AXIS_X_DIR);
 Stepper stepperAxis_M3(PIN_AXIS_3_STEP, PIN_AXIS_3_DIR);
 Stepper stepperAxis_M4(PIN_AXIS_4_STEP, PIN_AXIS_4_DIR);
 
-Stepper stepperAxis_MainX(PIN_AXIS_X_STEP, PIN_AXIS_X_DIR);
+//Stepper stepperAxis_MainX(PIN_AXIS_X_STEP, PIN_AXIS_X_DIR);
 
 // TeensyStep controllers
 RotateControl controllerAxis;
@@ -3318,7 +3318,11 @@ void loop()
 			reverseDirection = GetSerialInteger();
 			if (reverseDirection == 0)
 			{
-				reverseDirection = DIR_CCW; // Nextion won't send negative number
+				reverseDirection = DIR_CCW; // Nextion can't send negative number
+			}
+			else
+			{
+				reverseDirection = DIR_CW;
 			}
 #ifdef DEBUG
 			Serial.print(axisId_Char);

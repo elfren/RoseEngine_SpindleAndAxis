@@ -167,10 +167,10 @@ void BeginSD()
 /// <returns>void</returns>
 void SetEnable(int axisId, bool enabled, bool checkKeepEnabled)
 {
-	Serial.print("SetEnable axisId: ");
+	/*Serial.print("SetEnable axisId: ");
 	Serial.println(axisId);
 	Serial.print("Enabled?: ");
-	Serial.println(enabled);
+	Serial.println(enabled);*/
 	bool ignoreDisable = false;
 	if (checkKeepEnabled)
 	{
@@ -200,8 +200,8 @@ void SetEnable(int axisId, bool enabled, bool checkKeepEnabled)
 		}
 		case ID_AXIS_Z:
 		{
-			Serial.print("Z Enabled?: ");
-			Serial.println(enabled);
+			//Serial.print("Z Enabled?: ");
+			//Serial.println(enabled);
 			if (enabled)
 			{
 				digitalWrite(PIN_AXIS_Z_ENABLE, configSetup.polarity_Axis_Z ? (LOW) : (HIGH)); // Enable 
@@ -3461,7 +3461,13 @@ void Main_TwoSteppers(
 
 			switch (incomingByte)
 			{
-				case 83: // - S
+				case 66: //B - AxisId
+				{
+					configMain.axisId = GetSerialInteger();
+					EEPROM.put(eePromAddress_Main, configMain);
+					break;
+				}
+				case 83: // - S Spindle stop
 				{
 	#ifdef DEBUG
 					Serial.print(spindle_Char);
@@ -3546,6 +3552,8 @@ void Main_TwoSteppers(
 					rotateController_MainAxis.overrideSpeed(0);
 					MilliDelay(5);
 					rotateController_MainAxis.stop();
+					Serial.print("configMain.axisId:  ");
+					Serial.println(configMain.axisId);
 					switch (configMain.axisId)
 					{
 						case ID_AXIS_Z:
@@ -9408,6 +9416,8 @@ void GreekKey_Pattern_2a()
 		//SerialWrite(0x22);
 		//SerialPrint(i);
 		//SerialPrint(nextionQuoteEnd);
+		Serial.print(" >>>>>>>>>>>>>>>              reverseDirection: ");
+		Serial.println(reverseDirection);
 		switch (configGreekKey.radialOrAxial_Pattern)
 		{
 			case RADIAL: // Axis Left CCW
@@ -9419,6 +9429,7 @@ void GreekKey_Pattern_2a()
 					goto EndLoop;
 
 				}
+				Serial.println("DIR_CCW ");
 				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, reverseDirection * DIR_CCW); //2
 				if (StopGreekKey() || stopAll)
 				{
@@ -9431,18 +9442,21 @@ void GreekKey_Pattern_2a()
 					goto EndLoop;
 
 				}
+				Serial.println("DIR_CW ");
 				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, reverseDirection * DIR_CW); //4
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
+
 				stopAll = GreekKey_Move_Axis(axisShortLegSteps, 1, reverseDirection * DIR_CCW, true); //5
 				if (StopGreekKey() || stopAll)
 				{
 					goto EndLoop;
 
 				}
+				Serial.println("DIR_CCW ");
 				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, reverseDirection * DIR_CCW); //6
 				if (StopGreekKey() || stopAll)
 				{
@@ -9458,7 +9472,7 @@ void GreekKey_Pattern_2a()
 				Serial.print("2.axisShortLegSteps:");
 				Serial.println(axisShortLegSteps);
 #endif // DEBUG
-
+				Serial.println("DIR_CW ");
 				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 2, reverseDirection * DIR_CW); //1
 				if (StopGreekKey() || stopAll)
 				{
@@ -9472,7 +9486,7 @@ void GreekKey_Pattern_2a()
 					goto EndLoop;
 
 				}
-			
+				Serial.println("DIR_CCW ");
 				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, reverseDirection * DIR_CCW); //3
 				if (StopGreekKey() || stopAll)
 				{
@@ -9486,7 +9500,7 @@ void GreekKey_Pattern_2a()
 					goto EndLoop;
 
 				}
-			
+				Serial.println("DIR_CCW ");
 				stopAll = GreekKey_Move_Spindle(spindleShortLegSteps, 1, reverseDirection * DIR_CCW); //5
 				if (StopGreekKey() || stopAll)
 				{
@@ -10002,18 +10016,18 @@ bool GreekKey_Move_Axis(float segmentSteps, float multiplier, int direction, boo
 			}
 		}
 	}
-#ifdef DEBUG
-	Serial.print("Enter GreekKey_Move_Axis.......................:");
-	Serial.println(currentAxis);
-	Serial.print("Move_Axis:segmentSteps ");
-	Serial.println(segmentSteps);
-	Serial.print("Move_Axis:multiplier ");
-	Serial.println(multiplier);
-	Serial.print("Move_Axis:direction ");
-	Serial.println(direction);
-	Serial.print("Move_Axis:updatePosition ");
-	Serial.println(updatePosition);
-#endif // DEBUG
+//#ifdef DEBUG
+//	Serial.print("Enter GreekKey_Move_Axis.......................:");
+//	Serial.println(currentAxis);
+//	Serial.print("Move_Axis:segmentSteps ");
+//	Serial.println(segmentSteps);
+//	Serial.print("Move_Axis:multiplier ");
+//	Serial.println(multiplier);
+//	Serial.print("Move_Axis:direction ");
+//	Serial.println(direction);
+//	Serial.print("Move_Axis:updatePosition ");
+//	Serial.println(updatePosition);
+//#endif // DEBUG
 
 
 	switch (currentAxis)
@@ -10085,8 +10099,8 @@ bool GreekKey_Move_Axis(float segmentSteps, float multiplier, int direction, boo
 	digitalWrite(limitPin_Min, HIGH);
 
 	uint8_t maxLimitSetting = digitalRead(limitPin_Min);
-	Serial.print("maxLimitSetting:                   ");
-	Serial.println(maxLimitSetting);
+	//Serial.print("maxLimitSetting:                   ");
+	//Serial.println(maxLimitSetting);
 
 	actualSpeed = maxSpeed * speedPercentage * .01;
 	StepControl stepControllerAxis;
@@ -10102,35 +10116,35 @@ bool GreekKey_Move_Axis(float segmentSteps, float multiplier, int direction, boo
 
 	stepperAxis.setPosition(0);
 
-#ifdef DEBUG
-	Serial.print("+++");
-	Serial.print(axisName);
-	Serial.print("-------------------------");
-	Serial.print(axisName);
-	Serial.println("+++");
-	Serial.print("segmentSteps: ");
-	Serial.println(segmentSteps);
-	Serial.print("multiplier: ");
-	Serial.println(multiplier);
-	Serial.print("direction: ");
-	Serial.println(direction);
-	Serial.print("targetSteps: ");
-	Serial.println(targetSteps);
-	Serial.print("actualSpeed: ");
-	Serial.println(actualSpeed);
-	Serial.print("MaxSpeed: ");
-	Serial.println(maxSpeed);
-	Serial.print("Acceleration: ");
-	Serial.println(accel);
-	Serial.print("speedPercentage: ");
-	Serial.println(speedPercentage);
-	Serial.print("===");
-	Serial.print(axisName);
-	Serial.print("-------------------------");
-	Serial.print(axisName);
-	Serial.println("===");
-
-#endif // DEBUG
+//#ifdef DEBUG
+//	Serial.print("+++");
+//	Serial.print(axisName);
+//	Serial.print("-------------------------");
+//	Serial.print(axisName);
+//	Serial.println("+++");
+//	Serial.print("segmentSteps: ");
+//	Serial.println(segmentSteps);
+//	Serial.print("multiplier: ");
+//	Serial.println(multiplier);
+//	Serial.print("direction: ");
+//	Serial.println(direction);
+//	Serial.print("targetSteps: ");
+//	Serial.println(targetSteps);
+//	Serial.print("actualSpeed: ");
+//	Serial.println(actualSpeed);
+//	Serial.print("MaxSpeed: ");
+//	Serial.println(maxSpeed);
+//	Serial.print("Acceleration: ");
+//	Serial.println(accel);
+//	Serial.print("speedPercentage: ");
+//	Serial.println(speedPercentage);
+//	Serial.print("===");
+//	Serial.print(axisName);
+//	Serial.print("-------------------------");
+//	Serial.print(axisName);
+//	Serial.println("===");
+//
+//#endif // DEBUG
 
 	stepControllerAxis.moveAsync(stepperAxis);
 	while (stepControllerAxis.isRunning())
@@ -10219,25 +10233,25 @@ bool GreekKey_Move_Axis(float segmentSteps, float multiplier, int direction, boo
 	}
 
 EndLoops:
-#ifdef DEBUG
-	Serial.print("endPosition_Axis:");
-	Serial.println(endPosition_Axis);
-#endif // DEBUG
+//#ifdef DEBUG
+//	Serial.print("endPosition_Axis:");
+//	Serial.println(endPosition_Axis);
+//#endif // DEBUG
 	if (updatePosition)
 	{
 		// Update position only for R(ight) and L(eft), not O(ut) or I(n).
 		endPosition_Axis = endPosition_Axis + stepperAxis.getPosition();
 	}
-#ifdef DEBUG
-	Serial.print("endPosition_Axis:");
-	Serial.println(endPosition_Axis);
-#endif // DEBUG
-
-#ifdef DEBUG
-	Serial.print("axisId:               ....");
-	Serial.println(currentAxis);
-	Serial.println("Exit GreekKey_Move_Axis");
-#endif // DEBUG
+//#ifdef DEBUG
+//	Serial.print("endPosition_Axis:");
+//	Serial.println(endPosition_Axis);
+//#endif // DEBUG
+//
+//#ifdef DEBUG
+//	Serial.print("axisId:               ....");
+//	Serial.println(currentAxis);
+//	Serial.println("Exit GreekKey_Move_Axis");
+//#endif // DEBUG
 
 	return retVal;
 }
@@ -10570,7 +10584,7 @@ bool GreekKey_Move_Spindle(float segmentSteps, float multiplier, int direction)
 	float targetStepsRounded = round(targetSteps);
 	
 	targetSteps = targetStepsRounded;
-	float targetSteps_M3Synchro = targetSteps * synchro_Ratio * (configMain.synchro_M3_Percentage * 0.01);
+	float targetSteps_M3Synchro = round(targetSteps * synchro_Ratio * (configMain.synchro_M3_Percentage * 0.01));
 
 #ifdef DEBUG
 	Serial.print("targetStepsRounded:");
@@ -10590,7 +10604,7 @@ bool GreekKey_Move_Spindle(float segmentSteps, float multiplier, int direction)
 
 	if (configMain.synchro_M3_Spindle == 1)//Synchronized M3 and Spindle
 	{
-		Serial.print("targetSteps * synchro_Ratio * (configMain.synchro_M3_Percentage * 0.01):  ");
+		Serial.print("round(targetSteps * synchro_Ratio * (configMain.synchro_M3_Percentage * 0.01)):  ");
 		Serial.println(targetSteps_M3Synchro);
 		Serial.print("targetSteps:  ");
 		Serial.println(targetSteps);
@@ -10601,9 +10615,10 @@ bool GreekKey_Move_Spindle(float segmentSteps, float multiplier, int direction)
 		Serial.print("configMain.synchro_M3_Percentage * 0.01:  ");
 		Serial.println(configMain.synchro_M3_Percentage * 0.01);
 
-		//stepperAxis_M3.setPosition(0);
-		stepperAxis_M3.setTargetRel(targetSteps * synchro_Ratio * (configMain.synchro_M3_Percentage * 0.01));
-		stepperAxis_M3.setMaxSpeed(configGreekKey.maxSpd_Axis_M3 * configGreekKey.speedPercent_Axis_M3 * .01);
+		stepperAxis_M3.setPosition(0);
+		stepperAxis_M3.setTargetRel(targetSteps_M3Synchro);
+		//stepperAxis_M3.setMaxSpeed(direction * configGreekKey.maxSpd_Axis_M3 * configGreekKey.speedPercent_Axis_M3 * .01);
+		stepperAxis_M3.setMaxSpeed(mSpeed*direction);
 		stepperAxis_M3.setAcceleration(configGreekKey.accel_Axis_M3);
 		SetEnable(ID_AXIS_3, true, true);
 		MilliDelay(5);
@@ -10674,18 +10689,18 @@ bool GreekKey_Move_Spindle(float segmentSteps, float multiplier, int direction)
 
 		MilliDelay(5);
 	}
-#ifdef DEBUG
-	Serial.print("endPosition_Spindle:");
-	Serial.println(endPosition_Spindle);
-#endif // DEBUG
-
-
-	endPosition_Spindle = endPosition_Spindle + stepperSpindle.getPosition();
-#ifdef DEBUG
-	Serial.print("endPosition_Spindle:");
-	Serial.println(endPosition_Spindle);
-	Serial.println("Exit GreekKey_Move_Spindle.......................");
-#endif // DEBUG
+//#ifdef DEBUG
+//	Serial.print("endPosition_Spindle:");
+//	Serial.println(endPosition_Spindle);
+//#endif // DEBUG
+//
+//
+//	endPosition_Spindle = endPosition_Spindle + stepperSpindle.getPosition();
+//#ifdef DEBUG
+//	Serial.print("endPosition_Spindle:");
+//	Serial.println(endPosition_Spindle);
+//	Serial.println("Exit GreekKey_Move_Spindle.......................");
+//#endif // DEBUG
 
 	return retVal;
 }
@@ -17536,7 +17551,7 @@ void TestAllTeensyEEPROMValues() // ToDo
 
 					SerialPrint("pageEEPROM.t305.txt=");
 					SerialWrite(0x22);
-					SerialPrint(configIndex_4.sizeInUnits);
+					SerialPrint(configIndex_4.sizeInUnits,4);
 					SerialPrint(nextionQuoteEnd);
 
 					switch (configIndex_4.fileOrFixed)
@@ -20112,18 +20127,18 @@ void LoadSettings_PagePreferences()
 	SendPackedData(eePromAddress_Nextion);
 
 	// EEPROM 540
+	iniKey = "Preferences";
+	iniValue = "Polarity_M3";
+	returnVal = ReturnIniValue(iniKey, iniValue);
+	returnVal >= 1 ? (configSetup.polarity_Axis_M3 = true) : (configSetup.polarity_Axis_M3 = false);
+	value0 = (uint8_t)returnVal;
+
 	iniKey = "Limits";
 	eePromAddress_Nextion = 540;
 	iniValue = "NC-NO";
 	returnVal = ReturnIniValue(iniKey, iniValue);
 	configSetup.limit_NCorNO = (int)returnVal;
 	value8 = (uint8_t)configSetup.limit_NCorNO;
-
-	iniKey = "Preferences";
-	iniValue = "Polarity_M3";
-	returnVal = ReturnIniValue(iniKey, iniValue);
-	returnVal >= 1 ? (configSetup.polarity_Axis_M3 = true) : (configSetup.polarity_Axis_M3 = false);
-	value0 = (uint8_t)returnVal;
 
 	iniValue = "RadialOrLineal_M3";
 	returnVal = ReturnIniValue(iniKey, iniValue);
