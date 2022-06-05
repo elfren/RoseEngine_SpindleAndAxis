@@ -6,6 +6,7 @@
 #define SHOW_POSITION
 #define DEBUG
 #define TEENSY_32
+#define ESTOP_ENABLED
 //==================================================================
 // Pin assignments
 //==================================================================
@@ -67,8 +68,8 @@
 #define PIN_SPI_CS_10 10  // Primary pin for SPI
 #define PIN_SPI_CS_9 9
 // ToDo: Allow on 4 motor board
-#define PIN_SPI_CS_15 15
-#define PIN_SPI_CS_24 24
+//#define PIN_SPI_CS_15 15
+//#define PIN_SPI_CS_24 24
 
 // Index page ID
 #define ID_INDEX_1 1
@@ -80,7 +81,7 @@
 #define DIR_CCW -1
 #define DIR_CW 1
 
-#define BY_DEGREES 2 // ToDo: Change to 1 and 0
+#define BY_DEGREES 1 // ToDo: Change to 1 and 0
 #define BY_DIVISIONS 0
 
 #define FIXED 0
@@ -116,7 +117,7 @@
 /////////////////////////////////////////////////////////////////////////
 #define PAGE_SPLASH 0
 #define PAGE_MAIN 1
-#define PAGE_MULTI 2
+#define PAGE_ONE 2
 #define PAGE_INDEX 3
 #define PAGE_MOVE 4
 #define PAGE_BE 5
@@ -125,7 +126,7 @@
 #define PAGE_GRK 8
 #define PAGE_PROGRAM 9
 #define PAGE_ROSE 10 
-#define PAGE_ADV 11 
+#define PAGE_MULTI 11 
 #define PAGE_NUMBERPAD 12 
 #define PAGE_SPINDLE 13
 #define PAGE_Z 14
@@ -279,16 +280,62 @@ struct configPageSetup
 	uint32_t motorCount;
 };
 
-// Config Structs
-//struct configSteppers // 
-//{
-//	uint32_t maxSpd_Spindle;
-//	uint32_t accel_Spindle;
-//	uint32_t maxSpd_Axis;
-//	uint32_t accel_Axis;
-//	uint32_t speedPercent_Spindle;
-//	uint32_t speedPercent_Axis;
-//};
+struct configSpindle
+{
+	uint32_t microsteps_Spindle;
+	uint32_t steps360_Spindle;
+	float gearRatio_Spindle;
+	bool polarity_Spindle;
+};
+
+struct configZ
+{
+	uint32_t microsteps_Axis_Z;
+	uint32_t steps360_Axis_Z;
+	float distancePerRev_AxisZ;
+	bool polarity_Axis_Z;
+};
+struct configX
+{
+	uint32_t microsteps_Axis_X;
+	uint32_t steps360_Axis_X;
+	float distancePerRev_AxisX;
+	bool polarity_Axis_X;
+};
+
+struct configAltX
+{
+
+	uint32_t microsteps_Axis_XAlt;
+	uint32_t steps360_Axis_XAlt;
+	float distancePerRev_AxisXAlt;
+	bool polarity_Axis_XAlt;
+};
+
+struct configM3
+{
+	uint32_t microsteps_Axis_M3;
+	uint32_t steps360_Axis_M3;
+	float gearRatio_AxisM3;
+	float distancePerRev_AxisM3;
+	bool polarity_Axis_M3;
+	uint32_t radialOrLinear_Axis_M3;
+	float radiusM3;
+
+};
+
+struct configM4
+{
+	
+	uint32_t microsteps_Axis_M4;
+	uint32_t steps360_Axis_M4;
+	float gearRatio_AxisM4;
+	float distancePerRev_AxisM4;
+	bool polarity_Axis_M4;
+	uint32_t radialOrLinear_Axis_M4;
+	float radiusM4;
+
+};
 
 struct configPageRec // page 5,6,13,14
 {
@@ -485,8 +532,8 @@ unsigned int eePromAddress_Ind_Prime = 1400;  // EEProm address for Index_Main (
 unsigned int eePromAddress_Ind_1 = 1500;  // EEProm address for Index_1 (24)
 unsigned int eePromAddress_Ind_2 = 1550;  // EEProm address for Index_2 (24)
 unsigned int eePromAddress_Ind_3 = 1600;  // EEProm address for Index_3 (24)
-unsigned int eePromAddress_Ind_4 = 1650;  // EEProm address for Index_3 (24)
-unsigned int eePromAddress_Ind_5 = 1700;  // EEProm address for Index_3 (24)
+unsigned int eePromAddress_Ind_4 = 1650;  // EEProm address for Index_4 (24)
+unsigned int eePromAddress_Ind_5 = 1700;  // EEProm address for Index_5 (24)
 
 unsigned int eePromAddress_Filename_Ind = 1950; // EEProm address for filename (13)
 unsigned int eePromAddress_Filename_Length_Ind = 2000; // EEProm address for length of filename (13)

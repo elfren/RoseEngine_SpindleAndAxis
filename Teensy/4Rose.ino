@@ -162,10 +162,10 @@ void setup()
 	// Update with values from EEProm
 	EEPROM.get(eePromAddress_Setup, configSetup);
 	EEPROM.get(eePromAddress_Main, configMain);
-
+#ifdef DEBUG
 	Serial.print("                                eePromAddress_Main: ");
 	Serial.println(eePromAddress_Main);
-
+#endif // DEBUG
 	EEPROM.get(eePromAddress_Sync, configSync);
 
 	EEPROM.get(eePromAddress_Multi, configMulti);
@@ -173,6 +173,8 @@ void setup()
 	EEPROM.get(eePromAddress_Ind_1, configIndex_1);
 	EEPROM.get(eePromAddress_Ind_2, configIndex_2);
 	EEPROM.get(eePromAddress_Ind_3, configIndex_3);
+	EEPROM.get(eePromAddress_Ind_4, configIndex_4);
+	EEPROM.get(eePromAddress_Ind_5, configIndex_5);
 	EEPROM.get(eePromAddress_Mov, configMove);
 	EEPROM.get(eePromAddress_Rose, configRose);
 	EEPROM.get(eePromAddress_Rec, configRec);
@@ -224,13 +226,13 @@ void setup()
 		pinMode(PIN_AXIS_4_ENABLE, OUTPUT);
 		SetEnable(ID_AXIS_3, false, true);
 
-		if (configSetup.limit_Min_M4 > 9)
+		if (configSetup.limit_Min_M4 > 9 && configSetup.limit_Min_M4 < 40)
 		{
 			pinMode(configSetup.limit_Min_M4, INPUT_PULLUP);
 			MilliDelay(10);
 			digitalWrite(configSetup.limit_Min_M4, configSetup.limit_NCorNO);  // Enable
 		}
-		if (configSetup.limit_Max_M4 > 9)
+		if (configSetup.limit_Max_M4 > 9 && configSetup.limit_Max_M4 < 40)
 		{
 			pinMode(configSetup.limit_Max_M4, INPUT_PULLUP);
 			MilliDelay(10);
@@ -240,13 +242,13 @@ void setup()
 	}
 
 		// Initialize Limit switches	
-	if(configSetup.limit_Min_Z >9)
+	if(configSetup.limit_Min_Z >9 && configSetup.limit_Min_Z < 40)
 	{ 
 		pinMode(configSetup.limit_Min_Z, INPUT_PULLUP);
 		MilliDelay(10);
 		digitalWrite(configSetup.limit_Min_Z, configSetup.limit_NCorNO);  // Enable
 	}
-	if (configSetup.limit_Max_Z > 9)
+	if (configSetup.limit_Max_Z > 9 && configSetup.limit_Max_Z < 40)
 	{ 
 		pinMode(configSetup.limit_Max_Z, INPUT_PULLUP);
 		MilliDelay(10);
@@ -279,7 +281,7 @@ void setup()
 		digitalWrite(configSetup.limit_Max_M3, configSetup.limit_NCorNO);  // Enable
 	}
 
-	if (configSetup.cutterMotorPin > 9)
+	if (configSetup.cutterMotorPin > 9 && configSetup.cutterMotorPin < 40)
 	{
 		pinMode(configSetup.cutterMotorPin, INPUT_PULLUP);
 		digitalWrite(configSetup.cutterMotorPin, HIGH);  // Enable
@@ -287,7 +289,7 @@ void setup()
 
 	MilliDelay(10);
 
-	if (configSetup.eStop > 9)
+	if (configSetup.eStop > 9 && configSetup.eStop < 40)
 	{
 		pinMode(configSetup.eStop, INPUT_PULLUP);
 		digitalWrite(configSetup.eStop, configSetup.limit_NCorNO);  // Enable
@@ -296,14 +298,15 @@ void setup()
 	MilliDelay(10);
 
 	// Enable SD card reader
-	if(configSetup.motorCount<5)
-	{ 
-		pinMode(PIN_SPI_CS_24, OUTPUT);
-		digitalWrite(PIN_SPI_CS_24, HIGH);
-		pinMode(PIN_SPI_CS_15, OUTPUT);
-		digitalWrite(PIN_SPI_CS_15, HIGH);
-		pinMode(PIN_SPI_CS_10, OUTPUT);
-	}
+	//if(configSetup.motorCount<5)
+	//{ 
+	//	pinMode(PIN_SPI_CS_24, OUTPUT);
+	//	digitalWrite(PIN_SPI_CS_24, HIGH);
+	//	pinMode(PIN_SPI_CS_15, OUTPUT);
+	//	digitalWrite(PIN_SPI_CS_15, HIGH);
+	//	
+	//}
+    pinMode(PIN_SPI_CS_10, OUTPUT);
 	digitalWrite(PIN_SPI_CS_10, HIGH);
 	pinMode(PIN_SPI_CS_9, OUTPUT);
 	digitalWrite(PIN_SPI_CS_9, HIGH);
@@ -534,6 +537,7 @@ void loop()
 					break;
 				}
 				case PAGE_MULTI:
+				case PAGE_ONE:
 				{
 					configMulti.maxSpd_Spindle = maxSpeed_Spindle;
 					EEPROM.put(eePromAddress_Multi, configMulti);
@@ -598,6 +602,7 @@ void loop()
 				}
 
 				case PAGE_MULTI:
+				case PAGE_ONE:
 				{
 
 					configMulti.accel_Spindle = spindleAccel;
@@ -747,6 +752,7 @@ void loop()
 					break;
 				}
 				case PAGE_MULTI:
+				case PAGE_ONE:
 				{
 					Serial.print("2.axisId:  ");
 					Serial.println(configMulti.axisId);
@@ -761,7 +767,7 @@ void loop()
 				{
 					configIndex_Prime.axisId = axisId;
 	#ifdef DEBUG
-					Serial.print(indexId_Char);
+					Serial.print("Index axisId:  ");
 					Serial.println(configIndex_Prime.axisId);
 	#endif // DEBUG
 					EEPROM.put(eePromAddress_Ind_Prime, configIndex_Prime);
@@ -785,10 +791,12 @@ void loop()
 					configSync.axisId = axisId;
 					configRec.axisId = axisId;
 					configGreekKey.axisId = axisId;
+					configMove.axisId = axisId;
 
 					EEPROM.put(eePromAddress_Sync, configSync);
 					EEPROM.put(eePromAddress_Rec, configRec);
 					EEPROM.put(eePromAddress_Grk, configGreekKey);
+					EEPROM.put(eePromAddress_Mov, configMove);
 	#ifdef DEBUG
 					Serial.print(axisId_Char);
 					Serial.println(configSync.axisId);
@@ -1021,6 +1029,8 @@ void loop()
 		case 80: // P - Setup: Keep steppers enabled
 		{
 			configSetup.keepSteppersEnabled = GetSerialInteger();
+			Serial.print("configSetup.keepSteppersEnabled:");
+			Serial.println(configSetup.keepSteppersEnabled);
 			// Enable or disable the steppers
 			if (configSetup.keepSteppersEnabled == 1)
 			{
@@ -1057,7 +1067,7 @@ void loop()
 					else
 					{
 						//IndexSpindle(DIR_CCW);
-						IndexM3(DIR_CCW);
+						Index(DIR_CCW);
 					}
 
 					break;
@@ -1071,7 +1081,7 @@ void loop()
 					else
 					{
 						//IndexSpindle(DIR_CCW);
-						IndexM3(DIR_CCW);
+						Index(DIR_CCW);
 					}
 
 					break;
@@ -1085,7 +1095,7 @@ void loop()
 					else
 					{
 						//IndexSpindle(DIR_CCW);
-						IndexM3(DIR_CCW);
+						Index(DIR_CCW);
 					}
 
 					break;
@@ -1099,7 +1109,7 @@ void loop()
 					else
 					{
 						//IndexSpindle(DIR_CCW);
-						IndexM3(DIR_CCW);
+						Index(DIR_CCW);
 					}
 
 					break;
@@ -1113,7 +1123,7 @@ void loop()
 					else
 					{
 						//IndexSpindle(DIR_CCW);
-						IndexM3(DIR_CCW);
+						Index(DIR_CCW);
 					}
 
 					break;
@@ -1145,7 +1155,7 @@ void loop()
 					else
 					{
 						//IndexSpindle(DIR_CW);
-						IndexM3(DIR_CW);
+						Index(DIR_CW);
 					}
 					break;
 				}
@@ -1158,7 +1168,7 @@ void loop()
 					else
 					{
 						//IndexSpindle(DIR_CW);
-						IndexM3(DIR_CW);
+						Index(DIR_CW);
 					}
 					break;
 				}
@@ -1171,7 +1181,7 @@ void loop()
 					else
 					{
 						//IndexSpindle(DIR_CW);
-						IndexM3(DIR_CW);
+						Index(DIR_CW);
 					}
 
 					break;
@@ -1185,7 +1195,7 @@ void loop()
 					else
 					{
 						//IndexSpindle(DIR_CW);
-						IndexM3(DIR_CW);
+						Index(DIR_CW);
 					}
 
 					break;
@@ -1199,7 +1209,7 @@ void loop()
 					else
 					{
 						//IndexSpindle(DIR_CW);
-						IndexM3(DIR_CW);
+						Index(DIR_CW);
 					}
 
 					break;
@@ -1239,7 +1249,7 @@ void loop()
 			EEPROM.put(eePromAddress_Setup, configSetup);
 			break;
 		}
-		case 87: // W - Rec: Radial or Axial
+		case 87: // W - Shared: Radial or Axial
 		{
 			int radialOrAxial = GetSerialInteger();
 			configRec.radial_axial = radialOrAxial;
@@ -1808,8 +1818,14 @@ void loop()
 #endif // DEBUG
 			break;
 		}
-		case 169: // © - Not used
+		case 169: // © - M4 axis Gear Ratio
 		{
+			configSetup.gearRatio_AxisM4 = GetSerialFloat(serialId);
+			EEPROM.put(eePromAddress_Setup, configSetup);
+#ifdef DEBUG
+			Serial.print(gearRatio_Char);
+			Serial.println(configSetup.gearRatio_AxisM4);
+#endif // DEBUG
 			break;
 		}
 		case 170: // ª - Setup: Cutter Motor Pin
@@ -2084,6 +2100,7 @@ void loop()
 					break;
 				}
 				case PAGE_MULTI:
+				case PAGE_ONE:
 				{
 					Serial.print("pageMulti-configMulti.axisId: ");
 					Serial.println(pageCallerId);
@@ -2321,6 +2338,7 @@ void loop()
 					break;
 				}
 				case PAGE_MULTI:
+				case PAGE_ONE:
 				{
 					switch (configMulti.axisId)
 					{
@@ -2476,8 +2494,22 @@ void loop()
 
 #ifdef DEBUG
 			Serial.print(indexId_Char);
-			Serial.println(configIndex_Prime.indexId);
+			Serial.print(configIndex_Prime.indexId);
+			Serial.print("   Size:   ");
 			Serial.println(newIndexSize);
+
+			Serial.print("Index AxisId: ");
+			Serial.println(configIndex_Prime.axisId);
+			Serial.print("configIndex_1.sizeInUnits:  ");
+			Serial.println(configIndex_1.sizeInUnits);
+			Serial.print("configIndex_2.sizeInUnits:  ");
+			Serial.println(configIndex_2.sizeInUnits);
+			Serial.print("configIndex_3.sizeInUnits:  ");
+			Serial.println(configIndex_3.sizeInUnits);
+			Serial.print("configIndex_4.sizeInUnits:  ");
+			Serial.println(configIndex_4.sizeInUnits);
+			Serial.print("configIndex_5.sizeInUnits:  ");
+			Serial.println(configIndex_5.sizeInUnits);
 #endif // DEBUG
 
 
@@ -2507,7 +2539,8 @@ void loop()
 		{
 			configMulti.direction = GetSerialInteger();
 			EEPROM.put(eePromAddress_Multi, configMulti);
-			break;
+			Serial.print("configMulti.direction: ");
+			Serial.println(configMulti.direction);
 			break;
 		}
 		case 195: // Á - Setup: M3: Radial or Lineal
@@ -2781,6 +2814,7 @@ void loop()
 				}
 
 				case PAGE_MULTI:
+				case PAGE_ONE:
 				{
 					ReturnToStartPosition(configMulti.axisId);
 					break;
@@ -2800,7 +2834,7 @@ void loop()
 			EEPROM.put(eePromAddress_Ind_Prime, configIndex_Prime);
 			break;
 		}
-		case 208: // Ð - Index: Synchro
+		case 208: // Ð - Index: Synchro Percentage
 		{
 			configIndex_Prime.synchro_M3_Percentage = GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Ind_Prime, configIndex_Prime);
@@ -3212,31 +3246,76 @@ void loop()
 			returnSteps_Spindle = 0;
 			endPosition_Axis = 0;
 			endPosition_Spindle = 0;
-#ifdef DEBUG
-			Serial.print("Z AxisId: ");
-			Serial.println(configMain.axisId);
-#endif // DEBUG
 
 			pageCallerId = GetSerialInteger();
 
+			Serial.print("Index AxisId: ");
+			Serial.println(configIndex_Prime.axisId);
 
-//			switch (pageCallerId)
-//			{
-//				case PAGE_MAIN:
-//				{
-//	#ifdef DEBUG
-//					Serial.print("AxisId Z: ");
-//					Serial.println(configMain.axisId);
-//	#endif // DEBUG
-//					break;
-//				}
-//				default:
-//				{
-//					Serial.print("PageId: ");
-//					Serial.println(pageCallerId);
-//				}
-//			}
-#ifdef DEBUG
+	#ifdef DEBUG
+			switch (pageCallerId)
+			{
+				case PAGE_MAIN:
+				{
+
+					Serial.print("Main AxisId: ");
+					Serial.println(configMain.axisId);
+
+					break;
+				}
+				case PAGE_ONE:
+				case PAGE_MULTI:
+				{
+
+					Serial.print("One/Multi AxisId: ");
+					Serial.println(configMulti.axisId);
+
+					break;
+				}
+				case PAGE_INDEX:
+				{
+
+					Serial.print("Index AxisId: ");
+					Serial.println(configIndex_Prime.axisId);
+					Serial.print("configIndex_1.sizeInUnits:  ");
+					Serial.println(configIndex_1.sizeInUnits);
+					Serial.print("configIndex_2.sizeInUnits:  ");
+					Serial.println(configIndex_2.sizeInUnits);
+					Serial.print("configIndex_3.sizeInUnits:  ");
+					Serial.println(configIndex_3.sizeInUnits);
+					Serial.print("configIndex_4.sizeInUnits:  ");
+					Serial.println(configIndex_4.sizeInUnits);
+					Serial.print("configIndex_5.sizeInUnits:  ");
+					Serial.println(configIndex_5.sizeInUnits);
+					break;
+				}
+				case PAGE_MOVE:
+				{
+
+					Serial.print("Move AxisId: ");
+					Serial.println(configMove.axisId);
+
+					break;
+				}
+				case PAGE_SYNC:
+				case PAGE_REC:
+				case PAGE_GRK:
+				case PAGE_PROGRAM:
+				{
+
+					Serial.print("Shared AxisId: ");
+					Serial.println(configSync.axisId);
+
+					break;
+				}
+				default:
+				{
+					Serial.print("PageId: ");
+					Serial.println(pageCallerId);
+				}
+			}
+
+
 			Serial.print(pageCallerId_Char);
 			Serial.println(pageCallerId);
 #endif // DEBUG
