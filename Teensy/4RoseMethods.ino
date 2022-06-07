@@ -286,16 +286,23 @@ double GetSerialFloat(int serialPortId)
 			retVal = GetSerialFloatA(Serial1);
 			break;
 		}
-		case 2:
-		{
-			retVal = GetSerialFloatA(Serial2);
-			break;
-		}
+		//case 2:
+		//{
+		//	retVal = GetSerialFloatA(Serial2);
+		//	break;
+		//}
 		case 3:
 		{
 			retVal = GetSerialFloatA(Serial3);
 			break;
 		}
+#ifndef TEENSY_32
+		case 4:
+		{
+			retVal = GetSerialFloatA(Serial4);
+			break;
+		}
+#endif // Teensy 32
 	}
 
 	return retVal;
@@ -1627,7 +1634,10 @@ void MoveAxis(int axisId, int directionAxis)
 			}
 		}
 
-		if(configSetup.eStop !=0)
+		Serial.print(" configSetup.eStop:  ");
+
+		//if(configSetup.eStop !=0)
+		if (configSetup.eStop > 9 && configSetup.eStop < 40)
 		{ 
 			if (digitalRead(configSetup.eStop) != configSetup.limit_NCorNO)
 			{
@@ -2389,7 +2399,7 @@ void Main_TwoSteppers(
 	const char * spindle_Char = "Spindle-";
 	const char * maxSpd_Char = "MaxSpeed: ";
 	const char * accel_Char = "Accel: ";
-	const char * targetPosition_Char = "Target Position: ";
+//	const char * targetPosition_Char = "Target Position: ";
 	const char * stop_Char = "Stop: ";
 	const char * stopped_Char = "Stopped";
 	const char * go_Char = "Go: ";
@@ -3620,11 +3630,11 @@ void Multi_SimultaneousTargets()
 			stepperId_1 = ID_AXIS_4;
 			if (direction == 8)
 			{
-				direction_1 = 1;
+				direction_1 = -1;
 			}
 			else
 			{
-				direction_1 = -1;
+				direction_1 = 1;
 			}
 			if (configSetup.radialOrLinear_Axis_M4 == RADIAL_M4)
 			{
@@ -3649,11 +3659,11 @@ void Multi_SimultaneousTargets()
 			stepperId_2 = ID_AXIS_4;
 			if (direction == 8)
 			{
-				direction_2 = 1;
+				direction_2 = -1;
 			}
 			else
 			{
-				direction_2 = -1;
+				direction_2 = 1;
 			}
 			if (configSetup.radialOrLinear_Axis_M4 == RADIAL_M4)
 			{
@@ -3680,11 +3690,11 @@ void Multi_SimultaneousTargets()
 			stepperId_3 = ID_AXIS_4;
 			if (direction == 8)
 			{
-				direction_3 = 1;
+				direction_3 = -1;
 			}
 			else
 			{
-				direction_3 = -1;
+				direction_3 = 1;
 			}
 			if (configSetup.radialOrLinear_Axis_M4 == RADIAL_M4)
 			{
@@ -3712,11 +3722,11 @@ void Multi_SimultaneousTargets()
 			stepperId_4 = ID_AXIS_4;
 			if (direction == 8)
 			{
-				direction_4 = 1;
+				direction_4 = -1;
 			}
 			else
 			{
-				direction_4 = -1;
+				direction_4 = 1;
 			}
 			if (configSetup.radialOrLinear_Axis_M4 == RADIAL_M4)
 			{
@@ -3999,7 +4009,7 @@ void Multi_SimultaneousTargets()
 	stepController.moveAsync(stepper_1, stepper_2, stepper_3, stepper_4, stepper_5);
 
 	int eStop = 0;
-	int nCorNO = configSetup.limit_NCorNO;
+	//int nCorNO = configSetup.limit_NCorNO;
 	while (stepController.isRunning())
 	{
 
@@ -8643,7 +8653,7 @@ EndLoop:
 void GreekKey_Pattern_2a()
 {
 	bool stopAll = false;
-	const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
+//	const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
 	int totalSpindleSegments = 3;
 	limitTriggered = false;
 	String nextionEnd = "\xFF\xFF\xFF";
@@ -9365,7 +9375,7 @@ bool GreekKey_Move_Axis(float segmentSteps, float multiplier, int direction, boo
 	digitalWrite(limitPin_Max, HIGH);
 	digitalWrite(limitPin_Min, HIGH);
 
-	uint8_t maxLimitSetting = digitalRead(limitPin_Min);
+//	uint8_t maxLimitSetting = digitalRead(limitPin_Min);
 	//Serial.print("maxLimitSetting:                   ");
 	//Serial.println(maxLimitSetting);
 
@@ -12044,21 +12054,24 @@ void SerialPrint(String text, int decimalPlaces = 0)
 				Serial1.print(text);
 			break;
 		}
-		case 2:
-		{
-			Serial2.print(text);
-			break;
-		}
+		//case 2:
+		//{
+		//	Serial2.print(text);
+		//	break;
+		//}
 		case 3:
 		{
 			Serial3.print(text);
 			break;
 		}
-		//case 4:
-		//{
-		//	Serial4.print(text);
-		//	break;
-		//}
+#ifndef TEENSY_32
+
+		case 4:
+		{
+			Serial4.print(text);
+			break;
+		}
+#endif // !TEENSY_32
 	}
 }
 
@@ -12085,21 +12098,23 @@ void SerialPrint(float number, int decimalPlaces = 0)
 		Serial1.print(number, trim);
 		break;
 	}
-	case 2:
-	{
-		Serial2.print(number, trim);
-		break;
-	}
+	//case 2:
+	//{
+	//	Serial2.print(number, trim);
+	//	break;
+	//}
 	case 3:
 	{
 		Serial3.print(number, trim);
 		break;
 	}
-	//case 4:
-	//{
-	//	Serial4.print(number, trim);
-	//	break;
-	//}
+#ifndef TEENSY_32
+	case 4:
+	{
+		Serial4.print(number, trim);
+		break;
+	}
+#endif // Teensy_32
 	}
 }
 
@@ -12154,21 +12169,23 @@ void SerialWrite(char text)
 			Serial1.write(text);
 			break;
 		}
-		case 2:
-		{
-			Serial2.write(text);
-			break;
-		}
+		//case 2:
+		//{
+		//	Serial2.write(text);
+		//	break;
+		//}
 		case 3:
 		{
 			Serial3.write(text);
 			break;
 		}
-		//case 4:
-		//{
-		//	Serial4.write(text);
-		//	break;
-		//}
+#ifndef TEENSY_32
+		case 4:
+		{
+			Serial4.write(text);
+			break;
+		}
+#endif //Teensy 32
 	}
 }
 
@@ -12184,9 +12201,11 @@ void SerialPrintln(String text)
 {
 	Serial.println(text);
 	Serial1.println(text);
-	Serial2.println(text);
+	//Serial2.println(text);
 	Serial3.println(text);
-	//Serial4.println(text);
+#ifndef TEENSY_32
+	Serial4.println(text);
+#endif // Teensy 32
 }
 
 /// <summary>
@@ -12213,21 +12232,23 @@ int SerialRead(int serialPortId)
 			incomingData = Serial1.read();
 			break;
 		}
-		case 2:
-		{
-			incomingData = Serial2.read();
-			break;
-		}
+		//case 2:
+		//{
+		//	incomingData = Serial2.read();
+		//	break;
+		//}
 		case 3:
 		{
 			incomingData = Serial3.read();
 			break;
 		}
-		//case 4:
-		//{
-		//	incomingData = Serial4.read();
-		//	break;
-		//}
+#ifndef TEENSY_32
+		case 4:
+		{
+			incomingData = Serial4.read();
+			break;
+		}
+#endif // Teensy_32
 	}
 
 	return incomingData;
@@ -12250,18 +12271,20 @@ int SerialAvailable()
 	{
 		serialId = 1;
 	}
-	else if (Serial2.available() > 0)
-	{
-		serialId = 2;
-	}
+	//else if (Serial2.available() > 0)
+	//{
+	//	serialId = 2;
+	//}
 	else if (Serial3.available() > 0)
 	{
 		serialId = 3;
 	}
-	//else if (Serial4.available() > 0)
-	//{
-	//	serialId = 4;
-	//}
+#ifndef TEENSY_32
+	else if (Serial4.available() > 0)
+	{
+		serialId = 4;
+	}
+#endif // Teensy 32
 	return serialId;
 }
 
@@ -18503,6 +18526,12 @@ void SendPackedData(uint32_t eePromAddress)
 	SerialPrint("click m0,0");
 	SerialPrint(nextionEnd);
 
+	Serial.print("SendPackedData: ");
+	Serial.println(eePromAddress);
+	Serial.println(value0);
+	Serial.println(value8);
+	Serial.println(value16);
+	Serial.println(value24);
 }
 
 /// <summary>
@@ -19787,6 +19816,7 @@ void LoadSettings_PagePreferences()
 	SendPackedData(eePromAddress_Nextion);
 
 	// EEPROM 540
+	eePromAddress_Nextion = 540;
 	iniKey = "Preferences";
 	iniValue = "Polarity_M3";
 	returnVal = ReturnIniValue(iniKey, iniValue);
@@ -19794,7 +19824,6 @@ void LoadSettings_PagePreferences()
 	value0 = (uint8_t)returnVal;
 
 	iniKey = "Limits";
-	eePromAddress_Nextion = 540;
 	iniValue = "NC-NO";
 	returnVal = ReturnIniValue(iniKey, iniValue);
 	configSetup.limit_NCorNO = (int)returnVal;

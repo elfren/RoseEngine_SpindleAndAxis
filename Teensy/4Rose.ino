@@ -2,7 +2,7 @@
 /* *****************************************************************
 * 4Rose main entry
 * Author: Edward French
-* Version: v3.0.f.beta - 05/09/22
+* Version: v3.0.j.beta - 06/06/22
 ******************************************************************/
 
 #include "math.h"
@@ -89,25 +89,25 @@ void setup()
 		Serial.println(serialId);
 #endif // Debug
 	}
-	// Serial2
-	Serial2.begin(921600); //Nextion Serial baud rate set in Nextion pageMain Preinitialize Event tab
-	Serial2.print("bauds=921600");
-	Serial2.print(nextionEnd);
-	MilliDelay(50);
-	Serial2.print("bauds=921600");
-	Serial2.print(nextionEnd);
-	MilliDelay(50);
-	Serial2.print("bkcmd=0");  // Set Nextion to return NO replies to each command
-	Serial2.print(nextionEnd);
-	MilliDelay(50);
-	if (Serial2.available() > 0)
-	{
-		serialId = 2;
-#ifdef DEBUG
-		Serial.print("2-serialId: ");
-		Serial.println(serialId);
-#endif // Debug
-	}
+//	// Serial2
+//	Serial2.begin(921600); //Nextion Serial baud rate set in Nextion pageMain Preinitialize Event tab
+//	Serial2.print("bauds=921600");
+//	Serial2.print(nextionEnd);
+//	MilliDelay(50);
+//	Serial2.print("bauds=921600");
+//	Serial2.print(nextionEnd);
+//	MilliDelay(50);
+//	Serial2.print("bkcmd=0");  // Set Nextion to return NO replies to each command
+//	Serial2.print(nextionEnd);
+//	MilliDelay(50);
+//	if (Serial2.available() > 0)
+//	{
+//		serialId = 2;
+//#ifdef DEBUG
+//		Serial.print("2-serialId: ");
+//		Serial.println(serialId);
+//#endif // Debug
+//	}
 
 	// Serial3
 	//Serial3.begin(115200); //Nextion Serial baud rate set in Nextion pageMain Preinitialize Event tab
@@ -133,26 +133,28 @@ void setup()
 	}
 
 	// Serial4
-//
-//	Serial4.begin(921600); //Nextion Serial baud rate set in Nextion pageMain Preinitialize Event tab
-//	Serial4.print("bauds=921600");
-//	Serial4.print(nextionEnd);
-//	MilliDelay(50);
-//	//Serial3.print("bauds=115200");
-//	Serial4.print("bauds=921600");
-//	Serial4.print(nextionEnd);
-//	MilliDelay(50);
-//	Serial4.print("bkcmd=0");  // Set Nextion to return NO replies to each command
-//	Serial4.print(nextionEnd);
-//	MilliDelay(50);
-//	if (Serial4.available() > 0)
-//	{
-//		serialId = 4;
-//#ifdef DEBUG
-//		Serial.print("4-serialId: ");
-//		Serial.println(serialId);
-//#endif // Debug
-//	}
+#ifndef TEENSY_32
+	Serial4.begin(921600); //Nextion Serial baud rate set in Nextion pageMain Preinitialize Event tab
+	Serial4.print("bauds=921600");
+	Serial4.print(nextionEnd);
+	MilliDelay(50);
+	//Serial3.print("bauds=115200");
+	Serial4.print("bauds=921600");
+	Serial4.print(nextionEnd);
+	MilliDelay(50);
+	Serial4.print("bkcmd=0");  // Set Nextion to return NO replies to each command
+	Serial4.print(nextionEnd);
+	MilliDelay(50);
+
+	if (Serial4.available() > 0)
+	{
+		serialId = 4;
+#ifdef DEBUG
+		Serial.print("4-serialId: ");
+		Serial.println(serialId);
+#endif // Debug
+	}
+#endif //Teensy_32
 
 
 #ifdef DEBUG
@@ -426,13 +428,13 @@ void loop()
 		Serial.print("1.serialId: ");
 #endif // Debug
 	}
-	else if (Serial2.available() > 0)
-	{
-		serialId = 2;
-#ifdef DEBUG
-		Serial.print("2.serialId: ");
-#endif // Debug
-	}
+//	else if (Serial2.available() > 0)
+//	{
+//		serialId = 2;
+//#ifdef DEBUG
+//		Serial.print("2.serialId: ");
+//#endif // Debug
+//	}
 	else if (Serial3.available() > 0)
 	{
 		serialId = 3;
@@ -440,15 +442,35 @@ void loop()
 		Serial.print("3.serialId: ");
 #endif // Debug
 	}
-//	else if (Serial4.available() > 0)
-//	{
-//		serialId = 4;
-//#ifdef DEBUG
-//		Serial.print("3.serialId: ");
-//#endif // Debug
-//	}
+#ifndef TEENSY_32
+	else if (Serial4.available() > 0)
+	{
+		serialId = 4;
+#ifdef DEBUG
+		Serial.print("3.serialId: ");
+#endif // Debug
+	}
+#endif //Teensy_32
 	// All Nextion incoming data packets are terminated with one 0xFF byte
-	if ((Serial1.available() > 0) || (Serial2.available() > 0) || (Serial3.available() > 0))// || (Serial4.available() > 0))
+	//if ((Serial1.available() > 0) || (Serial2.available() > 0) || (Serial3.available() > 0))// || (Serial4.available() > 0))
+
+	int serialPortAvailable = 0;
+	if ((Serial1.available() > 0) || (Serial3.available() > 0))
+	{
+		serialPortAvailable = 1;
+	}
+#ifndef TEENSY_32
+	else if (Serial4.available() > 0)
+	{
+
+		serialPortAvailable = 1;
+	}
+#endif // Teensy 32
+
+
+
+	//if ((Serial1.available() > 0) || (Serial3.available() > 0) || (Serial4.available() > 0))
+	if (serialPortAvailable > 0)
 	{
 		incomingByte = SerialRead(serialId);
 
@@ -791,12 +813,12 @@ void loop()
 					configSync.axisId = axisId;
 					configRec.axisId = axisId;
 					configGreekKey.axisId = axisId;
-					configMove.axisId = axisId;
+					//configMove.axisId = axisId;
 
 					EEPROM.put(eePromAddress_Sync, configSync);
 					EEPROM.put(eePromAddress_Rec, configRec);
 					EEPROM.put(eePromAddress_Grk, configGreekKey);
-					EEPROM.put(eePromAddress_Mov, configMove);
+					//EEPROM.put(eePromAddress_Mov, configMove);
 	#ifdef DEBUG
 					Serial.print(axisId_Char);
 					Serial.println(configSync.axisId);
