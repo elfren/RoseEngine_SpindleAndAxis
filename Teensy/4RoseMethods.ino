@@ -1413,7 +1413,7 @@ void MoveAxis(int axisId, int directionAxis)
 			}
 			else
 			{
-				stepsToMove = DistanceToSteps_M3Linear(configMove.distance_MoveM3_1);
+				stepsToMove = DistanceToSteps_M3Linear(configMove.distance_MoveM3_1) * (-1);
 			}
 
 			stepper_M3.setPosition(0);
@@ -1462,7 +1462,7 @@ void MoveAxis(int axisId, int directionAxis)
 			}
 			else
 			{
-				stepsToMove = DistanceToSteps_M3Linear(configMove.distance_MoveM3_2);
+				stepsToMove = DistanceToSteps_M3Linear(configMove.distance_MoveM3_2) * (-1);
 			}
 
 			stepper_M3.setPosition(0);
@@ -1512,7 +1512,7 @@ void MoveAxis(int axisId, int directionAxis)
 			}
 			else
 			{
-				stepsToMove = DistanceToSteps_M4Linear(configMove.distance_MoveM4_1);
+				stepsToMove = DistanceToSteps_M4Linear(configMove.distance_MoveM4_1) * (-1);
 			}
 
 			stepper_M4.setPosition(0);
@@ -1561,7 +1561,7 @@ void MoveAxis(int axisId, int directionAxis)
 			}
 			else
 			{
-				stepsToMove = DistanceToSteps_M4Linear(configMove.distance_MoveM4_2);
+				stepsToMove = DistanceToSteps_M4Linear(configMove.distance_MoveM4_2) * (-1);
 			}
 
 			stepper_M4.setPosition(0);
@@ -1892,6 +1892,12 @@ void OneRunStepper(int direction) // pageMulti
 			accel = configMulti.accel_Axis_M3;
 			speedPercent = configMulti.speedPercent_Axis_M3;
 			currentSpeedPercent = speedPercent * .01;// *direction;
+			Serial.print("configSetup.radialOrLinear_Axis_M3:  ");
+			Serial.println(configSetup.radialOrLinear_Axis_M3);
+			if (configSetup.radialOrLinear_Axis_M3 == 1) // Linear
+			{
+				maxSpd = maxSpd * (-1);
+			}
 			limitPin_Max = configSetup.limit_Max_M3;
 			limitPin_Min = configSetup.limit_Min_M3;
 			break;
@@ -1904,6 +1910,16 @@ void OneRunStepper(int direction) // pageMulti
 			accel = configMulti.accel_Axis_M4;
 			speedPercent = configMulti.speedPercent_Axis_M4;
 			currentSpeedPercent = speedPercent * .01;// *direction;
+			Serial.print("configSetup.radialOrLinear_Axis_M4:  ");
+			Serial.println(configSetup.radialOrLinear_Axis_M4);
+			Serial.print("1-maxSpd:  ");
+			Serial.println(maxSpd);
+			if (configSetup.radialOrLinear_Axis_M4 == 1) // Linear
+			{
+				maxSpd = maxSpd * (-1);
+			}
+			Serial.print("2-maxSpd:  ");
+			Serial.println(maxSpd);
 			limitPin_Max = configSetup.limit_Max_M4;
 			limitPin_Min = configSetup.limit_Min_M4;
 			break;
@@ -2469,6 +2485,12 @@ void Main_TwoSteppers(
 			limitPin_Max = configSetup.limit_Max_M3;
 			limitPin_Min = configSetup.limit_Min_M3;
 			maxSpeed_Axis = configMain.maxSpd_Axis_M3 * direction_Axis;
+
+			if (configSetup.radialOrLinear_Axis_M3 == 1) // Linear
+			{
+				maxSpeed_Axis = maxSpeed_Axis * (-1);
+			}
+
 			accel_Axis = configMain.accel_Axis_M3;
 			stepper_M3.setPosition(0);
 			stepper_M3
@@ -2485,6 +2507,12 @@ void Main_TwoSteppers(
 			limitPin_Max = configSetup.limit_Max_M4;
 			limitPin_Min = configSetup.limit_Min_M4;
 			maxSpeed_Axis = configMain.maxSpd_Axis_M4 * direction_Axis;
+
+			if (configSetup.radialOrLinear_Axis_M4 == 1) // Linear
+			{
+				maxSpeed_Axis = maxSpeed_Axis * (-1);
+			}
+
 			accel_Axis = configMain.accel_Axis_M4;
 			stepper_M4.setPosition(0);
 			stepper_M4
@@ -2978,6 +3006,12 @@ void Main_TwoSteppers(
 					{
 						stepper_Axis_Go = true;
 						direction_Axis = DIR_CCW;
+
+						if (configSetup.radialOrLinear_Axis_M3 == 1) // Linear
+						{
+							direction_Axis = DIR_CW;
+						}
+
 						//targetPosition_Axis = -2147000000;
 						Serial.print("configMain.maxSpd_Axis_M3* direction_Axis:  ");
 						Serial.println(configMain.maxSpd_Axis_M3* direction_Axis);
@@ -2998,6 +3032,12 @@ void Main_TwoSteppers(
 					{
 						stepper_Axis_Go = true;
 						direction_Axis = DIR_CW;
+
+						if (configSetup.radialOrLinear_Axis_M3 == 1) // Linear
+						{
+							direction_Axis = DIR_CCW;
+						}
+
 						//targetPosition_Axis = 2147000000;
 						Serial.print("configMain.maxSpd_Axis_M3* direction_Axis:  ");
 						Serial.println(configMain.maxSpd_Axis_M3 * direction_Axis);
@@ -3019,6 +3059,11 @@ void Main_TwoSteppers(
 					{
 						stepper_Axis_Go = true;
 						direction_Axis = DIR_CCW;
+
+						if (configSetup.radialOrLinear_Axis_M4 == 1) // Linear
+						{
+							direction_Axis = DIR_CW;
+						}
 						//targetPosition_Axis = -2147000000;
 
 						speedPercentAxis = (float)((configMain.speedPercent_Axis_M4) * .01);
@@ -3038,6 +3083,12 @@ void Main_TwoSteppers(
 					{
 						stepper_Axis_Go = true;
 						direction_Axis = DIR_CW;
+
+						if (configSetup.radialOrLinear_Axis_M4 == 1) // Linear
+						{
+							direction_Axis = DIR_CCW;
+						}
+
 						//targetPosition_Axis = 2147000000;
 						speedPercentAxis = (float)((configMain.speedPercent_Axis_M4) * .01);
 						stepper_M4.setMaxSpeed(configMain.maxSpd_Axis_M4* direction_Axis);
@@ -5499,7 +5550,7 @@ void Sync(int directionSpindle, int directionAxis)
 				}
 				case LINEAR_M3:
 				{
-					axisSteps = DistanceToSteps_M3Linear(configSync.distance) * directionAxis;
+					axisSteps = DistanceToSteps_M3Linear(configSync.distance) * directionAxis * (-1);
 					break;
 				}
 			}
@@ -5523,7 +5574,7 @@ void Sync(int directionSpindle, int directionAxis)
 			}
 			case LINEAR_M3:
 			{
-				axisSteps = DistanceToSteps_M4Linear(configSync.distance) * directionAxis;
+				axisSteps = DistanceToSteps_M4Linear(configSync.distance) * directionAxis * (-1);
 				break;
 			}
 			}
@@ -5981,6 +6032,10 @@ void Reciprocate_Triangle(int wavDir)
 			limitPin_Max = configSetup.limit_Max_M3;
 			limitPin_Min = configSetup.limit_Min_M3;
 			maxSpeed = configRec.maxSpd_Axis_M3 * configRec.speedPercent_Axis_M3 * .01;
+			//if (configSetup.radialOrLinear_Axis_M3 == 1) // Linear
+			//{
+			//	maxSpeed = maxSpeed * (-1);
+			//}
 			accel = configRec.accel_Axis_M3;
 			speedPercent = configRec.speedPercent_Axis_M3;
 #ifdef DEBUG
@@ -6000,6 +6055,10 @@ void Reciprocate_Triangle(int wavDir)
 			limitPin_Max = configSetup.limit_Max_M4;
 			limitPin_Min = configSetup.limit_Min_M4;
 			maxSpeed = configRec.maxSpd_Axis_M4 * configRec.speedPercent_Axis_M4 * .01;
+			//if (configSetup.radialOrLinear_Axis_M4 == 1) // Linear
+			//{
+			//	maxSpeed = maxSpeed * (-1);
+			//}
 			accel = configRec.accel_Axis_M4;
 			speedPercent = configRec.speedPercent_Axis_M4;
 #ifdef DEBUG
@@ -6062,6 +6121,27 @@ void Reciprocate_Triangle(int wavDir)
 			axisSteps = (DistanceToSteps_Axis(configRec.distance_Axial_Axis, configRec.axisId) / (configRec.waves_Axial * 2))* wavDir;
 			break;
 		}
+	}
+
+
+	switch (configRec.axisId)
+	{
+	case ID_AXIS_3:
+	{
+		if (configSetup.radialOrLinear_Axis_M3 == 1) // Linear
+		{
+			axisSteps = axisSteps * (-1);
+		}
+		break;
+	}
+	case ID_AXIS_4:
+	{
+		if (configSetup.radialOrLinear_Axis_M4 == 1) // Linear
+		{
+			axisSteps = axisSteps * (-1);
+		}
+		break;
+	}
 	}
 
 #ifdef DEBUG
@@ -6448,6 +6528,10 @@ void Reciprocate_Sawtooth(int wavDir)
 			limitPin_Max = configSetup.limit_Max_M3;
 			limitPin_Min = configSetup.limit_Min_M3;
 			maxSpeed = configRec.maxSpd_Axis_M3 * configRec.speedPercent_Axis_M3 * .01;
+			//if (configSetup.radialOrLinear_Axis_M3 == 1) // Linear
+			//{
+			//	maxSpeed = maxSpeed * (-1);
+			//}
 			accel = configRec.accel_Axis_M3;
 			speedPercent = configRec.speedPercent_Axis_M3;
 	#ifdef DEBUG
@@ -6467,6 +6551,10 @@ void Reciprocate_Sawtooth(int wavDir)
 			limitPin_Max = configSetup.limit_Max_M4;
 			limitPin_Min = configSetup.limit_Min_M4;
 			maxSpeed = configRec.maxSpd_Axis_M4 * configRec.speedPercent_Axis_M4 * .01;
+			//if (configSetup.radialOrLinear_Axis_M4 == 1) // Linear
+			//{
+			//	maxSpeed = maxSpeed * (-1);
+			//}
 			accel = configRec.accel_Axis_M4;
 			speedPercent = configRec.speedPercent_Axis_M4;
 #ifdef DEBUG
@@ -6531,6 +6619,31 @@ void Reciprocate_Sawtooth(int wavDir)
 			break;
 		}
 	}
+
+
+	switch (configRec.axisId)
+	{
+		case ID_AXIS_3:
+		{
+			if (configSetup.radialOrLinear_Axis_M3 == 1) // Linear
+			{
+				axisSteps = axisSteps * (-1);
+			}
+			break;
+		}
+		case ID_AXIS_4:
+		{
+			if (configSetup.radialOrLinear_Axis_M4 == 1) // Linear
+			{
+				axisSteps = axisSteps * (-1);
+			}
+			break;
+		}
+	}
+
+
+
+
 
 #ifdef DEBUG
 	Serial.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
@@ -6984,6 +7097,10 @@ void Reciprocate_Square(int wavDir)
 			limitPin_Max = configSetup.limit_Max_M3;
 			limitPin_Min = configSetup.limit_Min_M3;
 			maxSpeed = configRec.maxSpd_Axis_M3 * configRec.speedPercent_Axis_M3 * .01;
+			//if (configSetup.radialOrLinear_Axis_M3 == 1) // Linear
+			//{
+			//	maxSpeed = maxSpeed * (-1);
+			//}
 			accel = configRec.accel_Axis_M3;
 			speedPercent = configRec.speedPercent_Axis_M3;
 	#ifdef DEBUG
@@ -7003,6 +7120,10 @@ void Reciprocate_Square(int wavDir)
 			limitPin_Max = configSetup.limit_Max_M4;
 			limitPin_Min = configSetup.limit_Min_M4;
 			maxSpeed = configRec.maxSpd_Axis_M4 * configRec.speedPercent_Axis_M4 * .01;
+			//if (configSetup.radialOrLinear_Axis_M4 == 1) // Linear
+			//{
+			//	maxSpeed = maxSpeed * (-1);
+			//}
 			accel = configRec.accel_Axis_M4;
 			speedPercent = configRec.speedPercent_Axis_M4;
 #ifdef DEBUG
@@ -7051,6 +7172,30 @@ void Reciprocate_Square(int wavDir)
 			break;
 		}
 	}
+
+	switch (configRec.axisId)
+	{
+		case ID_AXIS_3:
+		{
+			if (configSetup.radialOrLinear_Axis_M3 == 1) // Linear
+			{
+				axisSteps = axisSteps * (-1);
+			}
+			break;
+		}
+		case ID_AXIS_4:
+		{
+			if (configSetup.radialOrLinear_Axis_M4 == 1) // Linear
+			{
+				axisSteps = axisSteps * (-1);
+			}
+			break;
+		}
+	}
+
+
+
+
 
 #ifdef DEBUG
 	Serial.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
@@ -9365,6 +9510,7 @@ bool GreekKey_Move_Axis(float segmentSteps, float multiplier, int direction, boo
 			digitalWrite(configSetup.limit_Min_M4, HIGH);
 			SetEnable(ID_AXIS_4, true, true);
 			maxSpeed = configGreekKey.maxSpd_Axis_M4;
+
 			accel = configGreekKey.accel_Axis_M4;
 			speedPercentage = configGreekKey.speedPercent_Axis_M4;
 			break;
@@ -9385,6 +9531,27 @@ bool GreekKey_Move_Axis(float segmentSteps, float multiplier, int direction, boo
 	float targetSteps = (segmentSteps * multiplier * direction);
 
 	targetSteps = round(targetSteps);
+
+	switch (currentAxis)
+	{
+		case ID_AXIS_3:
+		{
+			if (configSetup.radialOrLinear_Axis_M3 == 1) // Linear
+			{
+				targetSteps = targetSteps * (-1);
+			}
+			break;
+		}
+		case ID_AXIS_4:
+		{
+			if (configSetup.radialOrLinear_Axis_M4 == 1) // Linear
+			{
+				targetSteps = targetSteps * (-1);
+			}
+			break;
+		}
+
+	}
 
 	stepperAxis
 		.setMaxSpeed(actualSpeed)
@@ -9625,6 +9792,7 @@ bool GreekKey_Move_Angular_TeensyStep(
 			SetEnable(ID_AXIS_3, true, true);
 
 			maxSpd_Axis = configGreekKey.maxSpd_Axis_M3;
+
 			accel_Axis = configGreekKey.accel_Axis_M3;
 			speedPercent_Axis = configGreekKey.speedPercent_Axis_M3;
 #ifdef DEBUG
@@ -9646,6 +9814,7 @@ bool GreekKey_Move_Angular_TeensyStep(
 			SetEnable(ID_AXIS_4, true, true);
 
 			maxSpd_Axis = configGreekKey.maxSpd_Axis_M4;
+
 			accel_Axis = configGreekKey.accel_Axis_M4;
 			speedPercent_Axis = configGreekKey.speedPercent_Axis_M4;
 #ifdef DEBUG
@@ -9681,6 +9850,31 @@ bool GreekKey_Move_Angular_TeensyStep(
 
 	//int32_t targetSteps_Axis = round(abs(shortLegLength_Axis) * multiplier_Axis);
 	int32_t targetSteps_Axis = round((shortLegLength_Axis) * multiplier_Axis);
+
+
+	switch (configGreekKey.axisId)
+	{
+		case ID_AXIS_3:
+		{
+			if (configSetup.radialOrLinear_Axis_M3 == 1) // Linear
+			{
+				targetSteps_Axis = targetSteps_Axis * (-1);
+			}
+			break;
+		}
+		case ID_AXIS_4:
+		{
+			if (configSetup.radialOrLinear_Axis_M4 == 1) // Linear
+			{
+				targetSteps_Axis = targetSteps_Axis * (-1);
+			}
+			break;
+		}
+	}
+
+
+
+
 	Serial.print("shortLegLength_Axis: ");
 	Serial.print(shortLegLength_Axis);
 	Serial.print("   multiplier_Axis: ");

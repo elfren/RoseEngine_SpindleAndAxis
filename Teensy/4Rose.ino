@@ -2,7 +2,7 @@
 /* *****************************************************************
 * 4Rose main entry
 * Author: Edward French
-* Version: v3.0.j.beta - 06/06/22
+* Version: v3.0.k.beta - 06/06/22
 ******************************************************************/
 
 #include "math.h"
@@ -777,11 +777,11 @@ void loop()
 				case PAGE_ONE:
 				{
 					Serial.print("2.axisId:  ");
-					Serial.println(configMulti.axisId);
+					Serial.print(configMulti.axisId);
 					configMulti.axisId = axisId;
 					EEPROM.put(eePromAddress_Multi, configMulti);
 
-					Serial.print("3.axisId:  ");
+					Serial.print("   3.axisId:  ");
 					Serial.println(configMulti.axisId);
 					break;
 				}
