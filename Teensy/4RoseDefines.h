@@ -4,8 +4,8 @@
 ******************************************************************/
 #pragma once
 #define SHOW_POSITION
-#define DEBUG
-//#define TEENSY_32
+//#define DEBUG
+#define TEENSY_32
 #define ESTOP_ENABLED
 //==================================================================
 // Pin assignments
@@ -52,6 +52,7 @@
 // Constants
 /////////////////////////////////////////////////////////////////////////
 
+#define MIN_SPEED 100
 
 // Move page
 #define ID_MOVE_AXIS_Z1 1
@@ -80,6 +81,10 @@
 
 #define DIR_CCW -1
 #define DIR_CW 1
+
+#define RETURN_SPINDLE 1
+#define RETURN_SPINDLE_M3 2
+#define RETURN_AXIS 3
 
 #define BY_DEGREES 1 // ToDo: Change to 1 and 0
 #define BY_DIVISIONS 0
@@ -403,27 +408,27 @@ struct configPageRose // page 12
 	float spindleRevolutions;
 };
 
-struct configPageMainMulti  // page 2 (pageMulti) and page 0 (pageMain)
+struct configPageMainMulti  // page 20 (pageMulti),page 0 (pageMain), page 2(One)
 {
 
-	uint32_t maxSpd_Spindle;
-	uint32_t maxSpd_Axis_Z;
-	uint32_t maxSpd_Axis_X;
-	uint32_t maxSpd_Axis_M3;
-	uint32_t maxSpd_Axis_M4;
-	uint32_t speedPercent_Spindle;
-	uint32_t speedPercent_Axis_Z;
-	uint32_t speedPercent_Axis_X;
-	uint32_t speedPercent_Axis_M3;
-	uint32_t speedPercent_Axis_M4;
-	uint32_t accel_Spindle;
-	uint32_t accel_Axis_Z;
-	uint32_t accel_Axis_X;
-	uint32_t accel_Axis_M3;
-	uint32_t accel_Axis_M4;
-	uint32_t direction;
-	uint32_t multiAxesIDs;
-	uint32_t axisId; // Z:0, X:1, M3:2, M4:3,Spindle:4
+	int32_t maxSpd_Spindle;
+	int32_t maxSpd_Axis_Z;
+	int32_t maxSpd_Axis_X;
+	int32_t maxSpd_Axis_M3;
+	int32_t maxSpd_Axis_M4;
+	int32_t speedPercent_Spindle;
+	int32_t speedPercent_Axis_Z;
+	int32_t speedPercent_Axis_X;
+	int32_t speedPercent_Axis_M3;
+	int32_t speedPercent_Axis_M4;
+	int32_t accel_Spindle;
+	int32_t accel_Axis_Z;
+	int32_t accel_Axis_X;
+	int32_t accel_Axis_M3;
+	int32_t accel_Axis_M4;
+	int32_t direction;
+	int32_t multiAxesIDs;
+	int32_t axisId; // Z:0, X:1, M3:2, M4:3,Spindle:4
 	float targetDistance_Spindle;
 	float targetDistance_Z;
 	float targetDistance_X;
@@ -552,6 +557,7 @@ int serialId = 9; // Initialize with unused serial id.  Serial: 0 (Usb cable to 
 byte incomingByte = 0;	// store incoming Serial data
 
 int enableTimeout = 300;// 200; // Workaround for DM542T external driver
+int currentSpeed = 0; // StepController can't stop when moving slower than 100 steps/sec.
 float distanceTotal_MoveZ = 0;
 float distanceTotal_MoveX = 0;
 
@@ -585,18 +591,26 @@ uint32_t packedValue = 0;
 
 float synchro_Ratio = 0;
 
+int dirPin = 2;
+int stepPin = 3;
+
+// pageMain Return values
+int returnType = 0;
+int spindle_Position = 0;
+int m3_Position = 0;
+int axis_Position = 0;
 
 // PageMulti
-int stepperPosition_1 = 30;
-int stepperPosition_2 = 30;
-int stepperPosition_3 = 30;
-int stepperPosition_4 = 30;
-int stepperPosition_5 = 30;
-int stepperId_1 = 40;
-int stepperId_2 = 40;
-int stepperId_3 = 40;
-int stepperId_4 = 40;
-int stepperId_5 = 40;
+int stepperPosition_1 = 0;
+int stepperPosition_2 = 0;
+int stepperPosition_3 = 0;
+int stepperPosition_4 = 0;
+int stepperPosition_5 = 0;
+int stepperId_1 = 43;
+int stepperId_2 = 44;
+int stepperId_3 = 45;
+int stepperId_4 = 46;
+int stepperId_5 = 47;
 int stepper1_step = 48;
 int stepper1_dir = 49;
 

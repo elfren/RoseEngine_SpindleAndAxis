@@ -2,7 +2,7 @@
 /* *****************************************************************
 * 4Rose main entry
 * Author: Edward French
-* Version: v3.0.k.beta - 06/06/22
+* Version: v3.0.m.beta - 06/07/22
 ******************************************************************/
 
 #include "math.h"
@@ -226,7 +226,7 @@ void setup()
 	if (configSetup.motorCount == 5)
 	{
 		pinMode(PIN_AXIS_4_ENABLE, OUTPUT);
-		SetEnable(ID_AXIS_3, false, true);
+		SetEnable(ID_AXIS_4, false, true);
 
 		if (configSetup.limit_Min_M4 > 9 && configSetup.limit_Min_M4 < 40)
 		{
@@ -1284,7 +1284,37 @@ void loop()
 		case 88:  // X - Return to start: Spindle
 		{
 			pageCallerId = GetSerialInteger();
-			ReturnToStartPosition(ID_SPINDLE);
+
+			switch (pageCallerId)
+			{
+				case PAGE_MAIN:
+				{
+					if (configMain.synchro_M3_Spindle == 1)//Synchronized M3 and Spindle
+					{
+						returnType = RETURN_SPINDLE_M3;
+						
+					}
+					else
+					{
+						returnType = RETURN_SPINDLE;
+					}
+					Return_Main();
+				}
+				case PAGE_ONE:
+				{
+					ReturnToStartPosition_Multi();
+					break;
+				}
+				
+				default:
+				{
+					ReturnToStartPosition(ID_SPINDLE);
+					break;
+				}
+			}
+
+
+			
 			break;
 		}
 		case 89:  // Y - Rose: d
@@ -1356,32 +1386,33 @@ void loop()
 		}
 		case 95: //_ - Disable stepper
 		{
+			// Manually disable stepper
 			int axisId = GetSerialInteger();
 			switch (axisId)
 			{
 			case ID_AXIS_Z:
 			{
-				SetEnable(ID_AXIS_Z, false, true);
+				SetEnable(ID_AXIS_Z, false, false);
 				break;
 			}
 			case ID_AXIS_X:
 			{
-				SetEnable(ID_AXIS_X, false, true);
+				SetEnable(ID_AXIS_X, false, false);
 				break;
 			}
 			case ID_AXIS_3:
 			{
-				SetEnable(ID_AXIS_3, false, true);
+				SetEnable(ID_AXIS_3, false, false);
 				break;
 			}
 			case ID_AXIS_4:
 			{
-				SetEnable(ID_AXIS_4, false, true);
+				SetEnable(ID_AXIS_4, false, false);
 				break;
 			}
 			case ID_SPINDLE:
 			{
-				SetEnable(ID_SPINDLE, false, true);
+				SetEnable(ID_SPINDLE, false, false);
 				break;
 			}
 			}
@@ -1448,6 +1479,7 @@ void loop()
 
 #ifdef DEBUG
 			Serial.print(axisId_Char);
+			Serial.print("   CCW: ");
 			Serial.println(configRose.axisId);
 #endif // DEBUG
 			RoseRadial(DIR_CCW);
@@ -1826,8 +1858,14 @@ void loop()
 			Main_TwoSteppers(DIR_CW, DIR_CW, ID_AXIS_X);
 			break;
 		}
-		case 167: // § - Not used
+		case 167: // § - M4 Distance/360
 		{
+			configSetup.distancePerRev_AxisM4 = GetSerialFloat(serialId);
+			EEPROM.put(eePromAddress_Setup, configSetup);
+#ifdef DEBUG
+			Serial.print(distance_Char);
+			Serial.println(configSetup.distancePerRev_AxisM4, 5);
+#endif // DEBUG
 			break;
 		}
 		case 168: // ¨ - Setup M4: Distance per revolution
@@ -2745,28 +2783,10 @@ void loop()
 		{
 #ifdef DEBUG
 			Serial.print(axisId_Char);
+			Serial.print("   CW: ");
 			Serial.println(configRose.axisId);
 #endif // DEBUG
 			RoseRadial(DIR_CW);
-			//switch (configRose.axisId)
-			//{
-			//	case ID_AXIS_Z: // Z axis
-			//	{
-			//		RoseRadial_Z(DIR_CW);
-			//		break;
-			//	}
-			//	case ID_AXIS_X: // X axis
-			//	{
-			//		RoseRadial_X(DIR_CW);
-			//		break;
-			//	}
-			//	case ID_AXIS_B: // B axis
-			//	{
-			//		RoseRadial_B(DIR_CW);
-			//		break;
-			//	}
-			//}
-
 			break;
 		}
 		case 202: // Ê - Not Used
@@ -2812,7 +2832,9 @@ void loop()
 			{
 				case PAGE_MAIN:
 				{
-					ReturnToStartPosition(configMain.axisId);
+					returnType = RETURN_AXIS;
+					Return_Main();
+					//ReturnToStartPosition(configMain.axisId);
 					break;
 				}
 
@@ -2826,19 +2848,22 @@ void loop()
 				case PAGE_GRK:
 				case PAGE_PROGRAM:
 				{
-					ReturnToStartPosition(configSync.axisId);
+					//ReturnToStartPosition(configSync.axisId);
+					ReturnToStartPosition_Multi();
 					break;
 				}
 				case PAGE_ROSE:
 				{
-					ReturnToStartPosition(configRose.axisId);
+					//ReturnToStartPosition(configRose.axisId);
+					ReturnToStartPosition_Multi();
 					break;
 				}
 
 				case PAGE_MULTI:
 				case PAGE_ONE:
 				{
-					ReturnToStartPosition(configMulti.axisId);
+					//ReturnToStartPosition(configMulti.axisId);
+					ReturnToStartPosition_Multi();
 					break;
 				}
 				case PAGE_INDEX:
@@ -3166,7 +3191,8 @@ void loop()
 		{
 			int axisId = GetSerialInteger();
 			pageCallerId = PAGE_ROSE;
-			ReturnToStartPosition(axisId);
+			//ReturnToStartPosition(axisId);
+			ReturnToStartPosition_Multi();
 			break;
 		}
 		case 232: // è - Return: Spindle MaxSpd
@@ -3271,8 +3297,6 @@ void loop()
 
 			pageCallerId = GetSerialInteger();
 
-			Serial.print("Index AxisId: ");
-			Serial.println(configIndex_Prime.axisId);
 
 	#ifdef DEBUG
 			switch (pageCallerId)
