@@ -2,7 +2,7 @@
 /* *****************************************************************
 * 4Rose main entry
 * Author: Edward French
-* Version: v3.0.m.beta - 06/07/22
+* Version: v3.0.n.beta - 06/07/22
 ******************************************************************/
 
 #include "math.h"
@@ -213,7 +213,6 @@ void setup()
 
 	SetEnable(ID_SPINDLE, false, true);
 	SetEnable(ID_AXIS_Z, false, true);
-	//SetEnable(ID_AXIS_Z, true);
 	SetEnable(ID_AXIS_X, false, true);
 	SetEnable(ID_AXIS_3, false, true);
 
@@ -221,6 +220,7 @@ void setup()
 	//vendorId = configSetup.vendorId;
 	//motorCount = 5;
 	//vendorId = 4;
+
 
 
 	if (configSetup.motorCount == 5)
@@ -241,6 +241,10 @@ void setup()
 			digitalWrite(configSetup.limit_Max_M4, configSetup.limit_NCorNO);  // Enable
 		}
 
+	}
+	else
+	{
+		digitalWriteFast(PIN_AXIS_4_ENABLE, LOW);
 	}
 
 		// Initialize Limit switches	
@@ -722,6 +726,7 @@ void loop()
 		case 65: // A - Load Settings.ini
 		{
 			iniFileType = INI_4AXES;
+			GetIniFilenameFromSerial();
 			LoadSettings();
 			break;
 		}
@@ -1034,7 +1039,21 @@ void loop()
 			Serial.print("GetFileListFromSD_78: ");
 			Serial.println(currentFileIndex);
 #endif // DEBUG
-			GetFileListFromSD(currentFileIndex);
+			switch (pageCallerId)
+			{
+			case PAGE_PROGRAM:
+			case PAGE_INDEX:
+			{
+			    GetFileListFromSD(currentFileIndex);
+				break;
+			}
+			case PAGE_INI:
+			{
+				GetIniFileListFromSD(currentFileIndex);
+				break;
+			}
+			}
+
 
 			break;
 		}
@@ -1053,6 +1072,10 @@ void loop()
 			configSetup.keepSteppersEnabled = GetSerialInteger();
 			Serial.print("configSetup.keepSteppersEnabled:");
 			Serial.println(configSetup.keepSteppersEnabled);
+			const char* pageMore_c1_0 = "pageMore.c1.val=0";
+			const char* pageMore_c1_1 = "pageMore.c1.val=1";
+
+			// 0 = Disabled, 1 = Enabled
 			// Enable or disable the steppers
 			if (configSetup.keepSteppersEnabled == 1)
 			{
@@ -1062,6 +1085,9 @@ void loop()
 				SetEnable(ID_AXIS_X, true, true);
 				SetEnable(ID_AXIS_3, true, true);
 				SetEnable(ID_AXIS_4, true, true);
+
+				SerialPrint(pageMore_c1_1);
+				SerialPrint(nextionEnd);
 			}
 			else
 			{
@@ -1071,6 +1097,9 @@ void loop()
 				SetEnable(ID_AXIS_X, false, true);
 				SetEnable(ID_AXIS_3, false, true);
 				SetEnable(ID_AXIS_4, false, true);
+
+				SerialPrint(pageMore_c1_0);
+				SerialPrint(nextionEnd);
 			}
 			EEPROM.put(eePromAddress_Setup, configSetup);
 			break;
@@ -1269,6 +1298,23 @@ void loop()
 		{
 			configSetup.limit_StopSpindle = GetSerialInteger();
 			EEPROM.put(eePromAddress_Setup, configSetup);
+
+			const char* pageLimits_c1_0 = "pageLimits.c1.val=0";
+			const char* pageLimits_c1_1 = "pageLimits.c1.val=1";
+			Serial.print("StopSpindle: ");
+			Serial.println(configSetup.limit_StopSpindle);
+			if (configSetup.limit_StopSpindle)
+			{
+				SerialPrint(pageLimits_c1_1);
+			}
+			else
+			{
+				SerialPrint(pageLimits_c1_0);
+			}
+			SerialPrint(nextionEnd);
+
+
+
 			break;
 		}
 		case 87: // W - Shared: Radial or Axial
@@ -1281,40 +1327,9 @@ void loop()
 			EEPROM.put(eePromAddress_Grk, configGreekKey);
 			break;
 		}
-		case 88:  // X - Return to start: Spindle
+		case 88:  // X - Not Used
 		{
-			pageCallerId = GetSerialInteger();
 
-			switch (pageCallerId)
-			{
-				case PAGE_MAIN:
-				{
-					if (configMain.synchro_M3_Spindle == 1)//Synchronized M3 and Spindle
-					{
-						returnType = RETURN_SPINDLE_M3;
-						
-					}
-					else
-					{
-						returnType = RETURN_SPINDLE;
-					}
-					Return_Main();
-				}
-				case PAGE_ONE:
-				{
-					ReturnToStartPosition_Multi();
-					break;
-				}
-				
-				default:
-				{
-					ReturnToStartPosition(ID_SPINDLE);
-					break;
-				}
-			}
-
-
-			
 			break;
 		}
 		case 89:  // Y - Rose: d
@@ -1578,11 +1593,19 @@ void loop()
 		}
 		case 117: // u - Setup: Polarity M4 (High or Low)
 		{
-			int polarityB = GetSerialInteger();
+			int polarityM4 = GetSerialInteger();
 
 			// true (1): LOW  false (0): HIGH
-			polarityB >= 1 ? (configSetup.polarity_Axis_M4 = true) : (configSetup.polarity_Axis_M4 = false);
+			polarityM4 >= 1 ? (configSetup.polarity_Axis_M4 = true) : (configSetup.polarity_Axis_M4 = false);
 			EEPROM.put(eePromAddress_Setup, configSetup);
+
+			const char* pageMotor_4_t59 = "pageMotor_4.t59.txt=";
+			const char* lowChar = "Low";
+			const char* highChar = "High";
+			SerialPrint(pageMotor_4_t59);
+			SerialWrite(0x22);
+			SerialPrint(configSetup.polarity_Axis_M4 ? lowChar : highChar);
+			SerialPrint(nextionQuoteEnd);
 			break;
 		}
 		case 118: // v - M3 axis microsteps
@@ -1824,6 +1847,27 @@ void loop()
 
 			EEPROM.put(eePromAddress_Setup, configSetup);
 
+			const char* pageLimits_c2_0 = "pageLimits.c2.val=0";
+			const char* pageLimits_c2_1 = "pageLimits.c2.val=1";
+			const char* pageLimits_c3_0 = "pageLimits.c3.val=0";
+			const char* pageLimits_c3_1 = "pageLimits.c3.val=1";
+
+			if (configSetup.limit_NCorNO == 0)
+			{
+
+				SerialPrint(pageLimits_c2_1);
+				SerialPrint(nextionEnd);
+				SerialPrint(pageLimits_c3_0);
+				SerialPrint(nextionEnd);
+			}
+			else
+			{
+				SerialPrint(pageLimits_c2_0);
+				SerialPrint(nextionEnd);
+				SerialPrint(pageLimits_c3_1);
+				SerialPrint(nextionEnd);
+			}
+
 			break;
 		}
 		case 162: // ¢ - Setup: M4: Radial or Lineal
@@ -1836,6 +1880,25 @@ void loop()
 			Serial.print("radialOrLinear_Axis_M4: ");
 			Serial.println(configSetup.radialOrLinear_Axis_M4);
 #endif // DEBUG
+			const char* pageMotor_4_c0_0 = "pageMotor_4.c0.val=0";
+			const char* pageMotor_4_c0_1 = "pageMotor_4.c0.val=1";
+			const char* pageMotor_4_c1_0 = "pageMotor_4.c1.val=0";
+			const char* pageMotor_4_c1_1 = "pageMotor_4.c1.val=1";
+			// True=Linear, False = Radial
+			if (configSetup.radialOrLinear_Axis_M4)
+			{
+				SerialPrint(pageMotor_4_c0_0);
+				SerialPrint(nextionEnd);
+				SerialPrint(pageMotor_4_c1_1);
+				SerialPrint(nextionEnd);
+			}
+			else
+			{
+				SerialPrint(pageMotor_4_c0_1);
+				SerialPrint(nextionEnd);
+				SerialPrint(pageMotor_4_c1_0);
+				SerialPrint(nextionEnd);
+			}
 			break;
 		}
 		case 163: // £ - TestEEPROM_Limits
@@ -2540,7 +2603,7 @@ void loop()
 #endif // DEBUG
 			break;
 		}
-		case 190: // ¾ - Filename-Index and Greek Key
+		case 190: // ¾ - Filename-Index and Program
 		{
 			GetFilenameFromSerial();
 			lastFileIndex = -1;
@@ -2597,10 +2660,53 @@ void loop()
 		}
 		case 194: // À - pageMulti: Direction
 		{
-			configMulti.direction = GetSerialInteger();
+			int direction = GetSerialInteger();
+			if (direction == 0)
+			{
+				direction = (1);
+			}
+			else
+			{
+				direction = (-1);
+			}
+			//configMulti.direction = GetSerialInteger();
+			switch (configMulti.axisId)
+			{
+				case ID_SPINDLE:
+				{
+					configMulti.direction_Spindle = direction;
+					Serial.print("Spindle ");
+					break;
+				}
+				case ID_AXIS_Z:
+				{
+					configMulti.direction_Z = direction;
+					Serial.print("Z ");
+					break;
+				}
+				case ID_AXIS_X:
+				{
+					configMulti.direction_X = direction;
+					Serial.print("X ");
+					break;
+				}
+				case ID_AXIS_3:
+				{
+					configMulti.direction_M3 = direction;
+					Serial.print("M3 ");
+					break;
+				}
+				case ID_AXIS_4:
+				{
+					configMulti.direction_M4 = direction;
+					Serial.print("M4 ");
+					break;
+				}
+			}
 			EEPROM.put(eePromAddress_Multi, configMulti);
-			Serial.print("configMulti.direction: ");
-			Serial.println(configMulti.direction);
+			Serial.print(configMulti.axisId);
+			Serial.print(" direction: ");
+			Serial.println(direction);
 			break;
 		}
 		case 195: // Á - Setup: M3: Radial or Lineal
@@ -2613,6 +2719,26 @@ void loop()
 			Serial.print("radialOrLinear_Axis_M4: ");
 			Serial.println(configSetup.radialOrLinear_Axis_M3);
 #endif // DEBUG
+
+			const char* pageMotor_3_c0_0 = "pageMotor_3.c0.val=0";
+			const char* pageMotor_3_c0_1 = "pageMotor_3.c0.val=1";
+			const char* pageMotor_3_c1_0 = "pageMotor_3.c1.val=0";
+			const char* pageMotor_3_c1_1 = "pageMotor_3.c1.val=1";
+			// True=Linear, False = Radial
+			if (configSetup.radialOrLinear_Axis_M3)
+			{
+				SerialPrint(pageMotor_3_c0_0);
+				SerialPrint(nextionEnd);
+				SerialPrint(pageMotor_3_c1_1);
+				SerialPrint(nextionEnd);
+			}
+			else
+			{
+				SerialPrint(pageMotor_3_c0_1);
+				SerialPrint(nextionEnd);
+				SerialPrint(pageMotor_3_c1_0);
+				SerialPrint(nextionEnd);
+			}
 			break;
 		}
 		case 196: // Ä - Index:SourceFixed
@@ -2832,9 +2958,9 @@ void loop()
 			{
 				case PAGE_MAIN:
 				{
+					// Axis return.  See 88 for Spindle and Synchro M3
 					returnType = RETURN_AXIS;
 					Return_Main();
-					//ReturnToStartPosition(configMain.axisId);
 					break;
 				}
 
@@ -2932,18 +3058,21 @@ void loop()
 #endif // DEBUG
 			break;
 		}
-		case 215: // × - XXXX Deprecate   Return: Spindle and X axis to start positions
+		case 215: // × - pageMain: Return Spindle and Synchro M3 to start positions
 		{
 			pageCallerId = GetSerialInteger();
 
-			if (pageCallerId == PAGE_MOVE)
+			if (configMain.synchro_M3_Spindle == 1)//Synchronized M3 and Spindle
 			{
-				ReturnToStartPosition_MovePage(configMove.axisId);
+				returnType = RETURN_SPINDLE_M3;
+
 			}
 			else
 			{
-				ReturnToStartPosition(ID_AXIS_X);
+				returnType = RETURN_SPINDLE;
 			}
+
+			Return_Main();
 			break;
 		}
 		case 216: // Ø - Setup:Polarity Spindle (High or Low)
@@ -2957,6 +3086,13 @@ void loop()
 			Serial.print(polarity_Char);
 			Serial.println(configSetup.polarity_Spindle);
 #endif // DEBUG
+			const char* pageSpindle_t45 = "pageSpindle.t45.txt=";
+			const char* lowChar = "Low";
+			const char* highChar = "High";
+			SerialPrint(pageSpindle_t45);
+			SerialWrite(0x22);
+			SerialPrint(configSetup.polarity_Spindle ? lowChar : highChar);
+			SerialPrint(nextionQuoteEnd);
 			break;
 		}
 		case 217: // Ù - Setup: Polarity Z (High or Low)
@@ -2966,6 +3102,13 @@ void loop()
 			// true (1): LOW  false (0): HIGH
 			polarityZ >= 1 ? (configSetup.polarity_Axis_Z = true) : (configSetup.polarity_Axis_Z = false);
 			EEPROM.put(eePromAddress_Setup, configSetup);
+			const char* pageZ_t49 = "pageZ.t49.txt=";
+			const char* lowChar = "Low";
+			const char* highChar = "High";
+			SerialPrint(pageZ_t49);
+			SerialWrite(0x22);
+			SerialPrint(configSetup.polarity_Axis_Z ? lowChar : highChar);
+			SerialPrint(nextionQuoteEnd);
 			break;
 		}
 		case 218: // Ú - Setup: Polarity X (High or Low)
@@ -2975,6 +3118,13 @@ void loop()
 			// true (1): LOW  false (0): HIGH
 			polarityX >= 1 ? (configSetup.polarity_Axis_X = true) : (configSetup.polarity_Axis_X = false);
 			EEPROM.put(eePromAddress_Setup, configSetup);
+			const char* pageX_t63 = "pageX.t63.txt=";
+			const char* lowChar = "Low";
+			const char* highChar = "High";
+			SerialPrint(pageX_t63);
+			SerialWrite(0x22);
+			SerialPrint(configSetup.polarity_Axis_X ? lowChar : highChar);
+			SerialPrint(nextionQuoteEnd);
 			break;
 		}
 		case 219: // Û - Setup: Polarity M3 (High or Low)
@@ -2984,6 +3134,14 @@ void loop()
 			// true (1): LOW  false (0): HIGH
 			polarityB >= 1 ? (configSetup.polarity_Axis_M3 = true) : (configSetup.polarity_Axis_M3 = false);
 			EEPROM.put(eePromAddress_Setup, configSetup);
+
+			const char* pageMotor_3_t59 = "pageMotor_3.t59.txt=";
+			const char* lowChar = "Low";
+			const char* highChar = "High";
+			SerialPrint(pageMotor_3_t59);
+			SerialWrite(0x22);
+			SerialPrint(configSetup.polarity_Axis_M3 ? lowChar : highChar);
+			SerialPrint(nextionQuoteEnd);
 			break;
 		}
 		case 220: // Ü - Limit: Z Min
@@ -3410,6 +3568,13 @@ void loop()
 			// true (1): LOW  false (0): HIGH
 			polarityAltX >= 1 ? (configSetup.polarity_Axis_XAlt = true) : (configSetup.polarity_Axis_XAlt = false);
 			EEPROM.put(eePromAddress_Setup, configSetup);
+			const char* pageAlternateX_t63 = "pageAlternateX.t63.txt=";
+			const char* lowChar = "Low";
+			const char* highChar = "High";
+			SerialPrint(pageAlternateX_t63);
+			SerialWrite(0x22);
+			SerialPrint(configSetup.polarity_Axis_XAlt ? lowChar : highChar);
+			SerialPrint(nextionQuoteEnd);
 			break;
 		}
 		case 243: // ó - X or Alt X axis

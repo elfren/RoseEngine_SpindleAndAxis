@@ -140,8 +140,12 @@
 #define PAGE_MOTOR_3 17
 #define PAGE_MOTOR_4 18
 #define PAGE_LIMITS 19
-#define PAGE_MORE 21
 #define PAGE_RETURNS 20
+#define PAGE_MORE 21
+#define PAGE_FILELIST 22
+#define PAGE_EEPROM 23
+#define PAGE_ERROR 24
+#define PAGE_INI 25
 
 /////////////////////////////////////////////////////////////////////////
 // Structs
@@ -427,6 +431,11 @@ struct configPageMainMulti  // page 20 (pageMulti),page 0 (pageMain), page 2(One
 	int32_t accel_Axis_M3;
 	int32_t accel_Axis_M4;
 	int32_t direction;
+	int32_t direction_Spindle;
+	int32_t direction_Z;
+	int32_t direction_X;
+	int32_t direction_M3;
+	int32_t direction_M4;
 	int32_t multiAxesIDs;
 	int32_t axisId; // Z:0, X:1, M3:2, M4:3,Spindle:4
 	float targetDistance_Spindle;
@@ -540,6 +549,8 @@ unsigned int eePromAddress_Ind_3 = 1600;  // EEProm address for Index_3 (24)
 unsigned int eePromAddress_Ind_4 = 1650;  // EEProm address for Index_4 (24)
 unsigned int eePromAddress_Ind_5 = 1700;  // EEProm address for Index_5 (24)
 
+unsigned int eePromAddress_Filename_Ini = 1850; // EEProm address for filename (13)
+unsigned int eePromAddress_Filename_Length_Ini = 1900; // EEProm address for length of filename (13)
 unsigned int eePromAddress_Filename_Ind = 1950; // EEProm address for filename (13)
 unsigned int eePromAddress_Filename_Length_Ind = 2000; // EEProm address for length of filename (13)
 unsigned int eePromAddress_Filename_Program = 2050; // EEProm address for filename (13)
@@ -575,6 +586,12 @@ bool fileDataAvailable = false;
 
 String filename_Index2a;
 char * filename_Index2;
+
+const char* filename_Ini = "RE30.ini";
+const char* filename_Reset = "/Reset.ini";
+char ini_FileName[13];
+char* iniFile;
+int iniFileType = INI_4AXES;
 
 int32_t returnSteps_Spindle = 0;
 int32_t returnSteps_M3 = 0;
@@ -684,9 +701,8 @@ float hv_SpindleLegLength = 0; // Vertical component of angular move
 long angularAxisSpeed = 0;
 long angularSpindleSpeed = 0;
 
-const char* filename_4Axes = "/4Axes.ini";
-const char* filename_Reset = "/Reset.ini";
-int iniFileType = INI_4AXES;
+
+
 
 int runPageID = 0;
 
