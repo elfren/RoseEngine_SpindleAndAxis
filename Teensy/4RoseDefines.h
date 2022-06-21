@@ -3,8 +3,8 @@
 * Author: Edward French
 ******************************************************************/
 #pragma once
-#define SHOW_POSITION
-//#define DEBUG
+//#define SHOW_POSITION
+#define DEBUG
 #define TEENSY_32
 #define ESTOP_ENABLED
 //==================================================================
@@ -12,7 +12,7 @@
 //==================================================================
 
 //// Spindle
-#define ID_SPINDLE 0  // ToDo: Verify Nextion sends 4 for spindle
+#define ID_SPINDLE 0  
 #define PIN_SPINDLE_DIR 2  //Stepper direction
 #define PIN_SPINDLE_STEP 3  //Stepper step
 #define PIN_SPINDLE_ENABLE 4 //Enable
@@ -68,9 +68,9 @@
 // SPI
 #define PIN_SPI_CS_10 10  // Primary pin for SPI
 #define PIN_SPI_CS_9 9
-// ToDo: Allow on 4 motor board
-//#define PIN_SPI_CS_15 15
-//#define PIN_SPI_CS_24 24
+
+#define PIN_SPI_CS_15 15
+#define PIN_SPI_CS_24 24
 
 // Index page ID
 #define ID_INDEX_1 1
@@ -86,7 +86,7 @@
 #define RETURN_SPINDLE_M3 2
 #define RETURN_AXIS 3
 
-#define BY_DEGREES 1 // ToDo: Change to 1 and 0
+#define BY_DEGREES 1 
 #define BY_DIVISIONS 0
 
 #define FIXED 0
@@ -645,7 +645,12 @@ int stepper5_dir = 57;
 
 int checkedCount = 0;
 
-
+// pageProgram Return values
+int stepperPosition_Cumulative_Spindle = 0;
+int stepperPosition_Cumulative_Axis = 0;
+int stepperPosition_Cumulative_M3 = 0;
+int stepperPosition_Cumulative_4 = 0;
+int stepperPosition_Cumulative_5 = 0;
 
 
 /////////////////////////////////////////////////////////////////////////

@@ -304,14 +304,17 @@ void setup()
 	MilliDelay(10);
 
 	// Enable SD card reader
-	//if(configSetup.motorCount<5)
-	//{ 
-	//	pinMode(PIN_SPI_CS_24, OUTPUT);
-	//	digitalWrite(PIN_SPI_CS_24, HIGH);
-	//	pinMode(PIN_SPI_CS_15, OUTPUT);
-	//	digitalWrite(PIN_SPI_CS_15, HIGH);
-	//	
-	//}
+	if(configSetup.motorCount<5)
+	{ 
+#ifndef TEENSY_32
+		pinMode(PIN_SPI_CS_24, OUTPUT);
+		digitalWrite(PIN_SPI_CS_24, HIGH);
+#endif // !TEENSY_32
+
+		pinMode(PIN_SPI_CS_15, OUTPUT);
+		digitalWrite(PIN_SPI_CS_15, HIGH);
+		
+	}
     pinMode(PIN_SPI_CS_10, OUTPUT);
 	digitalWrite(PIN_SPI_CS_10, HIGH);
 	pinMode(PIN_SPI_CS_9, OUTPUT);
@@ -1036,22 +1039,34 @@ void loop()
 			Serial.print("Call_78:   ");
 			currentFileIndex = GetSerialInteger();
 #ifdef DEBUG				
-			Serial.print("GetFileListFromSD_78: ");
-			Serial.println(currentFileIndex);
+			Serial.print("PageCallerId: ");
+			Serial.println(pageCallerId);
+
 #endif // DEBUG
 			switch (pageCallerId)
 			{
-			case PAGE_PROGRAM:
-			case PAGE_INDEX:
-			{
-			    GetFileListFromSD(currentFileIndex);
-				break;
-			}
-			case PAGE_INI:
-			{
-				GetIniFileListFromSD(currentFileIndex);
-				break;
-			}
+				case PAGE_PROGRAM:
+				case PAGE_INDEX:
+				{
+	#ifdef DEBUG				
+					Serial.print("GetFileList_SD_78: ");
+					Serial.println(currentFileIndex);
+
+	#endif // DEBUG
+					//GetFileListFromSD(currentFileIndex);
+					GetFileList_SD(currentFileIndex);
+					break;
+				}
+				case PAGE_INI:
+				{
+	#ifdef DEBUG				
+					Serial.print("GetIniFileListFromSD_78: ");
+					Serial.println(currentFileIndex);
+
+	#endif // DEBUG
+					GetIniFileListFromSD(currentFileIndex);
+					break;
+				}
 			}
 
 
@@ -2661,13 +2676,13 @@ void loop()
 		case 194: // À - pageMulti: Direction
 		{
 			int direction = GetSerialInteger();
-			if (direction == 0)
+			if (direction == 3)
 			{
-				direction = (1);
+				direction = (-1);
 			}
 			else
 			{
-				direction = (-1);
+				direction = (1);
 			}
 			//configMulti.direction = GetSerialInteger();
 			switch (configMulti.axisId)
@@ -2972,10 +2987,16 @@ void loop()
 				case PAGE_SYNC:
 				case PAGE_REC:
 				case PAGE_GRK:
+				{
+					//ReturnToStartPosition(configRose.axisId);
+					ReturnToStartPosition_Multi();
+					break;
+				}
 				case PAGE_PROGRAM:
 				{
 					//ReturnToStartPosition(configSync.axisId);
-					ReturnToStartPosition_Multi();
+					//ReturnToStartPosition_Multi();
+					ReturnToStartPosition_Cumulative();
 					break;
 				}
 				case PAGE_ROSE:
