@@ -13531,6 +13531,12 @@ void GetIniFileListFromSD(int fileIndex)
 					fileArrayIndex++;
 				}
 			}
+			else
+			{
+				iCounter--;
+			}
+
+
 
 			// fileIndex is the top line in the dropdown list on the Nextion
 #ifdef DEBUG

@@ -4,9 +4,9 @@
 ******************************************************************/
 #pragma once
 //#define SHOW_POSITION
-//#define DEBUG
-//#define VERBOSE
-#define TEENSY_32
+#define DEBUG
+#define VERBOSE
+//#define TEENSY_32
 //#define ESTOP_ENABLED
 //==================================================================
 // Pin assignments
