@@ -4,9 +4,10 @@
 ******************************************************************/
 #pragma once
 //#define SHOW_POSITION
-#define DEBUG
+//#define DEBUG
+//#define VERBOSE
 #define TEENSY_32
-#define ESTOP_ENABLED
+//#define ESTOP_ENABLED
 //==================================================================
 // Pin assignments
 //==================================================================
@@ -16,10 +17,6 @@
 #define PIN_SPINDLE_DIR 2  //Stepper direction
 #define PIN_SPINDLE_STEP 3  //Stepper step
 #define PIN_SPINDLE_ENABLE 4 //Enable
-
-//#define PIN_SPINDLE_DIR 23  // Stepper direction
-//#define PIN_SPINDLE_STEP 16  // Stepper step
-//#define PIN_SPINDLE_ENABLE 17 // Enable 
 
 // Z axis
 #define ID_AXIS_Z 1
@@ -46,13 +43,11 @@
 #define PIN_AXIS_4_STEP 18  // Stepper step
 #define PIN_AXIS_4_ENABLE 15 // Enable 
 
-
-
 /////////////////////////////////////////////////////////////////////////
 // Constants
 /////////////////////////////////////////////////////////////////////////
 
-#define MIN_SPEED 100
+#define MIN_SPEED 250
 
 // Move page
 #define ID_MOVE_AXIS_Z1 1
@@ -499,6 +494,7 @@ struct configPageIndex
 	uint32_t accel_Axis_M4;
 	float synchro_M3_Percentage;
 	uint32_t synchro_M3_Spindle;
+
 };
 
 struct configIndex
@@ -508,6 +504,12 @@ struct configIndex
 	uint32_t sizeInSteps;
 	float sizeInUnits;
 
+};
+
+struct fileData
+{
+	uint32_t length;
+	char name[12];
 };
 
 // Nextion data structures
@@ -549,12 +551,12 @@ unsigned int eePromAddress_Ind_3 = 1600;  // EEProm address for Index_3 (24)
 unsigned int eePromAddress_Ind_4 = 1650;  // EEProm address for Index_4 (24)
 unsigned int eePromAddress_Ind_5 = 1700;  // EEProm address for Index_5 (24)
 
-unsigned int eePromAddress_Filename_Ini = 1850; // EEProm address for filename (13)
-unsigned int eePromAddress_Filename_Length_Ini = 1900; // EEProm address for length of filename (13)
-unsigned int eePromAddress_Filename_Ind = 1950; // EEProm address for filename (13)
-unsigned int eePromAddress_Filename_Length_Ind = 2000; // EEProm address for length of filename (13)
-unsigned int eePromAddress_Filename_Program = 2050; // EEProm address for filename (13)
-unsigned int eePromAddress_Filename_Length_Program = 2100; // EEProm address for length of filename (13)
+//unsigned int eePromAddress_Filename_Ini = 1850; // EEProm address for filename (13)
+//unsigned int eePromAddress_Filename_Length_Ini = 1900; // EEProm address for length of filename (13)
+//unsigned int eePromAddress_Filename_Ind = 1950; // EEProm address for filename (13)
+//unsigned int eePromAddress_Filename_Length_Ind = 2000; // EEProm address for length of filename (13)
+//unsigned int eePromAddress_Filename_Program = 2050; // EEProm address for filename (13)
+//unsigned int eePromAddress_Filename_Length_Program = 2100; // EEProm address for length of filename (13)
 
 //==================================================================
 // Global Variables
@@ -587,13 +589,12 @@ bool fileDataAvailable = false;
 String filename_Index2a;
 char * filename_Index2;
 
-const char* filename_Ini = "RE30.ini";
-const char* filename_Reset = "/Reset.ini";
-char ini_FileName[13];
-char* iniFile;
+char fileNameIndex[12];
+char fileNameProgram[12];
+char fileNameIni[12];
 int iniFileType = INI_4AXES;
 
-int32_t returnSteps_Spindle = 0;
+//int32_t returnSteps_Spindle = 0;
 int32_t returnSteps_M3 = 0;
 int32_t returnSteps_M4 = 0;
 
@@ -659,11 +660,12 @@ int stepperPosition_Cumulative_5 = 0;
 
 volatile int32_t newMaxSpd_RoseSpindle;
 volatile int32_t newMaxSpd_RoseAxis;
-volatile int32_t spindleStepsPerRev;
+volatile int32_t stepsPerRev_Spindle;
 volatile float slideStepsAmplitude;
 volatile float spindleStepsAmplitude;
 volatile float kRatio;
 
+volatile int32_t stepsPerRev_M3;
 
 //float initialPosition_Axis = 0;
 int32_t endPosition_Spindle = 0;

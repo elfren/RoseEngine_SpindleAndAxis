@@ -2,7 +2,7 @@
 /* *****************************************************************
 * 4Rose main entry
 * Author: Edward French
-* Version: v3.0.n.beta - 06/07/22
+* Version: v3.0.q.beta - 06/07/22
 ******************************************************************/
 
 #include "math.h"
@@ -336,6 +336,7 @@ void setup()
 	// Set Spindle and M3 Synchro ratio
 	synchro_Ratio = configSetup.gearRatio_AxisM3 / configSetup.gearRatio_Spindle;
 
+#ifdef VERBOSE
 	Serial.print("configSetup.gearRatio_Spindle: ");
 	Serial.println(configSetup.gearRatio_Spindle,5);
 	Serial.print("configSetup.gearRatio_AxisM3: ");
@@ -343,12 +344,12 @@ void setup()
 
 	Serial.print("synchro_Ratio: ");
 	Serial.println(synchro_Ratio,5);
+#endif // VERBOSE
 
 #ifdef DEBUG
 	const char* initialized = "Initialized...";
 	Serial.println(initialized);
 #endif // DEBUG
-
 
 	// Uncomment to get size of defined structs.
 	structSizeCalc();
@@ -364,39 +365,34 @@ void setup()
 void loop()
 {
 	const char* pageCallerId_Char = "Page Caller ID:  ";
-	//const char* axis_SpeedPercent_Char = "Axis Speed Percent:  ";
-	//const char* spindle_SpeedPercent_Char = "Spindle Speed Percent:  ";
-	//const char* x_SpeedPercent_Char = "X axis Speed Percent:  ";
-	//const char* b_SpeedPercent_Char = "M3 axis Speed Percent:  ";
-	//const char* z_SpeedPercent_Char = "Z axis Speed Percent:  ";
+
 	const char* steps360_Char = "Steps/360: ";
 	const char* gearRatio_Char = "Gear Ratio: ";
 	const char* maxSpd_Char = "MaxSpeed:  ";
 	const char* accel_Char = "Accel:  ";
 	const char* polarity_Char = "Polarity:  ";
 	const char* distance_Char = "Distance:  ";
-	//const char * nextSpeed_Char = "Next Speed:";
+
 	const char* axisId_Char = "Axis ID:  ";
 	const char* indexId_Char = "Index ID:  ";
 	const char* z_LimitMin_Char = "Limit Min Z:  ";
 	const char* z_LimitMax_Char = "Limit Max Z:  ";
-	//const char* z_Home_Char = "Home Z:  ";
+
 	const char* x_LimitMin_Char = "Limit Min X:  ";
 	const char* x_LimitMax_Char = "Limit Max X:  ";
-	//const char* x_Home_Char = "Home X:  ";
+
 	const char* m3_LimitMin_Char = "Limit Min M3:  ";
 	const char* m3_LimitMax_Char = "Limit Max M3:  ";
-	//const char* m3_Home_Char = "Home M3:  ";
+
 	const char* m4_LimitMin_Char = "Limit Min M4:  ";
 	const char* m4_LimitMax_Char = "Limit Max M4:  ";
-	//const char* m4_Home_Char = "Home M4:  ";
+
 	const char* index1_Char = "Index1:  ";
 	const char* index2_Char = "Index2:  ";
 	const char* index3_Char = "Index3:  ";
 	const char* index4_Char = "Index4:  ";
 	const char* index5_Char = "Index5:  ";
-	//const char* newIndexSize_Char = "New Index Size:  ";
-	//const char* indexSizeChar = " Size:";
+
 	const char* degreeDivision_Char = " Degree or Division:  ";
 	const char* radialOrAxial_Char = "Radial or Axial:  ";
 	const char* helixType_Char = "Helix Type:  ";
@@ -411,22 +407,9 @@ void loop()
 	const char* pattern_Char = "Pattern:  ";
 	const char* reverseDirection_Char = "Reverse Direction:  ";
 	const char* fileOrFixed_Char = " File or Fixed:  ";
-	//const char* lineNumber_Char = "Line Number:  ";
-	//const char* pageIndex_t7_Char = "pageIndex.t7.txt=";
-	//const char * pageIndex_bt3_pco_Char = "pageIndex.bt3.pco=59391";
-	//const char* pageIndex_va0_Char = "pageIndex.va0.val=0";
-	//const char* pageIndex_bt3_Char = "pageIndex.bt3.val=0";
-	//const char* pageIndex_bt2_Char = "pageIndex.bt2.val=0";
-	//const char* pageIndex_bt1_Char = "pageIndex.bt1.val=0";
-	//const char* pageSync_b6_Char = "pageSync.b6.pco=0";
-	//const char* pageSync_b5_Char = "pageSync.b5.pco=0";
+
 	const char* rose_D_Char = "d: ";
 	const char* rose_N_Char = "n: ";
-	//const char * pageMain_va2_Char = "pageMain.va2.val=0";
-	//const char* activeAxis_Char = "Active Axis:  ";
-
-	//const char* nextionQuoteEnd = "\x22\xFF\xFF\xFF";
-	//const char* nextionEnd = "\xFF\xFF\xFF";
 
 	if (Serial1.available() > 0)
 	{
@@ -458,8 +441,8 @@ void loop()
 #endif // Debug
 	}
 #endif //Teensy_32
+
 	// All Nextion incoming data packets are terminated with one 0xFF byte
-	//if ((Serial1.available() > 0) || (Serial2.available() > 0) || (Serial3.available() > 0))// || (Serial4.available() > 0))
 
 	int serialPortAvailable = 0;
 	if ((Serial1.available() > 0) || (Serial3.available() > 0))
@@ -474,9 +457,6 @@ void loop()
 	}
 #endif // Teensy 32
 
-
-
-	//if ((Serial1.available() > 0) || (Serial3.available() > 0) || (Serial4.available() > 0))
 	if (serialPortAvailable > 0)
 	{
 		incomingByte = SerialRead(serialId);
@@ -484,9 +464,6 @@ void loop()
 #ifdef DEBUG
 		Serial.print("serialId: ");
 		Serial.println(serialId);
-		//		Serial.print("incomingByte: ");
-		//		Serial.println(incomingByte);
-		//		Serial.println("MilliDelay");
 #endif // DEBUG
 
 		// Allow processing time for serial data
@@ -521,17 +498,8 @@ void loop()
 			EEPROM.put(eePromAddress_Grk, configGreekKey);
 			break;
 		}
-		case 45: // - - Return Spindle and B axis to start positions
+		case 45: // - - Not Used
 		{
-			//pageCallerId = GetSerialInteger();
-			if (pageCallerId == PAGE_MOVE)
-			{
-				ReturnToStartPosition_MovePage(configMove.axisId);
-			}
-			else
-			{
-				ReturnToStartPosition(ID_AXIS_3);
-			}
 			break;
 		}
 		case 46: // . - Greek Key: Pattern count(pattern repeats)
@@ -689,28 +657,17 @@ void loop()
 
 			break;
 		}
-		case 61: // = Do Greek Key from file
+		case 61: // = Do pageProgram CCW
 		{
-
-			reverseDirection = GetSerialInteger();
-			if (reverseDirection == 0)
-			{
-				reverseDirection = DIR_CCW; // Nextion can't send negative number
-			}
-			else
-			{
-				reverseDirection = DIR_CW;
-			}
-
-			Serial.print("++++++++++++++++reverseDirection: ");
-			Serial.println(reverseDirection);
-			Program_FromFile(reverseDirection);
+			GetFilenameFromSerial();
+			Program_FromFile(DIR_CCW);
 
 			break;
 		}
-		case 62: // > Greater than - Not Used
+		case 62: // > Greater than - Do pageProgram CW
 		{
-
+			GetFilenameFromSerial();
+			Program_FromFile(DIR_CW);
 			break;
 		}
 		case 63: // ? Question mark - Not Used
@@ -729,7 +686,7 @@ void loop()
 		case 65: // A - Load Settings.ini
 		{
 			iniFileType = INI_4AXES;
-			GetIniFilenameFromSerial();
+			GetFilenameFromSerial();
 			LoadSettings();
 			break;
 		}
@@ -1121,13 +1078,13 @@ void loop()
 		}
 		case 81: // Q - Index1 counter clockwise
 		{
-
 			switch (configIndex_Prime.indexId)
 			{
 				case INDEX_1:
 				{
 					if (configIndex_1.fileOrFixed == FILE_SD)
 					{
+
 						IndexFromFile(DIR_CCW);
 					}
 					else
@@ -1652,7 +1609,6 @@ void loop()
 #endif // DEBUG
 			break;
 		}
-
 		case 121: // y - Z Axis Microsteps
 		{
 			configSetup.microsteps_Axis_Z = (int)GetSerialFloat(serialId);
@@ -3368,7 +3324,7 @@ void loop()
 		}
 		case 231: // ç - Rose: Return Axis and Spindle
 		{
-			int axisId = GetSerialInteger();
+			//int axisId = GetSerialInteger();
 			pageCallerId = PAGE_ROSE;
 			//ReturnToStartPosition(axisId);
 			ReturnToStartPosition_Multi();
@@ -3470,12 +3426,11 @@ void loop()
 		}
 		case 236: //ì- Clear Stepper positions and set pageCallerId
 		{
-			returnSteps_Spindle = 0;
+			//returnSteps_Spindle = 0;
 			endPosition_Axis = 0;
 			endPosition_Spindle = 0;
 
 			pageCallerId = GetSerialInteger();
-
 
 	#ifdef DEBUG
 			switch (pageCallerId)
@@ -3778,10 +3733,7 @@ void loop()
 			//Serial.println("1.End Switch");
 		}
 
-
-		//Serial.println("2.End Switch");
 		MilliDelay(100);
-		//Serial.println("3.End Switch");
 	}
 
 #ifdef DEBUG
