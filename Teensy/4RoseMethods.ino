@@ -13533,7 +13533,10 @@ void GetIniFileListFromSD(int fileIndex)
 			}
 			else
 			{
-				iCounter--;
+				if (iCounter > 1)
+				{
+					iCounter--;
+				}
 			}
 
 
@@ -18797,6 +18800,7 @@ void TestEEPROMSetup()
 	SerialPrint(eePromPageSetup.polarity_Axis_M3 ? lowChar : highChar);
 	SerialPrint(nextionQuoteEnd);
 
+
 	// True=Linear, False = Radial
 	if (eePromPageSetup.radialOrLinear_Axis_M3) 
 	{
@@ -22535,7 +22539,7 @@ void LoadSettings_PagePreferences()
 	const char* iniValue = "Polarity_M4";
 	int eePromAddress_Nextion = 460;
 	float returnVal = ReturnIniValue(iniKey, iniValue);
-	returnVal >= 1 ? (configSetup.polarity_Axis_M3 = true) : (configSetup.polarity_Axis_M3 = false);
+	returnVal >= 1 ? (configSetup.polarity_Axis_M4 = true) : (configSetup.polarity_Axis_M4 = false);
 	value24 = (uint8_t)returnVal;
 
 	iniValue = "Polarity_Spindle";

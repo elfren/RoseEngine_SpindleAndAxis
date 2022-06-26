@@ -7,7 +7,7 @@
 #define DEBUG
 #define VERBOSE
 //#define TEENSY_32
-//#define ESTOP_ENABLED
+#define ESTOP_ENABLED
 //==================================================================
 // Pin assignments
 //==================================================================
