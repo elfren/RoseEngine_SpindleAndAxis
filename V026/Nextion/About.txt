@@ -1,0 +1,3 @@
+Open the .hmi file in the Nextion IDE in order to modify the file. Otherwise, put the .tft file on a microSD card and load onto the Nextion.
+To compile for either the two axes board or the four axes board, change the variable pageSpZ.vaPCB to 2 or 4 respectively.
+Compiled files are located in the Two_Axes and the Four_Axes folder.
