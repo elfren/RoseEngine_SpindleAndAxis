@@ -2,7 +2,7 @@
 /* *****************************************************************
 * 5Rose main entry
 * Author: Edward French
-* Version: v3.0.1 - 07/04/22
+* Version: v3.0.2 - 07/09/22
 ******************************************************************/
 
 #include "math.h"
@@ -922,20 +922,20 @@ void loop()
 
 			switch (helixType)
 			{
-			case 0: // Left for right handed Z axis leadscrew, Right for left handed Z axis leadscrew.
-			case 48:
-			{
-				directionAxis = DIR_CCW;// 0; // CCW
-				directionSpindle = DIR_CCW;// 0; //CCW
-				break;
-			}
-			case 1: //Right for right handed Z axis leadscrew, Left for left handed Z axis leadscrew.
-			case 49:
-			{
-				directionAxis = DIR_CCW; // CCW
-				directionSpindle = DIR_CW; //CW
-				break;
-			}
+				case 0: // Left for right handed Z axis leadscrew, Right for left handed Z axis leadscrew.
+				case 48:
+				{
+					directionAxis = DIR_CCW;// 0; // CCW
+					directionSpindle = DIR_CCW;// 0; //CCW
+					break;
+				}
+				case 1: //Right for right handed Z axis leadscrew, Left for left handed Z axis leadscrew.
+				case 49:
+				{
+					directionAxis = DIR_CCW; // CCW
+					directionSpindle = DIR_CW; //CW
+					break;
+				}
 			}
 			//Sync(directionSpindle, directionAxis, ID_AXIS_Z);
 			Sync(directionSpindle, directionAxis);
@@ -949,20 +949,20 @@ void loop()
 
 			switch (helixType)
 			{
-			case 0:// Left for right handed Z axis leadscrew, Right for left handed Z axis leadscrew.
-			case 48:
-			{
-				directionAxis = DIR_CW; // CW
-				directionSpindle = DIR_CW; // CW
-				break;
-			}
-			case 1: //Right for right handed Z axis leadscrew, Left for left handed Z axis leadscrew.
-			case 49:
-			{
-				directionAxis = DIR_CW; // CW
-				directionSpindle = DIR_CCW;//0; // CCW
-				break;
-			}
+				case 0:// Left for right handed Z axis leadscrew, Right for left handed Z axis leadscrew.
+				case 48:
+				{
+					directionAxis = DIR_CW; // CW
+					directionSpindle = DIR_CW; // CW
+					break;
+				}
+				case 1: //Right for right handed Z axis leadscrew, Left for left handed Z axis leadscrew.
+				case 49:
+				{
+					directionAxis = DIR_CW; // CW
+					directionSpindle = DIR_CCW;//0; // CCW
+					break;
+				}
 			}
 
 			Sync(directionSpindle, directionAxis);

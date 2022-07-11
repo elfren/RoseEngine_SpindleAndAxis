@@ -5760,7 +5760,7 @@ void Sync(int directionSpindle, int directionAxis)
 				}
 				case LINEAR_M3:
 				{
-					axisSteps = DistanceToSteps_M3Linear(configSync.distance) * directionAxis * (-1);
+					axisSteps = DistanceToSteps_M3Linear(configSync.distance) * directionAxis;// * (-1);
 					break;
 				}
 			}
@@ -5784,7 +5784,7 @@ void Sync(int directionSpindle, int directionAxis)
 				}
 				case LINEAR_M3:
 				{
-					axisSteps = DistanceToSteps_M4Linear(configSync.distance) * directionAxis * (-1);
+					axisSteps = DistanceToSteps_M4Linear(configSync.distance) * directionAxis;// *(-1);
 					break;
 				}
 			}
@@ -13682,7 +13682,7 @@ EndSegmentCount:
 							SetEnable(ID_AXIS_Z, true, false);
 						}
 					}
-					else if (enableDisableStepperID == "M3") // ToDo Verify
+					else if (enableDisableStepperID == "B") // ToDo Verify
 					{
 						if (segmentMultiplier == 0)
 						{
@@ -13693,7 +13693,7 @@ EndSegmentCount:
 							SetEnable(ID_AXIS_3, true, false);
 						}
 					}
-					else if (enableDisableStepperID == "M4")// ToDo Verify
+					else if (enableDisableStepperID == "D")// ToDo Verify
 					{
 						if (segmentMultiplier == 0)
 						{
