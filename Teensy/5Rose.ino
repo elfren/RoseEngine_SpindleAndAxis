@@ -2,7 +2,7 @@
 /* *****************************************************************
 * 5Rose main entry
 * Author: Edward French
-* Version: v3.0.3 - 07/29/22
+* Version: v3.0.4 - 07/29/22
 ******************************************************************/
 
 #include "math.h"
@@ -206,19 +206,21 @@ void setup()
 
 
 		// Enable SD card reader
-	if (configSetup.motorCount < 5)
-	{
-#ifndef TEENSY_32
-		pinMode(PIN_SPI_CS_24, OUTPUT);
-		digitalWrite(PIN_SPI_CS_24, HIGH);
-#endif // !TEENSY_32
+//	if (configSetup.motorCount < 5)
+//	{
+//#ifndef TEENSY_32
+//		pinMode(PIN_SPI_CS_24, OUTPUT);
+//		digitalWrite(PIN_SPI_CS_24, HIGH);
+//#endif // !TEENSY_32
+//
+//		pinMode(PIN_SPI_CS_15, OUTPUT);
+//		digitalWrite(PIN_SPI_CS_15, HIGH);
+//
+//	}
 
-		pinMode(PIN_SPI_CS_15, OUTPUT);
-		digitalWrite(PIN_SPI_CS_15, HIGH);
-
-	}
 	pinMode(PIN_SPI_CS_10, OUTPUT);
 	digitalWrite(PIN_SPI_CS_10, HIGH);
+
 	pinMode(PIN_SPI_CS_9, OUTPUT);
 	digitalWrite(PIN_SPI_CS_9, HIGH);
 

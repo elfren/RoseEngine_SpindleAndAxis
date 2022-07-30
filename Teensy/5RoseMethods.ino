@@ -3750,7 +3750,7 @@ void Multi_SimultaneousTargets()
 	stepper5_step = 56;
 	stepper5_dir = 57;
 
-#ifdef TEENSY_32
+#ifdef TEENSY_32  // Reset to valid pins
 	stepperId_1 = 30;
 	stepperId_2 = 30;
 	stepperId_3 = 30;
@@ -3761,16 +3761,16 @@ void Multi_SimultaneousTargets()
 	stepper1_dir = 32;
 
 	stepper2_step = 33;
-	stepper2_dir = 24;
+	stepper2_dir = 33;
 
-	stepper3_step = 25;
-	stepper3_dir = 26;
+	stepper3_step = 33;
+	stepper3_dir = 33;
 
-	stepper4_step = 27;
-	stepper4_dir = 28;
+	stepper4_step = 33;
+	stepper4_dir = 33;
 
-	stepper5_step = 29;
-	stepper5_dir = 28;
+	stepper5_step = 33;
+	stepper5_dir = 33;
 #endif // TEENSY_32
 
 	// End global variables
@@ -4400,7 +4400,24 @@ void Multi_SimultaneousTargets()
 	Serial.println("End steps to move");
 #endif // DEBUG
 
+#ifdef DEBUG
+	Serial.print(" xxxxxxxxxx                         limitPin_Min_1:  ");
+	Serial.println(digitalRead(limitPin_Min_1));
+	Serial.print("configSetup.limit_NCorNO:");
+	Serial.println(configSetup.limit_NCorNO);
+
+#endif // DEBUG
+
 	stepController.moveAsync(stepper_1, stepper_2, stepper_3, stepper_4, stepper_5);
+
+#ifdef DEBUG
+	Serial.print(" zzzzzzzzzzzz                         limitPin_Min_1:  ");
+	Serial.println(digitalRead(limitPin_Min_1));
+	Serial.print("configSetup.limit_NCorNO:");
+	Serial.println(configSetup.limit_NCorNO);
+
+#endif // DEBUG
+
 
 	int eStop = 0;
 
@@ -4439,7 +4456,11 @@ void Multi_SimultaneousTargets()
 			if ((digitalRead(limitPin_Min_1) != configSetup.limit_NCorNO) && direction_1 < 0)
 			{
 #ifdef DEBUG
-				Serial.println("                          limitPin_Min_1");
+				Serial.print("                          limitPin_Min_1:  ");
+				Serial.println(digitalRead(limitPin_Min_1));
+				Serial.print("configSetup.limit_NCorNO:");
+				Serial.println(configSetup.limit_NCorNO);
+
 #endif // DEBUG
 				stepController.emergencyStop();
 				stopSteppers = true;
@@ -4591,9 +4612,7 @@ void Multi_SimultaneousTargets()
 				return;
 			}
 		}
-#ifndef TEENSY_32
 
-#endif // !TEENSY_32
 		// Check for Cancel code  
 		if (SerialAvailable() >= 0)
 		{
