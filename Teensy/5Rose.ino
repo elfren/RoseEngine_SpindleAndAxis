@@ -2,7 +2,7 @@
 /* *****************************************************************
 * 5Rose main entry
 * Author: Edward French
-* Version: v3.0.2 - 07/09/22
+* Version: v3.0.3 - 07/29/22
 ******************************************************************/
 
 #include "math.h"
@@ -199,8 +199,31 @@ void setup()
 	Serial.println(configRose.axisId);
 #endif // DEBUG
 
+
+
 	// Config as well as all other EEProm settings should be run from Nextion whenever Teensy is updated.  
 	// EEProm may contain invalid settings otherwise.
+
+
+		// Enable SD card reader
+	if (configSetup.motorCount < 5)
+	{
+#ifndef TEENSY_32
+		pinMode(PIN_SPI_CS_24, OUTPUT);
+		digitalWrite(PIN_SPI_CS_24, HIGH);
+#endif // !TEENSY_32
+
+		pinMode(PIN_SPI_CS_15, OUTPUT);
+		digitalWrite(PIN_SPI_CS_15, HIGH);
+
+	}
+	pinMode(PIN_SPI_CS_10, OUTPUT);
+	digitalWrite(PIN_SPI_CS_10, HIGH);
+	pinMode(PIN_SPI_CS_9, OUTPUT);
+	digitalWrite(PIN_SPI_CS_9, HIGH);
+
+	// Start SD
+	BeginSD();
 
 	pinMode(PIN_SPINDLE_ENABLE, OUTPUT);
 	pinMode(PIN_AXIS_Z_ENABLE, OUTPUT);
@@ -301,28 +324,9 @@ void setup()
 
 	MilliDelay(10);
 
-	// Enable SD card reader
-	if (configSetup.motorCount < 5)
-	{
-#ifndef TEENSY_32
-		pinMode(PIN_SPI_CS_24, OUTPUT);
-		digitalWrite(PIN_SPI_CS_24, HIGH);
-#endif // !TEENSY_32
-
-		pinMode(PIN_SPI_CS_15, OUTPUT);
-		digitalWrite(PIN_SPI_CS_15, HIGH);
-
-	}
-	pinMode(PIN_SPI_CS_10, OUTPUT);
-	digitalWrite(PIN_SPI_CS_10, HIGH);
-	pinMode(PIN_SPI_CS_9, OUTPUT);
-	digitalWrite(PIN_SPI_CS_9, HIGH);
-
-	// Start SD
-	BeginSD();
-
 	SetEnable(ID_SPINDLE, false, true);
 
+#ifndef TEENSY_32
 	for (int i = 0; i < 3; i++) // Verify Teensy is operational
 	{
 		digitalWrite(LED_BUILTIN, HIGH);
@@ -330,6 +334,7 @@ void setup()
 		digitalWrite(LED_BUILTIN, LOW);
 		MilliDelay(300);
 	}
+#endif // !TEENSY_32
 
 	// Set Spindle and M3 Synchro ratio
 	synchro_Ratio = configSetup.gearRatio_AxisM3 / configSetup.gearRatio_Spindle;

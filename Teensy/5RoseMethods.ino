@@ -100,24 +100,27 @@ void structSizeCalc()
 /// <returns>void</returns>
 void BeginSD()
 {
+
 	// Note: Each failed check requires 2 seconds.  Recommend using CS 10 for SPI card reader.
-#ifdef DEBUG
+//#ifdef DEBUG
 	Serial.println("SD..begin");
-#endif // DEBUG
+//#endif // DEBUG
 	if (SD.begin(254)) // Builtin microSD card: Use 254 instead of BUILTIN_SDCARD for compatibility with Teensy 3.2
 	{
 		microSD_Id = 1;
-#ifdef VERBOSE
+//#ifdef VERBOSE
 		Serial.println("microSD-1");
-#endif // VERBOSE
+//#endif // VERBOSE
 	}
 	else if (SD.begin(PIN_SPI_CS_10)) // SPI microSD CS on pin 10
 	{
 		microSD_Id = 10;
-#ifdef VERBOSE
+
+//#ifdef VERBOSE
 		Serial.println("microSD-10");
-#endif // VERBOSE
+//#endif // VERBOSE
 	}
+
 //	else if (SD.begin(PIN_SPI_CS_24)) // SPI microSD CS on pin 24
 //	{
 //		microSD_Id = 24;
@@ -132,23 +135,22 @@ void BeginSD()
 //		Serial.println("microSD-15");
 //#endif // DEBUG
 //	}
-
 	else if (SD.begin(PIN_SPI_CS_9)) // SPI microSD CS on pin 9
 	{
 		microSD_Id = 9;
-#ifdef VERBOSE
+//#ifdef VERBOSE
 	Serial.println("microSD-9");
-#endif // VERBOSE
+//#endif // VERBOSE
 		
 	}
 	else // No card
 	{
 		microSD_Id = 0;
 	}
-#ifdef VERBOSE
+//#ifdef VERBOSE
 	Serial.print("microSD_Id: ");
 	Serial.println(microSD_Id);
-#endif // VERBOSE
+//#endif // VERBOSE
 }
 
 /// <summary>
@@ -11114,7 +11116,7 @@ bool GreekKey_Angular_AxisAndSpindle(
 	//}
 
 
-	float spindleSteps = (shortLegLength_Spindle)*multiplier_Spindle;
+	float spindleSteps = (shortLegLength_Spindle) * multiplier_Spindle;
 	int32_t targetSteps_Spindle = (int32_t)round(spindleSteps);
 
 	//if (spindleSteps < 0)
@@ -11125,7 +11127,7 @@ bool GreekKey_Angular_AxisAndSpindle(
 
 	/////////////////////////////////////////////////
 	stepper_Axis
-		.setMaxSpeed(maxSpd_Axis* currentSpeedPercent_Axis)
+		.setMaxSpeed(maxSpd_Axis * currentSpeedPercent_Axis)
 		.setAcceleration(accel_Axis)
 		.setTargetAbs(targetSteps_Axis);
 
@@ -11217,7 +11219,7 @@ bool GreekKey_Angular_AxisAndSpindle(
 		//Serial.println(currentSpeed);
 #endif // VERBOSE
 
-		// Teensy crashes when Spindle and M3 are syncronized
+		// Teensy may crash when Spindle and M3 are syncronized so call stop when current speed is less than MIN_SPEED
 		if (currentSpeed < MIN_SPEED)
 		{
 			MilliDelay(500);
