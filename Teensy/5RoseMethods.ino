@@ -439,12 +439,12 @@ double GetSerialFloatA(Stream& port)
 
 	retVal = atof(in);
 
-#ifdef DEBUG
+//#ifdef DEBUG
 	Serial.print("In: ");
 	Serial.println(in);
 	Serial.print("Float: ");
 	Serial.println(retVal, 4);
-#endif //DEBUG
+//#endif //DEBUG
 	return retVal;
 }
 
@@ -3951,15 +3951,27 @@ void Multi_SimultaneousTargets()
 			stepper1_step = PIN_AXIS_3_STEP;
 			stepper1_dir = PIN_AXIS_3_DIR;
 			stepperId_1 = ID_AXIS_3;
-			if (direction == 4)
-			{
-				direction_1 = -1;
-			}
-			else
-			{
-				direction_1 = 1;
-			}
 
+#ifdef VERBOSE
+			Serial.print("direction_1:   ");
+			Serial.println(direction_1);
+			Serial.print("mconfigMulti.direction_M3:   ");
+			Serial.println(configMulti.direction_M3);
+			Serial.print("direction:   ");
+			Serial.println(direction);
+#endif // VERBOSE
+			//if (direction == 4)
+			//{
+			//	direction_1 = -1;
+			//}
+			//else
+			//{
+			//	direction_1 = 1;
+			//}
+#ifdef VERBOSE
+			Serial.print("direction_1:   ");
+			Serial.println(direction_1);
+#endif // VERBOSE
 			if (configSetup.radialOrLinear_Axis_M3 == RADIAL_M3)
 			{
 				stepsPerRevolution = (int)round(configSetup.microsteps_Axis_M3 * configSetup.steps360_Axis_M3 * configSetup.gearRatio_AxisM3);
@@ -4429,6 +4441,10 @@ void Multi_SimultaneousTargets()
 #ifdef VERBOSE
 		//Serial.print("currentSpeed: ");
 		//Serial.print(currentSpeed);
+		Serial.print("  1: ");
+		Serial.print(stepper_1.getPosition());
+		Serial.print("  2: ");
+		Serial.println(stepper_2.getPosition());
 #endif // VERBOSE
 
 		if (limitPin_Max_1 > 9 && limitPin_Max_1 < 40)
@@ -20057,7 +20073,7 @@ float slideFunc_Axis(float spindleAngle)
 	float phi = fmodf(spindleAngle * kRatio, TWO_PI);
 	//return slideStepsAmplitude * cosf(phi);
 	float retVal = slideStepsAmplitude * cosf(phi);
-	//float altVal = slideStepsAmplitude * (pow(sin(2.8 * spindleAngle * kRatio), 2) + cos(pow(2 * spindleAngle * kRatio, 2)));
+	//float retVal = slideStepsAmplitude * (pow(sin(2.8 * spindleAngle * kRatio), 2) + cos(pow(2 * spindleAngle * kRatio, 2)));
 	//Serial.println(altVal);
 	return retVal;
 }
@@ -20850,18 +20866,24 @@ void TestEEPROMSetup()
 
 	SerialPrint(pageMotor_4_t57);
 	SerialWrite(0x22);
-	SerialPrint(eePromPageSetup.steps360_Axis_M4);
+	SerialPrint(configSetup.steps360_Axis_M4);
 	SerialPrint(nextionQuoteEnd);
+//#ifdef DEBUG
+	Serial.print("M4 distance/360: ");
+	Serial.println(eePromPageSetup.steps360_Axis_M4);
+	Serial.print("M4 distance/360: ");
+	Serial.println(eePromPageSetup.steps360_Axis_M4);
+//#endif // DEBUG
+
 
 	SerialPrint(pageMotor_4_t58);
-	//SerialPrint("t58.txt=");
 	SerialWrite(0x22);
 	SerialPrint(eePromPageSetup.gearRatio_AxisM4, 5);
 	SerialPrint(nextionQuoteEnd);
 
-	Serial.println(pageMotor_4_t58);
+	/*Serial.println(pageMotor_4_t58);
 	Serial.print("(eePromPageSetup.gearRatio_AxisM4, 5):  ");
-	Serial.println(eePromPageSetup.gearRatio_AxisM4);
+	Serial.println(eePromPageSetup.gearRatio_AxisM4);*/
 
 	SerialPrint(pageMotor_4_t59);
 	SerialWrite(0x22);

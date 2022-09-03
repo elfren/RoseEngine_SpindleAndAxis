@@ -2,7 +2,7 @@
 /* *****************************************************************
 * 5Rose main entry
 * Author: Edward French
-* Version: v3.0.4 - 07/29/22
+* Version: v3.0.5 - 08/01/22
 ******************************************************************/
 
 #include "math.h"
@@ -1898,12 +1898,12 @@ void loop()
 		}
 		case 167: // § - M4 Distance/360
 		{
-			configSetup.distancePerRev_AxisM4 = GetSerialFloat(serialId);
+			configSetup.steps360_Axis_M4 = (int)GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Setup, configSetup);
-#ifdef DEBUG
+//#ifdef DEBUG
 			Serial.print(distance_Char);
-			Serial.println(configSetup.distancePerRev_AxisM4, 5);
-#endif // DEBUG
+			Serial.println(configSetup.steps360_Axis_M4);
+//#endif // DEBUG
 			break;
 		}
 		case 168: // ¨ - Setup M4: Distance per revolution
