@@ -688,7 +688,7 @@ constexpr float P = 0.01;             // (P)roportional constant of the regulato
 constexpr unsigned priorityLevel = 128;// 255;//64; //// 
 
 /////////////////////////////////////////////////////////////////////////
-// Greek Key
+// Program and Greek Key
 /////////////////////////////////////////////////////////////////////////
 
 int reverseDirection = 1;
@@ -708,8 +708,13 @@ float hv_SpindleLegLength = 0; // Vertical component of angular move
 long angularAxisSpeed = 0;
 long angularSpindleSpeed = 0;
 
+uint32_t primaryAxisId = 0;
+uint32_t secondaryAxisId = 0;
+float multiplier_Primary = 1;
+float multiplier_Secondary = 1;
 
-
+int32_t m3Radial_ShortLegSteps = 0;
+int32_t m4Radial_ShortLegSteps = 0;
 
 int runPageID = 0;
 
@@ -717,7 +722,8 @@ String commandRecip = "";
 String commandMove = "";
 String commandIndex = "";
 String commandSync = "";
-String commandBRadius = "";
+String commandM3Radius = "";
+String commandM4Radius = "";
 
 String enableDisableStepperID = "";
 

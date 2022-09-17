@@ -19,9 +19,13 @@
     <None Include="src\arduino folders read me.txt">
       <Filter>Misc Files</Filter>
     </None>
+    <None Include="5RoseMethods.ino" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="__vm\.5Rose.vsarduino.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="5RoseDefines.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

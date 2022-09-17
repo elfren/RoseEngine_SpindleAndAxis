@@ -2,7 +2,7 @@
 /* *****************************************************************
 * 5Rose main entry
 * Author: Edward French
-* Version: v3.0 - 06/30/22
+* Version: v3.0.5 - 08/01/22
 ******************************************************************/
 
 #include "math.h"
@@ -199,8 +199,33 @@ void setup()
 	Serial.println(configRose.axisId);
 #endif // DEBUG
 
+
+
 	// Config as well as all other EEProm settings should be run from Nextion whenever Teensy is updated.  
 	// EEProm may contain invalid settings otherwise.
+
+
+		// Enable SD card reader
+//	if (configSetup.motorCount < 5)
+//	{
+//#ifndef TEENSY_32
+//		pinMode(PIN_SPI_CS_24, OUTPUT);
+//		digitalWrite(PIN_SPI_CS_24, HIGH);
+//#endif // !TEENSY_32
+//
+//		pinMode(PIN_SPI_CS_15, OUTPUT);
+//		digitalWrite(PIN_SPI_CS_15, HIGH);
+//
+//	}
+
+	pinMode(PIN_SPI_CS_10, OUTPUT);
+	digitalWrite(PIN_SPI_CS_10, HIGH);
+
+	pinMode(PIN_SPI_CS_9, OUTPUT);
+	digitalWrite(PIN_SPI_CS_9, HIGH);
+
+	// Start SD
+	BeginSD();
 
 	pinMode(PIN_SPINDLE_ENABLE, OUTPUT);
 	pinMode(PIN_AXIS_Z_ENABLE, OUTPUT);
@@ -301,28 +326,9 @@ void setup()
 
 	MilliDelay(10);
 
-	// Enable SD card reader
-	if (configSetup.motorCount < 5)
-	{
-#ifndef TEENSY_32
-		pinMode(PIN_SPI_CS_24, OUTPUT);
-		digitalWrite(PIN_SPI_CS_24, HIGH);
-#endif // !TEENSY_32
-
-		pinMode(PIN_SPI_CS_15, OUTPUT);
-		digitalWrite(PIN_SPI_CS_15, HIGH);
-
-	}
-	pinMode(PIN_SPI_CS_10, OUTPUT);
-	digitalWrite(PIN_SPI_CS_10, HIGH);
-	pinMode(PIN_SPI_CS_9, OUTPUT);
-	digitalWrite(PIN_SPI_CS_9, HIGH);
-
-	// Start SD
-	BeginSD();
-
 	SetEnable(ID_SPINDLE, false, true);
 
+#ifndef TEENSY_32
 	for (int i = 0; i < 3; i++) // Verify Teensy is operational
 	{
 		digitalWrite(LED_BUILTIN, HIGH);
@@ -330,6 +336,7 @@ void setup()
 		digitalWrite(LED_BUILTIN, LOW);
 		MilliDelay(300);
 	}
+#endif // !TEENSY_32
 
 	// Set Spindle and M3 Synchro ratio
 	synchro_Ratio = configSetup.gearRatio_AxisM3 / configSetup.gearRatio_Spindle;
@@ -595,7 +602,6 @@ void loop()
 #endif // DEBUG
 				break;
 			}
-
 			case PAGE_MULTI:
 			case PAGE_ONE:
 			{
@@ -923,20 +929,20 @@ void loop()
 
 			switch (helixType)
 			{
-			case 0: // Left for right handed Z axis leadscrew, Right for left handed Z axis leadscrew.
-			case 48:
-			{
-				directionAxis = DIR_CCW;// 0; // CCW
-				directionSpindle = DIR_CCW;// 0; //CCW
-				break;
-			}
-			case 1: //Right for right handed Z axis leadscrew, Left for left handed Z axis leadscrew.
-			case 49:
-			{
-				directionAxis = DIR_CCW; // CCW
-				directionSpindle = DIR_CW; //CW
-				break;
-			}
+				case 0: // Left for right handed Z axis leadscrew, Right for left handed Z axis leadscrew.
+				case 48:
+				{
+					directionAxis = DIR_CCW;// 0; // CCW
+					directionSpindle = DIR_CCW;// 0; //CCW
+					break;
+				}
+				case 1: //Right for right handed Z axis leadscrew, Left for left handed Z axis leadscrew.
+				case 49:
+				{
+					directionAxis = DIR_CCW; // CCW
+					directionSpindle = DIR_CW; //CW
+					break;
+				}
 			}
 			//Sync(directionSpindle, directionAxis, ID_AXIS_Z);
 			Sync(directionSpindle, directionAxis);
@@ -950,20 +956,20 @@ void loop()
 
 			switch (helixType)
 			{
-			case 0:// Left for right handed Z axis leadscrew, Right for left handed Z axis leadscrew.
-			case 48:
-			{
-				directionAxis = DIR_CW; // CW
-				directionSpindle = DIR_CW; // CW
-				break;
-			}
-			case 1: //Right for right handed Z axis leadscrew, Left for left handed Z axis leadscrew.
-			case 49:
-			{
-				directionAxis = DIR_CW; // CW
-				directionSpindle = DIR_CCW;//0; // CCW
-				break;
-			}
+				case 0:// Left for right handed Z axis leadscrew, Right for left handed Z axis leadscrew.
+				case 48:
+				{
+					directionAxis = DIR_CW; // CW
+					directionSpindle = DIR_CW; // CW
+					break;
+				}
+				case 1: //Right for right handed Z axis leadscrew, Left for left handed Z axis leadscrew.
+				case 49:
+				{
+					directionAxis = DIR_CW; // CW
+					directionSpindle = DIR_CCW;//0; // CCW
+					break;
+				}
 			}
 
 			Sync(directionSpindle, directionAxis);
@@ -1892,12 +1898,12 @@ void loop()
 		}
 		case 167: // § - M4 Distance/360
 		{
-			configSetup.distancePerRev_AxisM4 = GetSerialFloat(serialId);
+			configSetup.steps360_Axis_M4 = (int)GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Setup, configSetup);
-#ifdef DEBUG
+//#ifdef DEBUG
 			Serial.print(distance_Char);
-			Serial.println(configSetup.distancePerRev_AxisM4, 5);
-#endif // DEBUG
+			Serial.println(configSetup.steps360_Axis_M4);
+//#endif // DEBUG
 			break;
 		}
 		case 168: // ¨ - Setup M4: Distance per revolution
@@ -1922,8 +1928,16 @@ void loop()
 		}
 		case 170: // ª - Setup: Cutter Motor Pin
 		{
-			configSetup.cutterMotorPin = GetSerialInteger();
+			int nueValue = GetSerialInteger();
+			configSetup.cutterMotorPin = nueValue;
+			//configSetup.cutterMotorPin = (int)GetSerialFloat(serialId);
 
+#ifdef DEBUG
+			Serial.print("nueValue:                    ");
+			Serial.println(nueValue);
+			Serial.print("configSetup.cutterMotorPin:  ");
+			Serial.println(configSetup.cutterMotorPin);
+#endif // DEBUG
 			EEPROM.put(eePromAddress_Setup, configSetup);
 			break;
 		}
