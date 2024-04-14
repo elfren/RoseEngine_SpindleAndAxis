@@ -430,6 +430,7 @@ double GetSerialFloatA(Stream& port)
 	const int bufferLength = 10;
 	char in[bufferLength];
 	char inputChar;
+	char discardChar;
 	double retVal = 0;
 	int i;
 	int j;
@@ -446,7 +447,7 @@ double GetSerialFloatA(Stream& port)
 		inputChar = port.read();
 #ifdef VERBOSE
 		Serial.println("");
-		Serial.print("InputChar:---------------------- ");
+		Serial.print("InputChar:----------abc------------ ");
 		Serial.print(i);
 		Serial.print(" :  ");
 		Serial.print(inputChar);
@@ -457,36 +458,35 @@ double GetSerialFloatA(Stream& port)
 		{
 			case 255:
 			{
+				Serial.print(">>>>>>>>>>>>>>>255: ");
+				Serial.println(in);
 				// Read and discard anything more on serial.
 				while (port.available() > 0)
 				{
-					port.read();
+					discardChar=port.read();
+					Serial.print(">>>>>>>>>>>>>>>discardChar: ");
+					Serial.println(discardChar);
 				}
-#ifdef VERBOSE
-				Serial.print("retVal 1: ");
-				Serial.println(retVal, 4);
-#endif //VERBOSE
-				retVal = (float)atof(in);
-#ifdef VERBOSE
-				Serial.print("In 1: ");
-				Serial.println(in);
-				Serial.print("Float 1: ");
-				Serial.println(retVal, 4);
-#endif //VERBOSE
-				return (retVal);
+
+				goto endLoop;
 				break;
 			}
 			case 4:
 			{
 #ifdef VERBOSE
-				Serial.println("Discard bogus 4----------");
+				Serial.print("Discard bogus 4----------");
+				Serial.println(i);
+				i = -1;
 #endif //VERBOSE
 				break;
 			}
 			case 127:
 			{
 #ifdef VERBOSE
-				Serial.println("Discard bogus 127----------");
+
+				Serial.print("Discard bogus 127----------");
+				Serial.println(i);
+				i = -1;
 #endif //VERBOSE
 				break;
 			}
@@ -499,13 +499,14 @@ double GetSerialFloatA(Stream& port)
 			}
 		}
 	}
+endLoop:
 
 	retVal = (float)atof(in);
 
 #ifdef DEBUG
-	Serial.print("In 2: ");
+	Serial.print("In: ");
 	Serial.println(in);
-	Serial.print("Float 2: ");
+	Serial.print("retVal: ");
 	Serial.println(retVal, 4);
 #endif //DEBUG
 	return retVal;
@@ -1683,9 +1684,9 @@ endLoop:
 /// <returns></returns>
 void OneRunStepper(int direction) // pageMulti
 {
-	if (configSetup.cutterMotorPin > 9 && configSetup.cutterMotorPin < 40)
+	if (configSetup.auxillaryPin > 9 && configSetup.auxillaryPin < 40)
 	{
-		digitalWrite(configSetup.cutterMotorPin, LOW);  // Enable
+		digitalWrite(configSetup.auxillaryPin, LOW);  // Enable
 	}
 
 
@@ -1960,9 +1961,9 @@ void OneRunStepper(int direction) // pageMulti
 				SetEnable(ID_AXIS_4, false, false);
 
 				SetEStopColors(pageCallerId);
-				if (configSetup.cutterMotorPin > 9 && configSetup.cutterMotorPin < 40)
+				if (configSetup.auxillaryPin > 9 && configSetup.auxillaryPin < 40)
 				{
-					digitalWrite(configSetup.cutterMotorPin, HIGH);  // Disable
+					digitalWrite(configSetup.auxillaryPin, HIGH);  // Disable
 				}
 				return;
 			}
@@ -2157,9 +2158,9 @@ endLoop:
 		}
 	}
 
-	if (configSetup.cutterMotorPin > 9 && configSetup.cutterMotorPin < 40)
+	if (configSetup.auxillaryPin > 9 && configSetup.auxillaryPin < 40)
 	{
-		digitalWrite(configSetup.cutterMotorPin, HIGH);  // Disable
+		digitalWrite(configSetup.auxillaryPin, HIGH);  // Disable
 	}
 	return;
 }
@@ -2179,9 +2180,9 @@ void Main_TwoSteppers(
 	int initialCaller
 )
 {
-	if (configSetup.cutterMotorPin > 9 && configSetup.cutterMotorPin < 40)
+	if (configSetup.auxillaryPin > 9 && configSetup.auxillaryPin < 40)
 	{
-		digitalWrite(configSetup.cutterMotorPin, LOW);  // Enable
+		digitalWrite(configSetup.auxillaryPin, LOW);  // Enable
 	}
 	RotateControl rotateController_MainSpindle;
 	RotateControl rotateController_MainAxis;
@@ -2445,9 +2446,9 @@ void Main_TwoSteppers(
 				SetEnable(ID_AXIS_4, false, false);
 				// Change Btn color on Nextion
 				SetEStopColors(PAGE_MAIN);
-				if (configSetup.cutterMotorPin > 9 && configSetup.cutterMotorPin < 40)
+				if (configSetup.auxillaryPin > 9 && configSetup.auxillaryPin < 40)
 				{
-					digitalWrite(configSetup.cutterMotorPin, HIGH);  // Disable
+					digitalWrite(configSetup.auxillaryPin, HIGH);  // Disable
 				}
 				return;
 			}
@@ -3015,9 +3016,9 @@ void Main_TwoSteppers(
 		m3_Position = stepper_M3.getPosition();
 	}
 
-	if (configSetup.cutterMotorPin > 9 && configSetup.cutterMotorPin < 40)
+	if (configSetup.auxillaryPin > 9 && configSetup.auxillaryPin < 40)
 	{
-		digitalWrite(configSetup.cutterMotorPin, HIGH);  // Disable
+		digitalWrite(configSetup.auxillaryPin, HIGH);  // Disable
 	}
 }
 
@@ -5733,6 +5734,7 @@ endLoop:
 /// </comment>
 void BeginMethodSettings()
 {
+	Serial.println("Enter BeginMethodSettings");
 	endPosition_Spindle = 0;
 	endPosition_Z = 0;
 	endPosition_X = 0;
@@ -5761,7 +5763,12 @@ void BeginMethodSettings()
 	if (configSetup.auxillaryPin > 9 && configSetup.auxillaryPin < 40)
 	{
 		digitalWrite(configSetup.auxillaryPin, LOW);  // Enable
+		uint8_t auxState = digitalRead(configSetup.auxillaryPin);
+		Serial.print("auxState: ");
+		Serial.println(auxState);
 	}
+	Serial.print("AuxPin #: ");
+	Serial.println(configSetup.auxillaryPin);
 
 	MilliDelay(10);
 	SerialPrint("pageSplash.vaEStop.val=0");
@@ -5771,6 +5778,8 @@ void BeginMethodSettings()
 	////cumulative_X = 0;
 	////cumulative_M3 = 0;
 	////cumulative_M4 = 0;
+
+	Serial.println("...................End BeginMethodSettings");
 }
 
 /// <summary>
@@ -5783,7 +5792,9 @@ void BeginMethodSettings()
 /// <returns></returns>
 void Sync(int directionSpindle, int directionAxis)
 {
+	Serial.println(" Call BeginMethodSettings");
 	BeginMethodSettings();
+	Serial.println(" End BeginMethodSettings");
 	int32_t currentPosition = 0;
 
 	const char* axisId_Char = "Axis ID:";
@@ -6318,6 +6329,10 @@ endLoop:
 	if (configSetup.auxillaryPin > 9 && configSetup.auxillaryPin < 40)
 	{
 		digitalWrite(configSetup.auxillaryPin, HIGH);  // Disable
+		uint8_t auxState = digitalRead(configSetup.auxillaryPin);
+		Serial.print("auxState: ");
+		Serial.println(auxState);
+
 	}
 }
 
@@ -7842,9 +7857,9 @@ void GreekKeyPattern_Initial(int segmentCount)
 #ifdef VERBOSE
 	Serial.println("Enter GreekKeyPattern_Initial");
 #endif // VERBOSE
-	if (configSetup.cutterMotorPin > 9 && configSetup.cutterMotorPin < 40)
+	if (configSetup.auxillaryPin > 9 && configSetup.auxillaryPin < 40)
 	{
-		digitalWrite(configSetup.cutterMotorPin, LOW);  // Enable
+		digitalWrite(configSetup.auxillaryPin, LOW);  // Enable
 	}
 	// Reset end positions
 	endPosition_Spindle = 0;
@@ -7996,9 +8011,9 @@ void GreekKeyPattern_End()
 	stepperPosition_3 = endPosition_M3 * (-1);
 
 	SetEnable(ID_SPINDLE, false, true);
-	if (configSetup.cutterMotorPin > 9 && configSetup.cutterMotorPin < 40)
+	if (configSetup.auxillaryPin > 9 && configSetup.auxillaryPin < 40)
 	{
-		digitalWrite(configSetup.cutterMotorPin, HIGH);  // Disable
+		digitalWrite(configSetup.auxillaryPin, HIGH);  // Disable
 	}
 }
 
@@ -8171,9 +8186,9 @@ bool GreekKey_Move_Axis(float segmentSteps, float multiplier, int direction, boo
 					SetEnable(ID_AXIS_3, false, true);
 					SetEnable(ID_AXIS_4, false, true);
 					SetLimitColors(PAGE_GRK, DIR_CW);
-					if (configSetup.cutterMotorPin > 9 && configSetup.cutterMotorPin < 40)
+					if (configSetup.auxillaryPin > 9 && configSetup.auxillaryPin < 40)
 					{
-						digitalWrite(configSetup.cutterMotorPin, HIGH);  // Disable
+						digitalWrite(configSetup.auxillaryPin, HIGH);  // Disable
 					}
 
 					return true;
@@ -8198,9 +8213,9 @@ bool GreekKey_Move_Axis(float segmentSteps, float multiplier, int direction, boo
 					SetEnable(ID_AXIS_3, false, true);
 					SetEnable(ID_AXIS_4, false, true);
 					SetLimitColors(PAGE_GRK, DIR_CCW);
-					if (configSetup.cutterMotorPin > 9 && configSetup.cutterMotorPin < 40)
+					if (configSetup.auxillaryPin > 9 && configSetup.auxillaryPin < 40)
 					{
-						digitalWrite(configSetup.cutterMotorPin, HIGH);  // Disable
+						digitalWrite(configSetup.auxillaryPin, HIGH);  // Disable
 					}
 
 					return true;
@@ -8225,9 +8240,9 @@ bool GreekKey_Move_Axis(float segmentSteps, float multiplier, int direction, boo
 				SetEnable(ID_AXIS_3, false, false);
 				SetEnable(ID_AXIS_4, false, false);
 				SetEStopColors(PAGE_GRK);
-				if (configSetup.cutterMotorPin > 9 && configSetup.cutterMotorPin < 40)
+				if (configSetup.auxillaryPin > 9 && configSetup.auxillaryPin < 40)
 				{
-					digitalWrite(configSetup.cutterMotorPin, HIGH);  // Disable
+					digitalWrite(configSetup.auxillaryPin, HIGH);  // Disable
 				}
 				return true;
 			}
@@ -8496,9 +8511,9 @@ bool GreekKey_Angular_AxisAndSpindle_Org(
 				SetEnable(ID_AXIS_3, false, true);
 				SetEnable(ID_AXIS_4, false, true);
 				SetLimitColors(PAGE_GRK, DIR_CW);
-				if (configSetup.cutterMotorPin > 9 && configSetup.cutterMotorPin < 40)
+				if (configSetup.auxillaryPin > 9 && configSetup.auxillaryPin < 40)
 				{
-					digitalWrite(configSetup.cutterMotorPin, HIGH);  // Disable
+					digitalWrite(configSetup.auxillaryPin, HIGH);  // Disable
 				}
 
 				return true;
@@ -8521,9 +8536,9 @@ bool GreekKey_Angular_AxisAndSpindle_Org(
 				SetEnable(ID_AXIS_3, false, true);
 				SetEnable(ID_AXIS_4, false, true);
 				SetLimitColors(PAGE_GRK, DIR_CCW);
-				if (configSetup.cutterMotorPin > 9 && configSetup.cutterMotorPin < 40)
+				if (configSetup.auxillaryPin > 9 && configSetup.auxillaryPin < 40)
 				{
-					digitalWrite(configSetup.cutterMotorPin, HIGH);  // Disable
+					digitalWrite(configSetup.auxillaryPin, HIGH);  // Disable
 				}
 
 				return true;
@@ -8547,9 +8562,9 @@ bool GreekKey_Angular_AxisAndSpindle_Org(
 				SetEnable(ID_AXIS_3, false, false);
 				SetEnable(ID_AXIS_4, false, false);
 				SetEStopColors(PAGE_GRK);
-				if (configSetup.cutterMotorPin > 9 && configSetup.cutterMotorPin < 40)
+				if (configSetup.auxillaryPin > 9 && configSetup.auxillaryPin < 40)
 				{
-					digitalWrite(configSetup.cutterMotorPin, HIGH);  // Disable
+					digitalWrite(configSetup.auxillaryPin, HIGH);  // Disable
 				}
 
 				return true;
@@ -8815,9 +8830,9 @@ bool GreekKey_Angular_AxisAndSpindle(
 				SetEnable(ID_AXIS_3, false, true);
 				SetEnable(ID_AXIS_4, false, true);
 				SetLimitColors(PAGE_PROGRAM, DIR_CW);
-				if (configSetup.cutterMotorPin > 9 && configSetup.cutterMotorPin < 40)
+				if (configSetup.auxillaryPin > 9 && configSetup.auxillaryPin < 40)
 				{
-					digitalWrite(configSetup.cutterMotorPin, HIGH);  // Disable
+					digitalWrite(configSetup.auxillaryPin, HIGH);  // Disable
 				}
 
 				return true;
@@ -8840,9 +8855,9 @@ bool GreekKey_Angular_AxisAndSpindle(
 				SetEnable(ID_AXIS_3, false, true);
 				SetEnable(ID_AXIS_4, false, true);
 				SetLimitColors(PAGE_PROGRAM, DIR_CCW);
-				if (configSetup.cutterMotorPin > 9 && configSetup.cutterMotorPin < 40)
+				if (configSetup.auxillaryPin > 9 && configSetup.auxillaryPin < 40)
 				{
-					digitalWrite(configSetup.cutterMotorPin, HIGH);  // Disable
+					digitalWrite(configSetup.auxillaryPin, HIGH);  // Disable
 				}
 
 				return true;
@@ -8866,9 +8881,9 @@ bool GreekKey_Angular_AxisAndSpindle(
 				SetEnable(ID_AXIS_3, false, false);
 				SetEnable(ID_AXIS_4, false, false);
 				SetEStopColors(PAGE_PROGRAM);
-				if (configSetup.cutterMotorPin > 9 && configSetup.cutterMotorPin < 40)
+				if (configSetup.auxillaryPin > 9 && configSetup.auxillaryPin < 40)
 				{
-					digitalWrite(configSetup.cutterMotorPin, HIGH);  // Disable
+					digitalWrite(configSetup.auxillaryPin, HIGH);  // Disable
 				}
 
 				return true;
@@ -9251,9 +9266,9 @@ bool GreekKey_Angular_TwoAxes(int direction)
 				SetEnable(ID_AXIS_3, false, true);
 				SetEnable(ID_AXIS_4, false, true);
 				SetLimitColors(PAGE_PROGRAM, DIR_CW);
-				if (configSetup.cutterMotorPin > 9 && configSetup.cutterMotorPin < 40)
+				if (configSetup.auxillaryPin > 9 && configSetup.auxillaryPin < 40)
 				{
-					digitalWrite(configSetup.cutterMotorPin, HIGH);  // Disable
+					digitalWrite(configSetup.auxillaryPin, HIGH);  // Disable
 				}
 
 				return true;
@@ -9277,9 +9292,9 @@ bool GreekKey_Angular_TwoAxes(int direction)
 				SetEnable(ID_AXIS_3, false, true);
 				SetEnable(ID_AXIS_4, false, true);
 				SetLimitColors(PAGE_PROGRAM, DIR_CCW);
-				if (configSetup.cutterMotorPin > 9 && configSetup.cutterMotorPin < 40)
+				if (configSetup.auxillaryPin > 9 && configSetup.auxillaryPin < 40)
 				{
-					digitalWrite(configSetup.cutterMotorPin, HIGH);  // Disable
+					digitalWrite(configSetup.auxillaryPin, HIGH);  // Disable
 				}
 
 				return true;
@@ -9304,9 +9319,9 @@ bool GreekKey_Angular_TwoAxes(int direction)
 				SetEnable(ID_AXIS_3, false, true);
 				SetEnable(ID_AXIS_4, false, true);
 				SetLimitColors(PAGE_PROGRAM, DIR_CW);
-				if (configSetup.cutterMotorPin > 9 && configSetup.cutterMotorPin < 40)
+				if (configSetup.auxillaryPin > 9 && configSetup.auxillaryPin < 40)
 				{
-					digitalWrite(configSetup.cutterMotorPin, HIGH);  // Disable
+					digitalWrite(configSetup.auxillaryPin, HIGH);  // Disable
 				}
 
 				return true;
@@ -9330,9 +9345,9 @@ bool GreekKey_Angular_TwoAxes(int direction)
 				SetEnable(ID_AXIS_3, false, true);
 				SetEnable(ID_AXIS_4, false, true);
 				SetLimitColors(PAGE_PROGRAM, DIR_CCW);
-				if (configSetup.cutterMotorPin > 9 && configSetup.cutterMotorPin < 40)
+				if (configSetup.auxillaryPin > 9 && configSetup.auxillaryPin < 40)
 				{
-					digitalWrite(configSetup.cutterMotorPin, HIGH);  // Disable
+					digitalWrite(configSetup.auxillaryPin, HIGH);  // Disable
 				}
 
 				return true;
@@ -9356,9 +9371,9 @@ bool GreekKey_Angular_TwoAxes(int direction)
 				SetEnable(ID_AXIS_3, false, false);
 				SetEnable(ID_AXIS_4, false, false);
 				SetEStopColors(PAGE_PROGRAM);
-				if (configSetup.cutterMotorPin > 9 && configSetup.cutterMotorPin < 40)
+				if (configSetup.auxillaryPin > 9 && configSetup.auxillaryPin < 40)
 				{
-					digitalWrite(configSetup.cutterMotorPin, HIGH);  // Disable
+					digitalWrite(configSetup.auxillaryPin, HIGH);  // Disable
 				}
 
 				return true;
@@ -9568,9 +9583,9 @@ bool GreekKey_Move_Spindle(float segmentSteps, float multiplier, int direction)
 				SetEnable(ID_AXIS_X, false, false);
 				SetEnable(ID_AXIS_3, false, false);
 				SetEStopColors(PAGE_GRK);
-				if (configSetup.cutterMotorPin > 9 && configSetup.cutterMotorPin < 40)
+				if (configSetup.auxillaryPin > 9 && configSetup.auxillaryPin < 40)
 				{
-					digitalWrite(configSetup.cutterMotorPin, HIGH);  // Disable
+					digitalWrite(configSetup.auxillaryPin, HIGH);  // Disable
 				}
 				return true;
 			}
@@ -11678,6 +11693,78 @@ int SerialRead(int serialPortId)
 	return incomingData;
 }
 
+void SerialInitialize()
+{
+	//Serial1.begin(9600);
+	MilliDelay(15);
+	//Serial1.print("bauds=921600");
+	Serial1.print("bauds=512000");
+	Serial1.print(nextionEnd);
+	MilliDelay(15);
+	Serial1.begin(921600);
+	if (Serial1.available() > 0)
+	{
+		serialId = 1;
+#ifdef DEBUG
+		Serial.print("1-serialId: ");
+		Serial.println(serialId);
+#endif // Debug
+
+		Serial1.print("bkcmd=0");  // Set Nextion to return NO replies to each command
+		Serial1.print(nextionEnd);
+	}
+			
+	if(serialId !=1)
+	{ 
+		//Serial2.begin(9600);
+		MilliDelay(15);
+		//Serial2.print("bauds=921600");
+		Serial2.print("bauds=512000");
+		Serial2.print(nextionEnd);
+		MilliDelay(15);
+		Serial2.begin(921600);
+		if (Serial2.available() > 0)
+		{
+			serialId = 2;
+#ifdef DEBUG
+			Serial.print("2-serialId: ");
+			Serial.println(serialId);
+#endif // Debug
+
+			Serial2.print("bkcmd=0");  // Set Nextion to return NO replies to each command
+			Serial2.print(nextionEnd);
+		}
+
+	}
+
+	if (serialId > 4)
+	{
+		//Serial3.begin(9600);
+		MilliDelay(15);
+		//Serial3.print("bauds=921600");
+		Serial3.print("bauds=512000");
+		Serial3.print(nextionEnd);
+		MilliDelay(15);
+		Serial3.begin(921600);
+		if (Serial3.available() > 0)
+		{
+			serialId = 3;
+#ifdef DEBUG
+			Serial.print("3-serialId: ");
+			Serial.println(serialId);
+#endif // Debug
+
+			Serial3.print("bkcmd=0");  // Set Nextion to return NO replies to each command
+			Serial3.print(nextionEnd);
+		}
+	}
+
+#ifdef DEBUG
+	Serial.print("serialId: ");
+	Serial.println(serialId);
+#endif // Debug
+}
+
 /// <summary>
 /// Serial Available
 /// </summary>
@@ -11819,7 +11906,7 @@ double GetIndexDataFromSD(int lineNumber)
 {
 	String newSizeString = "";
 	currentLineNumber = 0;
-	int filename_Length;
+	//// int filename_Length;
 
 	// Open file
 	File sdFile = SD.open(fileNameIndex, FILE_READ);
@@ -12268,7 +12355,7 @@ double GetGreekKeyDataFromSD(int lineNumber)
 	double retVal = 0;
 	currentLineNumber = 0;
 	String newSizeString = "";
-	int filename_Length;
+	////int filename_Length;
 
 	String nStr;
 	String nStrA;
@@ -12468,7 +12555,7 @@ double GetGreekKeyDataFromSD(int lineNumber)
 
 		case 84:// T - Two axes synchronized move.
 		{
-			char* val;
+			////char* val;
 			char charBuf[20];
 			char charSizePrimary[10];
 			
@@ -12658,9 +12745,9 @@ double GetGreekKeyDataFromSD(int lineNumber)
 /// <param name="axisId">Id of axis to move</param>
 void ReturnToStartPosition_Multi()
 {
-	if (configSetup.cutterMotorPin > 9 && configSetup.cutterMotorPin < 40)
+	if (configSetup.auxillaryPin > 9 && configSetup.auxillaryPin < 40)
 	{
-		digitalWrite(configSetup.cutterMotorPin, LOW);  // Enable
+		digitalWrite(configSetup.auxillaryPin, LOW);  // Enable
 	}
 	eStopTriggered = false;
 	MilliDelay(10);
@@ -12677,7 +12764,7 @@ void ReturnToStartPosition_Multi()
 	int32_t accel_3 = 10000;
 	int32_t accel_4 = 10000;
 	int32_t accel_5 = 10000;
-	int curPosition = 0;
+	////int curPosition = 0;
 #ifdef DEBUG
 	Serial.print("stepper1_step:  ");
 	Serial.println(stepper1_step);
@@ -13085,9 +13172,9 @@ void ReturnToStartPosition_Multi()
 				SetEnable(ID_AXIS_3, false, false);
 				SetEnable(ID_AXIS_4, false, false);
 				SetEStopColors(PAGE_RETURNS);
-				if (configSetup.cutterMotorPin > 9 && configSetup.cutterMotorPin < 40)
+				if (configSetup.auxillaryPin > 9 && configSetup.auxillaryPin < 40)
 				{
-					digitalWrite(configSetup.cutterMotorPin, HIGH);  // Disable
+					digitalWrite(configSetup.auxillaryPin, HIGH);  // Disable
 				}
 				return;
 			}
@@ -13887,9 +13974,9 @@ void ReturnToStartPosition_Multi()
 	}
 
 	checkedCount = 0;
-	if (configSetup.cutterMotorPin > 9 && configSetup.cutterMotorPin < 40)
+	if (configSetup.auxillaryPin > 9 && configSetup.auxillaryPin < 40)
 	{
-		digitalWrite(configSetup.cutterMotorPin, HIGH);  // Disable
+		digitalWrite(configSetup.auxillaryPin, HIGH);  // Disable
 	}
 }
 
@@ -13901,9 +13988,9 @@ void ReturnToStartPosition_Multi()
 /// <param name="axisId">Id of axis to move</param>
 void ReturnToStartPosition_Cumulative()
 {
-	if (configSetup.cutterMotorPin > 9 && configSetup.cutterMotorPin < 40)
+	if (configSetup.auxillaryPin > 9 && configSetup.auxillaryPin < 40)
 	{
-		digitalWrite(configSetup.cutterMotorPin, LOW);  // Enable
+		digitalWrite(configSetup.auxillaryPin, LOW);  // Enable
 	}
 	eStopTriggered = false;
 	MilliDelay(10);
@@ -13920,7 +14007,7 @@ void ReturnToStartPosition_Cumulative()
 	int32_t accel_3 = 100000;
 	int32_t accel_4 = 100000;
 	int32_t accel_5 = 100000;
-	int curPosition = 0;
+	////int curPosition = 0;
 
 	StepControl stepController;
 	Stepper stepper_1(stepper1_step, stepper1_dir);
@@ -14238,9 +14325,9 @@ void ReturnToStartPosition_Cumulative()
 				SetEnable(ID_AXIS_3, false, false);
 				SetEnable(ID_AXIS_4, false, false);
 				SetEStopColors(PAGE_RETURNS);
-				if (configSetup.cutterMotorPin > 9 && configSetup.cutterMotorPin < 40)
+				if (configSetup.auxillaryPin > 9 && configSetup.auxillaryPin < 40)
 				{
-					digitalWrite(configSetup.cutterMotorPin, HIGH);  // Disable
+					digitalWrite(configSetup.auxillaryPin, HIGH);  // Disable
 				}
 				return;
 			}
@@ -14357,9 +14444,9 @@ void ReturnToStartPosition_Cumulative()
 	}
 
 	checkedCount = 0;
-	if (configSetup.cutterMotorPin > 9 && configSetup.cutterMotorPin < 40)
+	if (configSetup.auxillaryPin > 9 && configSetup.auxillaryPin < 40)
 	{
-		digitalWrite(configSetup.cutterMotorPin, HIGH);  // Disable
+		digitalWrite(configSetup.auxillaryPin, HIGH);  // Disable
 	}
 }
 
@@ -14371,9 +14458,9 @@ void ReturnToStartPosition_Cumulative()
 /// <param name="axisId">Id of axis to move</param>
 void ReturnToStartPosition_MainPage()
 {
-	if (configSetup.cutterMotorPin > 9 && configSetup.cutterMotorPin < 40)
+	if (configSetup.auxillaryPin > 9 && configSetup.auxillaryPin < 40)
 	{
-		digitalWrite(configSetup.cutterMotorPin, LOW);  // Enable
+		digitalWrite(configSetup.auxillaryPin, LOW);  // Enable
 	}
 	eStopTriggered = false;
 	MilliDelay(10);
@@ -14390,7 +14477,7 @@ void ReturnToStartPosition_MainPage()
 	int32_t accel_3 = 100000;
 	int32_t accel_4 = 100000;
 	int32_t accel_5 = 100000;
-	int curPosition = 0;
+	////int curPosition = 0;
 	int dirPin_Reset = 55;
 
 	StepControl stepController;
@@ -14787,9 +14874,9 @@ void ReturnToStartPosition_MainPage()
 				SetEnable(ID_AXIS_3, false, false);
 				SetEnable(ID_AXIS_4, false, false);
 				SetEStopColors(PAGE_RETURNS);
-				if (configSetup.cutterMotorPin > 9 && configSetup.cutterMotorPin < 40)
+				if (configSetup.auxillaryPin > 9 && configSetup.auxillaryPin < 40)
 				{
-					digitalWrite(configSetup.cutterMotorPin, HIGH);  // Disable
+					digitalWrite(configSetup.auxillaryPin, HIGH);  // Disable
 				}
 				return;
 			}
@@ -14948,9 +15035,9 @@ void ReturnToStartPosition_MainPage()
 	}
 
 	checkedCount = 0;
-	if (configSetup.cutterMotorPin > 9 && configSetup.cutterMotorPin < 40)
+	if (configSetup.auxillaryPin > 9 && configSetup.auxillaryPin < 40)
 	{
-		digitalWrite(configSetup.cutterMotorPin, HIGH);  // Disable
+		digitalWrite(configSetup.auxillaryPin, HIGH);  // Disable
 	}
 }
 
@@ -14962,9 +15049,9 @@ void ReturnToStartPosition_MainPage()
 /// <param name="axisId">Id of axis to move</param>
 void ReturnToStartPosition_MovePage(int axisId)
 {
-	if (configSetup.cutterMotorPin > 9 && configSetup.cutterMotorPin < 40)
+	if (configSetup.auxillaryPin > 9 && configSetup.auxillaryPin < 40)
 	{
-		digitalWrite(configSetup.cutterMotorPin, LOW);  // Enable
+		digitalWrite(configSetup.auxillaryPin, LOW);  // Enable
 	}
 	eStopTriggered = false;
 	MilliDelay(10);
@@ -15092,9 +15179,9 @@ void ReturnToStartPosition_MovePage(int axisId)
 				SetEnable(ID_AXIS_3, false, false);
 				SetEnable(ID_AXIS_4, false, false);
 				SetEStopColors(PAGE_RETURNS);
-				if (configSetup.cutterMotorPin > 9 && configSetup.cutterMotorPin < 40)
+				if (configSetup.auxillaryPin > 9 && configSetup.auxillaryPin < 40)
 				{
-					digitalWrite(configSetup.cutterMotorPin, HIGH);  // Disable
+					digitalWrite(configSetup.auxillaryPin, HIGH);  // Disable
 				}
 				return;
 			}
@@ -15180,9 +15267,9 @@ void ReturnToStartPosition_MovePage(int axisId)
 		stepper_M3.setPosition(0);
 		stepper_M4.setPosition(0);
 		endPosition_Axis = 0;
-		if (configSetup.cutterMotorPin > 9 && configSetup.cutterMotorPin < 40)
+		if (configSetup.auxillaryPin > 9 && configSetup.auxillaryPin < 40)
 		{
-			digitalWrite(configSetup.cutterMotorPin, HIGH);  // Disable
+			digitalWrite(configSetup.auxillaryPin, HIGH);  // Disable
 		}
 }
 
@@ -15957,7 +16044,7 @@ void TestEEPROMSetup()
 	// pageMore
 	SerialPrint(pageMore_t8);
 	SerialWrite(0x22);
-	SerialPrint(eePromPageSetup.cutterMotorPin);
+	SerialPrint(eePromPageSetup.auxillaryPin);
 	SerialPrint(nextionQuoteEnd);
 
 	// 0 = Disabled, 1 = Enabled
@@ -18396,7 +18483,7 @@ void LoadSettings_PageIndex()
 	value0 = (uint8_t)configIndex_Prime.speedPercent_Spindle;
 	value8 = (uint8_t)configIndex_Prime.axisId;
 	value16 = (uint8_t)configIndex_Prime.indexId;
-	value24 = (uint8_t)configSetup.cutterMotorPin;
+	value24 = (uint8_t)configSetup.auxillaryPin;
 
 	int eePromAddress_Nextion = 104;
 	const char* iniValue = "SpeedPercentage_Spindle";
@@ -18415,10 +18502,10 @@ void LoadSettings_PageIndex()
 	value16 = (uint8_t)configIndex_Prime.indexId;
 
 	iniKey = "Preferences";
-	iniValue = "CutterMotorPin";
+	iniValue = "Auxillary_Pin";
 	returnVal = ReturnIniValue(iniKey, iniValue);
-	configSetup.cutterMotorPin = (int)returnVal;
-	value24 = (uint8_t)configSetup.cutterMotorPin;
+	configSetup.auxillaryPin = (int)returnVal;
+	value24 = (uint8_t)configSetup.auxillaryPin;
 
 	// Send to Nextion
 	SendPackedData(eePromAddress_Nextion);
@@ -18464,22 +18551,22 @@ void LoadSettings_PageIndex()
 	//configIndex_Prime.speedPercent_Axis_M4 = (int)returnVal;
 
 	iniValue = "Accel_M3";
-	eePromAddress_Nextion = 44;
+	eePromAddress_Nextion = 956;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configIndex_Prime.accel_Axis_M3 = (int)returnVal;
 
 	iniValue = "MaxSpeed_M3";
-	eePromAddress_Nextion = 32;
+	eePromAddress_Nextion = 804;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configIndex_Prime.maxSpd_Axis_M3 = (int)returnVal;
 
 	iniValue = "Accel_M4";
-	eePromAddress_Nextion = 560;
+	eePromAddress_Nextion = 984;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configIndex_Prime.accel_Axis_M4 = (int)returnVal;
 
 	iniValue = "MaxSpeed_M4";
-	eePromAddress_Nextion = 508;
+	eePromAddress_Nextion = 792;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configIndex_Prime.maxSpd_Axis_M4 = (int)returnVal;
 
@@ -18600,35 +18687,37 @@ void LoadSettings_PageRose()
 
 	const char* iniKey = "Rose";
 
-	// EEPROM 100
-	value0 = (uint8_t)configRose.speedPercent_Spindle;
-	value8 = (uint8_t)configRose.axisId;
-	value16 = (uint8_t)configRose.n;
-	value24 = (uint8_t)configRose.d;
+//(uint8_t)configRose.d;	// EEPROM 100
+//	value0 = (uint8_t)configRose.speedPercent_Spindle;
+//	value8 = (uint8_t)configRose.axisId;
+//	value16 = (uint8_t)configRose.n;
+//	value24 = 
 
 	int eePromAddress_Nextion = 100;
 	const char* iniValue = "SpeedPercentage_Spindle";
 	float returnVal = ReturnIniValue(iniKey, iniValue);
-	configRose.speedPercent_Spindle = (int)returnVal;
-	value0 = (uint8_t)configRose.speedPercent_Spindle;
+	////configRose.speedPercent_Spindle = (int)returnVal;
+	////value0 = (uint8_t)configRose.speedPercent_Spindle;
 
-	iniValue = "AxisId";
-	returnVal = ReturnIniValue(iniKey, iniValue);
-	configRose.axisId = (int)returnVal;
-	value8 = (uint8_t)configRose.axisId;
+	////iniValue = "AxisId";
+	////returnVal = ReturnIniValue(iniKey, iniValue);
+	////configRose.axisId = (int)returnVal;
+	////value8 = (uint8_t)configRose.axisId;
 
 	iniValue = "Rose_n";
-	returnVal = ReturnIniValue(iniKey, iniValue);
+	eePromAddress_Nextion = 732;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
 	configRose.n = (int)returnVal;
 	value16 = (uint8_t)configRose.n;
 
 	iniValue = "Rose_d";
-	returnVal = ReturnIniValue(iniKey, iniValue);
-	configRose.d = (int)returnVal;
-	value24 = (uint8_t)configRose.d;
+	eePromAddress_Nextion = 644;
+	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
+	configRose.d = returnVal;
+	////value24 = (uint8_t)configRose.d;
 
-	// Send to Nextion
-	SendPackedData(eePromAddress_Nextion);
+	////// Send to Nextion
+	////SendPackedData(eePromAddress_Nextion);
 
 	//// Pack data and send to Nextion
 	//packedValue = value24 << 24 | value16 << 16 | value8 << 8 | value0;
@@ -18767,12 +18856,12 @@ void LoadSettings_PageRose()
 
 	// M4 axis
 	iniValue = "MaxSpeed_M4";
-	eePromAddress_Nextion = 452;
+	eePromAddress_Nextion = 900;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configRose.maxSpd_Axis_M4 = (int)returnVal;
 
 	iniValue = "Accel_M4";
-	eePromAddress_Nextion = 208;
+	eePromAddress_Nextion = 844;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configRose.accel_Axis_M4 = (int)returnVal;
 
@@ -18900,12 +18989,12 @@ void LoadSettings_PageMove()
 
 	// M4 axis
 	iniValue = "MaxSpeed_M4";
-	eePromAddress_Nextion = 212;
+	eePromAddress_Nextion = 840;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configMove.maxSpd_Motor_4 = (int)returnVal;
 
 	iniValue = "Accel_M4";
-	eePromAddress_Nextion = 420;
+	eePromAddress_Nextion = 884;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configMove.accel_Motor_4 = (int)returnVal;
 
@@ -19084,7 +19173,7 @@ void LoadSettings_PageMulti()
 	// EEPROM 88
 	int eePromAddress_Nextion = 88;
 
-	const char* iniValue = "SpeedPercentage_Spindle"; // 0
+	const char* iniValue = "SpeedPercentage_Spindle"; // pageMulti
 	float returnVal = ReturnIniValue(iniKey, iniValue);
 	configMulti.speedPercent_Spindle = (int)returnVal;
 	value0 = (uint8_t)configMulti.speedPercent_Spindle;
@@ -19104,6 +19193,12 @@ void LoadSettings_PageMulti()
 	//configMulti.direction = (uint32_t)returnVal;
 	////configMulti.accel_Spindle = (int)returnVal;
 	//value24 = (uint8_t)configMulti.direction;
+
+	iniKey = "Rose";
+	iniValue = "SpeedPercentage_Spindle"; // pageRose
+	returnVal = ReturnIniValue(iniKey, iniValue);
+	configRose.speedPercent_Spindle = (int)returnVal;
+	value24 = (uint8_t)configRose.speedPercent_Spindle;
 
 	// Send to Nextion
 	SendPackedData(eePromAddress_Nextion);
@@ -19135,33 +19230,33 @@ void LoadSettings_PageMulti()
 
 	// MaxSpeed
 	iniValue = "MaxSpeed_Spindle";
-	eePromAddress_Nextion = 480;
+	eePromAddress_Nextion = 928;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configMulti.maxSpd_Spindle = (int)returnVal;
 
 	iniValue = "MaxSpeed_Z";
-	eePromAddress_Nextion = 148;
+	eePromAddress_Nextion = 852;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configMulti.maxSpd_Axis_Z = (int)returnVal;
 
 	iniValue = "MaxSpeed_X";
-	eePromAddress_Nextion = 164;
+	eePromAddress_Nextion = 848;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configMulti.maxSpd_Axis_X = (int)returnVal;
 
 	iniValue = "MaxSpeed_M3";
-	eePromAddress_Nextion = 108;
+	eePromAddress_Nextion = 864;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configMulti.maxSpd_Axis_M3 = (int)returnVal;
 
 	iniValue = "MaxSpeed_M4";
-	eePromAddress_Nextion = 376;
+	eePromAddress_Nextion = 836;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configMulti.maxSpd_Axis_M4 = (int)returnVal;
 
 	// Accel
 	iniValue = "Accel_Spindle";
-	eePromAddress_Nextion = 648;
+	eePromAddress_Nextion = 940;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configMulti.accel_Spindle = (int)returnVal;
 
@@ -19171,7 +19266,7 @@ void LoadSettings_PageMulti()
 	configMulti.accel_Axis_Z = (int)returnVal;
 
 	iniValue = "Accel_X";
-	eePromAddress_Nextion = 456;
+	eePromAddress_Nextion = 908;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configMulti.accel_Axis_X = (int)returnVal;
 
@@ -19181,7 +19276,7 @@ void LoadSettings_PageMulti()
 	configMulti.accel_Axis_M3 = (int)returnVal;
 
 	iniValue = "Accel_M4";
-	eePromAddress_Nextion = 644;
+	eePromAddress_Nextion = 924;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configMulti.accel_Axis_M4 = (int)returnVal;
 
@@ -19640,6 +19735,7 @@ void LoadSettings_PagePreferences()
 	configSetup.radialOrLinear_Axis_M4 = returnVal;
 	value8 = (uint8_t)configSetup.radialOrLinear_Axis_M4;
 
+
 	iniValue = "Polarity_Z";
 	eePromAddress_Nextion = 460;
 	returnVal = ReturnIniValue(iniKey, iniValue);
@@ -19656,12 +19752,20 @@ void LoadSettings_PagePreferences()
 	returnVal >= 1 ? (configSetup.polarity_Axis_XAlt = true) : (configSetup.polarity_Axis_XAlt = false);
 	value0 = (uint8_t)configSetup.polarity_Axis_XAlt;
 
+	iniKey = "Rose";
+	iniValue = "AxisId";
+	returnVal = ReturnIniValue(iniKey, iniValue);
+	configRose.axisId = (int)returnVal;
+	value8 = (uint8_t)configRose.axisId;
+
+	iniKey = "Preferences";
 	iniValue = "Polarity_X";
 	eePromAddress_Nextion = 176;
 	returnVal = ReturnIniValue(iniKey, iniValue);
 	returnVal >= 1 ? (configSetup.polarity_Axis_X = true) : (configSetup.polarity_Axis_X = false);
 	value16 = (uint8_t)configSetup.polarity_Axis_X;
 
+	iniKey = "Recip";
 	iniValue = "MinusLastSegment";
 	eePromAddress_Nextion = 176;
 	returnVal = ReturnIniValue(iniKey, iniValue);
@@ -20048,12 +20152,12 @@ void LoadSettings_PageReturns()
 	configSetup.accel_Return_Axis_M3 = (int)returnVal;
 
 	iniValue = "MaxSpeed_Axis_M4";
-	eePromAddress_Nextion = 56;
+	eePromAddress_Nextion = 856;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configSetup.maxSpd_Return_Axis_M4 = (int)returnVal;
 
 	iniValue = "Accel_Axis_M4";
-	eePromAddress_Nextion = 84;
+	eePromAddress_Nextion = 860;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configSetup.accel_Return_Axis_M4 = (int)returnVal;
 

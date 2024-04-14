@@ -281,8 +281,8 @@ struct configPageSetup
 	uint32_t keepSteppersEnabled;
 	uint32_t eStop;
 	uint32_t limit_NCorNO; // 0 (LOW) is NC, 1 (HIGH) is NO
-	uint32_t cutterMotorPin;
-	uint32_t auxillaryPin;;
+	uint32_t auxillaryPin;
+	//uint32_t auxillaryPin;;
 	uint32_t vendorId;
 	uint32_t motorCount;
 };
@@ -396,8 +396,8 @@ struct configPageRose // page 12
 	uint32_t speedPercent_Axis_M3;
 	uint32_t speedPercent_Axis_M4;
 
-	uint32_t n;
-	uint32_t d;
+	float n;
+	float d;
 	uint32_t axisId;
 	uint32_t radial_Axial;
 
@@ -702,6 +702,7 @@ float degrees_Spindle = 0;
 float degrees_M3 = 0;
 float degrees_M4 = 0;
 float distance_Axis = 0;
+float kFactor = 0;
 
 bool stopSteppers = false;
 

@@ -2,7 +2,7 @@
 /* *****************************************************************
 * 5Rose main entry
 * Author: Edward French
-* Version: v3.0.8.2 - 2/13/24
+* Version: v3.0.9 - 3/11/24
 ******************************************************************/
 
 #include "math.h"
@@ -54,85 +54,85 @@ void setup()
 	uint32_t serialBaud = Serial.baud();
 
 #ifdef DEBUG
-	SerialPrint("Baud:");
-	SerialPrintln(serialBaud);
+	Serial.print("Baud:");
+	Serial.println(serialBaud);
 #endif // DEBUG
 
-
-	// Initialize Nextion LCD for 115200 baud and enable Serial1,2,or3.
-	// Note: Nextion requires 3 0xFF bytes to signal end of transmission
-	// Serial1
-
-	//Serial1.begin(9600); //Nextion Serial baud rate set in Nextion pageMain Preinitialize Event tab
-	//Serial1.print("bauds=9600");
-	//Serial1.print(nextionEnd);
-	//MilliDelay(50);
-	//Serial1.print("bauds=9600");
-	//Serial1.print(nextionEnd);
-	//MilliDelay(50);
-
-
-	Serial1.begin(921600); //Nextion Serial baud rate set in Nextion pageMain Preinitialize Event tab
-	Serial1.print("bauds=921600");
-	Serial1.print(nextionEnd);
-	MilliDelay(50);
-	Serial1.print("bauds=921600");
-	Serial1.print(nextionEnd);
-	MilliDelay(50);
-	Serial1.print("bkcmd=0");  // Set Nextion to return NO replies to each command
-	Serial1.print(nextionEnd);
-	MilliDelay(50);
-
-	if (Serial1.available() > 0)
-	{
-		serialId = 1;
-#ifdef DEBUG
-		Serial.print("1-serialId: ");
-		Serial.println(serialId);
-#endif // Debug
-	}
-	//	// Serial2
-	//	Serial2.begin(921600); //Nextion Serial baud rate set in Nextion pageMain Preinitialize Event tab
-	//	Serial2.print("bauds=921600");
-	//	Serial2.print(nextionEnd);
-	//	MilliDelay(50);
-	//	Serial2.print("bauds=921600");
-	//	Serial2.print(nextionEnd);
-	//	MilliDelay(50);
-	//	Serial2.print("bkcmd=0");  // Set Nextion to return NO replies to each command
-	//	Serial2.print(nextionEnd);
-	//	MilliDelay(50);
-	//	if (Serial2.available() > 0)
-	//	{
-	//		serialId = 2;
-	//#ifdef DEBUG
-	//		Serial.print("2-serialId: ");
-	//		Serial.println(serialId);
-	//#endif // Debug
-	//	}
-
-		// Serial3
-		//Serial3.begin(115200); //Nextion Serial baud rate set in Nextion pageMain Preinitialize Event tab
-	Serial3.begin(921600); //Nextion Serial baud rate set in Nextion pageMain Preinitialize Event tab
-	//Serial3.print("bauds=115200");
-	Serial3.print("bauds=921600");
-	Serial3.print(nextionEnd);
-	MilliDelay(50);
-	//Serial3.print("bauds=115200");
-	Serial3.print("bauds=921600");
-	Serial3.print(nextionEnd);
-	MilliDelay(50);
-	Serial3.print("bkcmd=0");  // Set Nextion to return NO replies to each command
-	Serial3.print(nextionEnd);
-	MilliDelay(50);
-	if (Serial3.available() > 0)
-	{
-		serialId = 3;
-#ifdef DEBUG
-		Serial.print("3-serialId: ");
-		Serial.println(serialId);
-#endif // Debug
-	}
+	SerialInitialize();
+//
+//	// Initialize Nextion LCD for 115200 baud and enable Serial1,2,or3.
+//	// Note: Nextion requires 3 0xFF bytes to signal end of transmission
+//	// Serial1
+//
+//	Serial1.begin(9600); //Nextion Serial baud rate set in Nextion pageMain Preinitialize Event tab
+//	//Serial1.print("bauds=9600");
+//	//Serial1.print(nextionEnd);
+//	//MilliDelay(50);
+//	//Serial1.print("bauds=9600");
+//	//Serial1.print(nextionEnd);
+//	//MilliDelay(50);
+//
+//	//Serial1.begin(921600); //Nextion Serial baud rate set in Nextion pageMain Preinitialize Event tab
+//	Serial1.print("bauds=921600");
+//	Serial1.print(nextionEnd);
+//	MilliDelay(50);
+//	Serial1.print("bauds=921600");
+//	Serial1.print(nextionEnd);
+//	MilliDelay(50);
+//	Serial1.print("bkcmd=0");  // Set Nextion to return NO replies to each command
+//	Serial1.print(nextionEnd);
+//	MilliDelay(50);
+//
+//	if (Serial1.available() > 0)
+//	{
+//		serialId = 1;
+//#ifdef DEBUG
+//		Serial.print("1-serialId: ");
+//		Serial.println(serialId);
+//#endif // Debug
+//	}
+//	//	// Serial2
+//	//	Serial2.begin(921600); //Nextion Serial baud rate set in Nextion pageMain Preinitialize Event tab
+//	//	Serial2.print("bauds=921600");
+//	//	Serial2.print(nextionEnd);
+//	//	MilliDelay(50);
+//	//	Serial2.print("bauds=921600");
+//	//	Serial2.print(nextionEnd);
+//	//	MilliDelay(50);
+//	//	Serial2.print("bkcmd=0");  // Set Nextion to return NO replies to each command
+//	//	Serial2.print(nextionEnd);
+//	//	MilliDelay(50);
+//	//	if (Serial2.available() > 0)
+//	//	{
+//	//		serialId = 2;
+//	//#ifdef DEBUG
+//	//		Serial.print("2-serialId: ");
+//	//		Serial.println(serialId);
+//	//#endif // Debug
+//	//	}
+//
+//		// Serial3
+//		//Serial3.begin(115200); //Nextion Serial baud rate set in Nextion pageMain Preinitialize Event tab
+//	Serial3.begin(921600); //Nextion Serial baud rate set in Nextion pageMain Preinitialize Event tab
+//	//Serial3.print("bauds=115200");
+//	Serial3.print("bauds=921600");
+//	Serial3.print(nextionEnd);
+//	MilliDelay(50);
+//	//Serial3.print("bauds=115200");
+//	Serial3.print("bauds=921600");
+//	Serial3.print(nextionEnd);
+//	MilliDelay(50);
+//	Serial3.print("bkcmd=0");  // Set Nextion to return NO replies to each command
+//	Serial3.print(nextionEnd);
+//	MilliDelay(50);
+//	if (Serial3.available() > 0)
+//	{
+//		serialId = 3;
+//#ifdef DEBUG
+//		Serial.print("3-serialId: ");
+//		Serial.println(serialId);
+//#endif // Debug
+//	}
 
 	// Serial4
 #ifndef TEENSY_32
@@ -163,7 +163,7 @@ void setup()
 	Serial.print("serialId: ");
 	Serial.println(serialId);
 #endif // Debug
-	// Update with values from EEProm
+	//Update with values from EEProm
 	EEPROM.get(eePromAddress_Setup, configSetup);
 	EEPROM.get(eePromAddress_Main, configMain);
 #ifdef DEBUG
@@ -304,10 +304,17 @@ void setup()
 		digitalWrite(configSetup.limit_Max_M3, configSetup.limit_NCorNO);  // Enable
 	}
 
-	if (configSetup.cutterMotorPin > 9 && configSetup.cutterMotorPin < 40)
+	if (configSetup.auxillaryPin > 9 && configSetup.auxillaryPin < 40)
 	{
-		pinMode(configSetup.cutterMotorPin, OUTPUT);
-		digitalWrite(configSetup.cutterMotorPin, HIGH);  // Enable
+		pinMode(configSetup.auxillaryPin, OUTPUT);
+		digitalWrite(configSetup.auxillaryPin, HIGH);  // Enable
+		uint8_t auxState = digitalRead(configSetup.auxillaryPin);
+		Serial.print("auxState: ");
+		Serial.println(auxState);
+	}
+	else
+	{
+		Serial.println("auxillaryPin not enabled");
 	}
 
 	MilliDelay(10);
@@ -652,7 +659,6 @@ void loop()
 		}
 		case 60: // < Less than - Not Used
 		{
-
 			break;
 		}
 		case 61: // = Do pageProgram CCW
@@ -922,11 +928,15 @@ void loop()
 		}
 		case 74: // J - Sync:Z In
 		{
-			int helixType = GetSerialInteger();
+			Serial.println("1 Call Sync");
+			//int helixType = GetSerialInteger();
+			//int helixType = (int)GetSerialFloat(serialId);
 			int directionSpindle = 1;
 			int directionAxis = 1;
 
-			switch (helixType)
+			Serial.print("helixType: ");
+			Serial.print(configSync.helixType);
+			switch (configSync.helixType)
 			{
 				case 0: // Left for right handed Z axis leadscrew, Right for left handed Z axis leadscrew.
 				case 48:
@@ -943,17 +953,20 @@ void loop()
 					break;
 				}
 			}
+			Serial.println("2 Call Sync");
 			//Sync(directionSpindle, directionAxis, ID_AXIS_Z);
 			Sync(directionSpindle, directionAxis);
 			break;
 		}
 		case 75: // K - Sync: Z Out 
 		{
-			int helixType = GetSerialInteger();
+			Serial.println("3 Call Sync");
 			int directionSpindle = 1;
 			int directionAxis = 1;
 
-			switch (helixType)
+			Serial.print("helixType: ");
+			Serial.print(configSync.helixType);
+			switch (configSync.helixType)
 			{
 				case 0:// Left for right handed Z axis leadscrew, Right for left handed Z axis leadscrew.
 				case 48:
@@ -970,7 +983,9 @@ void loop()
 					break;
 				}
 			}
-
+			Serial.print("directionSpindle: ");
+			Serial.println(directionSpindle);
+			Serial.println("5 Call Sync");
 			Sync(directionSpindle, directionAxis);
 			break;
 		}
@@ -1253,12 +1268,24 @@ void loop()
 		}
 		case 84: // T - Rose: n
 		{
-			configRose.n = (int)GetSerialFloat(serialId);
+			configRose.n = GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Rose, configRose);
+
+			kFactor = configRose.n / configRose.d;
+			SerialPrint("pageRose.t103.txt=");
+			SerialWrite(0x22);
+			SerialPrint(kFactor, 4);
+			SerialPrint(nextionQuoteEnd);
 #ifdef DEBUG
 			Serial.print(rose_N_Char);
 			Serial.println(configRose.n);
+			Serial.print(rose_D_Char);
+			Serial.println(configRose.d);
+			Serial.print("kFactor: ");
+			Serial.println(kFactor);
 #endif // DEBUG
+
+
 			break;
 		}
 		case 85: //U - Greek Key File: Axis Segment Length
@@ -1312,8 +1339,14 @@ void loop()
 		}
 		case 89:  // Y - Rose: d
 		{
-			configRose.d = (int)GetSerialFloat(serialId);
+			configRose.d = GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Rose, configRose);
+
+			kFactor = configRose.n / configRose.d;
+			SerialPrint("pageRose.t103.txt=");
+			SerialWrite(0x22);
+			SerialPrint(kFactor,4);
+			SerialPrint(nextionQuoteEnd);
 #ifdef DEBUG
 			Serial.print(rose_D_Char);
 			Serial.println(configRose.d);
@@ -1469,20 +1502,7 @@ void loop()
 		}
 		case 104: // h - pageMulti: TargetDistance-X
 		{
-//			configMulti.targetDistance_X = .11;
-
-#ifdef DEBUG
-			Serial.print("1.configMulti.targetDistance_X: ");
-			Serial.println(configMulti.targetDistance_X);
-#endif // DEBUG
 			configMulti.targetDistance_X = GetSerialFloat(serialId);
-////			float newVal = GetSerialFloat(serialId);
-////#ifdef DEBUG
-////			Serial.print("1.newVal: ");
-////			Serial.println(newVal);
-////#endif // DEBUG
-			////configMulti.targetDistance_X = newVal;
-			//configMulti.targetDistance_X = GetSerialFloat(serialId);
 			EEPROM.put(eePromAddress_Multi, configMulti);
 #ifdef DEBUG
 			Serial.print("2.configMulti.targetDistance_X: ");
@@ -1954,14 +1974,14 @@ void loop()
 		case 170: // � - Setup: Cutter Motor Pin
 		{
 			int nueValue = GetSerialInteger();
-			configSetup.cutterMotorPin = nueValue;
+			configSetup.auxillaryPin = nueValue;
 			//configSetup.cutterMotorPin = (int)GetSerialFloat(serialId);
 
 #ifdef DEBUG
 			Serial.print("nueValue:                    ");
 			Serial.println(nueValue);
 			Serial.print("configSetup.cutterMotorPin:  ");
-			Serial.println(configSetup.cutterMotorPin);
+			Serial.println(configSetup.auxillaryPin);
 #endif // DEBUG
 			EEPROM.put(eePromAddress_Setup, configSetup);
 			break;
@@ -2372,216 +2392,216 @@ void loop()
 
 			switch (pageCallerId)
 			{
-			case PAGE_MAIN:
-			{
-				switch (configMain.axisId)
+				case PAGE_MAIN:
 				{
-				case ID_AXIS_Z:
-				{
-					configMain.accel_Axis_Z = accel_axis;
+					switch (configMain.axisId)
+					{
+					case ID_AXIS_Z:
+					{
+						configMain.accel_Axis_Z = accel_axis;
+						break;
+					}
+					case ID_AXIS_X:
+					{
+						configMain.accel_Axis_X = accel_axis;
+						break;
+					}
+					case ID_AXIS_3:
+					{
+						configMain.accel_Axis_M3 = accel_axis;
+	#ifdef DEBUG
+						Serial.print("axisId:");
+						Serial.println(configMain.axisId);
+						Serial.print("....................accel_Axis_M3:");
+						Serial.println(configMain.accel_Axis_M3);
+	#endif // DEBUG
+						break;
+					}
+					case ID_AXIS_4:
+					{
+						configMain.accel_Axis_M4 = accel_axis;
+	#ifdef DEBUG
+						Serial.print("axisId:");
+						Serial.println(configMain.axisId);
+						Serial.print("....................accel_Axis_M4:");
+						Serial.println(configMain.accel_Axis_M4);
+	#endif // DEBUG
+						break;
+					}
+					}
+					EEPROM.put(eePromAddress_Main, configMain);
 					break;
-				}
-				case ID_AXIS_X:
-				{
-					configMain.accel_Axis_X = accel_axis;
-					break;
-				}
-				case ID_AXIS_3:
-				{
-					configMain.accel_Axis_M3 = accel_axis;
-#ifdef DEBUG
-					Serial.print("axisId:");
-					Serial.println(configMain.axisId);
-					Serial.print("....................accel_Axis_M3:");
-					Serial.println(configMain.accel_Axis_M3);
-#endif // DEBUG
-					break;
-				}
-				case ID_AXIS_4:
-				{
-					configMain.accel_Axis_M4 = accel_axis;
-#ifdef DEBUG
-					Serial.print("axisId:");
-					Serial.println(configMain.axisId);
-					Serial.print("....................accel_Axis_M4:");
-					Serial.println(configMain.accel_Axis_M4);
-#endif // DEBUG
-					break;
-				}
-				}
-				EEPROM.put(eePromAddress_Main, configMain);
-				break;
 
-			}
-
-			case PAGE_MOVE:
-			{
-				switch (configMove.axisId)
-				{
-				case ID_MOVE_AXIS_Z1:
-				case ID_MOVE_AXIS_Z2:
-				{
-					configMove.accel_Axis_Z = accel_axis;
-					break;
-				}
-				case ID_MOVE_AXIS_X1:
-				case ID_MOVE_AXIS_X2:
-				{
-					configMove.accel_Axis_X = accel_axis;
-					break;
-				}
-				case ID_MOVE_AXIS_M3_1:
-				case ID_MOVE_AXIS_M3_2:
-				{
-					configMove.accel_Motor_3 = accel_axis;
-					break;
-				}
-				case ID_MOVE_AXIS_M4_1:
-				case ID_MOVE_AXIS_M4_2:
-				{
-					configMove.accel_Motor_4 = accel_axis;
-					break;
-				}
 				}
 
-				EEPROM.put(eePromAddress_Mov, configMove);
-				break;
-			}
-			case PAGE_INDEX:
-			{
-				switch (configIndex_Prime.axisId)
+				case PAGE_MOVE:
 				{
-				case ID_AXIS_3:
-				{
-					configIndex_Prime.accel_Axis_M3 = accel_axis;
-					Serial.print("configIndex_Main.accel_Axis_M3: ");
-					Serial.println(configIndex_Prime.accel_Axis_M3);
-					break;
-				}
-				case ID_AXIS_4:
-				{
-					configIndex_Prime.accel_Axis_M4 = accel_axis;
-					break;
-				}
-				}
-				EEPROM.put(eePromAddress_Ind_Prime, configIndex_Prime);
+					switch (configMove.axisId)
+					{
+					case ID_MOVE_AXIS_Z1:
+					case ID_MOVE_AXIS_Z2:
+					{
+						configMove.accel_Axis_Z = accel_axis;
+						break;
+					}
+					case ID_MOVE_AXIS_X1:
+					case ID_MOVE_AXIS_X2:
+					{
+						configMove.accel_Axis_X = accel_axis;
+						break;
+					}
+					case ID_MOVE_AXIS_M3_1:
+					case ID_MOVE_AXIS_M3_2:
+					{
+						configMove.accel_Motor_3 = accel_axis;
+						break;
+					}
+					case ID_MOVE_AXIS_M4_1:
+					case ID_MOVE_AXIS_M4_2:
+					{
+						configMove.accel_Motor_4 = accel_axis;
+						break;
+					}
+					}
 
-				break;
-			}
-			case PAGE_MULTI:
-			case PAGE_ONE:
-			{
-				switch (configMulti.axisId)
-				{
-				case ID_AXIS_Z:
-				{
-					configMulti.accel_Axis_Z = accel_axis;
+					EEPROM.put(eePromAddress_Mov, configMove);
 					break;
 				}
-				case ID_AXIS_X:
+				case PAGE_INDEX:
 				{
-					configMulti.accel_Axis_X = accel_axis;
+					switch (configIndex_Prime.axisId)
+					{
+					case ID_AXIS_3:
+					{
+						configIndex_Prime.accel_Axis_M3 = accel_axis;
+						Serial.print("configIndex_Main.accel_Axis_M3: ");
+						Serial.println(configIndex_Prime.accel_Axis_M3);
+						break;
+					}
+					case ID_AXIS_4:
+					{
+						configIndex_Prime.accel_Axis_M4 = accel_axis;
+						break;
+					}
+					}
+					EEPROM.put(eePromAddress_Ind_Prime, configIndex_Prime);
+
 					break;
 				}
-				case ID_AXIS_3:
+				case PAGE_MULTI:
+				case PAGE_ONE:
 				{
-					configMulti.accel_Axis_M3 = accel_axis;
-#ifdef DEBUG
+					switch (configMulti.axisId)
+					{
+					case ID_AXIS_Z:
+					{
+						configMulti.accel_Axis_Z = accel_axis;
+						break;
+					}
+					case ID_AXIS_X:
+					{
+						configMulti.accel_Axis_X = accel_axis;
+						break;
+					}
+					case ID_AXIS_3:
+					{
+						configMulti.accel_Axis_M3 = accel_axis;
+	#ifdef DEBUG
+						Serial.print(accel_Char);
+						Serial.println(configMulti.accel_Axis_M3);
+	#endif // DEBUG
+						break;
+					}
+					case ID_AXIS_4:
+					{
+						configMulti.accel_Axis_M4 = accel_axis;
+	#ifdef DEBUG
+						Serial.print(accel_Char);
+						Serial.println(configMulti.accel_Axis_M4);
+	#endif // DEBUG
+						break;
+					}
+					} // end switch (pageCallerId)
+
+					EEPROM.put(eePromAddress_Multi, configMulti);
+	#ifdef DEBUG
 					Serial.print(accel_Char);
-					Serial.println(configMulti.accel_Axis_M3);
-#endif // DEBUG
+					Serial.println(configMulti.accel_Spindle);
+	#endif // DEBUG
 					break;
-				}
-				case ID_AXIS_4:
-				{
-					configMulti.accel_Axis_M4 = accel_axis;
-#ifdef DEBUG
-					Serial.print(accel_Char);
-					Serial.println(configMulti.accel_Axis_M4);
-#endif // DEBUG
-					break;
-				}
-				} // end switch (pageCallerId)
 
-				EEPROM.put(eePromAddress_Multi, configMulti);
-#ifdef DEBUG
-				Serial.print(accel_Char);
-				Serial.println(configMulti.accel_Spindle);
-#endif // DEBUG
-				break;
+				}
+				case PAGE_SYNC:
+				case PAGE_REC:
+				case PAGE_GRK:
+				case PAGE_PROGRAM:
+				{
+					switch (configSync.axisId)
+					{
+					case ID_AXIS_Z:
+					{
+						configSync.accel_Axis_Z = accel_axis;
+						configRec.accel_Axis_Z = accel_axis;
+						configGreekKey.accel_Axis_Z = accel_axis;
+						break;
+					}
+					case ID_AXIS_X:
+					{
+						configSync.accel_Axis_X = accel_axis;
+						configRec.accel_Axis_X = accel_axis;
+						configGreekKey.accel_Axis_X = accel_axis;
+						break;
+					}
+					case ID_AXIS_3:
+					{
+						configSync.accel_Axis_M3 = accel_axis;
+						configRec.accel_Axis_M3 = accel_axis;
+						configGreekKey.accel_Axis_M3 = accel_axis;
+						break;
+					}
+					case ID_AXIS_4:
+					{
+						configSync.accel_Axis_M4 = accel_axis;
+						configRec.accel_Axis_M4 = accel_axis;
+						configGreekKey.accel_Axis_M4 = accel_axis;
+						break;
+					}
+					}
+					EEPROM.put(eePromAddress_Sync, configSync);
+					EEPROM.put(eePromAddress_Rec, configRec);
+					EEPROM.put(eePromAddress_Grk, configGreekKey);
+					break;
 
-			}
-			case PAGE_SYNC:
-			case PAGE_REC:
-			case PAGE_GRK:
-			case PAGE_PROGRAM:
-			{
-				switch (configSync.axisId)
-				{
-				case ID_AXIS_Z:
-				{
-					configSync.accel_Axis_Z = accel_axis;
-					configRec.accel_Axis_Z = accel_axis;
-					configGreekKey.accel_Axis_Z = accel_axis;
-					break;
 				}
-				case ID_AXIS_X:
+				case PAGE_ROSE:
 				{
-					configSync.accel_Axis_X = accel_axis;
-					configRec.accel_Axis_X = accel_axis;
-					configGreekKey.accel_Axis_X = accel_axis;
-					break;
-				}
-				case ID_AXIS_3:
-				{
-					configSync.accel_Axis_M3 = accel_axis;
-					configRec.accel_Axis_M3 = accel_axis;
-					configGreekKey.accel_Axis_M3 = accel_axis;
-					break;
-				}
-				case ID_AXIS_4:
-				{
-					configSync.accel_Axis_M4 = accel_axis;
-					configRec.accel_Axis_M4 = accel_axis;
-					configGreekKey.accel_Axis_M4 = accel_axis;
-					break;
-				}
-				}
-				EEPROM.put(eePromAddress_Sync, configSync);
-				EEPROM.put(eePromAddress_Rec, configRec);
-				EEPROM.put(eePromAddress_Grk, configGreekKey);
-				break;
+					switch (configRose.axisId)
+					{
+					case ID_AXIS_Z:
+					{
+						configRose.accel_Axis_Z = accel_axis;
+						break;
+					}
+					case ID_AXIS_X:
+					{
+						configRose.accel_Axis_X = accel_axis;
+						break;
+					}
+					case ID_AXIS_3:
+					{
+						configRose.accel_Axis_M3 = accel_axis;
+						break;
+					}
+					case ID_AXIS_4:
+					{
+						configRose.accel_Axis_M4 = accel_axis;
+						break;
+					}
+					}
 
-			}
-			case PAGE_ROSE:
-			{
-				switch (configRose.axisId)
-				{
-				case ID_AXIS_Z:
-				{
-					configRose.accel_Axis_Z = accel_axis;
+					EEPROM.put(eePromAddress_Rose, configRose);
 					break;
 				}
-				case ID_AXIS_X:
-				{
-					configRose.accel_Axis_X = accel_axis;
-					break;
-				}
-				case ID_AXIS_3:
-				{
-					configRose.accel_Axis_M3 = accel_axis;
-					break;
-				}
-				case ID_AXIS_4:
-				{
-					configRose.accel_Axis_M4 = accel_axis;
-					break;
-				}
-				}
-
-				EEPROM.put(eePromAddress_Rose, configRose);
-				break;
-			}
 			}
 			break;
 		}
@@ -3478,64 +3498,76 @@ void loop()
 #ifdef DEBUG
 			switch (pageCallerId)
 			{
-			case PAGE_MAIN:
-			{
+				case PAGE_MAIN:
+				{
 
-				Serial.print("Main AxisId: ");
-				Serial.println(configMain.axisId);
+					Serial.print("Main AxisId: ");
+					Serial.println(configMain.axisId);
 
-				break;
-			}
-			case PAGE_ONE:
-			case PAGE_MULTI:
-			{
+					break;
+				}
+				case PAGE_ONE:
+				case PAGE_MULTI:
+				{
 
-				Serial.print("One/Multi AxisId: ");
-				Serial.println(configMulti.axisId);
+					Serial.print("One/Multi AxisId: ");
+					Serial.println(configMulti.axisId);
 
-				break;
-			}
-			case PAGE_INDEX:
-			{
+					break;
+				}
+				case PAGE_INDEX:
+				{
 
-				Serial.print("Index AxisId: ");
-				Serial.println(configIndex_Prime.axisId);
-				Serial.print("configIndex_1.sizeInUnits:  ");
-				Serial.println(configIndex_1.sizeInUnits);
-				Serial.print("configIndex_2.sizeInUnits:  ");
-				Serial.println(configIndex_2.sizeInUnits);
-				Serial.print("configIndex_3.sizeInUnits:  ");
-				Serial.println(configIndex_3.sizeInUnits);
-				Serial.print("configIndex_4.sizeInUnits:  ");
-				Serial.println(configIndex_4.sizeInUnits);
-				Serial.print("configIndex_5.sizeInUnits:  ");
-				Serial.println(configIndex_5.sizeInUnits);
-				break;
-			}
-			case PAGE_MOVE:
-			{
+					Serial.print("Index AxisId: ");
+					Serial.println(configIndex_Prime.axisId);
+					Serial.print("configIndex_1.sizeInUnits:  ");
+					Serial.println(configIndex_1.sizeInUnits);
+					Serial.print("configIndex_2.sizeInUnits:  ");
+					Serial.println(configIndex_2.sizeInUnits);
+					Serial.print("configIndex_3.sizeInUnits:  ");
+					Serial.println(configIndex_3.sizeInUnits);
+					Serial.print("configIndex_4.sizeInUnits:  ");
+					Serial.println(configIndex_4.sizeInUnits);
+					Serial.print("configIndex_5.sizeInUnits:  ");
+					Serial.println(configIndex_5.sizeInUnits);
+					break;
+				}
+				case PAGE_MOVE:
+				{
 
-				Serial.print("Move AxisId: ");
-				Serial.println(configMove.axisId);
+					Serial.print("Move AxisId: ");
+					Serial.println(configMove.axisId);
 
-				break;
-			}
-			case PAGE_SYNC:
-			case PAGE_REC:
-			case PAGE_GRK:
-			case PAGE_PROGRAM:
-			{
+					break;
+				}
+				case PAGE_SYNC:
+				case PAGE_REC:
+				case PAGE_GRK:
+				case PAGE_PROGRAM:
+				{
 
-				Serial.print("Shared AxisId: ");
-				Serial.println(configSync.axisId);
+					Serial.print("Shared AxisId: ");
+					Serial.println(configSync.axisId);
 
-				break;
-			}
-			default:
-			{
-				Serial.print("PageId: ");
-				Serial.println(pageCallerId);
-			}
+					break;
+				}
+				case PAGE_ROSE:
+				{
+					if (kFactor == 0)
+					{
+						kFactor = (float)(configRose.n) / (float)(configRose.d);
+						SerialPrint("pageRose.t103.txt=");
+						SerialWrite(0x22);
+						SerialPrint(kFactor, 4);
+						SerialPrint(nextionQuoteEnd);
+					}
+					break;
+				}
+				default:
+				{
+					Serial.print("PageId: ");
+					Serial.println(pageCallerId);
+				}
 			}
 
 
