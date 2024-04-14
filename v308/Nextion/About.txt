@@ -1,0 +1,2 @@
+Open the .hmi file in the Nextion IDE in order to modify the file. Otherwise, put the .tft file on a microSD card and load onto the Nextion.
+
