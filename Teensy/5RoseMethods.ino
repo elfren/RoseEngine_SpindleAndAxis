@@ -5193,11 +5193,6 @@ void Reciprocate(int wavDir)
 		currentPosition = i;
 		ProgressReport(waveCount, currentPosition);
 
-//		stepperAxis_Z.setPosition(0);
-//		stepperAxis_X.setPosition(0);
-//		stepperAxis_M3.setPosition(0);
-//		stepperAxis_M4.setPosition(0);
-//		stepperSpindle.setPosition(0);
 		Serial.print("................i:");
 		Serial.println(i);
 
@@ -5205,21 +5200,25 @@ void Reciprocate(int wavDir)
 		{
 			case TRIANGLE_STYLE: // Triangle
 			{
-				if (i >= 1)
+				if (i > 1)
 				{
-					if (i > 1)
+					if (i > 2) // Skip the first wave
 					{
-						if (configRec.retro_AxisChange != 0)
+						if (i % 2 == 1)	
 						{
-							GetRetroAxisSteps();
-						}
+							if (configRec.retro_AxisChange != 0)
+							{
+								GetRetroAxisSteps();
+							}
 
-						if (configRec.retro_SpindleChange != 0)
-						{
-							GetRetroSpindleSteps();
+							if (configRec.retro_SpindleChange != 0)
+							{
+								GetRetroSpindleSteps();
+							}
 						}
 					}
 
+					// Change direction on each leg
 					switch (configRec.radial_Axial)
 					{
 						case RADIAL: // Radial
@@ -5238,191 +5237,211 @@ void Reciprocate(int wavDir)
 
 				steps_Spindle = spindleSteps_Next;
 				steps_Axis = axisSteps_Next;
+
 				break;
 			}
 
 			case SQUARE_STYLE: // Square
 			{
 				leg = i % 4;
-				switch (leg)
-				{
-					case 1:
+				Serial.print("leg: ");
+				Serial.println(leg);
+				//if (i > 4)
+				//{
+					switch (leg)
 					{
-						switch (configRec.radial_Axial)
+						case 1:
 						{
-							case RADIAL: // Radial
+							switch (configRec.radial_Axial)
 							{
-								if (i > 1)
+								case RADIAL: // Radial
 								{
-									GetRetroAxisSteps();
+									if (i > 4)
+									{
+										GetRetroAxisSteps();
+									}
+									steps_Spindle = 0;
+									steps_Axis = axisSteps_Next;
+									break;
 								}
-								steps_Spindle = 0;
-								steps_Axis = axisSteps_Next;
-								break;
-							}
-							case AXIAL:
-							{
-								if (i > 1)
+								case AXIAL:
 								{
-									GetRetroSpindleSteps();
+									if (i > 4)
+									{
+										GetRetroSpindleSteps();
+									}
+									steps_Spindle = spindleSteps_Next;
+									steps_Axis = 0;
+									break;
 								}
-								steps_Spindle = spindleSteps_Next;
-								steps_Axis = 0;
-								break;
 							}
+							break;
 						}
-						break;
-					}
-					case 2:
-					{
-						switch (configRec.radial_Axial)
+						case 2:
 						{
-							case RADIAL: // Radial
+							switch (configRec.radial_Axial)
 							{
-								if (i > 1)
+								case RADIAL: // Radial
 								{
-									GetRetroSpindleSteps();
+									if (i > 4)
+									{
+										GetRetroSpindleSteps();
+									}
+									steps_Spindle = spindleSteps_Next;
+									steps_Axis = 0;
+									break;
 								}
-								steps_Spindle = spindleSteps_Next;
-								steps_Axis = 0;
-								break;
-							}
-							case AXIAL:
-							{
-								if (i > 1)
+								case AXIAL:
 								{
-									GetRetroAxisSteps();
+									if (i > 4)
+									{
+										GetRetroAxisSteps();
+									}
+
+									steps_Spindle = 0;
+									steps_Axis = axisSteps_Next;
+
+									break;
 								}
-
-								steps_Spindle = 0;
-								steps_Axis = axisSteps_Next;
-
-								break;
 							}
+
+							break;
 						}
 
-						break;
-					}
-
-					case 3:
-					{
-						switch (configRec.radial_Axial)
+						case 3:
 						{
-							case RADIAL: // Radial
+							switch (configRec.radial_Axial)
 							{
-								if (i > 1)
+								case RADIAL: // Radial
 								{
-									GetRetroAxisSteps();
-								}
-								steps_Spindle = 0;
-								steps_Axis = -axisSteps_Next;
+									//if (i > 1)
+									//{
+								//		GetRetroAxisSteps();
+									//}
+									steps_Spindle = 0;
+									steps_Axis = -axisSteps_Next;
 
-								break;
-							}
-							case AXIAL:
-							{
-								if (i > 1)
+									break;
+								}
+								case AXIAL:
 								{
-									GetRetroSpindleSteps();
-								}
-								steps_Spindle = -spindleSteps_Next;
-								steps_Axis = 0;
+									//if (i > 1)
+									//{
+									//	GetRetroSpindleSteps();
+									//}
+									steps_Spindle = -spindleSteps_Next;
+									steps_Axis = 0;
 
-								break;
+									break;
+								}
 							}
+							break;
 						}
-						break;
-					}
 
-					case 0:
-					{
-						switch (configRec.radial_Axial)
+						case 0:
 						{
-							case RADIAL: // Radial
+							switch (configRec.radial_Axial)
 							{
-								if (i > 1)
+								case RADIAL: // Radial
 								{
-									GetRetroSpindleSteps();
-								}
-								steps_Spindle = spindleSteps_Next;
-								steps_Axis = 0;
+									//if (i > 1)
+									//{
+									//	GetRetroSpindleSteps();
+									//}
+									steps_Spindle = spindleSteps_Next;
+									steps_Axis = 0;
 
-								break;
-							}
-							case AXIAL:
-							{
-								if (i > 1)
+									break;
+								}
+								case AXIAL:
 								{
-									GetRetroAxisSteps();
-								}
-								steps_Spindle = 0;
-								steps_Axis = axisSteps_Next;
+									//if (i > 1)
+									//{
+									//	GetRetroAxisSteps();
+									//}
+									steps_Spindle = 0;
+									steps_Axis = axisSteps_Next;
 
-								break;
+									break;
+								}
 							}
+							break;
 						}
-						break;
 					}
-				}
+
+				//}
+
+				Serial.print("steps_Spindle: ");
+				Serial.println(steps_Spindle);
+				Serial.print("steps_Axis: ");
+				Serial.println(steps_Axis);
 				break;
 			}
 
 			case SAWTOOTH_STYLE: // Sawtooth
 			{
 				i_mod_2 = i % 2;
-				switch (i_mod_2)
+				if (i > 1)
 				{
-					case 0:
+					switch (i_mod_2)
 					{
-						switch (configRec.radial_Axial)
+						case 0:
 						{
-							case RADIAL: // Radial
+							switch (configRec.radial_Axial)
 							{
-								steps_Spindle = 0;
-								steps_Axis = -axisSteps_Next;
+								case RADIAL: // Radial
+								{
+									steps_Spindle = 0;
+									steps_Axis = -axisSteps_Next;
 
-								Serial.print("Radial steps_Axis-mod 0:");
-								Serial.println(steps_Axis);
-								Serial.print("Radial steps_Spindle-mod 0:");
-								Serial.println(steps_Spindle);
+									//Serial.print("Radial steps_Axis-mod 0:");
+									//Serial.println(steps_Axis);
+									//Serial.print("Radial steps_Spindle-mod 0:");
+									//Serial.println(steps_Spindle);
 
-								MilliDelay(5);
-								break;
+									MilliDelay(5);
+									break;
+								}
+								case AXIAL:
+								{
+									steps_Spindle = -spindleSteps_Next;
+									steps_Axis = 0;
+
+									//Serial.print("Axial steps_Spindle-mod 0:");
+									//Serial.println(steps_Spindle);
+									//Serial.print("Axial steps_Axis-mod 0:");
+									//Serial.println(steps_Axis);
+									break;
+								}
 							}
-							case AXIAL:
-							{
-								steps_Spindle = -spindleSteps_Next;
-								steps_Axis = 0;
 
-								Serial.print("Axial steps_Spindle-mod 0:");
-								Serial.println(steps_Spindle);
-								Serial.print("Axial steps_Axis-mod 0:");
-								Serial.println(steps_Axis);
-								break;
-							}
+							break;
 						}
-
-						break;
-					}
-					default:
-					{
-						if (i > 1)
+						default:
 						{
-							GetRetroAxisSteps();
+							if (i > 1)
+							{
+								GetRetroAxisSteps();
 
-							GetRetroSpindleSteps();
+								GetRetroSpindleSteps();
+							}
+
+							steps_Spindle = spindleSteps_Next;
+							steps_Axis = axisSteps_Next;
+
+							//Serial.print("steps_Spindle-mod 1+:");
+							//Serial.println(steps_Spindle);
+							//Serial.print("steps_Axis-mod 1+:");
+							//Serial.println(steps_Axis);
+							break;
 						}
-
-						steps_Spindle = spindleSteps_Next;
-						steps_Axis = axisSteps_Next;
-
-						Serial.print("steps_Spindle-mod 1+:");
-						Serial.println(steps_Spindle);
-						Serial.print("steps_Axis-mod 1+:");
-						Serial.println(steps_Axis);
-						break;
 					}
 				}
+
+				Serial.print("steps_Spindle: ");
+				Serial.println(steps_Spindle);
+				Serial.print("steps_Axis: ");
+				Serial.println(steps_Axis);
 				break;
 			}
 		}
@@ -5452,6 +5471,21 @@ void Reciprocate(int wavDir)
 		}
 
 		stepperSpindle.setTargetRel(steps_Spindle);
+
+		Serial.print("spindleSteps_Next: ");
+		Serial.println(spindleSteps_Next);
+
+		Serial.print("axisSteps_Next: ");
+		Serial.println(axisSteps_Next);
+
+		if (configRec.style == SQUARE_STYLE && configRec.noLast == 1 && i == (waveCount))
+		{
+			Serial.print("End Loop--------------------------------------: ");
+			Serial.println(waveCount);
+			goto endLoop;
+		}
+
+
 		if (configMain.synchro_M3_Spindle == 1)//Synchronized M3 and Spindle
 		{
 			checkedCount = 3;
@@ -17651,7 +17685,7 @@ void TestAllTeensyEEPROMValues()
 
 			SerialPrint("pageEEPROM.t315.txt=");
 			SerialWrite(0x22);
-			SerialPrint(configRec.minusLast);
+			SerialPrint(configRec.noLast);
 			SerialPrint(nextionQuoteEnd);
 
 			switch (configRec.radial_Axial)
@@ -18705,13 +18739,13 @@ void LoadSettings_PageRose()
 	////value8 = (uint8_t)configRose.axisId;
 
 	iniValue = "Rose_n";
-	eePromAddress_Nextion = 732;
+	eePromAddress_Nextion = 644;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
 	configRose.n = (int)returnVal;
 	value16 = (uint8_t)configRose.n;
 
 	iniValue = "Rose_d";
-	eePromAddress_Nextion = 644;
+	eePromAddress_Nextion = 452;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
 	configRose.d = returnVal;
 	////value24 = (uint8_t)configRose.d;
@@ -19088,7 +19122,7 @@ void LoadSettings_PageProgram()
 	configGreekKey.countPatternPer360_File = returnVal;
 
 	iniValue = "PatternCount";
-	eePromAddress_Nextion = 756;
+	eePromAddress_Nextion = 32;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configGreekKey.patternCount_File = (int)returnVal;
 
@@ -19261,7 +19295,7 @@ void LoadSettings_PageMulti()
 	configMulti.accel_Spindle = (int)returnVal;
 
 	iniValue = "Accel_Z";
-	eePromAddress_Nextion = 432;
+	eePromAddress_Nextion = 768;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configMulti.accel_Axis_Z = (int)returnVal;
 
@@ -19271,7 +19305,7 @@ void LoadSettings_PageMulti()
 	configMulti.accel_Axis_X = (int)returnVal;
 
 	iniValue = "Accel_M3";
-	eePromAddress_Nextion = 476;
+	eePromAddress_Nextion = 932;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configMulti.accel_Axis_M3 = (int)returnVal;
 
@@ -19766,11 +19800,11 @@ void LoadSettings_PagePreferences()
 	value16 = (uint8_t)configSetup.polarity_Axis_X;
 
 	iniKey = "Recip";
-	iniValue = "MinusLastSegment";
+	iniValue = "NoLastLeg";
 	eePromAddress_Nextion = 176;
 	returnVal = ReturnIniValue(iniKey, iniValue);
-	configRec.minusLast = (int32_t)returnVal;
-	value24 = (int8_t)configRec.minusLast;
+	configRec.noLast = (int32_t)returnVal;
+	value24 = (int8_t)configRec.noLast;
 
 	// Send to Nextion
 	SendPackedData(eePromAddress_Nextion);
@@ -20112,17 +20146,17 @@ void LoadSettings_PageReturns()
 	// Return settings
 	const char* iniKey = "Returns";
 	const char* iniValue = "MaxSpeed_Spindle";
-	int eePromAddress_Nextion = 760;
+	int eePromAddress_Nextion = 808;
 	float returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configSetup.maxSpd_Return_Spindle = (int)returnVal;
 
 	iniValue = "Accel_Spindle";
-	eePromAddress_Nextion = 764;
+	eePromAddress_Nextion = 812;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configSetup.accel_Return_Spindle = (int)returnVal;
 
 	iniValue = "MaxSpeed_Axis_Z";
-	eePromAddress_Nextion = 768;
+	eePromAddress_Nextion = 816;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, false);
 	configSetup.maxSpd_Return_Axis_Z = (int)returnVal;
 

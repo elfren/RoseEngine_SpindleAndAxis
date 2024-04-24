@@ -370,7 +370,7 @@ struct configPageRec // page 5,6,13,14
 	uint32_t axisId;
 	uint32_t radial_Axial;
 	uint32_t style;
-	int32_t minusLast;
+	int32_t noLast;
 	uint32_t retro_Style;
 	float retro_AxisChange;
 	float retro_SpindleChange;

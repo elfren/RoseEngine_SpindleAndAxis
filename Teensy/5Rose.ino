@@ -2,7 +2,7 @@
 /* *****************************************************************
 * 5Rose main entry
 * Author: Edward French
-* Version: v3.0.9 - 3/11/24
+* Version: v3.1.0 - 4/13/24
 ******************************************************************/
 
 #include "math.h"
@@ -1490,7 +1490,7 @@ void loop()
 		}
 		case 102: // f - pageRec MinusLast
 		{
-			configRec.minusLast = GetSerialInteger();
+			configRec.noLast = GetSerialInteger();
 			EEPROM.put(eePromAddress_Rec, configRec);
 			break;
 		}
