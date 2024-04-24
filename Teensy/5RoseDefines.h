@@ -128,20 +128,21 @@
 #define PAGE_PROGRAM 9
 #define PAGE_ROSE 10 
 #define PAGE_MULTI 11 
-#define PAGE_NUMBERPAD 12 
-#define PAGE_SPINDLE 13
-#define PAGE_Z 14
-#define PAGE_X 15
-#define PAGE_ALTERNATEX 16
-#define PAGE_MOTOR_3 17
-#define PAGE_MOTOR_4 18
-#define PAGE_LIMITS 19
-#define PAGE_RETURNS 20
-#define PAGE_MORE 21
-#define PAGE_FILELIST 22
-#define PAGE_EEPROM 23
-#define PAGE_ERROR 24
-#define PAGE_INI 25
+#define PAGE_GEO 12
+#define PAGE_NUMBERPAD 13 
+#define PAGE_SPINDLE 14
+#define PAGE_Z 15
+#define PAGE_X 16
+#define PAGE_ALTERNATEX 17
+#define PAGE_MOTOR_3 18
+#define PAGE_MOTOR_4 19
+#define PAGE_LIMITS 20
+#define PAGE_RETURNS 21
+#define PAGE_MORE 22
+#define PAGE_FILELIST 23
+#define PAGE_EEPROM 24
+#define PAGE_ERROR 25
+#define PAGE_INI 26
 
 /////////////////////////////////////////////////////////////////////////
 // Structs

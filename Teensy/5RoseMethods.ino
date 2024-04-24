@@ -18718,50 +18718,35 @@ void LoadSettings_PageIndex()
 /// <returns></returns>
 void LoadSettings_PageRose() 
 {
-
-	const char* iniKey = "Rose";
-
-//(uint8_t)configRose.d;	// EEPROM 100
-//	value0 = (uint8_t)configRose.speedPercent_Spindle;
-//	value8 = (uint8_t)configRose.axisId;
-//	value16 = (uint8_t)configRose.n;
-//	value24 = 
+	const char* iniKey = "Rose";	
+// EEPROM 100
+	value0 = (uint8_t)configRose.speedPercent_Spindle;
+	value8 = (uint8_t)configRose.axisId;
+	value16 = 0;
+	value24 = 0;
 
 	int eePromAddress_Nextion = 100;
 	const char* iniValue = "SpeedPercentage_Spindle";
 	float returnVal = ReturnIniValue(iniKey, iniValue);
-	////configRose.speedPercent_Spindle = (int)returnVal;
-	////value0 = (uint8_t)configRose.speedPercent_Spindle;
+	configRose.speedPercent_Spindle = (int)returnVal;
+	value0 = (uint8_t)configRose.speedPercent_Spindle;
 
-	////iniValue = "AxisId";
-	////returnVal = ReturnIniValue(iniKey, iniValue);
-	////configRose.axisId = (int)returnVal;
-	////value8 = (uint8_t)configRose.axisId;
+	iniValue = "AxisId";
+	returnVal = ReturnIniValue(iniKey, iniValue);
+	configRose.axisId = (int)returnVal;
+	value8 = (uint8_t)configRose.axisId;
+	// Send to Nextion
+	SendPackedData(eePromAddress_Nextion);
 
 	iniValue = "Rose_n";
 	eePromAddress_Nextion = 644;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
-	configRose.n = (int)returnVal;
-	value16 = (uint8_t)configRose.n;
+	configRose.n = returnVal;
 
 	iniValue = "Rose_d";
 	eePromAddress_Nextion = 452;
 	returnVal = GetIniValue(iniKey, iniValue, eePromAddress_Nextion, true);
 	configRose.d = returnVal;
-	////value24 = (uint8_t)configRose.d;
-
-	////// Send to Nextion
-	////SendPackedData(eePromAddress_Nextion);
-
-	//// Pack data and send to Nextion
-	//packedValue = value24 << 24 | value16 << 16 | value8 << 8 | value0;
-	//SerialPrint("wepo ");
-	//SerialPrint(packedValue);
-	//SerialPrint(",");
-	//SerialPrint(eePromAddress_Nextion);
-	//SerialPrint(nextionEnd);
-
-
 
 	iniValue = "RadialOrAxial";
 	eePromAddress_Nextion = 240;
@@ -18815,14 +18800,6 @@ void LoadSettings_PageRose()
 
 	// Send to Nextion
 	SendPackedData(eePromAddress_Nextion);
-	//// Pack data and send to Nextion
-	//packedValue = value24 << 24 | value16 << 16 | value8 << 8 | value0;
-	//SerialPrint("wepo ");
-	//SerialPrint(packedValue);
-	//SerialPrint(",");
-	//SerialPrint(eePromAddress_Nextion);
-	//SerialPrint(nextionEnd);
-
 
 	// Z axis
 	iniValue = "MaxSpeed_Z";
@@ -19236,6 +19213,8 @@ void LoadSettings_PageMulti()
 
 	// Send to Nextion
 	SendPackedData(eePromAddress_Nextion);
+
+	iniKey = "One_Multi";
 
 	// EEPROM 76
 	iniValue = "SpeedPercentage_Z";
