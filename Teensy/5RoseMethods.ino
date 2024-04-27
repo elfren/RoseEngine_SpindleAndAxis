@@ -4974,6 +4974,7 @@ void Reciprocate(int wavDir)
 	int32_t waves = 0;
 	int32_t speedPercent = 0;
 
+	float spindleDegrees = 0;
 	long steps_Spindle = 0;
 	long steps_Axis = 0;
 
@@ -5080,13 +5081,34 @@ void Reciprocate(int wavDir)
 
 	retroAxisSteps = DistanceToSteps_Axis(configRec.retro_AxisChange, configRec.axisId);
 	retroAxisChangeSteps = DistanceToSteps_Axis(configRec.retro_AxisChange, configRec.axisId);
-
+	Serial.print("$$$$$$$$$$$$$$$$$$$$$$ retroAxisChangeSteps: ");
+	Serial.println(retroAxisChangeSteps);
+	Serial.print("configRec.retro_AxisChange: ");
+	Serial.println(configRec.retro_AxisChange);
 	switch (configRec.radial_Axial)
 	{
 		case RADIAL: // Radial
 		{
 			waves = configRec.waves_Radial;
-			float spindleDegrees = configRec.degrees_Radial_Spindle / (configRec.waves_Radial * 2);
+			switch (configRec.style)
+			{
+				case TRIANGLE_STYLE: // Triangle
+				case SQUARE_STYLE: // Square
+				{
+					spindleDegrees = configRec.degrees_Radial_Spindle / (configRec.waves_Radial * 2);
+					break;
+				}
+				case SAWTOOTH_STYLE: // Sawtooth
+				{
+					spindleDegrees = configRec.degrees_Radial_Spindle / (configRec.waves_Radial);
+					break;
+				}
+			}
+
+
+
+
+			
 			spindleSteps = round((configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (spindleDegrees / 360) * wavDir);
 			axisSteps = (DistanceToSteps_Axis(configRec.amplitude_Radial_Axis, configRec.axisId)) * wavDir;
 			break;
@@ -5095,7 +5117,22 @@ void Reciprocate(int wavDir)
 		{
 			waves = configRec.waves_Axial;
 			spindleSteps = (configSetup.microsteps_Spindle * configSetup.steps360_Spindle * configSetup.gearRatio_Spindle) * (configRec.amplitude_Axial_Spindle / 360) * wavDir;
-			axisSteps = (DistanceToSteps_Axis(configRec.distance_Axial_Axis, configRec.axisId) / (configRec.waves_Axial * 2)) * wavDir;
+
+			switch (configRec.style)
+			{
+				case TRIANGLE_STYLE: // Triangle
+				case SQUARE_STYLE: // Square
+				{
+					axisSteps = (DistanceToSteps_Axis(configRec.distance_Axial_Axis, configRec.axisId) / (configRec.waves_Axial * 2)) * wavDir;
+					break;
+				}
+				case SAWTOOTH_STYLE: // Sawtooth
+				{
+					axisSteps = (DistanceToSteps_Axis(configRec.distance_Axial_Axis, configRec.axisId) / (configRec.waves_Axial)) * wavDir;
+					break;
+				}
+			}
+			
 			break;
 		}
 	}
@@ -5166,13 +5203,13 @@ void Reciprocate(int wavDir)
 			{
 				case RADIAL: // Radial
 				{
-					spindleSteps = spindleSteps * 2;
+					spindleSteps = spindleSteps;
 					spindleSteps_Next = spindleSteps;
 					break;
 				}
 				case AXIAL:
 				{
-					axisSteps = axisSteps * 2;
+					axisSteps = axisSteps;
 					axisSteps_Next = axisSteps;
 					break;
 				}
@@ -5415,6 +5452,8 @@ void Reciprocate(int wavDir)
 								}
 							}
 
+							Serial.print("0. steps_Axis:");
+							Serial.println(steps_Axis);
 							break;
 						}
 						default:
@@ -5426,13 +5465,16 @@ void Reciprocate(int wavDir)
 								GetRetroSpindleSteps();
 							}
 
+							Serial.print("1. steps_Axis:");
+							Serial.println(steps_Axis);
+
 							steps_Spindle = spindleSteps_Next;
 							steps_Axis = axisSteps_Next;
 
-							//Serial.print("steps_Spindle-mod 1+:");
+							//Serial.print("steps_Spindle:");
 							//Serial.println(steps_Spindle);
-							//Serial.print("steps_Axis-mod 1+:");
-							//Serial.println(steps_Axis);
+							Serial.print("2. steps_Axis:");
+							Serial.println(steps_Axis);
 							break;
 						}
 					}
